@@ -1,5 +1,9 @@
 # sphinxcontrib-jsontable
 
+[![Tests](https://github.com/sasakama-code/sphinxcontrib-jsontable/actions/workflows/test.yml/badge.svg)](https://github.com/sasakama-code/sphinxcontrib-jsontable/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/sasakama-code/sphinxcontrib-jsontable/graph/badge.svg)](https://codecov.io/gh/sasakama-code/sphinxcontrib-jsontable)
+[![Python](https://img.shields.io/pypi/pyversions/sphinxcontrib-jsontable.svg)](https://pypi.org/project/sphinxcontrib-jsontable/)
+
 **Languages:** [English](README.md) | [日本語](README_ja.md)
 
 A powerful Sphinx extension that renders JSON data (from files or inline content) as beautifully formatted reStructuredText tables. Perfect for documentation that needs to display structured data, API examples, configuration references, and data-driven content.
