@@ -7,7 +7,7 @@ from external files or inline content as HTML tables in Sphinx documentation.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from .directives import JsonTableDirective
 
@@ -19,19 +19,19 @@ __author__ = "sasakama-code"
 __email__ = "sasakamacode@gmail.com"
 
 
-def setup(app: Sphinx) -> Dict[str, Any]:
+def setup(app: Sphinx) -> dict[str, Any]:
     """
     Sphinx extension setup function.
-    
+
     Args:
         app: Sphinx application instance
-        
+
     Returns:
         Extension metadata
     """
     # Register the jsontable directive
     app.add_directive("jsontable", JsonTableDirective)
-    
+
     return {
         "version": __version__,
         "parallel_read_safe": True,
