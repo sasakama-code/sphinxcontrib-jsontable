@@ -25,6 +25,7 @@ NO_JSON_SOURCE_ERROR = "No JSON data source provided"
 INVALID_JSON_DATA_ERROR = "JSON data must be an array or object"
 EMPTY_CONTENT_ERROR = "No inline JSON content provided"
 
+
 class JsonTableError(Exception):
     """
     Exception raised for errors that occur during JSON to table conversion.
@@ -32,7 +33,7 @@ class JsonTableError(Exception):
     Attributes:
         message -- explanation of the error
     """
-    pass
+
 
 def validate_not_empty(data: Any, error_msg: str) -> None:
     """
@@ -45,6 +46,7 @@ def validate_not_empty(data: Any, error_msg: str) -> None:
     if not data:
         raise JsonTableError(error_msg)
 
+
 def safe_str(value: Any) -> str:
     """
     Safely convert a value to string, returning empty string for None.
@@ -56,6 +58,7 @@ def safe_str(value: Any) -> str:
         String representation of value, or empty string if value is None.
     """
     return str(value) if value is not None else ''
+
 
 def ensure_file_exists(path: Path) -> None:
     """
@@ -70,6 +73,7 @@ def ensure_file_exists(path: Path) -> None:
     if not path.exists():
         raise FileNotFoundError(f"JSON file not found: {path}")
 
+
 def format_error(context: str, error: Exception) -> str:
     """
     Format an error message combining a context string with exception details.
@@ -82,6 +86,7 @@ def format_error(context: str, error: Exception) -> str:
         A formatted string "{context}: {error}".
     """
     return f"{context}: {error}"
+
 
 def is_safe_path(path: Path, base: Path) -> bool:
     """
@@ -103,13 +108,15 @@ def is_safe_path(path: Path, base: Path) -> bool:
         except Exception:
             return False
 
+
 class JsonDataLoader:
     """
     Loader class for reading JSON data from files or inline content.
 
     Args:
         encoding: Character encoding to use when reading files (default: 'utf-8').
-    """    
+    """
+
     def __init__(self, encoding: str = DEFAULT_ENCODING):
         self.encoding = self._validate_encoding(encoding)
 
@@ -147,7 +154,7 @@ class JsonDataLoader:
         file_path = srcdir / source
         if not is_safe_path(file_path, srcdir):
             raise JsonTableError(f"Invalid file path: {source}")
-        return file_path    
+        return file_path
 
     def load_from_file(self, source: str, srcdir: Path) -> JsonData:
         """
@@ -166,13 +173,13 @@ class JsonDataLoader:
         """
         file_path = self._validate_file_path(source, srcdir)
         ensure_file_exists(file_path)
-        
+
         try:
             with open(file_path, 'r', encoding=self.encoding) as f:
                 return json.load(f)
         except (UnicodeDecodeError, json.JSONDecodeError) as e:
             raise JsonTableError(format_error(f"Failed to load {source}", e))
-    
+
     def parse_inline(self, content: List[str]) -> JsonData:
         """
         Parse inline JSON content provided as lines of text.
@@ -187,7 +194,7 @@ class JsonDataLoader:
             JsonTableError: If content is empty or invalid JSON.
         """
         validate_not_empty(content, EMPTY_CONTENT_ERROR)
-        
+
         try:
             return json.loads('\n'.join(content))
         except json.JSONDecodeError as e:
@@ -200,7 +207,8 @@ class TableConverter:
 
     Methods:
         convert: Entry point for conversion of object or array.
-    """    
+    """
+
     def convert(self, data: JsonData, include_header: bool = False, limit: Optional[int] = None) -> TableData:
         """
         Convert JSON data to a list of rows, optionally including headers and limiting rows.
@@ -217,14 +225,14 @@ class TableConverter:
             JsonTableError: If data is not dict or list, or if empty.
         """
         validate_not_empty(data, "No JSON data to process")
-        
+
         if isinstance(data, dict):
             return self._convert_dict(data, include_header, limit)
         elif isinstance(data, list):
             return self._convert_list(data, include_header, limit)
         else:
             raise JsonTableError(INVALID_JSON_DATA_ERROR)
-    
+
     def _convert_dict(self, data: Dict[str, Any], include_header: bool, limit: Optional[int] = None) -> TableData:
         """
         Convert a single JSON object into table rows, considering limit.
@@ -240,7 +248,7 @@ class TableConverter:
         if limit is not None and limit <= 0:
             return []
         return self._convert_object_list([data], include_header, limit)
-    
+
     def _convert_list(self, data: List[Any], include_header: bool, limit: Optional[int] = None) -> TableData:
         """
         Convert a JSON array into table rows, dispatching by element type.
@@ -262,14 +270,14 @@ class TableConverter:
         first_item = limited_data[0]
         if first_item is None:
             raise JsonTableError("Invalid array data: null first element")
-        
+
         if isinstance(first_item, dict):
             return self._convert_object_list(limited_data, include_header, limit)
         elif isinstance(first_item, list):
             return self._convert_array_list(limited_data, limit)
         else:
             raise JsonTableError("Array items must be objects or arrays")
-    
+
     def _convert_object_list(self, objects: List[Dict[str, Any]], include_header: bool, limit: Optional[int] = None) -> TableData:
         """
         Convert a list of JSON objects into rows, extracting headers.
@@ -288,7 +296,7 @@ class TableConverter:
         limited_objects = objects[:limit] if limit is not None else objects
         rows = [self._object_to_row(obj, headers) for obj in limited_objects]
         return [headers] + rows if include_header else rows
-    
+
     def _convert_array_list(self, arrays: List[List[Any]], limit: Optional[int] = None) -> TableData:
         """
         Convert a list of arrays (lists) directly into rows.
@@ -302,7 +310,7 @@ class TableConverter:
         """
         limited_arrays = arrays[:limit] if limit is not None else arrays
         return [[safe_str(cell) for cell in row] for row in limited_arrays]
-    
+
     def _extract_headers(self, objects: List[Dict[str, Any]]) -> List[str]:
         """
         Extract sorted header names from a list of JSON objects.
@@ -317,7 +325,7 @@ class TableConverter:
         for obj in objects:
             all_keys.update(obj.keys())
         return sorted(all_keys)
-    
+
     def _object_to_row(self, obj: Dict[str, Any], headers: List[str]) -> List[str]:
         """
         Convert a JSON object to a row based on provided headers.
@@ -338,7 +346,8 @@ class TableBuilder:
 
     Methods:
         build: Create and populate table nodes with header/body.
-    """    
+    """
+
     def build(self, table_data: TableData, has_header: bool = False) -> nodes.table:
         """
         Build a docutils.nodes.table from 2D list of strings.
@@ -352,19 +361,19 @@ class TableBuilder:
         """
         if not table_data:
             return self._create_empty_table()
-        
+
         max_cols = max(len(row) for row in table_data)
         table = self._create_table_structure(max_cols)
-        
+
         if has_header:
             self._add_header(table, table_data[0])
             body_data = table_data[1:]
         else:
             body_data = table_data
-        
+
         self._add_body(table, body_data, max_cols)
         return table
-    
+
     def _create_empty_table(self) -> nodes.table:
         """
         Create an empty table node with one column.
@@ -376,7 +385,7 @@ class TableBuilder:
         tgroup = nodes.tgroup(cols=1)
         table += tgroup
         return table
-    
+
     def _create_table_structure(self, cols: int) -> nodes.table:
         """
         Create a table structure with given number of columns.
@@ -390,12 +399,12 @@ class TableBuilder:
         table = nodes.table()
         tgroup = nodes.tgroup(cols=cols)
         table += tgroup
-        
+
         for _ in range(cols):
             tgroup += nodes.colspec(colwidth=1)
-        
+
         return table
-    
+
     def _add_header(self, table: nodes.table, header_data: List[str]) -> None:
         """
         Add a header row to an existing table node.
@@ -408,7 +417,7 @@ class TableBuilder:
         header_row = self._create_row(header_data)
         thead += header_row
         table[0] += thead
-    
+
     def _add_body(self, table: nodes.table, body_data: TableData, max_cols: int) -> None:
         """
         Add body rows to an existing table node.
@@ -419,14 +428,13 @@ class TableBuilder:
             max_cols: Maximum number of columns for padding.
         """
         tbody = nodes.tbody()
-        
-        for row_data in body_data:
 
+        for row_data in body_data:
             padded_row = row_data + [''] * (max_cols - len(row_data))
             tbody += self._create_row(padded_row)
-        
+
         table[0] += tbody
-    
+
     def _create_row(self, row_data: List[str]) -> nodes.row:
         """
         Create a docutils row node from a list of cell strings.
@@ -453,14 +461,15 @@ class JsonTableDirective(SphinxDirective):
         header: Flag to include the first row of JSON objects as table header.
         encoding: Character encoding for JSON file reading.
         limit: Positive integer to limit the number of rows.
-    """    
+    """
+
     has_content = True
     required_arguments = 0
     optional_arguments = 1
     option_spec = {
         'header': directives.flag,
         'encoding': directives.unchanged,
-        'limit': directives.positive_int,  # 正の整数のみ受け入れる
+        'limit': directives.positive_int,  # Accept only positive integers
     }
 
     def __init__(self, *args, **kwargs):
@@ -484,9 +493,9 @@ class JsonTableDirective(SphinxDirective):
         try:
             json_data = self._load_json_data()
             include_header = 'header' in self.options
-            limit = self.options.get('limit')  # Noneまたは正の整数
-            
-            # デバッグ情報をログに出力
+            limit = self.options.get('limit')  # None or positive integer
+
+            # Output debug information to log
             if limit is not None:
                 logger.info(f"JsonTable: Limiting output to {limit} rows")
 
