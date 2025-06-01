@@ -509,7 +509,7 @@ extensions = ['sphinxcontrib.jsontable']
 #### バージョン互換性
 
 - **Sphinx：** 3.0+（推奨：4.0+）
-- **Python：** 3.7+（推奨：3.8+）
+- **Python：** 3.9+（推奨：3.11+）
 - **Docutils：** 0.14+
 
 ### APIリファレンス
