@@ -41,7 +41,7 @@ jobs:
       run: ruff format --check .
 
     - name: Run mypy (type checking)
-      run: mypy sphinxcontrib
+      run: mypy .
 
     - name: Security check with safety
       run: |
