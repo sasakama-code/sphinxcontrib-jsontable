@@ -21,7 +21,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -31,49 +30,52 @@ classifiers = [
     "Topic :: Software Development :: Documentation",
     "Topic :: Text Processing :: Markup",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "sphinx>=3.0",
-    "myst-parser>=0.18",
-    "ruff>=0.11.11",
-    "sphinx-rtd-theme>=3.0.2",
-    "sphinx-autodoc-typehints>=2.0.1",
-    "pytest>=8.3.5",
-    "pytest-cov>=5.0.0",
-    "coverage>=7.6.1",
-    "mypy>=1.14.1",
-    "pre-commit>=3.5.0",
-    "build>=1.2.2.post1",
-    "twine>=6.1.0",
+    "docutils>=0.18",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=6.0",
-    "pytest-cov>=2.10",
-    "ruff>=0.1.0",
-    "mypy>=1.0",
-    "pre-commit>=2.15",
+    "pytest>=8.3.5",
+    "pytest-cov>=5.0.0",
+    "coverage>=7.6.1",
+    "mypy>=1.14.1",
+    "ruff>=0.11.11",
+    "pre-commit>=3.5.0",
+    "build>=1.2.2.post1",
+    "twine>=6.1.0",
+    "pytest-mock>=3.10.0",
+    "pytest-xdist>=3.2.0",
 ]
-docs = ["sphinx-rtd-theme>=1.0", "sphinx-autodoc-typehints>=1.10"]
+docs = [
+    "sphinx-rtd-theme>=3.0.2",
+    "sphinx-autodoc-typehints>=2.0.1",
+    "myst-parser>=0.18",
+]
+test = [
+    "pytest>=8.3.5",
+    "pytest-cov>=5.0.0",
+    "pytest-mock>=3.10.0",
+]
 
 [project.urls]
-# Homepage = "https://github.com/sasakama-code/sphinxcontrib-jsontable"
-# Documentation = "https://sphinxcontrib-jsontable.readthedocs.io/"
+Homepage = "https://github.com/sasakama-code/sphinxcontrib-jsontable"
 Repository = "https://github.com/sasakama-code/sphinxcontrib-jsontable.git"
 Issues = "https://github.com/sasakama-code/sphinxcontrib-jsontable/issues"
-# Changelog = "https://github.com/sasakama-code/sphinxcontrib-jsontable/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/sasakama-code/sphinxcontrib-jsontable/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["sphinxcontrib.jsontable*"]
 
 [tool.setuptools.package-data]
-sphinx_json_table = ["py.typed"]
+"sphinxcontrib.jsontable" = ["py.typed"]
 
 # Ruff configuration
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 88
 select = [
     "E",  # pycodestyle errors
@@ -83,9 +85,10 @@ select = [
     "B",  # flake8-bugbear
     "C4", # flake8-comprehensions
     "UP", # pyupgrade
+    "RUF", # Ruff-specific rules
 ]
 ignore = [
-    "E501", # line too long, handled by black
+    "E501", # line too long, handled by formatter
     "B008", # do not perform function calls in argument defaults
     "C901", # too complex
 ]
@@ -101,11 +104,11 @@ ignore = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["sphinx_json_table"]
+known-first-party = ["sphinxcontrib.jsontable"]
 
 # MyPy configuration
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 check_untyped_defs = true
 disallow_any_generics = true
 disallow_incomplete_defs = true
@@ -155,15 +158,3 @@ exclude_lines = [
 
 [tool.coverage.html]
 directory = "htmlcov"
-
-# UV configuration (if using uv)
-[tool.uv]
-dev-dependencies = [
-    "pytest>=6.0",
-    "pytest-cov>=2.10",
-    "ruff>=0.1.0",
-    "mypy>=1.0",
-    "pre-commit>=2.15",
-    "sphinx-rtd-theme>=1.0",
-    "sphinx-autodoc-typehints>=1.10",
-]
