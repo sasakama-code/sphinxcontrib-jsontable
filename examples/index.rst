@@ -73,11 +73,3 @@ Since the first row contains column names, use the :header: option.
        ["A2", "B2", "C2"],
        ["A3", "B3", "C3"]
    ]
-
-Markdown example is available here:
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Markdown Example
-
-   ./md_example
