@@ -8,17 +8,17 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Optional, Union
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from sphinx.util.docutils import SphinxDirective
 from sphinx.util import logging
+from sphinx.util.docutils import SphinxDirective
 
 logger = logging.getLogger(__name__)
 
-JsonData = Union[List[Any], Dict[str, Any]]
-TableData = List[List[str]]
+JsonData = Union[list[Any], dict[str, Any]]
+TableData = list[list[str]]
 
 DEFAULT_ENCODING = 'utf-8'
 NO_JSON_SOURCE_ERROR = "No JSON data source provided"
@@ -180,7 +180,7 @@ class JsonDataLoader:
         except (UnicodeDecodeError, json.JSONDecodeError) as e:
             raise JsonTableError(format_error(f"Failed to load {source}", e))
 
-    def parse_inline(self, content: List[str]) -> JsonData:
+    def parse_inline(self, content: list[str]) -> JsonData:
         """
         Parse inline JSON content provided as lines of text.
 
@@ -233,7 +233,7 @@ class TableConverter:
         else:
             raise JsonTableError(INVALID_JSON_DATA_ERROR)
 
-    def _convert_dict(self, data: Dict[str, Any], include_header: bool, limit: Optional[int] = None) -> TableData:
+    def _convert_dict(self, data: dict[str, Any], include_header: bool, limit: Optional[int] = None) -> TableData:
         """
         Convert a single JSON object into table rows, considering limit.
 
@@ -249,7 +249,7 @@ class TableConverter:
             return []
         return self._convert_object_list([data], include_header, limit)
 
-    def _convert_list(self, data: List[Any], include_header: bool, limit: Optional[int] = None) -> TableData:
+    def _convert_list(self, data: list[Any], include_header: bool, limit: Optional[int] = None) -> TableData:
         """
         Convert a JSON array into table rows, dispatching by element type.
 
@@ -278,7 +278,7 @@ class TableConverter:
         else:
             raise JsonTableError("Array items must be objects or arrays")
 
-    def _convert_object_list(self, objects: List[Dict[str, Any]], include_header: bool, limit: Optional[int] = None) -> TableData:
+    def _convert_object_list(self, objects: list[dict[str, Any]], include_header: bool, limit: Optional[int] = None) -> TableData:
         """
         Convert a list of JSON objects into rows, extracting headers.
 
@@ -297,7 +297,7 @@ class TableConverter:
         rows = [self._object_to_row(obj, headers) for obj in limited_objects]
         return [headers] + rows if include_header else rows
 
-    def _convert_array_list(self, arrays: List[List[Any]], limit: Optional[int] = None) -> TableData:
+    def _convert_array_list(self, arrays: list[list[Any]], limit: Optional[int] = None) -> TableData:
         """
         Convert a list of arrays (lists) directly into rows.
 
@@ -311,7 +311,7 @@ class TableConverter:
         limited_arrays = arrays[:limit] if limit is not None else arrays
         return [[safe_str(cell) for cell in row] for row in limited_arrays]
 
-    def _extract_headers(self, objects: List[Dict[str, Any]]) -> List[str]:
+    def _extract_headers(self, objects: list[dict[str, Any]]) -> list[str]:
         """
         Extract sorted header names from a list of JSON objects.
 
@@ -326,7 +326,7 @@ class TableConverter:
             all_keys.update(obj.keys())
         return sorted(all_keys)
 
-    def _object_to_row(self, obj: Dict[str, Any], headers: List[str]) -> List[str]:
+    def _object_to_row(self, obj: dict[str, Any], headers: list[str]) -> list[str]:
         """
         Convert a JSON object to a row based on provided headers.
 
@@ -405,7 +405,7 @@ class TableBuilder:
 
         return table
 
-    def _add_header(self, table: nodes.table, header_data: List[str]) -> None:
+    def _add_header(self, table: nodes.table, header_data: list[str]) -> None:
         """
         Add a header row to an existing table node.
 
@@ -435,7 +435,7 @@ class TableBuilder:
 
         table[0] += tbody
 
-    def _create_row(self, row_data: List[str]) -> nodes.row:
+    def _create_row(self, row_data: list[str]) -> nodes.row:
         """
         Create a docutils row node from a list of cell strings.
 
@@ -482,7 +482,7 @@ class JsonTableDirective(SphinxDirective):
         self.converter = TableConverter()
         self.builder = TableBuilder()
 
-    def run(self) -> List[nodes.Node]:
+    def run(self) -> list[nodes.Node]:
         """
         Execute the directive: load JSON, convert to table_data,
         build table node, and return it.
