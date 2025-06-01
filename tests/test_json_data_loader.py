@@ -7,16 +7,16 @@ Tests cover both normal and error scenarios with proper mocking for isolation.
 """
 
 import json
-import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
-from typing import List, Dict, Any
+from unittest.mock import mock_open, patch
+
+import pytest
 
 from sphinxcontrib.jsontable.directives import (
-    JsonDataLoader, 
-    JsonTableError, 
     DEFAULT_ENCODING,
-    EMPTY_CONTENT_ERROR
+    EMPTY_CONTENT_ERROR,
+    JsonDataLoader,
+    JsonTableError,
 )
 
 
