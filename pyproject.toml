@@ -73,33 +73,30 @@ include = ["sphinxcontrib.jsontable*"]
 [tool.setuptools.package-data]
 "sphinxcontrib.jsontable" = ["py.typed"]
 
-# Enhanced Ruff configuration for better code quality
+# Ruff configuration - Modern and practical
 [tool.ruff]
 target-version = "py39"
 line-length = 88
 src = ["sphinxcontrib"]
 
-# Enhanced rule selection for better code quality
+# Balanced rule selection for quality and compatibility
 select = [
     # Essential rules
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings  
-    "F",  # pyflakes
-    "I",  # isort
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings  
+    "F",   # pyflakes
+    "I",   # isort
     
-    # Additional safe rules for quality improvement
+    # Additional quality rules that are stable
     "UP",  # pyupgrade
     "B",   # flake8-bugbear (basic checks)
     "C4",  # flake8-comprehensions
     "PIE", # flake8-pie
-    "T20", # flake8-print
 ]
 
-# Ignores for compatibility and practical considerations
+# Modern ignore list - removed deprecated rules
 ignore = [
-    "E501",  # line too long, handled by formatter
-    "E203",  # whitespace before ':'
-    "W503",  # line break before binary operator
+    "E501",  # line too long, handled by ruff format
     "B008",  # do not perform function calls in argument defaults
     "PIE800", # unnecessary-spread
 ]
@@ -108,7 +105,7 @@ ignore = [
 # Allow unused imports in __init__.py files
 "__init__.py" = ["F401"]
 # Test files can be more relaxed
-"tests/**/*.py" = ["T201", "T203"]  # Allow print statements in tests
+"tests/**/*.py" = ["T201", "T203"]  # Allow print statements in tests if we add T20 later
 # Allow some flexibility in configuration files
 "conf.py" = ["E402"]
 
@@ -120,10 +117,10 @@ combine-as-imports = true
 [tool.ruff.format]
 # Use double quotes for consistency
 quote-style = "double"
-# Ensure trailing commas
+# Ensure trailing commas in multiline structures
 skip-magic-trailing-comma = false
 
-# Enhanced MyPy configuration for gradual typing adoption
+# MyPy configuration - balanced for gradual typing
 [tool.mypy]
 python_version = "3.9"
 warn_return_any = false
@@ -131,7 +128,7 @@ warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 
-# Relaxed settings for existing codebase
+# Balanced settings for existing codebase
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 check_untyped_defs = true
@@ -156,7 +153,7 @@ module = "sphinxcontrib.*"
 disallow_untyped_defs = false
 warn_return_any = false
 
-# Enhanced Pytest configuration
+# Pytest configuration
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
@@ -175,7 +172,7 @@ markers = [
     "unit: marks tests as unit tests",
 ]
 
-# Enhanced Coverage configuration
+# Coverage configuration
 [tool.coverage.run]
 source = ["sphinxcontrib.jsontable"]
 branch = true
