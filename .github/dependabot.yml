@@ -1,35 +1,15 @@
 version: 2
 
 updates:
-  # Python dependencies
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Asia/Tokyo"
-    open-pull-requests-limit: 10
-    reviewers:
-      - "sasakama-code"
-    assignees:
-      - "sasakama-code"
-    labels:
-      - "dependencies"
-      - "python"
-    commit-message:
-      prefix: "deps"
-      include: "scope"
-    
-  # GitHub Actions
+  # GitHub Actions - reduced frequency and PR limits
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:30"
+      interval: "monthly"  # Changed from weekly to monthly
+      day: "first-monday"
+      time: "09:00"
       timezone: "Asia/Tokyo"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2  # Reduced from 5 to 2
     reviewers:
       - "sasakama-code"
     assignees:
@@ -40,3 +20,30 @@ updates:
     commit-message:
       prefix: "ci"
       include: "scope"
+    # Group multiple updates into single PR when possible
+    groups:
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "codecov/*"
+        
+  # Python dependencies - temporarily disabled to focus on CI fixes
+  # Will be re-enabled after CI is stable
+  # - package-ecosystem: "pip"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "monthly"
+  #     day: "second-monday"
+  #     time: "09:00"
+  #     timezone: "Asia/Tokyo"
+  #   open-pull-requests-limit: 3
+  #   reviewers:
+  #     - "sasakama-code"
+  #   assignees:
+  #     - "sasakama-code"
+  #   labels:
+  #     - "dependencies"
+  #     - "python"
+  #   commit-message:
+  #     prefix: "deps"
+  #     include: "scope"
