@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -17,7 +17,7 @@ from sphinx.util.docutils import SphinxDirective
 
 logger = logging.getLogger(__name__)
 
-JsonData = Union[list[Any], dict[str, Any]]
+JsonData = list[Any] | dict[str, Any]
 TableData = list[list[str]]
 
 DEFAULT_ENCODING = 'utf-8'
@@ -175,10 +175,10 @@ class JsonDataLoader:
         ensure_file_exists(file_path)
 
         try:
-            with open(file_path, 'r', encoding=self.encoding) as f:
+            with open(file_path, encoding=self.encoding) as f:
                 return json.load(f)
         except (UnicodeDecodeError, json.JSONDecodeError) as e:
-            raise JsonTableError(format_error(f"Failed to load {source}", e))
+            raise JsonTableError(format_error(f"Failed to load {source}", e)) from e
 
     def parse_inline(self, content: list[str]) -> JsonData:
         """
@@ -198,7 +198,7 @@ class JsonDataLoader:
         try:
             return json.loads('\n'.join(content))
         except json.JSONDecodeError as e:
-            raise JsonTableError(f"Invalid inline JSON: {e.msg}")
+            raise JsonTableError(f"Invalid inline JSON: {e.msg}") from e
 
 
 class TableConverter:
@@ -209,7 +209,7 @@ class TableConverter:
         convert: Entry point for conversion of object or array.
     """
 
-    def convert(self, data: JsonData, include_header: bool = False, limit: Optional[int] = None) -> TableData:
+    def convert(self, data: JsonData, include_header: bool = False, limit: int | None = None) -> TableData:
         """
         Convert JSON data to a list of rows, optionally including headers and limiting rows.
 
@@ -233,7 +233,7 @@ class TableConverter:
         else:
             raise JsonTableError(INVALID_JSON_DATA_ERROR)
 
-    def _convert_dict(self, data: dict[str, Any], include_header: bool, limit: Optional[int] = None) -> TableData:
+    def _convert_dict(self, data: dict[str, Any], include_header: bool, limit: int | None = None) -> TableData:
         """
         Convert a single JSON object into table rows, considering limit.
 
@@ -249,7 +249,7 @@ class TableConverter:
             return []
         return self._convert_object_list([data], include_header, limit)
 
-    def _convert_list(self, data: list[Any], include_header: bool, limit: Optional[int] = None) -> TableData:
+    def _convert_list(self, data: list[Any], include_header: bool, limit: int | None = None) -> TableData:
         """
         Convert a JSON array into table rows, dispatching by element type.
 
@@ -278,7 +278,7 @@ class TableConverter:
         else:
             raise JsonTableError("Array items must be objects or arrays")
 
-    def _convert_object_list(self, objects: list[dict[str, Any]], include_header: bool, limit: Optional[int] = None) -> TableData:
+    def _convert_object_list(self, objects: list[dict[str, Any]], include_header: bool, limit: int | None = None) -> TableData:
         """
         Convert a list of JSON objects into rows, extracting headers.
 
@@ -297,7 +297,7 @@ class TableConverter:
         rows = [self._object_to_row(obj, headers) for obj in limited_objects]
         return [headers] + rows if include_header else rows
 
-    def _convert_array_list(self, arrays: list[list[Any]], limit: Optional[int] = None) -> TableData:
+    def _convert_array_list(self, arrays: list[list[Any]], limit: int | None = None) -> TableData:
         """
         Convert a list of arrays (lists) directly into rows.
 
