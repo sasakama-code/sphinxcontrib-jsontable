@@ -45,7 +45,7 @@ setup(
     package_data={
         "sphinxcontrib.jsontable": ["py.typed"],
     },
-    python_requires=">=3.10",
+    python_requires=">=3.9",
     install_requires=[
         "sphinx>=3.0",
         "docutils>=0.18",
@@ -84,6 +84,7 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
