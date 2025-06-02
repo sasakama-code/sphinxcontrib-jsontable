@@ -5,13 +5,13 @@
 # 1. グローバル設定 (トップレベル)
 ##############################
 
-# Python 3.9 互換
+# Python のバージョン互換（CI 側の PYTHON_VERSION=3.9）
 target-version = "py39"
 
-# PEP8 最大行長 (Black と合わせる)
+# PEP8 に沿った最大行長 (Black と合わせて 88)
 line-length = 88
 
-# 自動修正可能なルールをすべて有効 (必要に応じて絞り込む)
+# 自動修正可能なルールをすべて有効にする (必要に応じて絞り込む場合は ["I","B",…] のように配列)
 fixable = ["ALL"]
 
 # チェック対象から除外するディレクトリ・ファイル
@@ -23,44 +23,44 @@ exclude = [
   ".git"
 ]
 
-# 不要な # noqa を警告
+# 不要な # noqa を警告する
 forbid-unnecessary-noqa = true
 
 ##############################
 # 2. lint ルールの選択・除外
 ##############################
 [lint]
-# 適用するルール (Flake8, Bugbear, isort, pyupgrade など)
+# “必ず配列” で書く
 select = [
-    "E",    # pycodestyle errors
-    "W",    # pycodestyle warnings
-    "F",    # pyflakes
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # pyflakes
 
-    "I",    # isort (import order)
+  "I",    # isort による import 順チェック
 
-    "UP",   # pyupgrade (Python syntax modernization)
+  "UP",   # pyupgrade (Python 構文の最新版チェック)
 
-    "B",    # flake8-bugbear
-    "C4",   # flake8-comprehensions
+  "B",    # flake8-bugbear
+  "C4",   # flake8-comprehensions
 
-    "PIE",  # flake8-pie
+  "PIE",  # flake8-pie
 
-    "T20",  # flake8-print
+  "T20",  # flake8-print
 
-    "RUF",  # Ruff-specific rules
-    "SIM"   # flake8-simplify
+  "RUF",  # Ruff 独自ルール
+  "SIM"   # flake8-simplify
 ]
 
-# プロジェクト事情で無視したいルール
+# “必ず配列” で書く
 ignore = [
-    "E501",   # 長すぎる行は ruff format で補正
-    "E203",   # フォーマッタ (Black) と衝突しやすい空白
-    "B008",   # デフォルト引数内での関数呼び出し
-    "PIE800", # 不要な spread operator
-    "T201",   # 開発中は print を許容
-    "T203",   # 開発中は pprint を許容
-    "SIM108", # 三項演算子の自動提案を抑制
-    "SIM117"  # dict.get の自動提案を抑制
+  "E501",   # 行長エラー（ruff format で自動補正）
+  "E203",   # 空白まわり (Black と競合しやすい)
+  "B008",   # デフォルト引数内での関数呼び出し
+  "PIE800", # 不要な spread operator
+  "T201",   # 開発中は print を許容
+  "T203",   # 開発中は pprint を許容
+  "SIM108", # 三項演算子の自動提案を抑制
+  "SIM117"  # dict.get の自動提案を抑制
 ]
 
 ##############################
@@ -74,22 +74,45 @@ ignore = [
 "examples/**/*.py" = ["T201", "T203", "B008"]
 
 ##############################
-# 4. フォーマット関連設定 (トップレベル)
+# 4. isort (インポート整理) 設定
 ##############################
-# ダブルクォートを使う
+[isort]
+known-first-party       = ["sphinxcontrib.jsontable"]
+split-on-trailing-comma = true
+combine-as-imports      = true
+# ↓ 以下のキーはすべて **Ruff の isort サブセットではサポートされない** ため削除しました
+#    force-grid-wrap        = 0
+#    multi-line-output      = 3
+#    include-trailing-comma = true
+#    line-length            = 88
+
+# もし他に “Ruff がサポートする isort キー” を使いたい場合は、下記のいずれかを追加できます
+# force-wrap-aliases       = true
+# force-single-line        = false
+# single-line-exclusions   = ["*.py"]
+# order-by-type            = true
+# length-sort              = true
+# length-sort-straight     = false
+# など
+
+##############################
+# 5. フォーマット関連設定 (トップレベル)
+##############################
+
+# “必ずトップレベル” に置く。文字列型 (enum) で可
 quote-style = "double"
 
-# 複数行での末尾カンマを保持する
+# “必ずトップレベル” に置く。真偽値で可
 skip-magic-trailing-comma = false
 
-# インデントはスペース
+# タブではなくスペースを使う (enum)
 indent-style = "space"
 
-# 改行コードは自動判定 (lf/crlf を自動で選択)
+# 改行コードは自動判定 (enum: "lf"/"crlf"/"auto")
 line-ending = "auto"
 
-# docstring 内の code block をフォーマット
+# docstring 内のコードブロックをフォーマットする (真偽値)
 docstring-code-format = true
 
-# docstring 内のコード行長を動的に決定
+# docstring 内のコード行長を “動的(dynamic)” にする (enum or整数)
 docstring-code-line-length = "dynamic"
