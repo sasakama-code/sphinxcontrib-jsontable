@@ -113,8 +113,20 @@ jobs:
       run: |
         echo "Testing package installation..."
         pip install dist/*.whl
-        python -c "import sphinxcontrib.jsontable; print('Package installed successfully')"
+        
+        # Test basic import without Sphinx (should work with lazy import)
+        echo "Testing basic import without Sphinx dependencies..."
+        python -c "import sphinxcontrib.jsontable; print('Package imported successfully')"
         python -c "from sphinxcontrib.jsontable import __version__; print(f'Version: {__version__}')"
+        
+        # Install Sphinx for full functionality test
+        echo "Installing Sphinx for full functionality test..."
+        pip install sphinx>=3.0 docutils>=0.18
+        
+        # Test import with Sphinx dependencies
+        echo "Testing full functionality with Sphinx..."
+        python -c "from sphinxcontrib.jsontable import setup; print('Setup function available')"
+        python -c "import sphinxcontrib.jsontable.directives; print('Directives module imported successfully')"
 
   # Test Suite
   test:
@@ -125,7 +137,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
 
     steps:
     - name: Checkout code
@@ -157,7 +169,12 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest tests/ --cov=sphinxcontrib.jsontable --cov-report=xml --cov-report=term-missing --cov-fail-under=80 -v
+        pytest tests/ \
+          --cov=sphinxcontrib.jsontable \
+          --cov-report=xml \
+          --cov-report=term-missing \
+          --cov-fail-under=80 \
+          -v
 
     - name: Upload coverage to Codecov
       if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'

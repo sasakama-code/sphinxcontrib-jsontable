@@ -9,8 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from .directives import JsonTableDirective
-
+# Import only for type checking to avoid Sphinx dependency at import time
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
 
@@ -29,6 +28,9 @@ def setup(app: Sphinx) -> dict[str, Any]:
     Returns:
         Extension metadata
     """
+    # Import directive only when setup is called (lazy import)
+    from .directives import JsonTableDirective
+
     # Register the jsontable directive
     app.add_directive("jsontable", JsonTableDirective)
 
