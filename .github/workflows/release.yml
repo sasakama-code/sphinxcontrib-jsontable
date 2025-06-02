@@ -107,25 +107,25 @@ jobs:
     - name: Run basic functionality test
       run: |
         echo "🧪 Running functionality test..."
-        python -c "exec('import tempfile, os, json
-        test_data_dict = {\"name\": \"test\", \"value\": 123}
-        test_data = json.dumps(test_data_dict)
-        with tempfile.NamedTemporaryFile(mode=\"w\", suffix=\".json\", delete=False) as f:
-            f.write(test_data)
-            test_file = f.name
-        try:
-            from sphinxcontrib.jsontable.directives import JsonDataLoader, TableConverter, TableBuilder
-            loader = JsonDataLoader()
-            data = loader.parse_inline([test_data])
-            print(\"✅ JSON loading successful\")
-            converter = TableConverter()
-            table_data = converter.convert(data, include_header=True)
-            print(\"✅ Table conversion successful\")
-            builder = TableBuilder()
-            table_node = builder.build(table_data, has_header=True)
-            print(\"✅ Table building successful\")
-            print(\"🎉 All functionality tests passed!\")
-        finally:
+        python -c "exec('import tempfile, os, json\n\
+        test_data_dict = {\"name\": \"test\", \"value\": 123}\n\
+        test_data = json.dumps(test_data_dict)\n\
+        with tempfile.NamedTemporaryFile(mode=\"w\", suffix=\".json\", delete=False) as f:\n\
+            f.write(test_data)\n\
+            test_file = f.name\n\
+        try:\n\
+            from sphinxcontrib.jsontable.directives import JsonDataLoader, TableConverter, TableBuilder\n\
+            loader = JsonDataLoader()\n\
+            data = loader.parse_inline([test_data])\n\
+            print(\"✅ JSON loading successful\")\n\
+            converter = TableConverter()\n\
+            table_data = converter.convert(data, include_header=True)\n\
+            print(\"✅ Table conversion successful\")\n\
+            builder = TableBuilder()\n\
+            table_node = builder.build(table_data, has_header=True)\n\
+            print(\"✅ Table building successful\")\n\
+            print(\"🎉 All functionality tests passed!\")\n\
+        finally:\n\
             os.unlink(test_file)')"
 
     - name: Build source distribution and wheel
