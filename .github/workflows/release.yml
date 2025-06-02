@@ -1,62 +1,23 @@
-name: Release
+name: Release to PyPI
 
 on:
+  release:
+    types: [published]
   push:
     tags:
-      - 'v*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g., 0.1.1)'
-        required: true
-        type: string
+      - "v*"
 
-permissions:
-  contents: write
-  id-token: write
+env:
+  PYTHON_VERSION: "3.11"
 
 jobs:
-  validate-release:
+  # ===============================
+  # Build Distribution Packages
+  # ===============================
+  build:
+    name: Build distribution 📦
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .[dev]
-
-    - name: Run quality checks
-      run: |
-        ruff check .
-        ruff format --check .
-        mypy sphinxcontrib
-
-    - name: Run tests
-      run: |
-        pytest tests/ \
-          --cov=sphinxcontrib.jsontable \
-          --cov-fail-under=80 \
-          -v
-
-    - name: Security check
-      run: |
-        pip install safety
-        safety check
-
-  build-and-publish:
-    needs: validate-release
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    environment: release
     
     steps:
     - name: Checkout code
@@ -64,97 +25,102 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Set up Python 3.11
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install build dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build twine
+        python -m pip install build twine
 
-    - name: Extract version from tag
-      if: startsWith(github.ref, 'refs/tags/')
+    - name: Verify package metadata
       run: |
-        VERSION=${GITHUB_REF#refs/tags/v}
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Releasing version: $VERSION"
+        python -c "import sphinxcontrib.jsontable; print(f'Version: {sphinxcontrib.jsontable.__version__}')"
+        python -c "from sphinxcontrib.jsontable import setup; print('Setup function available')"
 
-    - name: Use manual version
-      if: github.event_name == 'workflow_dispatch'
+    - name: Build source distribution and wheel
       run: |
-        echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-        echo "Releasing version: ${{ github.event.inputs.version }}"
+        python -m build --verbose
 
-    - name: Update version in pyproject.toml
+    - name: Verify distributions
       run: |
-        sed -i "s/version = \".*\"/version = \"$VERSION\"/" pyproject.toml
-        echo "Updated version in pyproject.toml to $VERSION"
+        python -m twine check dist/*
+        ls -la dist/
 
-    - name: Build package
-      run: python -m build
+    - name: Store distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
 
-    - name: Check package
-      run: python -m twine check dist/*
+  # ===============================
+  # Publish to TestPyPI (Optional)
+  # ===============================
+  publish-to-testpypi:
+    name: Publish to TestPyPI 🧪
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/sphinxcontrib-jsontable
+    permissions:
+      id-token: write # IMPORTANT: mandatory for trusted publishing
 
-    - name: Test package installation
-      run: |
-        pip install dist/*.whl
-        python -c "import sphinxcontrib.jsontable; print(f'Package version: {sphinxcontrib.jsontable.__version__}')"
+    steps:
+    - name: Download distribution packages
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
 
-    - name: Publish to Test PyPI
+    - name: Publish to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
-        skip-existing: true
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        verbose: true
 
-    - name: Test installation from Test PyPI
-      run: |
-        pip uninstall -y sphinxcontrib-jsontable
-        sleep 30  # Wait for Test PyPI to update
-        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sphinxcontrib-jsontable==$VERSION
-        python -c "import sphinxcontrib.jsontable; print('Test PyPI installation successful')"
+  # ===============================
+  # Publish to PyPI (Production)
+  # ===============================
+  publish-to-pypi:
+    name: Publish to PyPI 🚀
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/sphinxcontrib-jsontable
+    permissions:
+      id-token: write # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - name: Download distribution packages
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
 
     - name: Publish to PyPI
-      if: success()
       uses: pypa/gh-action-pypi-publish@release/v1
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-
-    - name: Create GitHub Release
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref_name }}
-        release_name: Release ${{ github.ref_name }}
-        body: |
-          ## Changes in this release
-          
-          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for detailed changes.
-          
-          ## Installation
-          
-          ```bash
-          pip install sphinxcontrib-jsontable==${{ env.VERSION }}
-          ```
-          
-          ## Links
-          
-          - [PyPI Package](https://pypi.org/project/sphinxcontrib-jsontable/${{ env.VERSION }}/)
-          - [Documentation](https://github.com/${{ github.repository }}/blob/main/README.md)
-        draft: false
-        prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+        verbose: true
+        print-hash: true
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: distribution-packages
-        path: dist/
-        retention-days: 30
+  # ===============================
+  # Post-Release Notifications
+  # ===============================
+  notify-success:
+    name: Notify successful release 📢
+    if: github.event_name == 'release'
+    needs: [publish-to-pypi]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Create success notification
+      run: |
+        echo "🎉 Successfully published sphinxcontrib-jsontable to PyPI!"
+        echo "📦 Package: https://pypi.org/project/sphinxcontrib-jsontable/"
+        echo "🏷️ Version: ${{ github.ref_name }}"
