@@ -6,7 +6,7 @@ including both normal and error scenarios. Tests follow the AAA pattern with sin
 and proper isolation using mocks.
 """
 
-from typing import Any, Union
+from typing import Any
 from unittest.mock import patch
 
 import pytest
