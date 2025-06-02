@@ -74,16 +74,7 @@ ignore = [
 "examples/**/*.py" = ["T201", "T203", "B008"]
 
 ##############################
-# 4. isort (インポート整理) 設定
-##############################
-[isort]
-known-first-party       = ["sphinxcontrib.jsontable"]
-split-on-trailing-comma = true
-combine-as-imports      = true
-include-trailing-comma  = true
-
-##############################
-# 5. フォーマット関連設定 (トップレベル)
+# 4. フォーマット関連設定 (トップレベル)
 ##############################
 # ダブルクォートを使う
 quote-style = "double"
