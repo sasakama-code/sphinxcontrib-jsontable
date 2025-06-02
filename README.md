@@ -509,7 +509,7 @@ The extension automatically prevents directory traversal attacks:
 #### Version Compatibility
 
 - **Sphinx:** 3.0+ (recommended: 4.0+)
-- **Python:** 3.9+ (recommended: 3.11+)
+- **Python:** 3.10+ (recommended: 3.11+)
 - **Docutils:** 0.14+
 
 ### API Reference
