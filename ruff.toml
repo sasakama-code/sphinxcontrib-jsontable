@@ -80,10 +80,7 @@ ignore = [
 known-first-party       = ["sphinxcontrib.jsontable"]
 split-on-trailing-comma = true
 combine-as-imports      = true
-# force-grid-wrap = 0      ← この行は削除 (Ruff がサポートしていない)
-multi-line-output       = 3
 include-trailing-comma  = true
-line-length             = 88
 
 ##############################
 # 5. フォーマット関連設定 (トップレベル)
