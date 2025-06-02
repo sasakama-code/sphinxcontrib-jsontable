@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Planned bug fixes for future releases
 
-## [0.1.0] - 2025-05-31
+## [0.1.0] - 2025-06-02
 
 ### Added
 - Initial release of sphinxcontrib-jsontable
@@ -47,6 +47,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Memory-conscious handling of large datasets
 - Optional row limiting for performance optimization
 
+### Changed
+- **BREAKING**: Minimum Python version raised to 3.10+
+- **BREAKING**: Dropped support for Python 3.9 and earlier versions
+- Updated build system to use modern Python packaging standards
+- Improved code quality with ruff and mypy integration
+
 ---
 
 ## Release Notes
@@ -63,9 +69,9 @@ This is the first stable release of sphinxcontrib-jsontable, providing a robust 
 - 🔧 Flexible customization options
 
 **Compatibility:**
-- Python 3.7+
+- Python 3.10+ (3.10, 3.11, 3.12)
 - Sphinx 3.0+
-- Docutils 0.14+
+- Docutils 0.18+
 
 **Installation:**
 ```bash
@@ -84,6 +90,14 @@ For detailed usage instructions, see [README.md](README.md).
 ---
 
 ## Migration Guide
+
+### Python Version Requirements
+
+**Important:** This package requires Python 3.10 or later. If you're using an older Python version:
+
+1. **Upgrade Python**: Install Python 3.10+ on your system
+2. **Virtual Environment**: Create a new virtual environment with the supported Python version
+3. **Dependencies**: Ensure all your project dependencies are compatible with Python 3.10+
 
 ### From Custom Solutions
 
