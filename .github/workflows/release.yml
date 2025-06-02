@@ -17,7 +17,7 @@ jobs:
   build:
     name: Build distribution 📦
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     
     steps:
     - name: Checkout code
@@ -35,25 +35,118 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install build twine
 
-    - name: Verify package metadata
+    - name: Install package dependencies for verification
       run: |
-        python -c "import sphinxcontrib.jsontable; print(f'Version: {sphinxcontrib.jsontable.__version__}')"
-        python -c "from sphinxcontrib.jsontable import setup; print('Setup function available')"
+        # Install Sphinx and package dependencies
+        python -m pip install sphinx>=3.0 docutils>=0.18
+        # Install the package in editable mode for verification
+        python -m pip install -e .
+
+    - name: Verify package installation and metadata
+      run: |
+        # Verify package can be imported successfully
+        python -c "import sphinxcontrib.jsontable; print(f'✅ Package imported successfully')"
+        python -c "import sphinxcontrib.jsontable; print(f'📦 Version: {sphinxcontrib.jsontable.__version__}')"
+        python -c "from sphinxcontrib.jsontable import setup; print('✅ Setup function available')"
+        
+        # Verify Sphinx integration
+        python -c "from sphinxcontrib.jsontable.directives import JsonTableDirective; print('✅ Directive import successful')"
+        
+        # Display package metadata
+        python -c "
+import pkg_resources
+try:
+    dist = pkg_resources.get_distribution('sphinxcontrib-jsontable')
+    print(f'📋 Package name: {dist.project_name}')
+    print(f'📋 Version: {dist.version}')
+    print(f'📋 Location: {dist.location}')
+except:
+    print('⚠️  Package metadata not available (editable install)')
+"
+
+    - name: Run basic functionality test
+      run: |
+        # Create a minimal test to ensure the package works
+        python -c "
+import tempfile
+import os
+from pathlib import Path
+
+# Create test JSON file
+test_data = '{\"name\": \"test\", \"value\": 123}'
+with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    f.write(test_data)
+    test_file = f.name
+
+try:
+    from sphinxcontrib.jsontable.directives import JsonDataLoader, TableConverter, TableBuilder
+    
+    # Test data loading
+    loader = JsonDataLoader()
+    data = loader.parse_inline([test_data])
+    print('✅ JSON loading successful')
+    
+    # Test conversion
+    converter = TableConverter()
+    table_data = converter.convert(data, include_header=True)
+    print('✅ Table conversion successful')
+    
+    # Test table building
+    builder = TableBuilder()
+    table_node = builder.build(table_data, has_header=True)
+    print('✅ Table building successful')
+    
+    print('🎉 All functionality tests passed!')
+    
+finally:
+    os.unlink(test_file)
+"
 
     - name: Build source distribution and wheel
       run: |
+        echo "🔨 Building package distributions..."
         python -m build --verbose
+        echo "✅ Build completed successfully"
 
     - name: Verify distributions
       run: |
+        echo "🔍 Verifying built distributions..."
         python -m twine check dist/*
+        
+        echo "📋 Distribution files:"
         ls -la dist/
+        
+        echo "📊 Distribution details:"
+        for file in dist/*; do
+          echo "  📦 $file: $(stat -f%z "$file" 2>/dev/null || stat -c%s "$file") bytes"
+        done
+
+    - name: Test wheel installation
+      run: |
+        echo "🧪 Testing wheel installation in clean environment..."
+        # Create fresh virtual environment for testing
+        python -m venv test_env
+        source test_env/bin/activate
+        
+        # Install sphinx first (as it's a required dependency)
+        pip install sphinx>=3.0 docutils>=0.18
+        
+        # Install our wheel
+        pip install dist/*.whl
+        
+        # Test import
+        python -c "import sphinxcontrib.jsontable; print(f'✅ Wheel installation test passed: v{sphinxcontrib.jsontable.__version__}')"
+        
+        # Cleanup
+        deactivate
+        rm -rf test_env
 
     - name: Store distribution packages
       uses: actions/upload-artifact@v4
       with:
         name: python-package-distributions
         path: dist/
+        retention-days: 30
 
   # ===============================
   # Publish to TestPyPI (Optional)
@@ -76,11 +169,24 @@ jobs:
         name: python-package-distributions
         path: dist/
 
+    - name: Verify distributions before upload
+      run: |
+        echo "📋 Files to be uploaded to TestPyPI:"
+        ls -la dist/
+        echo "📊 Total files: $(ls -1 dist/ | wc -l)"
+
     - name: Publish to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
         verbose: true
+        print-hash: true
+
+    - name: Post-upload verification
+      run: |
+        echo "✅ Successfully uploaded to TestPyPI"
+        echo "🔗 TestPyPI URL: https://test.pypi.org/project/sphinxcontrib-jsontable/"
+        echo "📥 Test installation: pip install -i https://test.pypi.org/simple/ sphinxcontrib-jsontable"
 
   # ===============================
   # Publish to PyPI (Production)
@@ -103,14 +209,39 @@ jobs:
         name: python-package-distributions
         path: dist/
 
+    - name: Verify distributions before upload
+      run: |
+        echo "📋 Files to be uploaded to PyPI:"
+        ls -la dist/
+        echo "📊 Total files: $(ls -1 dist/ | wc -l)"
+        
+        # Final verification with twine
+        pip install twine
+        python -m twine check dist/*
+
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         verbose: true
         print-hash: true
 
+    - name: Post-upload verification and summary
+      run: |
+        echo "🎉 Successfully published to PyPI!"
+        echo ""
+        echo "📦 Package Information:"
+        echo "  Name: sphinxcontrib-jsontable"
+        echo "  Version: ${{ github.ref_name }}"
+        echo "  PyPI URL: https://pypi.org/project/sphinxcontrib-jsontable/"
+        echo ""
+        echo "📥 Installation command:"
+        echo "  pip install sphinxcontrib-jsontable"
+        echo ""
+        echo "📚 Documentation:"
+        echo "  https://github.com/sasakama-code/sphinxcontrib-jsontable"
+
   # ===============================
-  # Post-Release Notifications
+  # Post-Release Tasks
   # ===============================
   notify-success:
     name: Notify successful release 📢
@@ -119,8 +250,41 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Create success notification
+    - name: Create comprehensive success notification
       run: |
-        echo "🎉 Successfully published sphinxcontrib-jsontable to PyPI!"
-        echo "📦 Package: https://pypi.org/project/sphinxcontrib-jsontable/"
-        echo "🏷️ Version: ${{ github.ref_name }}"
+        echo "🎊 RELEASE SUCCESSFUL! 🎊"
+        echo ""
+        echo "📦 Package: sphinxcontrib-jsontable"
+        echo "🏷️  Version: ${{ github.ref_name }}"
+        echo "🔗 PyPI: https://pypi.org/project/sphinxcontrib-jsontable/"
+        echo "📚 GitHub: https://github.com/sasakama-code/sphinxcontrib-jsontable"
+        echo ""
+        echo "🚀 Ready for installation:"
+        echo "   pip install sphinxcontrib-jsontable"
+        echo ""
+        echo "✨ Thank you for using sphinxcontrib-jsontable!"
+
+  # ===============================
+  # Handle failures
+  # ===============================
+  notify-failure:
+    name: Handle release failure 🚨
+    if: failure()
+    needs: [build, publish-to-pypi]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Report failure details
+      run: |
+        echo "❌ RELEASE FAILED"
+        echo ""
+        echo "🔍 Please check the following:"
+        echo "  1. Build logs for compilation errors"
+        echo "  2. PyPI Trusted Publishing configuration"
+        echo "  3. Package dependencies and metadata"
+        echo "  4. GitHub environment permissions"
+        echo ""
+        echo "📞 For support, please check:"
+        echo "  - GitHub Actions logs"
+        echo "  - PyPI publishing status"
+        echo "  - Repository issues"
