@@ -253,7 +253,7 @@ class TestJsonDataLoaderLoadFromFile:
 
             # Assert
             mock_file.assert_called_once_with(
-                srcdir / source, "r", encoding=custom_encoding
+                srcdir / source, encoding=custom_encoding
             )
 
 

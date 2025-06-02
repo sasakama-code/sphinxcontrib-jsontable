@@ -12,6 +12,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 # Import the functions and classes to be tested
+from sphinxcontrib.jsontable import setup
 from sphinxcontrib.jsontable.directives import (
     JsonTableError,
     ensure_file_exists,
@@ -696,3 +697,18 @@ class TestIsSafePath:
 
         # Assert
         assert isinstance(result, bool)
+
+
+
+class DummyApp:
+    def add_directive(self, name, directive):
+        # お嬢様の名言：ディレクティブの登録はお任せあれですわ！
+        self.called = (name, directive)
+
+def test_setup_returns_metadata():
+    app = DummyApp()
+    meta = setup(app)
+    assert isinstance(meta, dict)
+    assert "version" in meta
+    assert meta["parallel_read_safe"] is True
+    assert meta["parallel_write_safe"] is True
