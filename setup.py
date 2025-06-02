@@ -9,20 +9,28 @@ for the sphinxcontrib namespace.
 
 from setuptools import find_namespace_packages, setup
 
-# Read version from the main module
-version_file = "sphinxcontrib/jsontable/__init__.py"
-version_line = [line for line in open(version_file) if line.startswith("__version__")][0]
-version = version_line.split("=")[1].strip().strip('"').strip("'")
 
-# Read long description from README
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+def get_version():
+    """Read version from the main module."""
+    version_file = "sphinxcontrib/jsontable/__init__.py"
+    with open(version_file, encoding="utf-8") as f:
+        for line in f:
+            if line.startswith("__version__"):
+                return line.split("=")[1].strip().strip('"').strip("'")
+    raise RuntimeError(f"Unable to find version string in {version_file}")
+
+
+def get_long_description():
+    """Read long description from README."""
+    with open("README.md", encoding="utf-8") as fh:
+        return fh.read()
+
 
 setup(
     name="sphinxcontrib-jsontable",
-    version=version,
+    version=get_version(),
     description="Sphinx extension to render JSON data as tables",
-    long_description=long_description,
+    long_description=get_long_description(),
     long_description_content_type="text/markdown",
     author="sasakama-code",
     author_email="sasakamacode@gmail.com",
