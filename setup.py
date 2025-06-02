@@ -42,9 +42,6 @@ setup(
         "Changelog": "https://github.com/sasakama-code/sphinxcontrib-jsontable/blob/main/CHANGELOG.md",
     },
     packages=find_namespace_packages(include=["sphinxcontrib*"]),
-    package_data={
-        "sphinxcontrib.jsontable": ["py.typed"],
-    },
     python_requires=">=3.10",
     install_requires=[
         "sphinx>=3.0",
@@ -92,7 +89,6 @@ setup(
         "Topic :: Software Development :: Documentation",
         "Topic :: Text Processing :: Markup",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        "Typing :: Typed",
     ],
     keywords=["sphinx", "json", "table", "documentation", "rst", "markdown"],
     license="MIT",
