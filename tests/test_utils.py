@@ -7,8 +7,7 @@ Tests cover normal operation, edge cases, and error scenarios.
 """
 
 from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 

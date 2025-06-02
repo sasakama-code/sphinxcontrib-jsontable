@@ -14,19 +14,19 @@ src = ["sphinxcontrib", "tests"]
 # Rule selection - comprehensive but practical for existing codebase
 select = [
     # Essential rules - pycodestyle and pyflakes
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings  
-    "F",   # pyflakes
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings  
+    "F", # pyflakes
 
     # Import sorting and organization
-    "I",   # isort
+    "I", # isort
 
     # Modern Python upgrades
-    "UP",  # pyupgrade (Python syntax modernization)
+    "UP", # pyupgrade (Python syntax modernization)
 
     # Bug prevention
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
 
     # Code simplification
     "PIE", # flake8-pie
@@ -43,7 +43,6 @@ select = [
 ignore = [
     "E501",   # line too long, handled by ruff format
     "E203",   # whitespace before ':' (conflicts with formatter)
-    "W503",   # line break before binary operator (deprecated)
     "B008",   # do not perform function calls in argument defaults
     "PIE800", # unnecessary-spread operator
     "T201",   # print statements allowed in development
@@ -93,7 +92,6 @@ skip-magic-trailing-comma = false
 
 # Indentation
 indent-style = "space"
-tab-size = 4
 
 # Line endings
 line-ending = "auto"
