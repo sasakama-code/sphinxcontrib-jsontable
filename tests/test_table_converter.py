@@ -6,7 +6,7 @@ including both normal and error scenarios. Tests follow the AAA pattern with sin
 and proper isolation using mocks.
 """
 
-from typing import Any, Union
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -18,7 +18,7 @@ from sphinxcontrib.jsontable.directives import (
 )
 
 # Type aliases
-JsonData = Union[dict[str, Any], list[Any]]
+JsonData = dict[str, Any] | list[Any]
 TableData = list[list[str]]
 
 

@@ -1,8 +1,8 @@
 # ===== RUFF CONFIGURATION =====
 # Ruff公式ドキュメント準拠・最小構成ですわ！余計なものはバッサリ斬り捨て御免！
 
-# Python のバージョン互換（CI 側の PYTHON_VERSION=3.9）
-target-version = "py39"
+# Python のバージョン互換（CI 側の PYTHON_VERSION=3.10）
+target-version = "py310"
 
 # PEP8 に沿った最大行長 (Black と合わせて 88)
 line-length = 88
