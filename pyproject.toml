@@ -29,7 +29,6 @@ classifiers = [
     "Topic :: Software Development :: Documentation",
     "Topic :: Text Processing :: Markup",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed",
 ]
 requires-python = ">=3.10"
 dependencies = [
@@ -78,10 +77,6 @@ zip-safe = false
 # Explicitly specify the packages to include
 include = ["sphinxcontrib*"]
 exclude = ["tests*", "docs*", "examples*"]
-
-# Ensure the namespace package structure is properly configured
-[tool.setuptools.package-data]
-"sphinxcontrib.jsontable" = ["py.typed"]
 
 # ===== MYPY CONFIGURATION =====
 # MyPy configuration - balanced for gradual typing
