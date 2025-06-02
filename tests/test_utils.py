@@ -702,7 +702,6 @@ class TestIsSafePath:
 
 class DummyApp:
     def add_directive(self, name, directive):
-        # お嬢様の名言：ディレクティブの登録はお任せあれですわ！
         self.called = (name, directive)
 
 def test_setup_returns_metadata():
