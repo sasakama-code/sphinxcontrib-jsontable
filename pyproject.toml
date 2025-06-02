@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Sphinx extension to render JSON data as tables"
 readme = "README.md"
 license = { text = "MIT" }
+dynamic = []
 authors = [{ name = "sasakama-code", email = "sasakamacode@gmail.com" }]
 maintainers = [{ name = "sasakama-code", email = "sasakamacode@gmail.com" }]
 keywords = ["sphinx", "json", "table", "documentation", "rst", "markdown"]
