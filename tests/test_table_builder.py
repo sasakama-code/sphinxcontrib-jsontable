@@ -55,7 +55,9 @@ class TestTableBuilder:
         # Assert
         assert isinstance(result, nodes.table)
 
-    def test_build_without_header_creates_table_with_body_only(self, table_builder, sample_table_data):
+    def test_build_without_header_creates_table_with_body_only(
+        self, table_builder, sample_table_data
+    ):
         """Test that build() creates table without header when has_header=False."""
         # Arrange
         data = sample_table_data
@@ -66,7 +68,9 @@ class TestTableBuilder:
         # Assert
         assert isinstance(result, nodes.table)
 
-    def test_build_with_header_creates_table_with_header_and_body(self, table_builder, sample_table_data):
+    def test_build_with_header_creates_table_with_header_and_body(
+        self, table_builder, sample_table_data
+    ):
         """Test that build() creates table with header when has_header=True."""
         # Arrange
         data = sample_table_data
@@ -89,7 +93,9 @@ class TestTableBuilder:
         # Assert
         assert isinstance(result, nodes.table)
 
-    def test_build_with_irregular_rows_pads_correctly(self, table_builder, irregular_table_data):
+    def test_build_with_irregular_rows_pads_correctly(
+        self, table_builder, irregular_table_data
+    ):
         """Test that build() pads shorter rows to match longest row."""
         # Arrange
         data = irregular_table_data
@@ -176,7 +182,9 @@ class TestTableBuilder:
 
         # Assert
         tgroup = result[0]
-        colspecs = [child for child in tgroup.children if isinstance(child, nodes.colspec)]
+        colspecs = [
+            child for child in tgroup.children if isinstance(child, nodes.colspec)
+        ]
         assert len(colspecs) == 3
 
     def test_create_table_structure_returns_table_node(self, table_builder):
@@ -204,7 +212,9 @@ class TestTableBuilder:
         table_builder._add_header(table, header_data)
 
         # Assert
-        thead_nodes = [child for child in tgroup.children if isinstance(child, nodes.thead)]
+        thead_nodes = [
+            child for child in tgroup.children if isinstance(child, nodes.thead)
+        ]
         assert len(thead_nodes) == 1
 
     def test_add_header_with_single_column(self, table_builder):
@@ -219,7 +229,9 @@ class TestTableBuilder:
         table_builder._add_header(table, header_data)
 
         # Assert
-        thead = [child for child in tgroup.children if isinstance(child, nodes.thead)][0]
+        thead = [
+            child for child in tgroup.children if isinstance(child, nodes.thead)
+        ][0]
         assert isinstance(thead, nodes.thead)
 
     def test_add_header_with_empty_header_data(self, table_builder):
@@ -234,7 +246,9 @@ class TestTableBuilder:
         table_builder._add_header(table, header_data)
 
         # Assert
-        thead_nodes = [child for child in tgroup.children if isinstance(child, nodes.thead)]
+        thead_nodes = [
+            child for child in tgroup.children if isinstance(child, nodes.thead)
+        ]
         assert len(thead_nodes) == 1
 
     def test_add_header_creates_row_with_entries(self, table_builder):
@@ -249,7 +263,9 @@ class TestTableBuilder:
         table_builder._add_header(table, header_data)
 
         # Assert
-        thead = [child for child in tgroup.children if isinstance(child, nodes.thead)][0]
+        thead = [
+            child for child in tgroup.children if isinstance(child, nodes.thead)
+        ][0]
         row = thead[0]
         entries = [child for child in row.children if isinstance(child, nodes.entry)]
         assert len(entries) == 3
@@ -269,7 +285,9 @@ class TestTableBuilder:
         table_builder._add_body(table, body_data, max_cols)
 
         # Assert
-        tbody_nodes = [child for child in tgroup.children if isinstance(child, nodes.tbody)]
+        tbody_nodes = [
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        ]
         assert len(tbody_nodes) == 1
 
     def test_add_body_with_empty_data(self, table_builder):
@@ -285,7 +303,9 @@ class TestTableBuilder:
         table_builder._add_body(table, body_data, max_cols)
 
         # Assert
-        tbody_nodes = [child for child in tgroup.children if isinstance(child, nodes.tbody)]
+        tbody_nodes = [
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        ]
         assert len(tbody_nodes) == 1
 
     def test_add_body_pads_short_rows(self, table_builder):
@@ -301,9 +321,13 @@ class TestTableBuilder:
         table_builder._add_body(table, body_data, max_cols)
 
         # Assert
-        tbody = [child for child in tgroup.children if isinstance(child, nodes.tbody)][0]
+        tbody = [
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        ][0]
         first_row = tbody[0]
-        entries = [child for child in first_row.children if isinstance(child, nodes.entry)]
+        entries = [
+            child for child in first_row.children if isinstance(child, nodes.entry)
+        ]
         assert len(entries) == 3
 
     def test_add_body_with_multiple_rows(self, table_builder):
@@ -319,7 +343,9 @@ class TestTableBuilder:
         table_builder._add_body(table, body_data, max_cols)
 
         # Assert
-        tbody = [child for child in tgroup.children if isinstance(child, nodes.tbody)][0]
+        tbody = [
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        ][0]
         rows = [child for child in tbody.children if isinstance(child, nodes.row)]
         assert len(rows) == 3
 
