@@ -47,10 +47,12 @@ jobs:
         # Verify package can be imported successfully
         python -c "import sphinxcontrib.jsontable; print(f'✅ Package imported successfully')"
         python -c "import sphinxcontrib.jsontable; print(f'📦 Version: {sphinxcontrib.jsontable.__version__}')"
-        python -c "from sphinxcontrib.jsontable import setup; print('✅ Setup function available')"
         
         # Verify Sphinx integration
         python -c "from sphinxcontrib.jsontable.directives import JsonTableDirective; print('✅ Directive import successful')"
+        
+        # Verify setup function from __init__.py
+        python -c "from sphinxcontrib.jsontable import setup; print('✅ Setup function available')"
         
         # Display package metadata
         python -c "
