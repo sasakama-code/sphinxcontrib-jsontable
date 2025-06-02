@@ -5,14 +5,10 @@ This module provides comprehensive test coverage for all TableBuilder methods,
 following pytest best practices with single assertions and AAA pattern.
 """
 
-from unittest.mock import Mock, patch
-
 import pytest
 from docutils import nodes
 
-# Assuming the TableBuilder is in a module called 'json_table'
-# Adjust the import path according to your project structure
-from sphinxcontrib.jsontable.directives import TableBuilder, TableData
+from sphinxcontrib.jsontable.directives import TableBuilder
 
 
 class TestTableBuilder:
