@@ -62,7 +62,6 @@ jobs:
         echo "📦 Installing Sphinx and package dependencies..."
         python -m pip install sphinx>=3.0 docutils>=0.18
         echo "✅ Package dependencies installed"
-        
         echo "🔍 Checking installed packages:"
         pip list | grep -E "(sphinx|docutils)" || echo "No sphinx/docutils found"
 
@@ -77,7 +76,7 @@ jobs:
         ls -la
         echo ""
         echo "🐍 Python path:"
-        python -c "import sys; print('\\n'.join(sys.path))"
+        python -c "import sys; [print(p) for p in sys.path]"
 
     - name: Install package in editable mode with verbose output
       run: |
@@ -93,101 +92,22 @@ jobs:
         pip list | grep sphinxcontrib || echo "No sphinxcontrib packages found"
         echo ""
         echo "🐍 Python package discovery:"
-        python -c "
-import sys
-import pkgutil
-print('Python path:')
-for path in sys.path:
-    print(f'  {path}')
-print()
-print('Checking for sphinxcontrib namespace:')
-try:
-    import sphinxcontrib
-    print(f'✅ sphinxcontrib found at: {sphinxcontrib.__path__}')
-    for finder, name, ispkg in pkgutil.iter_modules(sphinxcontrib.__path__, 'sphinxcontrib.'):
-        print(f'  📦 {name} (package: {ispkg})')
-except ImportError as e:
-    print(f'❌ sphinxcontrib import failed: {e}')
-"
+        python -c "import sys, pkgutil; print('Python path:'); [print(f'  {path}') for path in sys.path]; print(); print('Checking for sphinxcontrib namespace:'); exec('try:\n    import sphinxcontrib\n    print(f\"✅ sphinxcontrib found at: {sphinxcontrib.__path__}\")\n    for finder, name, ispkg in pkgutil.iter_modules(sphinxcontrib.__path__, \"sphinxcontrib.\"):\n        print(f\"  📦 {name} (package: {ispkg})\")\nexcept ImportError as e:\n    print(f\"❌ sphinxcontrib import failed: {e}\")')"
 
     - name: Test package import
       run: |
         echo "🧪 Testing package import..."
-        python -c "
-try:
-    import sphinxcontrib.jsontable
-    print('✅ Package imported successfully')
-    print(f'📦 Version: {sphinxcontrib.jsontable.__version__}')
-    print(f'📂 Package location: {sphinxcontrib.jsontable.__file__}')
-except ImportError as e:
-    print(f'❌ Package import failed: {e}')
-    print('🔍 Debugging info:')
-    import sys
-    print(f'Python version: {sys.version}')
-    print(f'Python executable: {sys.executable}')
-    print('Available modules in sphinxcontrib:')
-    try:
-        import sphinxcontrib
-        import pkgutil
-        for finder, name, ispkg in pkgutil.iter_modules(sphinxcontrib.__path__):
-            print(f'  - {name}')
-    except Exception as debug_e:
-        print(f'Could not list sphinxcontrib modules: {debug_e}')
-    raise
-"
+        python -c "exec('try:\n    import sphinxcontrib.jsontable\n    print(\"✅ Package imported successfully\")\n    print(f\"📦 Version: {sphinxcontrib.jsontable.__version__}\")\n    print(f\"📂 Package location: {sphinxcontrib.jsontable.__file__}\")\nexcept ImportError as e:\n    print(f\"❌ Package import failed: {e}\")\n    import sys\n    print(f\"Python version: {sys.version}\")\n    print(f\"Python executable: {sys.executable}\")\n    print(\"Available modules in sphinxcontrib:\")\n    try:\n        import sphinxcontrib, pkgutil\n        for finder, name, ispkg in pkgutil.iter_modules(sphinxcontrib.__path__):\n            print(f\"  - {name}\")\n    except Exception as debug_e:\n        print(f\"Could not list sphinxcontrib modules: {debug_e}\")\n    raise')"
 
     - name: Verify Sphinx integration
       run: |
         echo "🔧 Testing Sphinx integration..."
-        python -c "
-try:
-    from sphinxcontrib.jsontable.directives import JsonTableDirective
-    print('✅ Directive import successful')
-    from sphinxcontrib.jsontable import setup
-    print('✅ Setup function available')
-    print('🎉 Sphinx integration verified')
-except ImportError as e:
-    print(f'❌ Sphinx integration failed: {e}')
-    raise
-"
+        python -c "exec('try:\n    from sphinxcontrib.jsontable.directives import JsonTableDirective\n    print(\"✅ Directive import successful\")\n    from sphinxcontrib.jsontable import setup\n    print(\"✅ Setup function available\")\n    print(\"🎉 Sphinx integration verified\")\nexcept ImportError as e:\n    print(f\"❌ Sphinx integration failed: {e}\")\n    raise')"
 
     - name: Run basic functionality test
       run: |
         echo "🧪 Running functionality test..."
-        python -c "
-import tempfile
-import os
-from pathlib import Path
-
-# Create test JSON file
-test_data = '{\"name\": \"test\", \"value\": 123}'
-with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-    f.write(test_data)
-    test_file = f.name
-
-try:
-    from sphinxcontrib.jsontable.directives import JsonDataLoader, TableConverter, TableBuilder
-    
-    # Test data loading
-    loader = JsonDataLoader()
-    data = loader.parse_inline([test_data])
-    print('✅ JSON loading successful')
-    
-    # Test conversion
-    converter = TableConverter()
-    table_data = converter.convert(data, include_header=True)
-    print('✅ Table conversion successful')
-    
-    # Test table building
-    builder = TableBuilder()
-    table_node = builder.build(table_data, has_header=True)
-    print('✅ Table building successful')
-    
-    print('🎉 All functionality tests passed!')
-    
-finally:
-    os.unlink(test_file)
-"
+        python -c "exec('import tempfile, os\ntest_data = \"{\\\"name\\\": \\\"test\\\", \\\"value\\\": 123}\"\nwith tempfile.NamedTemporaryFile(mode=\"w\", suffix=\".json\", delete=False) as f:\n    f.write(test_data)\n    test_file = f.name\ntry:\n    from sphinxcontrib.jsontable.directives import JsonDataLoader, TableConverter, TableBuilder\n    loader = JsonDataLoader()\n    data = loader.parse_inline([test_data])\n    print(\"✅ JSON loading successful\")\n    converter = TableConverter()\n    table_data = converter.convert(data, include_header=True)\n    print(\"✅ Table conversion successful\")\n    builder = TableBuilder()\n    table_node = builder.build(table_data, has_header=True)\n    print(\"✅ Table building successful\")\n    print(\"🎉 All functionality tests passed!\")\nfinally:\n    os.unlink(test_file)')"
 
     - name: Build source distribution and wheel
       run: |
@@ -199,37 +119,24 @@ finally:
       run: |
         echo "🔍 Verifying built distributions..."
         python -m twine check dist/*
-        
         echo "📋 Distribution files:"
         ls -la dist/
-        
         echo "📊 Distribution details:"
         for file in dist/*; do
-          echo "  📦 $file: $(stat -f%z "$file" 2>/dev/null || stat -c%s "$file") bytes"
+          echo "  📦 $file: $(wc -c < "$file") bytes"
         done
 
     - name: Test wheel installation in clean environment
       run: |
         echo "🧪 Testing wheel installation in clean environment..."
-        # Create fresh virtual environment for testing
         python -m venv test_env
-        source test_env/bin/activate
-        
         echo "📦 Installing dependencies in test environment..."
-        pip install sphinx>=3.0 docutils>=0.18
-        
+        python -m pip install sphinx>=3.0 docutils>=0.18
         echo "📦 Installing our wheel..."
-        pip install dist/*.whl
-        
+        python -m pip install dist/*.whl
         echo "🧪 Testing import in clean environment..."
-        python -c "
-import sphinxcontrib.jsontable
-print(f'✅ Wheel installation test passed: v{sphinxcontrib.jsontable.__version__}')
-print(f'📂 Package location: {sphinxcontrib.jsontable.__file__}')
-"
-        
+        python -c "import sphinxcontrib.jsontable; print(f'✅ Wheel installation test passed: v{sphinxcontrib.jsontable.__version__}'); print(f'📂 Package location: {sphinxcontrib.jsontable.__file__}')"
         echo "🧹 Cleaning up test environment..."
-        deactivate
         rm -rf test_env
 
     - name: Store distribution packages
@@ -305,8 +212,6 @@ print(f'📂 Package location: {sphinxcontrib.jsontable.__file__}')
         echo "📋 Files to be uploaded to PyPI:"
         ls -la dist/
         echo "📊 Total files: $(ls -1 dist/ | wc -l)"
-        
-        # Final verification with twine
         pip install twine
         python -m twine check dist/*
 
