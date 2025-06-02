@@ -6,12 +6,17 @@ including both normal and error scenarios. Tests follow the AAA pattern with sin
 and proper isolation using mocks.
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import Any, Dict, List, Optional, Union
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+from unittest.mock import MagicMock, Mock, patch
 
-from sphinxcontrib.jsontable.directives import TableConverter, JsonTableError, INVALID_JSON_DATA_ERROR
+import pytest
+
+from sphinxcontrib.jsontable.directives import (
+    INVALID_JSON_DATA_ERROR,
+    JsonTableError,
+    TableConverter,
+)
 
 
 # Type aliases
@@ -35,10 +40,7 @@ def sample_dict():
 @pytest.fixture
 def sample_list_of_dicts():
     """Sample list of dictionaries for testing."""
-    return [
-        {"name": "John", "age": 30},
-        {"name": "Jane", "age": 25, "city": "Osaka"}
-    ]
+    return [{"name": "John", "age": 30}, {"name": "Jane", "age": 25, "city": "Osaka"}]
 
 
 @pytest.fixture
@@ -60,7 +62,9 @@ class TestTableConverterConvert:
         """Test convert method routes dict input to _convert_dict method."""
         # Arrange
         test_data = {"key": "value"}
-        with patch.object(converter, '_convert_dict', return_value=[]) as mock_convert_dict:
+        with patch.object(
+            converter, "_convert_dict", return_value=[]
+        ) as mock_convert_dict:
             # Act
             converter.convert(test_data, include_header=True, limit=10)
             # Assert
@@ -70,12 +74,13 @@ class TestTableConverterConvert:
         """Test convert method routes list input to _convert_list method."""
         # Arrange
         test_data = [{"key": "value"}]
-        with patch.object(converter, '_convert_list', return_value=[]) as mock_convert_list:
+        with patch.object(
+            converter, "_convert_list", return_value=[]
+        ) as mock_convert_list:
             # Act
             converter.convert(test_data, include_header=False, limit=5)
             # Assert
             mock_convert_list.assert_called_once_with(test_data, False, 5)
-
 
     def test_convert_empty_data_raises_json_table_error(self, converter):
         """Test convert method raises JsonTableError for empty data."""
@@ -103,10 +108,14 @@ class TestTableConverterConvert:
 class TestTableConverterConvertDict:
     """Test cases for the _convert_dict method."""
 
-    def test_convert_dict_valid_data_calls_convert_object_list(self, converter, sample_dict):
+    def test_convert_dict_valid_data_calls_convert_object_list(
+        self, converter, sample_dict
+    ):
         """Test _convert_dict calls _convert_object_list with wrapped dict."""
         # Arrange
-        with patch.object(converter, '_convert_object_list', return_value=[]) as mock_convert:
+        with patch.object(
+            converter, "_convert_object_list", return_value=[]
+        ) as mock_convert:
             # Act
             converter._convert_dict(sample_dict, True, 5)
             # Assert
@@ -119,7 +128,9 @@ class TestTableConverterConvertDict:
         # Assert
         assert result == []
 
-    def test_convert_dict_negative_limit_returns_empty_list(self, converter, sample_dict):
+    def test_convert_dict_negative_limit_returns_empty_list(
+        self, converter, sample_dict
+    ):
         """Test _convert_dict returns empty list when limit is negative."""
         # Arrange & Act
         result = converter._convert_dict(sample_dict, False, -1)
@@ -129,7 +140,9 @@ class TestTableConverterConvertDict:
     def test_convert_dict_none_limit_processes_data(self, converter, sample_dict):
         """Test _convert_dict processes data when limit is None."""
         # Arrange
-        with patch.object(converter, '_convert_object_list', return_value=[["row1"]]) as mock_convert:
+        with patch.object(
+            converter, "_convert_object_list", return_value=[["row1"]]
+        ) as mock_convert:
             # Act
             result = converter._convert_dict(sample_dict, False, None)
             # Assert
@@ -146,19 +159,27 @@ class TestTableConverterConvertList:
         # Assert
         assert result == []
 
-    def test_convert_list_dict_items_calls_convert_object_list(self, converter, sample_list_of_dicts):
+    def test_convert_list_dict_items_calls_convert_object_list(
+        self, converter, sample_list_of_dicts
+    ):
         """Test _convert_list calls _convert_object_list for dict items."""
         # Arrange
-        with patch.object(converter, '_convert_object_list', return_value=[]) as mock_convert:
+        with patch.object(
+            converter, "_convert_object_list", return_value=[]
+        ) as mock_convert:
             # Act
             converter._convert_list(sample_list_of_dicts, True, 5)
             # Assert
             mock_convert.assert_called_once_with(sample_list_of_dicts, True, 5)
 
-    def test_convert_list_array_items_calls_convert_array_list(self, converter, sample_list_of_lists):
+    def test_convert_list_array_items_calls_convert_array_list(
+        self, converter, sample_list_of_lists
+    ):
         """Test _convert_list calls _convert_array_list for array items."""
         # Arrange
-        with patch.object(converter, '_convert_array_list', return_value=[]) as mock_convert:
+        with patch.object(
+            converter, "_convert_array_list", return_value=[]
+        ) as mock_convert:
             # Act
             converter._convert_list(sample_list_of_lists, False, 3)
             # Assert
@@ -180,10 +201,12 @@ class TestTableConverterConvertList:
         with pytest.raises(JsonTableError, match="Array items must be objects or arrays"):
             converter._convert_list(invalid_data, False, None)
 
-    def test_convert_list_with_limit_processes_limited_data(self, converter, sample_list_of_dicts):
+    def test_convert_list_with_limit_processes_limited_data(
+        self, converter, sample_list_of_dicts
+    ):
         """Test _convert_list processes only limited data when limit is set."""
         # Arrange
-        with patch.object(converter, '_convert_object_list') as mock_convert:
+        with patch.object(converter, "_convert_object_list") as mock_convert:
             # Act
             converter._convert_list(sample_list_of_dicts, True, 1)
             # Assert
@@ -200,31 +223,39 @@ class TestTableConverterConvertObjectList:
         # Assert
         assert result == []
 
-    def test_convert_object_list_with_header_includes_header_row(self, converter, sample_list_of_dicts):
+    def test_convert_object_list_with_header_includes_header_row(
+        self, converter, sample_list_of_dicts
+    ):
         """Test _convert_object_list includes header when include_header is True."""
         # Arrange
-        with patch.object(converter, '_extract_headers', return_value=["age", "name"]):
-            with patch.object(converter, '_object_to_row', return_value=["30", "John"]):
+        with patch.object(converter, "_extract_headers", return_value=["age", "name"]):
+            with patch.object(converter, "_object_to_row", return_value=["30", "John"]):
                 # Act
                 result = converter._convert_object_list(sample_list_of_dicts, True, None)
                 # Assert
                 assert result[0] == ["age", "name"]
 
-    def test_convert_object_list_without_header_excludes_header_row(self, converter, sample_list_of_dicts):
+    def test_convert_object_list_without_header_excludes_header_row(
+        self, converter, sample_list_of_dicts
+    ):
         """Test _convert_object_list excludes header when include_header is False."""
         # Arrange
-        with patch.object(converter, '_extract_headers', return_value=["age", "name"]):
-            with patch.object(converter, '_object_to_row', return_value=["30", "John"]):
+        with patch.object(converter, "_extract_headers", return_value=["age", "name"]):
+            with patch.object(converter, "_object_to_row", return_value=["30", "John"]):
                 # Act
-                result = converter._convert_object_list(sample_list_of_dicts, False, None)
+                result = converter._convert_object_list(
+                    sample_list_of_dicts, False, None
+                )
                 # Assert
                 assert ["age", "name"] not in result
 
-    def test_convert_object_list_calls_extract_headers(self, converter, sample_list_of_dicts):
+    def test_convert_object_list_calls_extract_headers(
+        self, converter, sample_list_of_dicts
+    ):
         """Test _convert_object_list calls _extract_headers method."""
         # Arrange
-        with patch.object(converter, '_extract_headers', return_value=[]) as mock_extract:
-            with patch.object(converter, '_object_to_row', return_value=[]):
+        with patch.object(converter, "_extract_headers", return_value=[]) as mock_extract:
+            with patch.object(converter, "_object_to_row", return_value=[]):
                 # Act
                 converter._convert_object_list(sample_list_of_dicts, False, None)
                 # Assert
@@ -233,8 +264,10 @@ class TestTableConverterConvertObjectList:
     def test_convert_object_list_applies_limit(self, converter, sample_list_of_dicts):
         """Test _convert_object_list applies limit to objects."""
         # Arrange
-        with patch.object(converter, '_extract_headers', return_value=["name"]):
-            with patch.object(converter, '_object_to_row', return_value=["John"]) as mock_to_row:
+        with patch.object(converter, "_extract_headers", return_value=["name"]):
+            with patch.object(
+                converter, "_object_to_row", return_value=["John"]
+            ) as mock_to_row:
                 # Act
                 converter._convert_object_list(sample_list_of_dicts, False, 1)
                 # Assert
@@ -244,7 +277,9 @@ class TestTableConverterConvertObjectList:
 class TestTableConverterConvertArrayList:
     """Test cases for the _convert_array_list method."""
 
-    def test_convert_array_list_converts_all_elements_to_strings(self, converter, sample_list_of_lists):
+    def test_convert_array_list_converts_all_elements_to_strings(
+        self, converter, sample_list_of_lists
+    ):
         """Test _convert_array_list converts all elements to strings."""
         # Arrange
         data_with_mixed_types = [[1, "John"], [2.5, "Jane"]]
@@ -269,7 +304,9 @@ class TestTableConverterConvertArrayList:
         # Assert
         assert result == [["", "John"], ["Jane", ""]]
 
-    def test_convert_array_list_no_limit_processes_all_data(self, converter, sample_list_of_lists):
+    def test_convert_array_list_no_limit_processes_all_data(
+        self, converter, sample_list_of_lists
+    ):
         """Test _convert_array_list processes all data when no limit is set."""
         # Arrange & Act
         result = converter._convert_array_list(sample_list_of_lists, None)
@@ -289,7 +326,9 @@ class TestTableConverterExtractHeaders:
         # Assert
         assert result == ["age", "name"]
 
-    def test_extract_headers_multiple_objects_merges_keys(self, converter, sample_list_of_dicts):
+    def test_extract_headers_multiple_objects_merges_keys(
+        self, converter, sample_list_of_dicts
+    ):
         """Test _extract_headers merges keys from multiple objects."""
         # Arrange & Act
         result = converter._extract_headers(sample_list_of_dicts)
@@ -325,7 +364,9 @@ class TestTableConverterExtractHeaders:
 class TestTableConverterObjectToRow:
     """Test cases for the _object_to_row method."""
 
-    def test_object_to_row_all_keys_present_returns_values_in_order(self, converter, sample_headers):
+    def test_object_to_row_all_keys_present_returns_values_in_order(
+        self, converter, sample_headers
+    ):
         """Test _object_to_row returns values in header order when all keys present."""
         # Arrange
         obj = {"name": "John", "age": "30"}
@@ -334,7 +375,9 @@ class TestTableConverterObjectToRow:
         # Assert
         assert result == ["30", "John"]
 
-    def test_object_to_row_missing_keys_returns_empty_strings(self, converter, sample_headers):
+    def test_object_to_row_missing_keys_returns_empty_strings(
+        self, converter, sample_headers
+    ):
         """Test _object_to_row returns empty strings for missing keys."""
         # Arrange
         obj = {"name": "John"}  # missing "age"
@@ -343,7 +386,9 @@ class TestTableConverterObjectToRow:
         # Assert
         assert result == ["", "John"]
 
-    def test_object_to_row_none_values_converted_to_empty_strings(self, converter, sample_headers):
+    def test_object_to_row_none_values_converted_to_empty_strings(
+        self, converter, sample_headers
+    ):
         """Test _object_to_row converts None values to empty strings."""
         # Arrange
         obj = {"name": None, "age": 30}
@@ -352,7 +397,9 @@ class TestTableConverterObjectToRow:
         # Assert
         assert result == ["30", ""]
 
-    def test_object_to_row_empty_object_returns_empty_strings(self, converter, sample_headers):
+    def test_object_to_row_empty_object_returns_empty_strings(
+        self, converter, sample_headers
+    ):
         """Test _object_to_row returns empty strings for empty object."""
         # Arrange
         obj = {}
