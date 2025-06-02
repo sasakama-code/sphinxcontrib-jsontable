@@ -131,11 +131,11 @@ jobs:
         echo "🧪 Testing wheel installation in clean environment..."
         python -m venv test_env
         echo "📦 Installing dependencies in test environment..."
-        python -m pip install sphinx>=3.0 docutils>=0.18
+        test_env/bin/python -m pip install sphinx>=3.0 docutils>=0.18
         echo "📦 Installing our wheel..."
-        python -m pip install dist/*.whl
+        test_env/bin/python -m pip install dist/*.whl
         echo "🧪 Testing import in clean environment..."
-        python -c "import sphinxcontrib.jsontable; print(f'✅ Wheel installation test passed: v{sphinxcontrib.jsontable.__version__}'); print(f'📂 Package location: {sphinxcontrib.jsontable.__file__}')"
+        test_env/bin/python -c "import sphinxcontrib.jsontable; print(f'✅ Wheel installation test passed: v{sphinxcontrib.jsontable.__version__}'); print(f'📂 Package location: {sphinxcontrib.jsontable.__file__}')"
         echo "🧹 Cleaning up test environment..."
         rm -rf test_env
 
