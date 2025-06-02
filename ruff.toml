@@ -1,116 +1,107 @@
 # ===== RUFF CONFIGURATION =====
 # Comprehensive ruff configuration optimized for CI pipeline and modern Python development
-# This configuration ensures full compliance with GitHub Actions CI requirements
 
-# Python version compatibility
+##############################
+# 1. グローバル設定 (トップレベル)
+##############################
+
+# Python 3.9 互換
 target-version = "py39"
 
-# Line length (consistent with project standards)
+# PEP8 最大行長 (Black と合わせる)
 line-length = 88
 
-# Source directories to analyze
-src = ["sphinxcontrib", "tests"]
+# 自動修正可能なルールをすべて有効 (必要に応じて絞り込む)
+fixable = ["ALL"]
 
-# Rule selection - comprehensive but practical for existing codebase
+# チェック対象から除外するディレクトリ・ファイル
+exclude = [
+  "__pycache__",
+  ".venv",
+  "build",
+  "dist",
+  ".git"
+]
+
+# 不要な # noqa を警告
+forbid-unnecessary-noqa = true
+
+##############################
+# 2. lint ルールの選択・除外
+##############################
+[lint]
+# 適用するルール (Flake8, Bugbear, isort, pyupgrade など)
 select = [
-    # Essential rules - pycodestyle and pyflakes
-    "E", # pycodestyle errors
-    "W", # pycodestyle warnings  
-    "F", # pyflakes
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
 
-    # Import sorting and organization
-    "I", # isort
+    "I",    # isort (import order)
 
-    # Modern Python upgrades
-    "UP", # pyupgrade (Python syntax modernization)
+    "UP",   # pyupgrade (Python syntax modernization)
 
-    # Bug prevention
-    "B",  # flake8-bugbear
-    "C4", # flake8-comprehensions
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
 
-    # Code simplification
-    "PIE", # flake8-pie
+    "PIE",  # flake8-pie
 
-    # Print statement detection (useful for production code)
-    "T20", # flake8-print
+    "T20",  # flake8-print
 
-    # Additional quality rules
-    "RUF", # Ruff-specific rules
-    "SIM", # flake8-simplify (subset of safe rules)
+    "RUF",  # Ruff-specific rules
+    "SIM"   # flake8-simplify
 ]
 
-# Ignore rules that conflict with formatter or are too strict for existing code
+# プロジェクト事情で無視したいルール
 ignore = [
-    "E501",   # line too long, handled by ruff format
-    "E203",   # whitespace before ':' (conflicts with formatter)
-    "B008",   # do not perform function calls in argument defaults
-    "PIE800", # unnecessary-spread operator
-    "T201",   # print statements allowed in development
-    "T203",   # pprint statements allowed in development
-    "SIM108", # use ternary operator - not always more readable
-    "SIM117", # use dict.get - can be overly aggressive
+    "E501",   # 長すぎる行は ruff format で補正
+    "E203",   # フォーマッタ (Black) と衝突しやすい空白
+    "B008",   # デフォルト引数内での関数呼び出し
+    "PIE800", # 不要な spread operator
+    "T201",   # 開発中は print を許容
+    "T203",   # 開発中は pprint を許容
+    "SIM108", # 三項演算子の自動提案を抑制
+    "SIM117"  # dict.get の自動提案を抑制
 ]
 
-# Per-file ignores for flexibility
+##############################
+# 3. per-file での無視設定
+##############################
 [per-file-ignores]
-# Allow unused imports in __init__.py files (common pattern)
-"__init__.py" = ["F401"]
-
-# Test files can be more relaxed
-"tests/**/*.py" = [
-    "T201",   # Allow print statements in tests
-    "T203",   # Allow pprint statements in tests
-    "B011",   # Allow assert False in tests
-    "SIM117", # Allow more verbose dict access in tests for clarity
-]
-
-# Configuration files can have imports at module level
-"conf.py" = ["E402"]
-"conftest.py" = ["E402"]
-
-# Examples directory can be more relaxed
+"__init__.py"      = ["F401"]
+"tests/**/*.py"    = ["T201", "T203", "B011", "SIM117"]
+"conf.py"          = ["E402"]
+"conftest.py"      = ["E402"]
 "examples/**/*.py" = ["T201", "T203", "B008"]
 
-# Import sorting configuration
+##############################
+# 4. isort (インポート整理) 設定
+##############################
 [isort]
-# Project-specific settings
-known-first-party = ["sphinxcontrib.jsontable"]
+known-first-party       = ["sphinxcontrib.jsontable"]
 split-on-trailing-comma = true
-combine-as-imports = true
-force-grid-wrap = 0
-multi-line-output = 3
-include-trailing-comma = true
-line-length = 88
+combine-as-imports      = true
+# force-grid-wrap = 0      ← この行は削除 (Ruff がサポートしていない)
+multi-line-output       = 3
+include-trailing-comma  = true
+line-length             = 88
 
-# Formatting configuration
-[format]
-# Use double quotes for consistency with project style
+##############################
+# 5. フォーマット関連設定 (トップレベル)
+##############################
+# ダブルクォートを使う
 quote-style = "double"
 
-# Preserve trailing commas in multiline structures
+# 複数行での末尾カンマを保持する
 skip-magic-trailing-comma = false
 
-# Indentation
+# インデントはスペース
 indent-style = "space"
 
-# Line endings
+# 改行コードは自動判定 (lf/crlf を自動で選択)
 line-ending = "auto"
 
-# String normalization
+# docstring 内の code block をフォーマット
 docstring-code-format = true
+
+# docstring 内のコード行長を動的に決定
 docstring-code-line-length = "dynamic"
-
-# Advanced rule configuration
-[flake8-bugbear]
-# Allow default mutable arguments in dataclasses
-extend-immutable-calls = ["dataclasses.field"]
-
-[flake8-quotes]
-# Consistent with format.quote-style
-docstring-quotes = "double"
-inline-quotes = "double"
-multiline-quotes = "double"
-
-[pyupgrade]
-# Keep typing compatibility for older Python versions
-keep-runtime-typing = true
