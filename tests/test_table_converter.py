@@ -6,9 +6,8 @@ including both normal and error scenarios. Tests follow the AAA pattern with sin
 and proper isolation using mocks.
 """
 
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-from unittest.mock import MagicMock, Mock, patch
+from typing import Any, Dict, List, Union
+from unittest.mock import patch
 
 import pytest
 
