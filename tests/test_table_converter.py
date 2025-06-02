@@ -6,7 +6,7 @@ including both normal and error scenarios. Tests follow the AAA pattern with sin
 and proper isolation using mocks.
 """
 
-from typing import Any, Dict, List, Union
+from typing import Any, Union
 from unittest.mock import patch
 
 import pytest
@@ -17,10 +17,9 @@ from sphinxcontrib.jsontable.directives import (
     TableConverter,
 )
 
-
 # Type aliases
-JsonData = Union[Dict[str, Any], List[Any]]
-TableData = List[List[str]]
+JsonData = Union[dict[str, Any], list[Any]]
+TableData = list[list[str]]
 
 
 # Test Fixtures
@@ -141,7 +140,7 @@ class TestTableConverterConvertDict:
         # Arrange
         with patch.object(
             converter, "_convert_object_list", return_value=[["row1"]]
-        ) as mock_convert:
+        ) as mock_convert: # noqa
             # Act
             result = converter._convert_dict(sample_dict, False, None)
             # Assert

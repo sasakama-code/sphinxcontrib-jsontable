@@ -8,7 +8,7 @@ Tests cover both normal and error scenarios with proper mocking for isolation.
 
 import json
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch, PropertyMock, mock_open
+from unittest.mock import mock_open, patch
 
 import pytest
 

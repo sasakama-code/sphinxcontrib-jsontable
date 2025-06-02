@@ -5,9 +5,10 @@ This module provides comprehensive test coverage for all methods of the
 JsonTableDirective class, including normal and error cases.
 """
 
-import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
+
+import pytest
 
 # Import the class under test and related exceptions
 from sphinxcontrib.jsontable.directives import (
@@ -74,7 +75,7 @@ class TestJsonTableDirective:
         args = ("json-table", [], {}, [], 1, 0, "block text", mock_state, mock_state_machine)
 
         # Act
-        directive = JsonTableDirective(*args)
+        directive = JsonTableDirective(*args) # noqa
 
         # Assert
         mock_loader.assert_called_once_with(DEFAULT_ENCODING)
@@ -91,7 +92,7 @@ class TestJsonTableDirective:
         args = ("json-table", [], {"encoding": custom_encoding}, [], 1, 0, "block text", mock_state, mock_state_machine)
 
         # Act
-        directive = JsonTableDirective(*args)
+        directive = JsonTableDirective(*args) # noqa
 
         # Assert
         mock_loader.assert_called_once_with(custom_encoding)

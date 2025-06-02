@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -315,7 +315,7 @@ class TableConverter:
         headers = self._extract_headers(objects)
         limited_objects = objects[:limit] if limit is not None else objects
         rows = [self._object_to_row(obj, headers) for obj in limited_objects]
-        return [headers] + rows if include_header else rows
+        return [headers, *rows] if include_header else rows
 
     def _convert_array_list(
         self,
@@ -495,7 +495,7 @@ class JsonTableDirective(SphinxDirective):
     has_content = True
     required_arguments = 0
     optional_arguments = 1
-    option_spec = {
+    option_spec: ClassVar[dict] = {
         "header": directives.flag,
         "encoding": directives.unchanged,
         "limit": directives.positive_int,  # Accept only positive integers
