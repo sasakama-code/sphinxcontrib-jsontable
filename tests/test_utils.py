@@ -699,10 +699,10 @@ class TestIsSafePath:
         assert isinstance(result, bool)
 
 
-
 class DummyApp:
     def add_directive(self, name, directive):
         self.called = (name, directive)
+
 
 def test_setup_returns_metadata():
     app = DummyApp()

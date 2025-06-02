@@ -252,9 +252,7 @@ class TestJsonDataLoaderLoadFromFile:
             loader.load_from_file(source, srcdir)
 
             # Assert
-            mock_file.assert_called_once_with(
-                srcdir / source, encoding=custom_encoding
-            )
+            mock_file.assert_called_once_with(srcdir / source, encoding=custom_encoding)
 
 
 class TestJsonDataLoaderParseInline:
