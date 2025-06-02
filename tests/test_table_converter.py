@@ -18,7 +18,7 @@ from sphinxcontrib.jsontable.directives import (
 )
 
 # Type aliases
-JsonData = Union[dict[str, Any], list[Any]]
+JsonData = dict[str, Any] | list[Any]
 TableData = list[list[str]]
 
 
