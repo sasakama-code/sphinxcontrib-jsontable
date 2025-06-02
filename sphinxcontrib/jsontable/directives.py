@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 JsonData = list[Any] | dict[str, Any]
 TableData = list[list[str]]
 
-DEFAULT_ENCODING = 'utf-8'
+DEFAULT_ENCODING = "utf-8"
 NO_JSON_SOURCE_ERROR = "No JSON data source provided"
 INVALID_JSON_DATA_ERROR = "JSON data must be an array or object"
 EMPTY_CONTENT_ERROR = "No inline JSON content provided"
@@ -57,7 +57,7 @@ def safe_str(value: Any) -> str:
     Returns:
         String representation of value, or empty string if value is None.
     """
-    return str(value) if value is not None else ''
+    return str(value) if value is not None else ""
 
 
 def ensure_file_exists(path: Path) -> None:
@@ -114,7 +114,7 @@ class JsonDataLoader:
     Loader class for reading JSON data from files or inline content.
 
     Args:
-        encoding: Character encoding to use when reading files (default: 'utf-8').
+        encoding: Character encoding to use when reading files (default: "utf-8").
     """
 
     def __init__(self, encoding: str = DEFAULT_ENCODING):
@@ -131,7 +131,7 @@ class JsonDataLoader:
             Validated encoding name, or DEFAULT_ENCODING if invalid.
         """
         try:
-            'test'.encode(encoding)
+            "test".encode(encoding)
             return encoding
         except LookupError:
             logger.warning(f"Invalid encoding '{encoding}', using {DEFAULT_ENCODING}")
@@ -196,7 +196,7 @@ class JsonDataLoader:
         validate_not_empty(content, EMPTY_CONTENT_ERROR)
 
         try:
-            return json.loads('\n'.join(content))
+            return json.loads("\n".join(content))
         except json.JSONDecodeError as e:
             raise JsonTableError(f"Invalid inline JSON: {e.msg}") from e
 
@@ -209,7 +209,12 @@ class TableConverter:
         convert: Entry point for conversion of object or array.
     """
 
-    def convert(self, data: JsonData, include_header: bool = False, limit: int | None = None) -> TableData:
+    def convert(
+        self,
+        data: JsonData,
+        include_header: bool = False,
+        limit: int | None = None,
+    ) -> TableData:
         """
         Convert JSON data to a list of rows, optionally including headers and limiting rows.
 
@@ -233,7 +238,12 @@ class TableConverter:
         else:
             raise JsonTableError(INVALID_JSON_DATA_ERROR)
 
-    def _convert_dict(self, data: dict[str, Any], include_header: bool, limit: int | None = None) -> TableData:
+    def _convert_dict(
+        self,
+        data: dict[str, Any],
+        include_header: bool,
+        limit: int | None = None,
+    ) -> TableData:
         """
         Convert a single JSON object into table rows, considering limit.
 
@@ -249,7 +259,12 @@ class TableConverter:
             return []
         return self._convert_object_list([data], include_header, limit)
 
-    def _convert_list(self, data: list[Any], include_header: bool, limit: int | None = None) -> TableData:
+    def _convert_list(
+        self,
+        data: list[Any],
+        include_header: bool,
+        limit: int | None = None,
+    ) -> TableData:
         """
         Convert a JSON array into table rows, dispatching by element type.
 
@@ -278,7 +293,12 @@ class TableConverter:
         else:
             raise JsonTableError("Array items must be objects or arrays")
 
-    def _convert_object_list(self, objects: list[dict[str, Any]], include_header: bool, limit: int | None = None) -> TableData:
+    def _convert_object_list(
+        self,
+        objects: list[dict[str, Any]],
+        include_header: bool,
+        limit: int | None = None,
+    ) -> TableData:
         """
         Convert a list of JSON objects into rows, extracting headers.
 
@@ -295,9 +315,13 @@ class TableConverter:
         headers = self._extract_headers(objects)
         limited_objects = objects[:limit] if limit is not None else objects
         rows = [self._object_to_row(obj, headers) for obj in limited_objects]
-        return [headers] + rows if include_header else rows
+        return [headers, *rows] if include_header else rows
 
-    def _convert_array_list(self, arrays: list[list[Any]], limit: int | None = None) -> TableData:
+    def _convert_array_list(
+        self,
+        arrays: list[list[Any]],
+        limit: int | None = None,
+    ) -> TableData:
         """
         Convert a list of arrays (lists) directly into rows.
 
@@ -337,7 +361,7 @@ class TableConverter:
         Returns:
             List of stringified values corresponding to headers.
         """
-        return [safe_str(obj.get(key, '')) for key in headers]
+        return [safe_str(obj.get(key, "")) for key in headers]
 
 
 class TableBuilder:
@@ -418,7 +442,12 @@ class TableBuilder:
         thead += header_row
         table[0] += thead
 
-    def _add_body(self, table: nodes.table, body_data: TableData, max_cols: int) -> None:
+    def _add_body(
+        self,
+        table: nodes.table,
+        body_data: TableData,
+        max_cols: int,
+    ) -> None:
         """
         Add body rows to an existing table node.
 
@@ -430,7 +459,7 @@ class TableBuilder:
         tbody = nodes.tbody()
 
         for row_data in body_data:
-            padded_row = row_data + [''] * (max_cols - len(row_data))
+            padded_row = row_data + [""] * (max_cols - len(row_data))
             tbody += self._create_row(padded_row)
 
         table[0] += tbody
@@ -466,10 +495,10 @@ class JsonTableDirective(SphinxDirective):
     has_content = True
     required_arguments = 0
     optional_arguments = 1
-    option_spec = {
-        'header': directives.flag,
-        'encoding': directives.unchanged,
-        'limit': directives.positive_int,  # Accept only positive integers
+    option_spec: ClassVar[dict] = {
+        "header": directives.flag,
+        "encoding": directives.unchanged,
+        "limit": directives.positive_int,  # Accept only positive integers
     }
 
     def __init__(self, *args, **kwargs):
@@ -477,7 +506,7 @@ class JsonTableDirective(SphinxDirective):
         Initialize directive with JSON loader, converter, and builder.
         """
         super().__init__(*args, **kwargs)
-        encoding = self.options.get('encoding', DEFAULT_ENCODING)
+        encoding = self.options.get("encoding", DEFAULT_ENCODING)
         self.loader = JsonDataLoader(encoding)
         self.converter = TableConverter()
         self.builder = TableBuilder()
@@ -492,8 +521,8 @@ class JsonTableDirective(SphinxDirective):
         """
         try:
             json_data = self._load_json_data()
-            include_header = 'header' in self.options
-            limit = self.options.get('limit')  # None or positive integer
+            include_header = "header" in self.options
+            limit = self.options.get("limit")  # None or positive integer
 
             # Output debug information to log
             if limit is not None:
@@ -519,7 +548,10 @@ class JsonTableDirective(SphinxDirective):
             JsonTableError: If no JSON source provided.
         """
         if self.arguments:
-            return self.loader.load_from_file(self.arguments[0], Path(self.env.srcdir))
+            return self.loader.load_from_file(
+                self.arguments[0],
+                Path(self.env.srcdir),
+            )
         elif self.content:
             return self.loader.parse_inline(self.content)
         else:
