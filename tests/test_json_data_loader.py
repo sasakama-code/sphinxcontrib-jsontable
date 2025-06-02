@@ -8,7 +8,7 @@ Tests cover both normal and error scenarios with proper mocking for isolation.
 
 import json
 from pathlib import Path
-from unittest.mock import mock_open, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, mock_open, patch
 
 import pytest
 
@@ -71,7 +71,9 @@ class TestJsonDataLoaderValidateEncoding:
         assert result == valid_encoding
 
     @patch("sphinxcontrib.jsontable.directives.logger")
-    def test_validate_encoding_with_invalid_encoding_returns_default(self, mock_logger):
+    def test_validate_encoding_with_invalid_encoding_returns_default(
+        self, mock_logger
+    ):
         """Test _validate_encoding returns default for invalid encoding."""
         # Arrange
         loader = JsonDataLoader()
@@ -129,7 +131,9 @@ class TestJsonDataLoaderValidateFilePath:
             loader._validate_file_path(source, srcdir)
 
     @patch("sphinxcontrib.jsontable.directives.is_safe_path")
-    def test_validate_file_path_calls_is_safe_path_with_correct_arguments(self, mock_is_safe_path):
+    def test_validate_file_path_calls_is_safe_path_with_correct_arguments(
+        self, mock_is_safe_path
+    ):
         """Test _validate_file_path calls is_safe_path with correct arguments."""
         # Arrange
         loader = JsonDataLoader()
@@ -151,7 +155,9 @@ class TestJsonDataLoaderLoadFromFile:
     @patch("sphinxcontrib.jsontable.directives.ensure_file_exists")
     @patch("builtins.open", new_callable=mock_open, read_data='{"key": "value"}')
     @patch("json.load")
-    def test_load_from_file_with_valid_json_returns_data(self, mock_json_load, mock_file, mock_ensure_exists):
+    def test_load_from_file_with_valid_json_returns_data(
+        self, mock_json_load, mock_file, mock_ensure_exists
+    ):
         """Test load_from_file returns JSON data for valid file."""
         # Arrange
         loader = JsonDataLoader()
@@ -179,7 +185,9 @@ class TestJsonDataLoaderLoadFromFile:
         with patch.object(loader, "_validate_file_path") as mock_validate:
             mock_validate.return_value = srcdir / source
 
-            with patch("sphinxcontrib.jsontable.directives.ensure_file_exists") as mock_ensure:
+            with patch(
+                "sphinxcontrib.jsontable.directives.ensure_file_exists"
+            ) as mock_ensure:
                 mock_ensure.side_effect = FileNotFoundError("File not found")
 
                 # Act & Assert
@@ -189,7 +197,9 @@ class TestJsonDataLoaderLoadFromFile:
     @patch("sphinxcontrib.jsontable.directives.ensure_file_exists")
     @patch("builtins.open", new_callable=mock_open, read_data="invalid json")
     @patch("json.load")
-    def test_load_from_file_with_invalid_json_raises_json_table_error(self, mock_json_load, mock_file, mock_ensure_exists):
+    def test_load_from_file_with_invalid_json_raises_json_table_error(
+        self, mock_json_load, mock_file, mock_ensure_exists
+    ):
         """Test load_from_file raises JsonTableError for invalid JSON."""
         # Arrange
         loader = JsonDataLoader()
@@ -206,7 +216,9 @@ class TestJsonDataLoaderLoadFromFile:
 
     @patch("sphinxcontrib.jsontable.directives.ensure_file_exists")
     @patch("builtins.open")
-    def test_load_from_file_with_unicode_error_raises_json_table_error(self, mock_open_func, mock_ensure_exists):
+    def test_load_from_file_with_unicode_error_raises_json_table_error(
+        self, mock_open_func, mock_ensure_exists
+    ):
         """Test load_from_file raises JsonTableError for Unicode decode error."""
         # Arrange
         loader = JsonDataLoader()
@@ -224,7 +236,9 @@ class TestJsonDataLoaderLoadFromFile:
     @patch("sphinxcontrib.jsontable.directives.ensure_file_exists")
     @patch("builtins.open", new_callable=mock_open, read_data='{"key": "value"}')
     @patch("json.load")
-    def test_load_from_file_opens_file_with_correct_encoding(self, mock_json_load, mock_file, mock_ensure_exists):
+    def test_load_from_file_opens_file_with_correct_encoding(
+        self, mock_json_load, mock_file, mock_ensure_exists
+    ):
         """Test load_from_file opens file with correct encoding."""
         # Arrange
         custom_encoding = "utf-16"
