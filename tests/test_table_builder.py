@@ -225,7 +225,9 @@ class TestTableBuilder:
         table_builder._add_header(table, header_data)
 
         # Assert
-        thead = next(child for child in tgroup.children if isinstance(child, nodes.thead))
+        thead = next(
+            child for child in tgroup.children if isinstance(child, nodes.thead)
+        )
         assert isinstance(thead, nodes.thead)
 
     def test_add_header_with_empty_header_data(self, table_builder):
@@ -257,7 +259,9 @@ class TestTableBuilder:
         table_builder._add_header(table, header_data)
 
         # Assert
-        thead = next(child for child in tgroup.children if isinstance(child, nodes.thead))
+        thead = next(
+            child for child in tgroup.children if isinstance(child, nodes.thead)
+        )
         row = thead[0]
         entries = [child for child in row.children if isinstance(child, nodes.entry)]
         assert len(entries) == 3
@@ -313,7 +317,9 @@ class TestTableBuilder:
         table_builder._add_body(table, body_data, max_cols)
 
         # Assert
-        tbody = next(child for child in tgroup.children if isinstance(child, nodes.tbody))
+        tbody = next(
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        )
         first_row = tbody[0]
         entries = [
             child for child in first_row.children if isinstance(child, nodes.entry)
@@ -333,7 +339,9 @@ class TestTableBuilder:
         table_builder._add_body(table, body_data, max_cols)
 
         # Assert
-        tbody = next(child for child in tgroup.children if isinstance(child, nodes.tbody))
+        tbody = next(
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        )
         rows = [child for child in tbody.children if isinstance(child, nodes.row)]
         assert len(rows) == 3
 

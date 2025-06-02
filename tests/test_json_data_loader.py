@@ -71,9 +71,7 @@ class TestJsonDataLoaderValidateEncoding:
         assert result == valid_encoding
 
     @patch("sphinxcontrib.jsontable.directives.logger")
-    def test_validate_encoding_with_invalid_encoding_returns_default(
-        self, mock_logger
-    ):
+    def test_validate_encoding_with_invalid_encoding_returns_default(self, mock_logger):
         """Test _validate_encoding returns default for invalid encoding."""
         # Arrange
         loader = JsonDataLoader()
@@ -254,7 +252,9 @@ class TestJsonDataLoaderLoadFromFile:
             loader.load_from_file(source, srcdir)
 
             # Assert
-            mock_file.assert_called_once_with(srcdir / source, "r", encoding=custom_encoding)
+            mock_file.assert_called_once_with(
+                srcdir / source, "r", encoding=custom_encoding
+            )
 
 
 class TestJsonDataLoaderParseInline:

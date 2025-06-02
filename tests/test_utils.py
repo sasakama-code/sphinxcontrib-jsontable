@@ -323,6 +323,7 @@ class TestSafeStr:
 
     def test_safe_str_with_custom_object_calls_str_method(self):
         """Test that safe_str calls __str__ method on custom objects."""
+
         # Arrange
         class CustomObject:
             def __str__(self):

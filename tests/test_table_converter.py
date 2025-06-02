@@ -140,7 +140,7 @@ class TestTableConverterConvertDict:
         # Arrange
         with patch.object(
             converter, "_convert_object_list", return_value=[["row1"]]
-        ) as mock_convert: # noqa
+        ) as mock_convert:  # noqa
             # Act
             result = converter._convert_dict(sample_dict, False, None)
             # Assert
@@ -188,7 +188,9 @@ class TestTableConverterConvertList:
         # Arrange
         data_with_none = [None, {"key": "value"}]
         # Act & Assert
-        with pytest.raises(JsonTableError, match="Invalid array data: null first element"):
+        with pytest.raises(
+            JsonTableError, match="Invalid array data: null first element"
+        ):
             converter._convert_list(data_with_none, False, None)
 
     def test_convert_list_invalid_first_element_raises_error(self, converter):
@@ -196,7 +198,9 @@ class TestTableConverterConvertList:
         # Arrange
         invalid_data = ["string", "another_string"]
         # Act & Assert
-        with pytest.raises(JsonTableError, match="Array items must be objects or arrays"):
+        with pytest.raises(
+            JsonTableError, match="Array items must be objects or arrays"
+        ):
             converter._convert_list(invalid_data, False, None)
 
     def test_convert_list_with_limit_processes_limited_data(
@@ -229,7 +233,9 @@ class TestTableConverterConvertObjectList:
         with patch.object(converter, "_extract_headers", return_value=["age", "name"]):
             with patch.object(converter, "_object_to_row", return_value=["30", "John"]):
                 # Act
-                result = converter._convert_object_list(sample_list_of_dicts, True, None)
+                result = converter._convert_object_list(
+                    sample_list_of_dicts, True, None
+                )
                 # Assert
                 assert result[0] == ["age", "name"]
 
@@ -252,7 +258,9 @@ class TestTableConverterConvertObjectList:
     ):
         """Test _convert_object_list calls _extract_headers method."""
         # Arrange
-        with patch.object(converter, "_extract_headers", return_value=[]) as mock_extract:
+        with patch.object(
+            converter, "_extract_headers", return_value=[]
+        ) as mock_extract:
             with patch.object(converter, "_object_to_row", return_value=[]):
                 # Act
                 converter._convert_object_list(sample_list_of_dicts, False, None)
