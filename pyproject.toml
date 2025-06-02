@@ -75,16 +75,13 @@ Documentation = "https://github.com/sasakama-code/sphinxcontrib-jsontable#readme
 zip-safe = false
 
 [tool.setuptools.packages.find]
-where = ["."]
+# Explicitly specify the packages to include
 include = ["sphinxcontrib*"]
 exclude = ["tests*", "docs*", "examples*"]
 
+# Ensure the namespace package structure is properly configured
 [tool.setuptools.package-data]
 "sphinxcontrib.jsontable" = ["py.typed"]
-
-# Ensure namespace package is properly configured
-[tool.setuptools.package-dir]
-"" = "."
 
 # ===== MYPY CONFIGURATION =====
 # MyPy configuration - balanced for gradual typing
