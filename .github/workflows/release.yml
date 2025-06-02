@@ -30,45 +30,130 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
+    - name: Debug environment and project structure
+      run: |
+        echo "🔍 Environment Debug Information"
+        echo "Current working directory: $(pwd)"
+        echo "Python version: $(python --version)"
+        echo "Python executable: $(which python)"
+        echo ""
+        echo "📁 Project structure:"
+        find . -type f -name "*.py" | head -20
+        echo ""
+        echo "📋 pyproject.toml exists: $(test -f pyproject.toml && echo 'Yes' || echo 'No')"
+        echo "📋 setup.py exists: $(test -f setup.py && echo 'Yes' || echo 'No')"
+        echo ""
+        echo "🗂️ sphinxcontrib directory structure:"
+        if [ -d "sphinxcontrib" ]; then
+          find sphinxcontrib -type f -name "*.py" | sort
+        else
+          echo "❌ sphinxcontrib directory not found"
+        fi
+
     - name: Install build dependencies
       run: |
+        echo "📦 Installing build dependencies..."
         python -m pip install --upgrade pip
         python -m pip install build twine
+        echo "✅ Build dependencies installed"
 
-    - name: Install package dependencies for verification
+    - name: Install package dependencies
       run: |
-        # Install Sphinx and package dependencies
+        echo "📦 Installing Sphinx and package dependencies..."
         python -m pip install sphinx>=3.0 docutils>=0.18
-        # Install the package in editable mode for verification
-        python -m pip install -e .
+        echo "✅ Package dependencies installed"
+        
+        echo "🔍 Checking installed packages:"
+        pip list | grep -E "(sphinx|docutils)" || echo "No sphinx/docutils found"
 
-    - name: Verify package installation and metadata
+    - name: Verify project structure before installation
       run: |
-        # Verify package can be imported successfully
-        python -c "import sphinxcontrib.jsontable; print(f'✅ Package imported successfully')"
-        python -c "import sphinxcontrib.jsontable; print(f'📦 Version: {sphinxcontrib.jsontable.__version__}')"
-        
-        # Verify Sphinx integration
-        python -c "from sphinxcontrib.jsontable.directives import JsonTableDirective; print('✅ Directive import successful')"
-        
-        # Verify setup function from __init__.py
-        python -c "from sphinxcontrib.jsontable import setup; print('✅ Setup function available')"
-        
-        # Display package metadata
+        echo "🔍 Pre-installation verification:"
+        echo "Current directory: $(pwd)"
+        echo "pyproject.toml content (first 50 lines):"
+        head -50 pyproject.toml
+        echo ""
+        echo "📂 Directory listing:"
+        ls -la
+        echo ""
+        echo "🐍 Python path:"
+        python -c "import sys; print('\\n'.join(sys.path))"
+
+    - name: Install package in editable mode with verbose output
+      run: |
+        echo "🔧 Installing package in editable mode..."
+        echo "Command: pip install -e ."
+        python -m pip install -e . -v
+        echo "✅ Package installation completed"
+
+    - name: Verify package installation
+      run: |
+        echo "🔍 Post-installation verification:"
+        echo "📦 Installed packages:"
+        pip list | grep sphinxcontrib || echo "No sphinxcontrib packages found"
+        echo ""
+        echo "🐍 Python package discovery:"
         python -c "
-import pkg_resources
+import sys
+import pkgutil
+print('Python path:')
+for path in sys.path:
+    print(f'  {path}')
+print()
+print('Checking for sphinxcontrib namespace:')
 try:
-    dist = pkg_resources.get_distribution('sphinxcontrib-jsontable')
-    print(f'📋 Package name: {dist.project_name}')
-    print(f'📋 Version: {dist.version}')
-    print(f'📋 Location: {dist.location}')
-except:
-    print('⚠️  Package metadata not available (editable install)')
+    import sphinxcontrib
+    print(f'✅ sphinxcontrib found at: {sphinxcontrib.__path__}')
+    for finder, name, ispkg in pkgutil.iter_modules(sphinxcontrib.__path__, 'sphinxcontrib.'):
+        print(f'  📦 {name} (package: {ispkg})')
+except ImportError as e:
+    print(f'❌ sphinxcontrib import failed: {e}')
+"
+
+    - name: Test package import
+      run: |
+        echo "🧪 Testing package import..."
+        python -c "
+try:
+    import sphinxcontrib.jsontable
+    print('✅ Package imported successfully')
+    print(f'📦 Version: {sphinxcontrib.jsontable.__version__}')
+    print(f'📂 Package location: {sphinxcontrib.jsontable.__file__}')
+except ImportError as e:
+    print(f'❌ Package import failed: {e}')
+    print('🔍 Debugging info:')
+    import sys
+    print(f'Python version: {sys.version}')
+    print(f'Python executable: {sys.executable}')
+    print('Available modules in sphinxcontrib:')
+    try:
+        import sphinxcontrib
+        import pkgutil
+        for finder, name, ispkg in pkgutil.iter_modules(sphinxcontrib.__path__):
+            print(f'  - {name}')
+    except Exception as debug_e:
+        print(f'Could not list sphinxcontrib modules: {debug_e}')
+    raise
+"
+
+    - name: Verify Sphinx integration
+      run: |
+        echo "🔧 Testing Sphinx integration..."
+        python -c "
+try:
+    from sphinxcontrib.jsontable.directives import JsonTableDirective
+    print('✅ Directive import successful')
+    from sphinxcontrib.jsontable import setup
+    print('✅ Setup function available')
+    print('🎉 Sphinx integration verified')
+except ImportError as e:
+    print(f'❌ Sphinx integration failed: {e}')
+    raise
 "
 
     - name: Run basic functionality test
       run: |
-        # Create a minimal test to ensure the package works
+        echo "🧪 Running functionality test..."
         python -c "
 import tempfile
 import os
@@ -123,23 +208,27 @@ finally:
           echo "  📦 $file: $(stat -f%z "$file" 2>/dev/null || stat -c%s "$file") bytes"
         done
 
-    - name: Test wheel installation
+    - name: Test wheel installation in clean environment
       run: |
         echo "🧪 Testing wheel installation in clean environment..."
         # Create fresh virtual environment for testing
         python -m venv test_env
         source test_env/bin/activate
         
-        # Install sphinx first (as it's a required dependency)
+        echo "📦 Installing dependencies in test environment..."
         pip install sphinx>=3.0 docutils>=0.18
         
-        # Install our wheel
+        echo "📦 Installing our wheel..."
         pip install dist/*.whl
         
-        # Test import
-        python -c "import sphinxcontrib.jsontable; print(f'✅ Wheel installation test passed: v{sphinxcontrib.jsontable.__version__}')"
+        echo "🧪 Testing import in clean environment..."
+        python -c "
+import sphinxcontrib.jsontable
+print(f'✅ Wheel installation test passed: v{sphinxcontrib.jsontable.__version__}')
+print(f'📂 Package location: {sphinxcontrib.jsontable.__file__}')
+"
         
-        # Cleanup
+        echo "🧹 Cleaning up test environment..."
         deactivate
         rm -rf test_env
 
