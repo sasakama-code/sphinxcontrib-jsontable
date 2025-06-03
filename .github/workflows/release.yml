@@ -112,22 +112,94 @@ jobs:
         pip list | grep sphinxcontrib || echo "No sphinxcontrib packages found"
         echo ""
         echo "🐍 Python package discovery:"
-        python -c "import sys, pkgutil; print('Python path:'); [print(f'  {path}') for path in sys.path]; print(); print('Checking for sphinxcontrib namespace:'); exec('try:\n    import sphinxcontrib\n    print(f\"✅ sphinxcontrib found at: {sphinxcontrib.__path__}\")\n    for finder, name, ispkg in pkgutil.iter_modules(sphinxcontrib.__path__, \"sphinxcontrib.\"):\n        print(f\"  📦 {name} (package: {ispkg})\")\nexcept ImportError as e:\n    print(f\"❌ sphinxcontrib import failed: {e}\")')"
+        python << 'EOF'
+        import sys, pkgutil
+        print('Python path:')
+        for path in sys.path:
+            print(f'  {path}')
+        print()
+        print('Checking for sphinxcontrib namespace:')
+        try:
+            import sphinxcontrib
+            print(f"✅ sphinxcontrib found at: {sphinxcontrib.__path__}")
+            for finder, name, ispkg in pkgutil.iter_modules(sphinxcontrib.__path__, "sphinxcontrib."):
+                print(f"  📦 {name} (package: {ispkg})")
+        except ImportError as e:
+            print(f"❌ sphinxcontrib import failed: {e}")
+        EOF
 
     - name: Test package import
       run: |
         echo "🧪 Testing package import..."
-        python -c "exec('try:\n    import sphinxcontrib.jsontable\n    print(\"✅ Package imported successfully\")\n    print(f\"📦 Version: {sphinxcontrib.jsontable.__version__}\")\n    print(f\"📂 Package location: {sphinxcontrib.jsontable.__file__}\")\nexcept ImportError as e:\n    print(f\"❌ Package import failed: {e}\")\n    import sys\n    print(f\"Python version: {sys.version}\")\n    print(f\"Python executable: {sys.executable}\")\n    print(\"Available modules in sphinxcontrib:\")\n    try:\n        import sphinxcontrib, pkgutil\n        for finder, name, ispkg in pkgutil.iter_modules(sphinxcontrib.__path__):\n            print(f\"  - {name}\")\n    except Exception as debug_e:\n        print(f\"Could not list sphinxcontrib modules: {debug_e}\")\n    raise')"
+        python << 'EOF'
+        try:
+            import sphinxcontrib.jsontable
+            print("✅ Package imported successfully")
+            print(f"📦 Version: {sphinxcontrib.jsontable.__version__}")
+            print(f"📂 Package location: {sphinxcontrib.jsontable.__file__}")
+        except ImportError as e:
+            print(f"❌ Package import failed: {e}")
+            import sys
+            print(f"Python version: {sys.version}")
+            print(f"Python executable: {sys.executable}")
+            print("Available modules in sphinxcontrib:")
+            try:
+                import sphinxcontrib, pkgutil
+                for finder, name, ispkg in pkgutil.iter_modules(sphinxcontrib.__path__):
+                    print(f"  - {name}")
+            except Exception as debug_e:
+                print(f"Could not list sphinxcontrib modules: {debug_e}")
+            raise
+        EOF
 
     - name: Verify Sphinx integration
       run: |
         echo "🔧 Testing Sphinx integration..."
-        python -c "exec('try:\n    from sphinxcontrib.jsontable.directives import JsonTableDirective\n    print(\"✅ Directive import successful\")\n    from sphinxcontrib.jsontable import setup\n    print(\"✅ Setup function available\")\n    print(\"🎉 Sphinx integration verified\")\nexcept ImportError as e:\n    print(f\"❌ Sphinx integration failed: {e}\")\n    raise')"
+        python << 'EOF'
+        try:
+            from sphinxcontrib.jsontable.directives import JsonTableDirective
+            print("✅ Directive import successful")
+            from sphinxcontrib.jsontable import setup
+            print("✅ Setup function available")
+            print("🎉 Sphinx integration verified")
+        except ImportError as e:
+            print(f"❌ Sphinx integration failed: {e}")
+            raise
+        EOF
 
     - name: Run basic functionality test
       run: |
         echo "🧪 Running functionality test..."
-        python -c "exec('import tempfile, os, json\n\n        test_data_dict = {\"name\": \"test\", \"value\": 123}\n\n        test_data = json.dumps(test_data_dict)\n\n        with tempfile.NamedTemporaryFile(mode=\"w\", suffix=\".json\", delete=False) as f:\n\n            f.write(test_data)\n\n            test_file = f.name\n\n        try:\n\n            from sphinxcontrib.jsontable.directives import JsonDataLoader, TableConverter, TableBuilder\n\n            loader = JsonDataLoader()\n\n            data = loader.parse_inline([test_data])\n\n            print(\"✅ JSON loading successful\")\n\n            converter = TableConverter()\n\n            table_data = converter.convert(data, include_header=True)\n\n            print(\"✅ Table conversion successful\")\n\n            builder = TableBuilder()\n\n            table_node = builder.build(table_data, has_header=True)\n\n            print(\"✅ Table building successful\")\n\n            print(\"🎉 All functionality tests passed!\")\n\n        finally:\n\n            os.unlink(test_file)')"
+        python << 'EOF'
+        import tempfile, os, json
+
+        test_data_dict = {"name": "test", "value": 123}
+        test_data = json.dumps(test_data_dict)
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write(test_data)
+            test_file = f.name
+
+        try:
+            from sphinxcontrib.jsontable.directives import JsonDataLoader, TableConverter, TableBuilder
+            
+            loader = JsonDataLoader()
+            data = loader.parse_inline([test_data])
+            print("✅ JSON loading successful")
+            
+            converter = TableConverter()
+            table_data = converter.convert(data, include_header=True)
+            print("✅ Table conversion successful")
+            
+            builder = TableBuilder()
+            table_node = builder.build(table_data, has_header=True)
+            print("✅ Table building successful")
+            
+            print("🎉 All functionality tests passed!")
+            
+        finally:
+            os.unlink(test_file)
+        EOF
 
     # ===============================
     # Extra cleanup before build (FIX for license-file error)
