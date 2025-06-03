@@ -91,6 +91,6 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     keywords=["sphinx", "json", "table", "documentation", "rst", "markdown"],
-    license="MIT",
+    # license field removed - now managed by pyproject.toml
     zip_safe=False,
 )
