@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=77.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,8 @@ name = "sphinxcontrib-jsontable"
 version = "0.1.0"
 description = "Sphinx extension to render JSON data as tables"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 dynamic = []
 authors = [{ name = "sasakama-code", email = "sasakamacode@gmail.com" }]
 maintainers = [{ name = "sasakama-code", email = "sasakamacode@gmail.com" }]
@@ -18,7 +19,6 @@ classifiers = [
     "Environment :: Web Environment",
     "Framework :: Sphinx :: Extension",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
