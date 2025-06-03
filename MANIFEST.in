@@ -9,7 +9,6 @@ include SECURITY.md
 
 # Include requirements files
 include requirements-test.txt
-include test_requirements.txt
 
 # Include the pyproject.toml file
 include pyproject.toml
@@ -19,9 +18,6 @@ include ruff.toml
 
 # Include the codecov configuration
 include codecov.yml
-
-# Include the py.typed marker file
-include sphinxcontrib/jsontable/py.typed
 
 # Include all test files
 recursive-include tests *.py
