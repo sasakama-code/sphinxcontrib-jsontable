@@ -75,8 +75,6 @@ Documentation = "https://github.com/sasakama-code/sphinxcontrib-jsontable#readme
 [tool.setuptools]
 zip-safe = false
 include-package-data = true
-# Explicitly control license file detection
-license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 # Explicitly specify the packages to include
