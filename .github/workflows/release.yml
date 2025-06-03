@@ -70,12 +70,22 @@ jobs:
           echo "❌ sphinxcontrib directory not found"
         fi
 
-    - name: Install build dependencies
+    # ===============================
+    # Install build dependencies with specific versions (FIX)
+    # ===============================
+    - name: Install build dependencies with specific versions
       run: |
-        echo "📦 Installing build dependencies..."
+        echo "📦 Installing build dependencies with specific versions..."
         python -m pip install --upgrade pip
-        python -m pip install build twine
+        # Install specific versions to ensure compatibility
+        python -m pip install "setuptools>=77.0.0" "wheel>=0.44.0" "build>=1.2.2" "twine>=6.1.0"
         echo "✅ Build dependencies installed"
+        echo ""
+        echo "🔍 Verifying tool versions:"
+        python -c "import setuptools; print(f'setuptools: {setuptools.__version__}')"
+        python -c "import wheel; print(f'wheel: {wheel.__version__}')"
+        pip show build | grep Version
+        pip show twine | grep Version
 
     - name: Install package dependencies
       run: |
@@ -217,16 +227,48 @@ jobs:
         python -m build --verbose
         echo "✅ Build completed successfully"
 
-    - name: Verify distributions
+    # ===============================
+    # Enhanced verification for license metadata (FIX)
+    # ===============================
+    - name: Verify distributions and check metadata
       run: |
         echo "🔍 Verifying built distributions..."
-        python -m twine check dist/*
+        python -m twine check --strict dist/*
         echo "📋 Distribution files:"
         ls -la dist/
         echo "📊 Distribution details:"
         for file in dist/*; do
           echo "  📦 $file: $(wc -c < "$file") bytes"
         done
+        echo ""
+        echo "🔍 Checking wheel metadata for license-file issues:"
+        python << 'EOF'
+        import zipfile
+        import glob
+        
+        wheel_files = glob.glob("dist/*.whl")
+        if wheel_files:
+            wheel_file = wheel_files[0]
+            print(f"Checking {wheel_file}")
+            with zipfile.ZipFile(wheel_file, 'r') as zf:
+                metadata_files = [f for f in zf.namelist() if f.endswith('METADATA')]
+                if metadata_files:
+                    metadata_content = zf.read(metadata_files[0]).decode('utf-8')
+                    if 'license-file' in metadata_content.lower():
+                        print("⚠️  WARNING: Found 'license-file' in metadata")
+                        print("Content around license-file:")
+                        for line in metadata_content.split('\n'):
+                            if 'license' in line.lower():
+                                print(f"  {line}")
+                    else:
+                        print("✅ No 'license-file' field found in metadata")
+                    
+                    # Check metadata version
+                    for line in metadata_content.split('\n'):
+                        if line.startswith('Metadata-Version:'):
+                            print(f"✅ {line}")
+                            break
+        EOF
 
     - name: Test wheel installation in clean environment
       run: |
@@ -319,10 +361,10 @@ jobs:
         echo "📊 Total files: $(ls -1 dist/ | wc -l)"
         echo ""
         echo "🔍 Installing twine for verification..."
-        pip install twine
+        pip install "twine>=6.1.0"
         echo ""
-        echo "🔍 Running twine check..."
-        python -m twine check dist/*
+        echo "🔍 Running twine check with strict mode..."
+        python -m twine check --strict dist/*
         echo ""
         echo "✅ All distribution files passed twine check"
 
