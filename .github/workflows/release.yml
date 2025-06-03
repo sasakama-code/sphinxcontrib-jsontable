@@ -30,6 +30,26 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
+    # ===============================
+    # Clean build artifacts (FIX for license-file error)
+    # ===============================
+    - name: Clean build artifacts
+      run: |
+        echo "🧹 Cleaning previous build artifacts..."
+        rm -rf dist/ build/ *.egg-info
+        find . -type d -name "__pycache__" -exec rm -rf {} +
+        find . -type d -name "*.egg-info" -exec rm -rf {} +
+        find . -type f -name "*.pyc" -delete
+        find . -type f -name "*.pyo" -delete
+        echo "✅ Cleanup completed"
+        
+        # Verify clean state
+        echo "📂 Verifying clean state:"
+        ls -la
+        [ ! -d "dist" ] && echo "✓ dist/ directory removed"
+        [ ! -d "build" ] && echo "✓ build/ directory removed"
+        find . -name "*.egg-info" -type d | wc -l | grep -q "^0$" && echo "✓ All .egg-info directories removed"
+
     - name: Debug environment and project structure
       run: |
         echo "🔍 Environment Debug Information"
@@ -107,26 +127,17 @@ jobs:
     - name: Run basic functionality test
       run: |
         echo "🧪 Running functionality test..."
-        python -c "exec('import tempfile, os, json\n\
-        test_data_dict = {\"name\": \"test\", \"value\": 123}\n\
-        test_data = json.dumps(test_data_dict)\n\
-        with tempfile.NamedTemporaryFile(mode=\"w\", suffix=\".json\", delete=False) as f:\n\
-            f.write(test_data)\n\
-            test_file = f.name\n\
-        try:\n\
-            from sphinxcontrib.jsontable.directives import JsonDataLoader, TableConverter, TableBuilder\n\
-            loader = JsonDataLoader()\n\
-            data = loader.parse_inline([test_data])\n\
-            print(\"✅ JSON loading successful\")\n\
-            converter = TableConverter()\n\
-            table_data = converter.convert(data, include_header=True)\n\
-            print(\"✅ Table conversion successful\")\n\
-            builder = TableBuilder()\n\
-            table_node = builder.build(table_data, has_header=True)\n\
-            print(\"✅ Table building successful\")\n\
-            print(\"🎉 All functionality tests passed!\")\n\
-        finally:\n\
-            os.unlink(test_file)')"
+        python -c "exec('import tempfile, os, json\n\n        test_data_dict = {\"name\": \"test\", \"value\": 123}\n\n        test_data = json.dumps(test_data_dict)\n\n        with tempfile.NamedTemporaryFile(mode=\"w\", suffix=\".json\", delete=False) as f:\n\n            f.write(test_data)\n\n            test_file = f.name\n\n        try:\n\n            from sphinxcontrib.jsontable.directives import JsonDataLoader, TableConverter, TableBuilder\n\n            loader = JsonDataLoader()\n\n            data = loader.parse_inline([test_data])\n\n            print(\"✅ JSON loading successful\")\n\n            converter = TableConverter()\n\n            table_data = converter.convert(data, include_header=True)\n\n            print(\"✅ Table conversion successful\")\n\n            builder = TableBuilder()\n\n            table_node = builder.build(table_data, has_header=True)\n\n            print(\"✅ Table building successful\")\n\n            print(\"🎉 All functionality tests passed!\")\n\n        finally:\n\n            os.unlink(test_file)')"
+
+    # ===============================
+    # Extra cleanup before build (FIX for license-file error)
+    # ===============================
+    - name: Final cleanup before build
+      run: |
+        echo "🧹 Final cleanup before build..."
+        rm -rf dist/ build/ *.egg-info
+        find . -type d -name "*.egg-info" -exec rm -rf {} +
+        echo "✅ Final cleanup completed"
 
     - name: Build source distribution and wheel
       run: |
@@ -226,13 +237,22 @@ jobs:
         name: python-package-distributions
         path: dist/
 
+    # ===============================
+    # Additional verification before PyPI upload (FIX)
+    # ===============================
     - name: Verify distributions before upload
       run: |
         echo "📋 Files to be uploaded to PyPI:"
         ls -la dist/
         echo "📊 Total files: $(ls -1 dist/ | wc -l)"
+        echo ""
+        echo "🔍 Installing twine for verification..."
         pip install twine
+        echo ""
+        echo "🔍 Running twine check..."
         python -m twine check dist/*
+        echo ""
+        echo "✅ All distribution files passed twine check"
 
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
