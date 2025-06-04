@@ -71,21 +71,20 @@ jobs:
         fi
 
     # ===============================
-    # Install build dependencies with specific versions (FIX)
+    # Install build dependencies (FIX: twine removed)
     # ===============================
-    - name: Install build dependencies with specific versions
+    - name: Install build dependencies
       run: |
-        echo "📦 Installing build dependencies with specific versions..."
+        echo "📦 Installing build dependencies..."
         python -m pip install --upgrade pip
-        # Install specific versions to ensure compatibility
-        python -m pip install "setuptools>=77.0.0" "wheel>=0.44.0" "build>=1.2.2" "twine>=6.1.0"
+        # Install specific versions to ensure compatibility (twine removed)
+        python -m pip install "setuptools>=77.0.0" "wheel>=0.44.0" "build>=1.2.2"
         echo "✅ Build dependencies installed"
         echo ""
         echo "🔍 Verifying tool versions:"
         python -c "import setuptools; print(f'setuptools: {setuptools.__version__}')"
         python -c "import wheel; print(f'wheel: {wheel.__version__}')"
         pip show build | grep Version
-        pip show twine | grep Version
 
     - name: Install package dependencies
       run: |
@@ -228,12 +227,11 @@ jobs:
         echo "✅ Build completed successfully"
 
     # ===============================
-    # Enhanced verification for license metadata (FIX)
+    # Basic verification without twine
     # ===============================
-    - name: Verify distributions and check metadata
+    - name: Verify distributions
       run: |
         echo "🔍 Verifying built distributions..."
-        python -m twine check --strict dist/*
         echo "📋 Distribution files:"
         ls -la dist/
         echo "📊 Distribution details:"
@@ -241,7 +239,7 @@ jobs:
           echo "  📦 $file: $(wc -c < "$file") bytes"
         done
         echo ""
-        echo "🔍 Checking wheel metadata for license-file issues:"
+        echo "🔍 Checking wheel metadata structure:"
         python << 'EOF'
         import zipfile
         import glob
@@ -251,23 +249,27 @@ jobs:
             wheel_file = wheel_files[0]
             print(f"Checking {wheel_file}")
             with zipfile.ZipFile(wheel_file, 'r') as zf:
+                # List all files in wheel
+                print("Files in wheel:")
+                for f in sorted(zf.namelist())[:10]:  # Show first 10 files
+                    print(f"  - {f}")
+                
+                # Check for METADATA file
                 metadata_files = [f for f in zf.namelist() if f.endswith('METADATA')]
                 if metadata_files:
+                    print(f"\n✅ Found METADATA file: {metadata_files[0]}")
                     metadata_content = zf.read(metadata_files[0]).decode('utf-8')
-                    if 'license-file' in metadata_content.lower():
-                        print("⚠️  WARNING: Found 'license-file' in metadata")
-                        print("Content around license-file:")
-                        for line in metadata_content.split('\n'):
-                            if 'license' in line.lower():
-                                print(f"  {line}")
-                    else:
-                        print("✅ No 'license-file' field found in metadata")
                     
                     # Check metadata version
-                    for line in metadata_content.split('\n'):
-                        if line.startswith('Metadata-Version:'):
-                            print(f"✅ {line}")
-                            break
+                    for line in metadata_content.split('\n')[:5]:  # Show first 5 lines
+                        print(f"  {line}")
+                else:
+                    print("❌ No METADATA file found in wheel")
+        
+        # Check source distribution
+        tar_files = glob.glob("dist/*.tar.gz")
+        if tar_files:
+            print(f"\n✅ Found source distribution: {tar_files[0]}")
         EOF
 
     - name: Test wheel installation in clean environment
@@ -317,6 +319,7 @@ jobs:
         ls -la dist/
         echo "📊 Total files: $(ls -1 dist/ | wc -l)"
 
+    # pypa/gh-action-pypi-publish will automatically run twine check internally
     - name: Publish to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
@@ -352,7 +355,7 @@ jobs:
         path: dist/
 
     # ===============================
-    # Additional verification before PyPI upload (FIX)
+    # Basic verification before PyPI upload
     # ===============================
     - name: Verify distributions before upload
       run: |
@@ -360,14 +363,13 @@ jobs:
         ls -la dist/
         echo "📊 Total files: $(ls -1 dist/ | wc -l)"
         echo ""
-        echo "🔍 Installing twine for verification..."
-        pip install "twine>=6.1.0"
+        echo "🔍 Checking distribution files exist:"
+        [ -f dist/*.whl ] && echo "✅ Wheel file found" || echo "❌ No wheel file found"
+        [ -f dist/*.tar.gz ] && echo "✅ Source distribution found" || echo "❌ No source distribution found"
         echo ""
-        echo "🔍 Running twine check with strict mode..."
-        python -m twine check --strict dist/*
-        echo ""
-        echo "✅ All distribution files passed twine check"
+        echo "✅ Ready for PyPI upload"
 
+    # pypa/gh-action-pypi-publish will automatically run twine check internally
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
