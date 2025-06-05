@@ -376,7 +376,7 @@ class TableConverter:
                     return ordered_keys
 
                 if (key not in seen_keys
-                    and isinstance(key, str) 
+                    and isinstance(key, str)
                     and key != ""
                     and len(key) <= MAX_KEY_LENGTH):
                     ordered_keys.append(key)

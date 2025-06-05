@@ -74,7 +74,7 @@ def sample_user_data():
         {
             "id": 2,
             "username": "bob",
-            "email": "bob@example.com", 
+            "email": "bob@example.com",
             "first_name": "Bob",
             "last_name": "Johnson",
             "created_at": "2023-01-02",
@@ -561,7 +561,7 @@ class TestTableConverterExtractHeaders:
 
     def test_max_keys_limit_enforcement(self, converter):
         """
-        最大キー数制限（1000）が適用されることを確認。
+        最大キー数制限(1000)が適用されることを確認。
 
         Given: 1000個を超えるユニークキーを持つオブジェクト群
         When: _extract_headers を呼び出す
@@ -586,7 +586,7 @@ class TestTableConverterExtractHeaders:
 
     def test_max_objects_limit_enforcement(self, converter):
         """
-        最大オブジェクト数制限（10000）が適用されることを確認。
+        最大オブジェクト数制限(10000)が適用されることを確認。
 
         Given: 10000個を超えるオブジェクト
         When: _extract_headers を呼び出す
@@ -594,7 +594,7 @@ class TestTableConverterExtractHeaders:
         """
         # Arrange
         objects = []
-        # 15000個のオブジェクトを生成（各オブジェクトに固有キー）
+        # 15000個のオブジェクトを生成(各オブジェクトに固有キー)
         for i in range(15000):
             objects.append({f"key_{i}": f"value_{i}"})
 
@@ -608,13 +608,13 @@ class TestTableConverterExtractHeaders:
 
 
     @pytest.mark.parametrize("key_length,should_be_included", [
-        ("x" * 255, True),   # 255文字（制限内）
-        ("x" * 256, False),  # 256文字（制限超過）
-        ("x" * 300, False),  # 300文字（制限超過）
+        ("x" * 255, True),   # 255文字(制限内)
+        ("x" * 256, False),  # 256文字(制限超過)
+        ("x" * 300, False),  # 300文字(制限超過)
     ])
     def test_key_length_limit_enforcement(self, converter, key_length, should_be_included):
         """
-        キー名長制限（255文字）が適用されることを確認。
+        キー名長制限(255文字)が適用されることを確認。
 
         Given: 様々な長さのキー名を持つオブジェクト
         When: _extract_headers を呼び出す
@@ -646,7 +646,7 @@ class TestTableConverterExtractHeaders:
         """
         大量データでのパフォーマンステスト。
 
-        Given: 大量のオブジェクト（1000個）
+        Given: 大量のオブジェクト(1000個)
         When: _extract_headers を呼び出す
         Then: 合理的な時間内に処理が完了する
         """
@@ -674,7 +674,7 @@ class TestTableConverterExtractHeaders:
         """
         # Arrange
         objects = []
-        for i in range(object_count):
+        for _i in range(object_count):
             obj = {f"key_{j}": f"value_{j}" for j in range(5)}
             objects.append(obj)
 
@@ -704,8 +704,8 @@ class TestTableConverterExtractHeaders:
         # Arrange: 重要度順の設定データ
         config_objects = [
             {
-                "priority": "high", 
-                "name": "production_server", 
+                "priority": "high",
+                "name": "production_server",
                 "host": "prod.example.com",
                 "port": 443,
                 "ssl": True,
@@ -713,7 +713,7 @@ class TestTableConverterExtractHeaders:
             },
             {
                 "priority": "medium",
-                "name": "staging_server", 
+                "name": "staging_server",
                 "host": "staging.example.com",
                 "port": 80,
                 "ssl": False,
@@ -772,7 +772,7 @@ class TestTableConverterExtractHeaders:
                 "description": "高音質ワイヤレスヘッドフォン"
             },
             {
-                "id": "prod_002", 
+                "id": "prod_002",
                 "name": "スマートウォッチ",
                 "price": 32000,
                 "category": "electronics",
@@ -782,7 +782,7 @@ class TestTableConverterExtractHeaders:
             },
             {
                 "id": "prod_003",
-                "name": "エコバッグ", 
+                "name": "エコバッグ",
                 "price": 980,
                 "category": "lifestyle",
                 "in_stock": True,
@@ -818,7 +818,7 @@ class TestTableConverterExtractHeaders:
         """
         # Arrange
         first_object_keys = [f"key_{i}" for i in range(5)]
-        objects = [{key: f"value_{i}_{j}" for j, key in enumerate(first_object_keys)} 
+        objects = [{key: f"value_{i}_{j}" for j, key in enumerate(first_object_keys)}
                 for i in range(num_objects)]
 
         # 後続オブジェクトに追加キーを含める
