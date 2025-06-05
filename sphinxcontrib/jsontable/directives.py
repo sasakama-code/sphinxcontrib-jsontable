@@ -337,32 +337,18 @@ class TableConverter:
 
     def _extract_headers(self, objects: list[dict[str, Any]]) -> list[str]:
         """
-        Extract header names from a list of JSON objects, preserving key order.
-        
-        The key order from the first object is preserved, and any additional keys
-        from subsequent objects are appended in the order they are encountered.
+        Extract sorted header names from a list of JSON objects.
 
         Args:
             objects: List of dicts from which to collect keys.
 
         Returns:
-            List of unique keys in their original order (first occurrence).
+            Alphabetically sorted list of unique keys.
         """
-        if not objects:
-            return []
-        
-        # Start with the first object's keys to preserve order
-        ordered_keys = list(objects[0].keys())
-        seen_keys = set(ordered_keys)
-        
-        # Collect additional keys from remaining objects
-        for obj in objects[1:]:
-            for key in obj.keys():
-                if key not in seen_keys:
-                    ordered_keys.append(key)
-                    seen_keys.add(key)
-        
-        return ordered_keys
+        all_keys = set()
+        for obj in objects:
+            all_keys.update(obj.keys())
+        return sorted(all_keys)
 
     def _object_to_row(self, obj: dict[str, Any], headers: list[str]) -> list[str]:
         """
