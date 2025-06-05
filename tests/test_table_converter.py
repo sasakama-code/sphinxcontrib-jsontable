@@ -69,7 +69,7 @@ def sample_user_data():
             "email": "alice@example.com",
             "first_name": "Alice",
             "last_name": "Smith",
-            "created_at": "2023-01-01"
+            "created_at": "2023-01-01",
         },
         {
             "id": 2,
@@ -78,8 +78,8 @@ def sample_user_data():
             "first_name": "Bob",
             "last_name": "Johnson",
             "created_at": "2023-01-02",
-            "last_login": "2023-06-01"  # 一部ユーザーのみ持つフィールド
-        }
+            "last_login": "2023-06-01",  # 一部ユーザーのみ持つフィールド
+        },
     ]
 
 
@@ -96,6 +96,7 @@ def large_dataset():
         obj = {f"key_{j}": f"value_{j}" for j in range(i % 10, (i % 10) + 5)}
         objects.append(obj)
     return objects
+
 
 class TestTableConverterConvert:
     """Test cases for the convert method."""
@@ -389,7 +390,6 @@ class TestTableConverterExtractHeaders:
         assert result == []
         assert isinstance(result, list)
 
-
     def test_single_object_key_order_preservation(self, converter):
         """
         単一オブジェクトのキー順序が保持されることを確認。
@@ -399,7 +399,9 @@ class TestTableConverterExtractHeaders:
         Then: 元の順序でキーが返される
         """
         # Arrange
-        objects = [{"name": "Alice", "age": 30, "city": "Tokyo", "email": "alice@example.com"}]
+        objects = [
+            {"name": "Alice", "age": 30, "city": "Tokyo", "email": "alice@example.com"}
+        ]
         expected = ["name", "age", "city", "email"]
 
         # Act
@@ -408,7 +410,6 @@ class TestTableConverterExtractHeaders:
         # Assert
         assert result == expected
         assert len(result) == 4
-
 
     def test_multiple_objects_first_object_priority(self, converter):
         """
@@ -422,7 +423,11 @@ class TestTableConverterExtractHeaders:
         objects = [
             {"name": "Alice", "age": 30, "city": "Tokyo"},
             {"age": 25, "name": "Bob", "country": "Japan"},  # name, age は既存
-            {"city": "Osaka", "name": "Charlie", "email": "charlie@example.com"}  # email が新規
+            {
+                "city": "Osaka",
+                "name": "Charlie",
+                "email": "charlie@example.com",
+            },  # email が新規
         ]
         expected = ["name", "age", "city", "country", "email"]
 
@@ -432,7 +437,6 @@ class TestTableConverterExtractHeaders:
         # Assert
         assert result == expected
         assert len(result) == 5
-
 
     def test_additional_keys_append_order(self, converter):
         """
@@ -446,7 +450,7 @@ class TestTableConverterExtractHeaders:
         objects = [
             {"a": 1, "b": 2},
             {"a": 1, "c": 3, "d": 4},  # c, d が追加
-            {"a": 1, "e": 5, "f": 6}   # e, f が追加
+            {"a": 1, "e": 5, "f": 6},  # e, f が追加
         ]
         expected = ["a", "b", "c", "d", "e", "f"]
 
@@ -455,7 +459,6 @@ class TestTableConverterExtractHeaders:
 
         # Assert
         assert result == expected
-
 
     def test_duplicate_keys_no_repetition(self, converter):
         """
@@ -469,7 +472,7 @@ class TestTableConverterExtractHeaders:
         objects = [
             {"name": "Alice", "age": 30},
             {"name": "Bob", "age": 25},
-            {"name": "Charlie", "age": 35}
+            {"name": "Charlie", "age": 35},
         ]
         expected = ["name", "age"]
 
@@ -479,7 +482,6 @@ class TestTableConverterExtractHeaders:
         # Assert
         assert result == expected
         assert len(set(result)) == len(result)  # 重複なしの確認
-
 
     # ========================================
     # エッジケース・型安全性テスト
@@ -494,12 +496,7 @@ class TestTableConverterExtractHeaders:
         Then: 空でないオブジェクトからキーが抽出される
         """
         # Arrange
-        objects = [
-            {},
-            {"name": "Alice"},
-            {},
-            {"age": 30, "city": "Tokyo"}
-        ]
+        objects = [{}, {"name": "Alice"}, {}, {"age": 30, "city": "Tokyo"}]
         expected = ["name", "age", "city"]
 
         # Act
@@ -508,13 +505,15 @@ class TestTableConverterExtractHeaders:
         # Assert
         assert result == expected
 
-
-    @pytest.mark.parametrize("invalid_objects", [
-        [{"name": "Alice"}, "invalid_string", {"age": 30}],
-        [{"name": "Alice"}, ["invalid", "list"], {"age": 30}],
-        [{"name": "Alice"}, 123, {"age": 30}],
-        [{"name": "Alice"}, None, {"age": 30}],
-    ])
+    @pytest.mark.parametrize(
+        "invalid_objects",
+        [
+            [{"name": "Alice"}, "invalid_string", {"age": 30}],
+            [{"name": "Alice"}, ["invalid", "list"], {"age": 30}],
+            [{"name": "Alice"}, 123, {"age": 30}],
+            [{"name": "Alice"}, None, {"age": 30}],
+        ],
+    )
     def test_non_dict_objects_skipped(self, converter, invalid_objects):
         """
         辞書以外のオブジェクトがスキップされることを確認。
@@ -531,7 +530,6 @@ class TestTableConverterExtractHeaders:
         assert "age" in result
         assert len(result) == 2
 
-
     def test_non_string_keys_skipped(self, converter):
         """
         文字列以外のキーがスキップされることを確認。
@@ -543,7 +541,7 @@ class TestTableConverterExtractHeaders:
         # Arrange
         objects = [
             {"name": "Alice", 123: "invalid", "age": 30},
-            {456: "invalid", "city": "Tokyo", None: "invalid"}
+            {456: "invalid", "city": "Tokyo", None: "invalid"},
         ]
         expected = ["name", "age", "city"]
 
@@ -553,7 +551,6 @@ class TestTableConverterExtractHeaders:
         # Assert
         assert result == expected
         assert all(isinstance(key, str) for key in result)
-
 
     # ========================================
     # セキュリティ制約テスト
@@ -583,7 +580,6 @@ class TestTableConverterExtractHeaders:
         for i in range(min(1000, len(result))):
             assert result[i] == f"key_{i:04d}"
 
-
     def test_max_objects_limit_enforcement(self, converter):
         """
         最大オブジェクト数制限(10000)が適用されることを確認。
@@ -604,15 +600,19 @@ class TestTableConverterExtractHeaders:
         # Assert
         # 最大10000個のオブジェクトから抽出されたキーのみ
         expected_keys = [f"key_{i}" for i in range(min(10000, len(objects)))]
-        assert result == expected_keys[:len(result)]
+        assert result == expected_keys[: len(result)]
 
-
-    @pytest.mark.parametrize("key_length,should_be_included", [
-        ("x" * 255, True),   # 255文字(制限内)
-        ("x" * 256, False),  # 256文字(制限超過)
-        ("x" * 300, False),  # 300文字(制限超過)
-    ])
-    def test_key_length_limit_enforcement(self, converter, key_length, should_be_included):
+    @pytest.mark.parametrize(
+        "key_length,should_be_included",
+        [
+            ("x" * 255, True),  # 255文字(制限内)
+            ("x" * 256, False),  # 256文字(制限超過)
+            ("x" * 300, False),  # 300文字(制限超過)
+        ],
+    )
+    def test_key_length_limit_enforcement(
+        self, converter, key_length, should_be_included
+    ):
         """
         キー名長制限(255文字)が適用されることを確認。
 
@@ -635,7 +635,6 @@ class TestTableConverterExtractHeaders:
 
         # すべてのキーが制限内であることを確認
         assert all(len(key) <= 255 for key in result)
-
 
     # ========================================
     # パフォーマンステスト
@@ -660,7 +659,6 @@ class TestTableConverterExtractHeaders:
         assert processing_time < 1.0  # 1秒以内で完了すること
         assert isinstance(result, list)
         assert len(result) > 0
-
 
     @pytest.mark.benchmark
     @pytest.mark.parametrize("object_count", [100, 500, 1000, 5000])
@@ -688,7 +686,6 @@ class TestTableConverterExtractHeaders:
         assert processing_time < (object_count / 1000.0)  # 1000オブジェクト/秒以上
         assert len(result) == 5  # 期待されるキー数
 
-
     # ========================================
     # 実用的なユースケーステスト
     # ========================================
@@ -709,7 +706,7 @@ class TestTableConverterExtractHeaders:
                 "host": "prod.example.com",
                 "port": 443,
                 "ssl": True,
-                "backup_host": "backup.example.com"
+                "backup_host": "backup.example.com",
             },
             {
                 "priority": "medium",
@@ -717,8 +714,8 @@ class TestTableConverterExtractHeaders:
                 "host": "staging.example.com",
                 "port": 80,
                 "ssl": False,
-                "debug": True  # 新しいキー
-            }
+                "debug": True,  # 新しいキー
+            },
         ]
         expected = ["priority", "name", "host", "port", "ssl", "backup_host", "debug"]
 
@@ -731,7 +728,6 @@ class TestTableConverterExtractHeaders:
         assert result[0] == "priority"
         assert result[1] == "name"
 
-
     def test_api_response_use_case(self, converter, sample_user_data):
         """
         APIレスポンスのユースケースシミュレーション。
@@ -741,7 +737,15 @@ class TestTableConverterExtractHeaders:
         Then: ユーザーフレンドリーな順序でフィールドが配置される
         """
         # Arrange
-        expected = ["id", "username", "email", "first_name", "last_name", "created_at", "last_login"]
+        expected = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "created_at",
+            "last_login",
+        ]
 
         # Act
         result = converter._extract_headers(sample_user_data)
@@ -750,7 +754,6 @@ class TestTableConverterExtractHeaders:
         assert result == expected
         # 基本情報が最初に来ることを確認
         assert result[:3] == ["id", "username", "email"]
-
 
     @pytest.mark.integration
     def test_real_world_json_structure(self, converter):
@@ -769,7 +772,7 @@ class TestTableConverterExtractHeaders:
                 "price": 15800,
                 "category": "electronics",
                 "in_stock": True,
-                "description": "高音質ワイヤレスヘッドフォン"
+                "description": "高音質ワイヤレスヘッドフォン",
             },
             {
                 "id": "prod_002",
@@ -778,7 +781,7 @@ class TestTableConverterExtractHeaders:
                 "category": "electronics",
                 "in_stock": False,
                 "description": "多機能スマートウォッチ",
-                "warranty_months": 24  # 一部商品のみ
+                "warranty_months": 24,  # 一部商品のみ
             },
             {
                 "id": "prod_003",
@@ -787,20 +790,28 @@ class TestTableConverterExtractHeaders:
                 "category": "lifestyle",
                 "in_stock": True,
                 "description": "環境に優しいエコバッグ",
-                "material": "リサイクル素材"  # 一部商品のみ
-            }
+                "material": "リサイクル素材",  # 一部商品のみ
+            },
         ]
 
         # Act
         result = converter._extract_headers(products)
 
         # Assert
-        expected = ["id", "name", "price", "category", "in_stock", "description", "warranty_months", "material"]
+        expected = [
+            "id",
+            "name",
+            "price",
+            "category",
+            "in_stock",
+            "description",
+            "warranty_months",
+            "material",
+        ]
         assert result == expected
 
         # ビジネス的に重要な情報が最初に来ることを確認
         assert result[:4] == ["id", "name", "price", "category"]
-
 
     # ========================================
     # プロパティベーステスト
@@ -818,8 +829,10 @@ class TestTableConverterExtractHeaders:
         """
         # Arrange
         first_object_keys = [f"key_{i}" for i in range(5)]
-        objects = [{key: f"value_{i}_{j}" for j, key in enumerate(first_object_keys)}
-                for i in range(num_objects)]
+        objects = [
+            {key: f"value_{i}_{j}" for j, key in enumerate(first_object_keys)}
+            for i in range(num_objects)
+        ]
 
         # 後続オブジェクトに追加キーを含める
         if num_objects > 1:
@@ -831,8 +844,7 @@ class TestTableConverterExtractHeaders:
 
         # Assert
         # 最初のオブジェクトのキー順序が保持されていることを確認
-        assert result[:len(first_object_keys)] == first_object_keys
-
+        assert result[: len(first_object_keys)] == first_object_keys
 
     # ========================================
     # エラーハンドリングテスト
