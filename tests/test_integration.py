@@ -179,7 +179,7 @@ def test_sphinx_directive_integration():
     print("\n🐍 Testing Sphinx Directive Integration...")
 
     # Test default config value behavior
-    with patch('sphinxcontrib.jsontable.directives.getattr') as mock_getattr:
+    with patch("sphinxcontrib.jsontable.directives.getattr") as mock_getattr:
         mock_getattr.return_value = DEFAULT_MAX_ROWS
 
         # Create directive instance with basic mocks
@@ -192,7 +192,7 @@ def test_sphinx_directive_integration():
 
     # Test with custom config
     custom_config_value = 7500
-    with patch('sphinxcontrib.jsontable.directives.getattr') as mock_getattr:
+    with patch("sphinxcontrib.jsontable.directives.getattr") as mock_getattr:
         mock_getattr.return_value = custom_config_value
 
         directive = JsonTableDirective(
