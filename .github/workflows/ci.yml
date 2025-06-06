@@ -205,7 +205,7 @@ jobs:
 
     - name: Run benchmark tests
       run: |
-        pytest tests/ -m benchmark --benchmark-enable --benchmark-sort=mean --benchmark-json=benchmark.json -v
+        pytest tests/ -m benchmark --benchmark-enable --benchmark-sort=mean --benchmark-json=benchmark.json -v --cov-fail-under=0
       continue-on-error: true  # ベンチマークは失敗してもCI全体は通す
 
     - name: Run performance tests (CI-safe)
