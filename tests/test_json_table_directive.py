@@ -426,7 +426,9 @@ class TestJsonTableDirective:
     # Additional edge case tests
 
     @patch("sphinxcontrib.jsontable.directives.logger")
-    def test_run_processes_limit_option_correctly(self, mock_logger, directive_instance):
+    def test_run_processes_limit_option_correctly(
+        self, mock_logger, directive_instance
+    ):
         """Test run method processes limit option correctly without specific logging."""
         # Arrange
         directive_instance.arguments = ["test.json"]

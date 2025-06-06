@@ -184,7 +184,9 @@ def test_sphinx_directive_integration():
     mock_env.srcdir = "/tmp/docs"
 
     # Create directive instance with proper mocking to avoid env assignment issues
-    with patch.object(JsonTableDirective, '__init__', lambda self, *args, **kwargs: None):
+    with patch.object(
+        JsonTableDirective, "__init__", lambda self, *args, **kwargs: None
+    ):
         directive = JsonTableDirective(
             "jsontable", [], {}, [], 1, 0, "", MagicMock(), MagicMock()
         )
@@ -201,7 +203,9 @@ def test_sphinx_directive_integration():
     custom_config_value = 7500
     mock_env.config.jsontable_max_rows = custom_config_value
 
-    with patch.object(JsonTableDirective, '__init__', lambda self, *args, **kwargs: None):
+    with patch.object(
+        JsonTableDirective, "__init__", lambda self, *args, **kwargs: None
+    ):
         directive = JsonTableDirective(
             "jsontable", [], {}, [], 1, 0, "", MagicMock(), MagicMock()
         )
