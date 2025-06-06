@@ -69,5 +69,15 @@ ehthumbs.db
 CLAUDE.md
 uv.lock
 
+# Security - API keys and secrets
+.env
+.env.local
+.env.production
+config/secrets.py
+secrets/
+*.key
+*_key.txt
+api_keys.json
+
 #Claude
 # plan - 進捗管理のためコミット対象とする
