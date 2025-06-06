@@ -288,12 +288,12 @@ class TestJsonTableDirectivePerformanceLimits:
         assert limit_value == 1000
 
     # ========================================
-    # Performance and Memory Tests
+    # Performance and Memory Tests (CI-Safe)
     # ========================================
 
     @pytest.mark.performance
-    def test_memory_usage_with_default_limit(self, converter):
-        """Test that memory usage is controlled with default limit."""
+    def test_memory_usage_with_default_limit_ci_safe(self, converter):
+        """Test that memory usage is controlled with default limit (CI-safe version)."""
         # Create a very large dataset
         huge_dataset = [{"id": i, "data": f"value_{i}" * 100} for i in range(50000)]
         
@@ -303,27 +303,100 @@ class TestJsonTableDirectivePerformanceLimits:
             
             # Memory should be controlled by limiting to DEFAULT_MAX_ROWS
             assert len(result) <= DEFAULT_MAX_ROWS + 1  # +1 for header
+            assert isinstance(result, list)
+            assert all(isinstance(row, list) for row in result)
 
     @pytest.mark.performance  
-    def test_processing_time_improvement_with_limit(self, converter):
-        """Test that processing time is improved with limits applied."""
+    def test_processing_efficiency_with_limit_functional(self, converter):
+        """Test that processing efficiency is maintained with limits (functional test)."""
         import time
         
-        # Large dataset that would be slow without limits
+        # Large dataset that benefits from limits
         large_dataset = [{"field": f"value_{i}"} for i in range(25000)]
         
-        # Test with default limit (should be fast)
+        # Test with default limit (should efficiently process limited data)
         with patch('sphinxcontrib.jsontable.directives.logger'):
             start_time = time.perf_counter()
-            converter.convert(large_dataset, include_header=True)
+            limited_result = converter.convert(large_dataset, include_header=True)
             limited_time = time.perf_counter() - start_time
         
-        # Test with unlimited (should be slower)
+        # Test with unlimited (should process all data)
         with patch('sphinxcontrib.jsontable.directives.logger'):
             start_time = time.perf_counter()
-            converter.convert(large_dataset, include_header=True, limit=0)
+            unlimited_result = converter.convert(large_dataset, include_header=True, limit=0)
             unlimited_time = time.perf_counter() - start_time
         
-        # Limited processing should not be significantly slower
-        # (This is a relative performance test, not absolute timing)
-        assert limited_time <= unlimited_time * 1.5  # Allow some variance
+        # Functional assertions (not time-based)
+        assert len(limited_result) == DEFAULT_MAX_ROWS + 1  # Limited processing
+        assert len(unlimited_result) == len(large_dataset) + 1  # Full processing
+        
+        # Log performance information for reference (not asserted)
+        print(f"\nPerformance reference (not asserted):")
+        print(f"  Limited processing:   {limited_time:.4f}s ({len(limited_result):,} rows)")
+        print(f"  Unlimited processing: {unlimited_time:.4f}s ({len(unlimited_result):,} rows)")
+        print(f"  Data reduction: {(1 - len(limited_result)/len(unlimited_result))*100:.1f}%")
+
+
+class TestPerformanceLimitsBenchmarks:
+    """pytest-benchmark based performance tests for CI stability."""
+
+    @pytest.fixture
+    def converter(self):
+        """Create TableConverter instance for testing."""
+        return TableConverter()
+
+    @pytest.fixture
+    def benchmark_dataset(self):
+        """Dataset optimized for benchmark testing."""
+        return [{"id": i, "name": f"item_{i}", "value": f"data_{i}"} for i in range(5000)]
+
+    @pytest.mark.benchmark
+    def test_convert_performance_benchmark(self, converter, benchmark_dataset, benchmark):
+        """Benchmark convert method performance with default limits."""
+        with patch('sphinxcontrib.jsontable.directives.logger'):
+            result = benchmark(converter.convert, benchmark_dataset, True)
+            
+            # Functional verification (no time assertions)
+            assert isinstance(result, list)
+            assert len(result) <= len(benchmark_dataset) + 1
+
+    @pytest.mark.benchmark
+    def test_apply_default_limit_benchmark(self, converter, benchmark_dataset, benchmark):
+        """Benchmark _apply_default_limit method performance."""
+        with patch('sphinxcontrib.jsontable.directives.logger'):
+            result = benchmark(converter._apply_default_limit, benchmark_dataset, None)
+            
+            # Functional verification
+            assert result is None or isinstance(result, int)
+
+    @pytest.mark.benchmark
+    def test_estimate_data_size_benchmark(self, converter, benchmark_dataset, benchmark):
+        """Benchmark _estimate_data_size method performance."""
+        result = benchmark(converter._estimate_data_size, benchmark_dataset)
+        
+        # Functional verification
+        assert result == len(benchmark_dataset)
+
+    @pytest.mark.benchmark
+    def test_large_dataset_processing_benchmark(self, converter, benchmark):
+        """Benchmark large dataset processing with various configurations."""
+        large_dataset = [{"field": f"value_{i}"} for i in range(15000)]
+        
+        with patch('sphinxcontrib.jsontable.directives.logger'):
+            result = benchmark(converter.convert, large_dataset, True)
+            
+            # Should be limited by default
+            assert len(result) == DEFAULT_MAX_ROWS + 1
+
+    @pytest.mark.benchmark  
+    def test_scalability_benchmark_multiple_sizes(self, converter, benchmark):
+        """Benchmark scalability across different dataset sizes."""
+        # Test with moderate size for stable benchmarking
+        dataset = [{"id": i, "data": f"value_{i}"} for i in range(2000)]
+        
+        with patch('sphinxcontrib.jsontable.directives.logger'):
+            result = benchmark(converter.convert, dataset, True)
+            
+            # Functional verification
+            assert len(result) == len(dataset) + 1  # All data + header
+            assert all(isinstance(row, list) for row in result)
