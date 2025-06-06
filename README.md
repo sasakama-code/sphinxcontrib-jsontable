@@ -758,6 +758,26 @@ cd examples/
 sphinx-build -b html . _build/html/
 ```
 
+### Development Tools
+
+The [`scripts/`](scripts/) directory contains development and analysis tools used during the creation of performance features:
+
+- **`performance_benchmark.py`** - Performance measurement and analysis tool
+- **`memory_analysis.py`** - Memory usage analysis for different dataset sizes
+- **`competitive_analysis.py`** - Industry standard research and best practices
+- **`validate_ci_tests.py`** - CI environment testing and validation
+- **`test_integration.py`** - Comprehensive integration testing
+
+These tools were instrumental in establishing the scientific foundation for performance limits and ensuring enterprise-grade reliability. They can be used for ongoing performance monitoring and analysis.
+
+```bash
+# Run performance analysis
+python scripts/performance_benchmark.py
+
+# Validate CI environment
+python scripts/validate_ci_tests.py
+```
+
 ### Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history and release notes.

@@ -758,6 +758,26 @@ cd examples/
 sphinx-build -b html . _build/html/
 ```
 
+### 開発ツール
+
+[`scripts/`](scripts/)ディレクトリには、パフォーマンス機能開発時に使用された開発・分析ツールが含まれています：
+
+- **`performance_benchmark.py`** - パフォーマンス測定・分析ツール
+- **`memory_analysis.py`** - 異なるデータセットサイズのメモリ使用量分析
+- **`competitive_analysis.py`** - 業界標準調査とベストプラクティス
+- **`validate_ci_tests.py`** - CI環境テスト・検証
+- **`test_integration.py`** - 包括的統合テスト
+
+これらのツールは、パフォーマンス制限の科学的基盤確立と企業レベルの信頼性確保において重要な役割を果たしました。継続的なパフォーマンス監視と分析に活用できます。
+
+```bash
+# パフォーマンス分析実行
+python scripts/performance_benchmark.py
+
+# CI環境検証
+python scripts/validate_ci_tests.py
+```
+
 ### 変更履歴
 
 詳細なバージョン履歴とリリースノートは[CHANGELOG.md](CHANGELOG.md)を参照してください。
