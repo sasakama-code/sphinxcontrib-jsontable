@@ -126,16 +126,22 @@ addopts = [
     "--cov-report=xml",
     "--cov-fail-under=80",
     "--benchmark-skip",              # デフォルトではbenchmarkをスキップ
+    "--tb=short",                    # 短いトレースバック
 ]
 testpaths = ["tests"]
 markers = [
     "slow: marks tests as slow (use -m 'not slow' to deselect)",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
-    "performance: marks tests as performance tests",
-    "benchmark: marks tests as benchmark tests",
+    "performance: marks tests as performance tests (CI-safe, time-independent)",
+    "benchmark: marks tests as benchmark tests (use pytest-benchmark)",
     "property: marks tests related to property handling",
     "error_handling: marks tests related to error handling",
+]
+# Performance test environment handling
+filterwarnings = [
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+    "ignore::DeprecationWarning",
 ]
 
 # ===== COVERAGE CONFIGURATION =====
@@ -177,3 +183,20 @@ title = "sphinxcontrib-jsontable Coverage Report"
 
 [tool.coverage.xml]
 output = "coverage.xml"
+
+# ===== PYTEST-BENCHMARK CONFIGURATION =====
+[tool.pytest-benchmark]
+# Only run benchmarks when explicitly requested
+only_run_when_called = true
+# Minimum rounds for stable results
+min_rounds = 5
+# Maximum time per benchmark
+max_time = 30
+# Disable timer overhead calibration in CI
+disable_gc = true
+# Sort results by mean time
+sort = "mean"
+# Store results for comparison
+autosave = false
+# Skip benchmarks by default (use --benchmark-only to run)
+skip = true
