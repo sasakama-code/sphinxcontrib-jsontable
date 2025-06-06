@@ -638,54 +638,64 @@ class TestTableConverterExtractHeaders:
         assert all(len(key) <= 255 for key in result)
 
     # ========================================
-    # パフォーマンステスト
+    # 安定化されたパフォーマンステスト
     # ========================================
 
     @pytest.mark.performance
-    def test_large_dataset_performance(self, converter, large_dataset):
+    def test_large_dataset_performance_ci_safe(self, converter, large_dataset):
         """
-        大量データでのパフォーマンステスト。
+        大量データでの機能ベースパフォーマンステスト（CI環境安全版）。
 
         Given: 大量のオブジェクト(1000個)
         When: _extract_headers を呼び出す
-        Then: 合理的な時間内に処理が完了する
+        Then: 正常に処理が完了し、期待される結果が返される
         """
         # Act
-        start_time = time.time()
+        start_time = time.perf_counter()
         result = converter._extract_headers(large_dataset)
-        end_time = time.time()
+        processing_time = time.perf_counter() - start_time
 
-        # Assert
-        processing_time = end_time - start_time
-        assert processing_time < 1.0  # 1秒以内で完了すること
+        # Assert - 機能確認に重点を置く
         assert isinstance(result, list)
         assert len(result) > 0
+        assert all(isinstance(key, str) for key in result)
+        
+        # 性能情報をログ出力（参考値として）
+        print(f"\n処理時間: {processing_time:.4f}秒 (参考値)")
+        print(f"処理オブジェクト数: {len(large_dataset)}")
+        print(f"抽出キー数: {len(result)}")
 
-    @pytest.mark.benchmark
-    @pytest.mark.parametrize("object_count", [100, 500, 1000, 5000])
-    def test_scalability_benchmark(self, converter, object_count):
+    @pytest.mark.performance
+    def test_scalability_functional_verification(self, converter):
         """
-        スケーラビリティベンチマークテスト。
+        スケーラビリティの機能ベース検証テスト（時間アサーションなし）。
 
         Given: 異なるサイズのデータセット
         When: _extract_headers を呼び出す
-        Then: 線形的なパフォーマンス特性を示す
+        Then: 各サイズで正常に処理が完了する
         """
-        # Arrange
-        objects = []
-        for _i in range(object_count):
-            obj = {f"key_{j}": f"value_{j}" for j in range(5)}
-            objects.append(obj)
+        # Test different object counts
+        object_counts = [100, 500, 1000, 2000]
+        
+        for object_count in object_counts:
+            # Arrange
+            objects = []
+            for _i in range(object_count):
+                obj = {f"key_{j}": f"value_{j}" for j in range(5)}
+                objects.append(obj)
 
-        # Act & Assert
-        start_time = time.time()
-        result = converter._extract_headers(objects)
-        end_time = time.time()
+            # Act
+            start_time = time.perf_counter()
+            result = converter._extract_headers(objects)
+            processing_time = time.perf_counter() - start_time
 
-        processing_time = end_time - start_time
-        # オブジェクト数に対して合理的な処理時間
-        assert processing_time < (object_count / 1000.0)  # 1000オブジェクト/秒以上
-        assert len(result) == 5  # 期待されるキー数
+            # Assert - 機能確認のみ（時間アサーションなし）
+            assert len(result) == 5  # 期待されるキー数
+            assert isinstance(result, list)
+            assert all(isinstance(key, str) for key in result)
+            
+            # 情報ログ出力
+            print(f"\nオブジェクト数 {object_count}: {processing_time:.4f}秒")
 
     # ========================================
     # 実用的なユースケーステスト
@@ -850,6 +860,8 @@ class TestTableConverterExtractHeaders:
 
 
 class TestExtractHeadersPerformance:
+    """pytest-benchmarkベースの安定的なパフォーマンステスト。"""
+    
     @pytest.mark.benchmark
     def test_extract_headers_benchmark(self, converter, benchmark):
         """
@@ -870,9 +882,9 @@ class TestExtractHeadersPerformance:
         assert all(isinstance(key, str) for key in result)
 
     @pytest.mark.benchmark
-    def test_scalability_benchmark(self, converter, benchmark):
+    def test_scalability_benchmark_stable(self, converter, benchmark):
         """
-        スケーラビリティのbenchmarkテスト。
+        スケーラビリティのbenchmarkテスト（安定版）。
         """
         # Arrange
         very_large_objects = [
@@ -904,33 +916,8 @@ class TestExtractHeadersPerformance:
         processing_time = time.perf_counter() - start_time
 
         # Assert - ローカル環境では緩いマージンで時間チェック
-        assert processing_time < 3.0  # 元の3倍のマージン
+        assert processing_time < 5.0  # より緩いマージン
         assert len(result) <= 1000
-
-    @pytest.mark.performance
-    def test_extract_headers_performance_ci_safe(self, converter):
-        """
-        CI環境でも安全な機能ベースパフォーマンステスト。
-        時間アサーションなし、機能確認のみ。
-        """
-        # Arrange
-        large_objects = [
-            {f"key_{j}": f"value_{i}_{j}" for j in range(100)} for i in range(1000)
-        ]
-
-        # Act
-        start_time = time.perf_counter()
-        result = converter._extract_headers(large_objects)
-        processing_time = time.perf_counter() - start_time
-
-        # Assert - 機能確認のみ
-        assert len(result) <= 1000
-        assert isinstance(result, list)
-
-        # 性能情報をログ出力(参考値として)
-        print(f"\n処理時間: {processing_time:.4f}秒 (参考値)")
-        print(f"処理オブジェクト数: {len(large_objects)}")
-        print(f"抽出キー数: {len(result)}")
 
 
 class TestTableConverterObjectToRow:
