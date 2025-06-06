@@ -293,47 +293,6 @@ jobs:
         retention-days: 30
 
   # ===============================
-  # Publish to TestPyPI (Optional)
-  # ===============================
-  publish-to-testpypi:
-    name: Publish to TestPyPI 🧪
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    needs: [build]
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/sphinxcontrib-jsontable
-    permissions:
-      id-token: write # IMPORTANT: mandatory for trusted publishing
-
-    steps:
-    - name: Download distribution packages
-      uses: actions/download-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/
-
-    - name: Verify distributions before upload
-      run: |
-        echo "📋 Files to be uploaded to TestPyPI:"
-        ls -la dist/
-        echo "📊 Total files: $(ls -1 dist/ | wc -l)"
-
-    # pypa/gh-action-pypi-publish will automatically run twine check internally
-    - name: Publish to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
-        verbose: true
-        print-hash: true
-
-    - name: Post-upload verification
-      run: |
-        echo "✅ Successfully uploaded to TestPyPI"
-        echo "🔗 TestPyPI URL: https://test.pypi.org/project/sphinxcontrib-jsontable/"
-        echo "📥 Test installation: pip install -i https://test.pypi.org/simple/ sphinxcontrib-jsontable"
-
-  # ===============================
   # Publish to PyPI (Production)
   # ===============================
   publish-to-pypi:

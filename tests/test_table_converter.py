@@ -6,6 +6,8 @@ including both normal and error scenarios. Tests follow the AAA pattern with sin
 and proper isolation using mocks.
 """
 
+import os
+import time
 from typing import Any
 from unittest.mock import patch
 
@@ -51,6 +53,50 @@ def sample_list_of_lists():
 def sample_headers():
     """Sample headers for testing."""
     return ["age", "name"]
+
+
+@pytest.fixture
+def sample_user_data():
+    """
+    ユーザーデータのサンプルを提供するフィクスチャ。
+
+    Returns:
+        List[Dict]: APIレスポンス風のユーザーデータ
+    """
+    return [
+        {
+            "id": 1,
+            "username": "alice",
+            "email": "alice@example.com",
+            "first_name": "Alice",
+            "last_name": "Smith",
+            "created_at": "2023-01-01",
+        },
+        {
+            "id": 2,
+            "username": "bob",
+            "email": "bob@example.com",
+            "first_name": "Bob",
+            "last_name": "Johnson",
+            "created_at": "2023-01-02",
+            "last_login": "2023-06-01",  # 一部ユーザーのみ持つフィールド
+        },
+    ]
+
+
+@pytest.fixture
+def large_dataset():
+    """
+    パフォーマンステスト用の大量データセットを提供するフィクスチャ。
+
+    Returns:
+        List[Dict]: 1000個のオブジェクトを含むデータセット
+    """
+    objects = []
+    for i in range(1000):
+        obj = {f"key_{j}": f"value_{j}" for j in range(i % 10, (i % 10) + 5)}
+        objects.append(obj)
+    return objects
 
 
 class TestTableConverterConvert:
@@ -323,48 +369,568 @@ class TestTableConverterConvertArrayList:
 class TestTableConverterExtractHeaders:
     """Test cases for the _extract_headers method."""
 
-    def test_extract_headers_single_object_returns_sorted_keys(self, converter):
-        """Test _extract_headers returns sorted keys from single object."""
+    # ========================================
+    # 基本機能テスト
+    # ========================================
+
+    def test_empty_objects_list(self, converter):
+        """
+        空のオブジェクトリストを処理した場合、空のリストが返されることを確認。
+
+        Given: 空のオブジェクトリスト
+        When: _extract_headers を呼び出す
+        Then: 空のリストが返される
+        """
         # Arrange
-        objects = [{"name": "John", "age": 30}]
+        objects = []
+
         # Act
         result = converter._extract_headers(objects)
-        # Assert
-        assert result == ["age", "name"]
 
-    def test_extract_headers_multiple_objects_merges_keys(
-        self, converter, sample_list_of_dicts
-    ):
-        """Test _extract_headers merges keys from multiple objects."""
-        # Arrange & Act
-        result = converter._extract_headers(sample_list_of_dicts)
-        # Assert
-        assert set(result) == {"age", "city", "name"}
-
-    def test_extract_headers_empty_list_returns_empty_list(self, converter):
-        """Test _extract_headers returns empty list for empty input."""
-        # Arrange & Act
-        result = converter._extract_headers([])
         # Assert
         assert result == []
+        assert isinstance(result, list)
 
-    def test_extract_headers_duplicate_keys_returns_unique_sorted_keys(self, converter):
-        """Test _extract_headers returns unique sorted keys even with duplicates."""
+    def test_single_object_key_order_preservation(self, converter):
+        """
+        単一オブジェクトのキー順序が保持されることを確認。
+
+        Given: 特定の順序のキーを持つ単一オブジェクト
+        When: _extract_headers を呼び出す
+        Then: 元の順序でキーが返される
+        """
         # Arrange
-        objects = [{"name": "John"}, {"name": "Jane"}, {"age": 30}]
+        objects = [
+            {"name": "Alice", "age": 30, "city": "Tokyo", "email": "alice@example.com"}
+        ]
+        expected = ["name", "age", "city", "email"]
+
         # Act
         result = converter._extract_headers(objects)
-        # Assert
-        assert result == ["age", "name"]
 
-    def test_extract_headers_maintains_alphabetical_order(self, converter):
-        """Test _extract_headers maintains alphabetical order of keys."""
+        # Assert
+        assert result == expected
+        assert len(result) == 4
+
+    def test_multiple_objects_first_object_priority(self, converter):
+        """
+        複数オブジェクトの場合、最初のオブジェクトのキー順序が優先されることを確認。
+
+        Given: 異なるキー順序を持つ複数オブジェクト
+        When: _extract_headers を呼び出す
+        Then: 最初のオブジェクトの順序 + 追加キーの順序でキーが返される
+        """
         # Arrange
-        objects = [{"zebra": 1, "apple": 2, "banana": 3}]
+        objects = [
+            {"name": "Alice", "age": 30, "city": "Tokyo"},
+            {"age": 25, "name": "Bob", "country": "Japan"},  # name, age は既存
+            {
+                "city": "Osaka",
+                "name": "Charlie",
+                "email": "charlie@example.com",
+            },  # email が新規
+        ]
+        expected = ["name", "age", "city", "country", "email"]
+
         # Act
         result = converter._extract_headers(objects)
+
         # Assert
-        assert result == ["apple", "banana", "zebra"]
+        assert result == expected
+        assert len(result) == 5
+
+    def test_additional_keys_append_order(self, converter):
+        """
+        後続オブジェクトの新しいキーが発見順で追加されることを確認。
+
+        Given: 段階的に新しいキーが追加される複数オブジェクト
+        When: _extract_headers を呼び出す
+        Then: キーが発見された順序で追加される
+        """
+        # Arrange
+        objects = [
+            {"a": 1, "b": 2},
+            {"a": 1, "c": 3, "d": 4},  # c, d が追加
+            {"a": 1, "e": 5, "f": 6},  # e, f が追加
+        ]
+        expected = ["a", "b", "c", "d", "e", "f"]
+
+        # Act
+        result = converter._extract_headers(objects)
+
+        # Assert
+        assert result == expected
+
+    def test_duplicate_keys_no_repetition(self, converter):
+        """
+        重複するキーが複数回含まれないことを確認。
+
+        Given: 同じキーを持つ複数オブジェクト
+        When: _extract_headers を呼び出す
+        Then: 各キーが一度だけ含まれる
+        """
+        # Arrange
+        objects = [
+            {"name": "Alice", "age": 30},
+            {"name": "Bob", "age": 25},
+            {"name": "Charlie", "age": 35},
+        ]
+        expected = ["name", "age"]
+
+        # Act
+        result = converter._extract_headers(objects)
+
+        # Assert
+        assert result == expected
+        assert len(set(result)) == len(result)  # 重複なしの確認
+
+    # ========================================
+    # エッジケース・型安全性テスト
+    # ========================================
+
+    def test_empty_objects_in_list(self, converter):
+        """
+        空のオブジェクトが含まれる場合の処理を確認。
+
+        Given: 空のオブジェクトを含むリスト
+        When: _extract_headers を呼び出す
+        Then: 空でないオブジェクトからキーが抽出される
+        """
+        # Arrange
+        objects = [{}, {"name": "Alice"}, {}, {"age": 30, "city": "Tokyo"}]
+        expected = ["name", "age", "city"]
+
+        # Act
+        result = converter._extract_headers(objects)
+
+        # Assert
+        assert result == expected
+
+    @pytest.mark.parametrize(
+        "invalid_objects",
+        [
+            [{"name": "Alice"}, "invalid_string", {"age": 30}],
+            [{"name": "Alice"}, ["invalid", "list"], {"age": 30}],
+            [{"name": "Alice"}, 123, {"age": 30}],
+            [{"name": "Alice"}, None, {"age": 30}],
+        ],
+    )
+    def test_non_dict_objects_skipped(self, converter, invalid_objects):
+        """
+        辞書以外のオブジェクトがスキップされることを確認。
+
+        Given: 辞書以外の要素を含むリスト
+        When: _extract_headers を呼び出す
+        Then: 辞書のみからキーが抽出される
+        """
+        # Act
+        result = converter._extract_headers(invalid_objects)
+
+        # Assert
+        assert "name" in result
+        assert "age" in result
+        assert len(result) == 2
+
+    def test_non_string_keys_skipped(self, converter):
+        """
+        文字列以外のキーがスキップされることを確認。
+
+        Given: 文字列以外のキーを持つオブジェクト
+        When: _extract_headers を呼び出す
+        Then: 文字列キーのみが抽出される
+        """
+        # Arrange
+        objects = [
+            {"name": "Alice", 123: "invalid", "age": 30},
+            {456: "invalid", "city": "Tokyo", None: "invalid"},
+        ]
+        expected = ["name", "age", "city"]
+
+        # Act
+        result = converter._extract_headers(objects)
+
+        # Assert
+        assert result == expected
+        assert all(isinstance(key, str) for key in result)
+
+    # ========================================
+    # セキュリティ制約テスト
+    # ========================================
+
+    def test_max_keys_limit_enforcement(self, converter):
+        """
+        最大キー数制限(1000)が適用されることを確認。
+
+        Given: 1000個を超えるユニークキーを持つオブジェクト群
+        When: _extract_headers を呼び出す
+        Then: 最大1000個のキーで制限される
+        """
+        # Arrange
+        objects = []
+        # 1500個のユニークキーを生成
+        for i in range(1500):
+            objects.append({f"key_{i:04d}": f"value_{i}"})
+
+        # Act
+        result = converter._extract_headers(objects)
+
+        # Assert
+        assert len(result) <= 1000
+        assert len(set(result)) == len(result)  # 重複なし確認
+        # 最初の1000個が順序通りに含まれている確認
+        for i in range(min(1000, len(result))):
+            assert result[i] == f"key_{i:04d}"
+
+    def test_max_objects_limit_enforcement(self, converter):
+        """
+        最大オブジェクト数制限(10000)が適用されることを確認。
+
+        Given: 10000個を超えるオブジェクト
+        When: _extract_headers を呼び出す
+        Then: 最初の10000個のオブジェクトのみが処理される
+        """
+        # Arrange
+        objects = []
+        # 15000個のオブジェクトを生成(各オブジェクトに固有キー)
+        for i in range(15000):
+            objects.append({f"key_{i}": f"value_{i}"})
+
+        # Act
+        result = converter._extract_headers(objects)
+
+        # Assert
+        # 最大10000個のオブジェクトから抽出されたキーのみ
+        expected_keys = [f"key_{i}" for i in range(min(10000, len(objects)))]
+        assert result == expected_keys[: len(result)]
+
+    @pytest.mark.parametrize(
+        "key_length,should_be_included",
+        [
+            ("x" * 255, True),  # 255文字(制限内)
+            ("x" * 256, False),  # 256文字(制限超過)
+            ("x" * 300, False),  # 300文字(制限超過)
+        ],
+    )
+    def test_key_length_limit_enforcement(
+        self, converter, key_length, should_be_included
+    ):
+        """
+        キー名長制限(255文字)が適用されることを確認。
+
+        Given: 様々な長さのキー名を持つオブジェクト
+        When: _extract_headers を呼び出す
+        Then: 制限を超えるキーがスキップされる
+        """
+        # Arrange
+        objects = [{"short": "value1", key_length: "value2"}]
+
+        # Act
+        result = converter._extract_headers(objects)
+
+        # Assert
+        assert "short" in result
+        if should_be_included:
+            assert key_length in result
+        else:
+            assert key_length not in result
+
+        # すべてのキーが制限内であることを確認
+        assert all(len(key) <= 255 for key in result)
+
+    # ========================================
+    # パフォーマンステスト
+    # ========================================
+
+    @pytest.mark.performance
+    def test_large_dataset_performance(self, converter, large_dataset):
+        """
+        大量データでのパフォーマンステスト。
+
+        Given: 大量のオブジェクト(1000個)
+        When: _extract_headers を呼び出す
+        Then: 合理的な時間内に処理が完了する
+        """
+        # Act
+        start_time = time.time()
+        result = converter._extract_headers(large_dataset)
+        end_time = time.time()
+
+        # Assert
+        processing_time = end_time - start_time
+        assert processing_time < 1.0  # 1秒以内で完了すること
+        assert isinstance(result, list)
+        assert len(result) > 0
+
+    @pytest.mark.benchmark
+    @pytest.mark.parametrize("object_count", [100, 500, 1000, 5000])
+    def test_scalability_benchmark(self, converter, object_count):
+        """
+        スケーラビリティベンチマークテスト。
+
+        Given: 異なるサイズのデータセット
+        When: _extract_headers を呼び出す
+        Then: 線形的なパフォーマンス特性を示す
+        """
+        # Arrange
+        objects = []
+        for _i in range(object_count):
+            obj = {f"key_{j}": f"value_{j}" for j in range(5)}
+            objects.append(obj)
+
+        # Act & Assert
+        start_time = time.time()
+        result = converter._extract_headers(objects)
+        end_time = time.time()
+
+        processing_time = end_time - start_time
+        # オブジェクト数に対して合理的な処理時間
+        assert processing_time < (object_count / 1000.0)  # 1000オブジェクト/秒以上
+        assert len(result) == 5  # 期待されるキー数
+
+    # ========================================
+    # 実用的なユースケーステスト
+    # ========================================
+
+    def test_configuration_file_use_case(self, converter):
+        """
+        設定ファイルのユースケースシミュレーション。
+
+        Given: 設定項目の優先順序が重要なデータ
+        When: _extract_headers を呼び出す
+        Then: 重要な設定が最初に表示される順序が保持される
+        """
+        # Arrange: 重要度順の設定データ
+        config_objects = [
+            {
+                "priority": "high",
+                "name": "production_server",
+                "host": "prod.example.com",
+                "port": 443,
+                "ssl": True,
+                "backup_host": "backup.example.com",
+            },
+            {
+                "priority": "medium",
+                "name": "staging_server",
+                "host": "staging.example.com",
+                "port": 80,
+                "ssl": False,
+                "debug": True,  # 新しいキー
+            },
+        ]
+        expected = ["priority", "name", "host", "port", "ssl", "backup_host", "debug"]
+
+        # Act
+        result = converter._extract_headers(config_objects)
+
+        # Assert
+        assert result == expected
+        # 重要な設定が最初に来ることを確認
+        assert result[0] == "priority"
+        assert result[1] == "name"
+
+    def test_api_response_use_case(self, converter, sample_user_data):
+        """
+        APIレスポンスのユースケースシミュレーション。
+
+        Given: ユーザー情報APIのレスポンス形式データ
+        When: _extract_headers を呼び出す
+        Then: ユーザーフレンドリーな順序でフィールドが配置される
+        """
+        # Arrange
+        expected = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "created_at",
+            "last_login",
+        ]
+
+        # Act
+        result = converter._extract_headers(sample_user_data)
+
+        # Assert
+        assert result == expected
+        # 基本情報が最初に来ることを確認
+        assert result[:3] == ["id", "username", "email"]
+
+    @pytest.mark.integration
+    def test_real_world_json_structure(self, converter):
+        """
+        実世界のJSON構造での動作確認。
+
+        Given: 実際のアプリケーションで使われそうなJSON構造
+        When: _extract_headers を呼び出す
+        Then: 適切な順序でキーが抽出される
+        """
+        # Arrange: 実際のeコマースデータ風
+        products = [
+            {
+                "id": "prod_001",
+                "name": "ワイヤレスヘッドフォン",
+                "price": 15800,
+                "category": "electronics",
+                "in_stock": True,
+                "description": "高音質ワイヤレスヘッドフォン",
+            },
+            {
+                "id": "prod_002",
+                "name": "スマートウォッチ",
+                "price": 32000,
+                "category": "electronics",
+                "in_stock": False,
+                "description": "多機能スマートウォッチ",
+                "warranty_months": 24,  # 一部商品のみ
+            },
+            {
+                "id": "prod_003",
+                "name": "エコバッグ",
+                "price": 980,
+                "category": "lifestyle",
+                "in_stock": True,
+                "description": "環境に優しいエコバッグ",
+                "material": "リサイクル素材",  # 一部商品のみ
+            },
+        ]
+
+        # Act
+        result = converter._extract_headers(products)
+
+        # Assert
+        expected = [
+            "id",
+            "name",
+            "price",
+            "category",
+            "in_stock",
+            "description",
+            "warranty_months",
+            "material",
+        ]
+        assert result == expected
+
+        # ビジネス的に重要な情報が最初に来ることを確認
+        assert result[:4] == ["id", "name", "price", "category"]
+
+    # ========================================
+    # エラーハンドリングテスト
+    # ========================================
+
+    @pytest.mark.error_handling
+    def test_malformed_data_resilience(self, converter):
+        """
+        不正なデータに対する耐性テスト。
+
+        Given: 様々な不正なデータを含むリスト
+        When: _extract_headers を呼び出す
+        Then: エラーなく処理され、有効なデータのみが抽出される
+        """
+        # Arrange
+        malformed_objects = [
+            {"valid_key": "value"},
+            {"": "empty_key"},  # 空文字キー
+            {123: "numeric_key"},  # 数値キー
+            None,  # None
+            "string",  # 文字列
+            [],  # リスト
+            {"valid_key2": "value2"},
+        ]
+
+        # Act
+        result = converter._extract_headers(malformed_objects)
+
+        # Assert
+        assert "valid_key" in result
+        assert "valid_key2" in result
+        assert "" not in result  # 空文字キーは除外される可能性
+        assert 123 not in result
+        assert len([k for k in result if isinstance(k, str)]) == len(result)
+
+
+class TestExtractHeadersPerformance:
+    @pytest.mark.benchmark
+    def test_extract_headers_benchmark(self, converter, benchmark):
+        """
+        pytest-benchmarkを使用した安定的なパフォーマンステスト。
+        CI環境でも安定して動作。
+        """
+        # Arrange
+        large_objects = [
+            {f"key_{j}": f"value_{i}_{j}" for j in range(100)} for i in range(1000)
+        ]
+
+        # Act & Assert
+        result = benchmark(converter._extract_headers, large_objects)
+
+        # 機能確認(時間に依存しない)
+        assert len(result) <= 1000
+        assert isinstance(result, list)
+        assert all(isinstance(key, str) for key in result)
+
+    @pytest.mark.benchmark
+    def test_scalability_benchmark(self, converter, benchmark):
+        """
+        スケーラビリティのbenchmarkテスト。
+        """
+        # Arrange
+        very_large_objects = [
+            {f"key_{j}": f"value_{i}_{j}" for j in range(50)} for i in range(5000)
+        ]
+
+        # Act & Assert
+        result = benchmark(converter._extract_headers, very_large_objects)
+        assert len(result) <= 1000
+
+    @pytest.mark.performance
+    @pytest.mark.skipif(
+        os.environ.get("CI", "").lower() in ("true", "1", "yes"),
+        reason="CI環境では時間ベースアサーションを無効化",
+    )
+    def test_extract_headers_performance_local_only(self, converter):
+        """
+        ローカル環境専用の時間ベースパフォーマンステスト。
+        CI環境では自動的にスキップされる。
+        """
+        # Arrange
+        large_objects = [
+            {f"key_{j}": f"value_{i}_{j}" for j in range(100)} for i in range(1000)
+        ]
+
+        # Act
+        start_time = time.perf_counter()
+        result = converter._extract_headers(large_objects)
+        processing_time = time.perf_counter() - start_time
+
+        # Assert - ローカル環境では緩いマージンで時間チェック
+        assert processing_time < 3.0  # 元の3倍のマージン
+        assert len(result) <= 1000
+
+    @pytest.mark.performance
+    def test_extract_headers_performance_ci_safe(self, converter):
+        """
+        CI環境でも安全な機能ベースパフォーマンステスト。
+        時間アサーションなし、機能確認のみ。
+        """
+        # Arrange
+        large_objects = [
+            {f"key_{j}": f"value_{i}_{j}" for j in range(100)} for i in range(1000)
+        ]
+
+        # Act
+        start_time = time.perf_counter()
+        result = converter._extract_headers(large_objects)
+        processing_time = time.perf_counter() - start_time
+
+        # Assert - 機能確認のみ
+        assert len(result) <= 1000
+        assert isinstance(result, list)
+
+        # 性能情報をログ出力(参考値として)
+        print(f"\n処理時間: {processing_time:.4f}秒 (参考値)")
+        print(f"処理オブジェクト数: {len(large_objects)}")
+        print(f"抽出キー数: {len(result)}")
 
 
 class TestTableConverterObjectToRow:

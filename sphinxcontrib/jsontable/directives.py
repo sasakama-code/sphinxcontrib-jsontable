@@ -337,18 +337,54 @@ class TableConverter:
 
     def _extract_headers(self, objects: list[dict[str, Any]]) -> list[str]:
         """
-        Extract sorted header names from a list of JSON objects.
+        Extract header names from JSON objects with key order preservation.
+
+        The key order from the first object is preserved, and any additional keys
+        from subsequent objects are appended in the order they are encountered.
+        Includes performance optimizations and security constraints.
 
         Args:
-            objects: List of dicts from which to collect keys.
+            objects: List of dictionary objects to extract headers from.
+                    Each object should be a dict with string keys.
+                    Non-dict objects are automatically skipped.
+                    Processing limited to first 10,000 objects.
 
         Returns:
-            Alphabetically sorted list of unique keys.
+            List of unique header keys in preserved order.
+            Maximum 1,000 keys returned.
+            String keys only, with length limit of 255 characters.
+            Empty list if no valid objects provided.
         """
-        all_keys = set()
-        for obj in objects:
-            all_keys.update(obj.keys())
-        return sorted(all_keys)
+        if not objects:
+            return []
+
+        ordered_keys = []
+        seen_keys = set()
+
+        # Realistic limits for performance and security
+        MAX_KEYS = 1000
+        MAX_OBJECTS = min(len(objects), 10000)
+        MAX_KEY_LENGTH = 255
+
+        for i in range(MAX_OBJECTS):
+            obj = objects[i]
+            if not isinstance(obj, dict):
+                continue
+
+            for key in obj:
+                if len(ordered_keys) >= MAX_KEYS:
+                    return ordered_keys
+
+                if (
+                    key not in seen_keys
+                    and isinstance(key, str)
+                    and key != ""
+                    and len(key) <= MAX_KEY_LENGTH
+                ):
+                    ordered_keys.append(key)
+                    seen_keys.add(key)
+
+        return ordered_keys
 
     def _object_to_row(self, obj: dict[str, Any], headers: list[str]) -> list[str]:
         """
