@@ -230,7 +230,6 @@ class TestJsonTableDirectivePerformanceLimitsIntegration:
                 "jsontable", [], {}, [], 1, 0, "", MagicMock(), MagicMock()
             )
             # Manually set up the directive components
-            directive.env = mock_env
             directive.options = {}
             directive.converter = TableConverter(DEFAULT_MAX_ROWS)
 
@@ -254,7 +253,6 @@ class TestJsonTableDirectivePerformanceLimitsIntegration:
                 "jsontable", [], {}, [], 1, 0, "", MagicMock(), MagicMock()
             )
             # Manually set up the directive components
-            directive.env = mock_env
             directive.options = {}
             directive.converter = TableConverter(custom_limit)
 
@@ -293,7 +291,6 @@ class TestJsonTableDirectivePerformanceLimitsIntegration:
                 MagicMock(),
             )
             # Manually set up the directive components
-            directive.env = mock_env
             directive.options = {"limit": limit_value}
 
             assert directive.options.get("limit") == limit_value, (
@@ -375,7 +372,6 @@ class TestBackwardCompatibilityWithLimits:
                 MagicMock(),
             )
             # Manually set up the directive components
-            directive.env = mock_env
             directive.options = {"encoding": "utf-16"}
             # Create a loader with the specified encoding
             from sphinxcontrib.jsontable.directives import JsonDataLoader

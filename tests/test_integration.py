@@ -178,42 +178,26 @@ def test_sphinx_directive_integration():
     """Test Sphinx directive integration."""
     print("\n🐍 Testing Sphinx Directive Integration...")
 
-    # Mock Sphinx environment
-    mock_env = MagicMock()
-    mock_env.config.jsontable_max_rows = DEFAULT_MAX_ROWS
-    mock_env.srcdir = "/tmp/docs"
+    # Test default config value behavior
+    with patch('sphinxcontrib.jsontable.directives.getattr') as mock_getattr:
+        mock_getattr.return_value = DEFAULT_MAX_ROWS
 
-    # Create directive instance with proper mocking to avoid env assignment issues
-    with patch.object(
-        JsonTableDirective, "__init__", lambda self, *args, **kwargs: None
-    ):
+        # Create directive instance with basic mocks
         directive = JsonTableDirective(
             "jsontable", [], {}, [], 1, 0, "", MagicMock(), MagicMock()
         )
-        # Manually set up the directive components
-        directive.env = mock_env
-        directive.options = {}
-        directive.converter = TableConverter(DEFAULT_MAX_ROWS)
-
         # Test that it uses config value
         assert directive.converter.default_max_rows == DEFAULT_MAX_ROWS
         print("   ✅ Directive uses Sphinx config value correctly")
 
     # Test with custom config
     custom_config_value = 7500
-    mock_env.config.jsontable_max_rows = custom_config_value
+    with patch('sphinxcontrib.jsontable.directives.getattr') as mock_getattr:
+        mock_getattr.return_value = custom_config_value
 
-    with patch.object(
-        JsonTableDirective, "__init__", lambda self, *args, **kwargs: None
-    ):
         directive = JsonTableDirective(
             "jsontable", [], {}, [], 1, 0, "", MagicMock(), MagicMock()
         )
-        # Manually set up the directive components
-        directive.env = mock_env
-        directive.options = {}
-        directive.converter = TableConverter(custom_config_value)
-
         assert directive.converter.default_max_rows == custom_config_value
         print(f"   ✅ Custom config value ({custom_config_value:,}) respected")
 

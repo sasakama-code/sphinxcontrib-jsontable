@@ -364,7 +364,6 @@ class TestJsonTableDirectivePerformanceLimits:
                 "jsontable", [], {}, [], 1, 0, "", MagicMock(), MagicMock()
             )
             # Manually set up the directive components
-            directive.env = mock_env
             directive.options = {}
             directive.converter = TableConverter(DEFAULT_MAX_ROWS)
 
@@ -387,7 +386,6 @@ class TestJsonTableDirectivePerformanceLimits:
                 "jsontable", [], {}, [], 1, 0, "", MagicMock(), MagicMock()
             )
             # Manually set up the directive components
-            directive.env = mock_env
             directive.options = {}
             directive.converter = TableConverter(custom_limit)
 
