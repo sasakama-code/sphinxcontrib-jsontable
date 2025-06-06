@@ -9,7 +9,7 @@ Phase 1: Semantic Data Output
 - RAGMetadataExtractor: Automatic metadata extraction from JSON data
 - SemanticChunker: Intelligent data chunking for search optimization
 
-Phase 2: Advanced Metadata Generation  
+Phase 2: Advanced Metadata Generation
 - AdvancedMetadataGenerator: Statistical analysis and entity classification
 - SearchFacetGenerator: Automatic search facet generation
 - MetadataExporter: Multi-format export (JSON-LD, OpenSearch, etc.)
