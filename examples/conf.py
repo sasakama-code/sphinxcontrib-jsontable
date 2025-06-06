@@ -15,7 +15,7 @@ copyright = "%Y, sasakama-code"
 author = "sasakama-code"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.0"
+release = "0.2.0"
 
 # Add any Sphinx extension module names here
 extensions = [
@@ -50,3 +50,25 @@ source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
 }
+
+# =============================================================================
+# sphinxcontrib-jsontable Configuration
+# =============================================================================
+
+# Performance configuration for JSON table rendering
+# Set the default maximum number of rows to display before applying automatic limits
+jsontable_max_rows = 5000  # Example: Conservative setting for demonstrations
+
+# Alternative configuration examples:
+
+# For documentation with mostly small datasets:
+# jsontable_max_rows = 100
+
+# For large data-heavy documentation:
+# jsontable_max_rows = 50000
+
+# To disable automatic limiting entirely (not recommended for web deployment):
+# jsontable_max_rows = None
+
+# Note: Users can still override this setting with explicit :limit: options
+# in individual jsontable directives
