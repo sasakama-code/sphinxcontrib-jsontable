@@ -33,13 +33,15 @@ class TestTableConverterPerformanceLimits:
     @pytest.fixture
     def dataset_generator(self):
         """Unified test data generator for DRY principle compliance."""
-        def _generate(size: int, schema: dict = None) -> list:
+
+        def _generate(size: int, schema: dict | None = None) -> list:
             default_schema = {"id": "id_{i}", "name": "item_{i}"}
             schema = schema or default_schema
             return [
                 {key: template.format(i=i) for key, template in schema.items()}
                 for i in range(size)
             ]
+
         return _generate
 
     @pytest.fixture
@@ -58,7 +60,9 @@ class TestTableConverterPerformanceLimits:
 
     def test_default_max_rows_constant_value(self):
         """Test that DEFAULT_MAX_ROWS is set to expected value."""
-        assert DEFAULT_MAX_ROWS == 10000, f"Expected DEFAULT_MAX_ROWS to be 10000, got {DEFAULT_MAX_ROWS}"
+        assert DEFAULT_MAX_ROWS == 10000, (
+            f"Expected DEFAULT_MAX_ROWS to be 10000, got {DEFAULT_MAX_ROWS}"
+        )
 
     def test_converter_uses_default_max_rows(self, converter):
         """Test that TableConverter uses DEFAULT_MAX_ROWS by default."""
@@ -85,10 +89,10 @@ class TestTableConverterPerformanceLimits:
     ):
         """
         小さなデータセットに制限が適用されないことを確認。
-        
+
         Given: DEFAULT_MAX_ROWS未満の小さなデータセット
         When: user_limit=Noneで_apply_default_limitを呼び出す
-        Then: Noneが返される（制限なし）
+        Then: Noneが返される(制限なし)
         """
         result = converter._apply_default_limit(small_dataset, None)
         assert result is None, "Small dataset should not trigger default limit"
@@ -98,13 +102,13 @@ class TestTableConverterPerformanceLimits:
     ):
         """
         大量データセットにデフォルト制限が適用されることを確認。
-        
+
         Given: DEFAULT_MAX_ROWSを超える大量データセット
         When: user_limit=Noneで_apply_default_limitを呼び出す
         Then: DEFAULT_MAX_ROWSが返され、警告がログ出力される
         """
         result = converter._apply_default_limit(large_dataset, None)
-        
+
         assert result == DEFAULT_MAX_ROWS, (
             f"Expected default limit {DEFAULT_MAX_ROWS} for large dataset, got {result}"
         )
@@ -118,13 +122,13 @@ class TestTableConverterPerformanceLimits:
     ):
         """
         user_limit=0で無制限処理が有効になることを確認。
-        
+
         Given: 大量データセット
         When: user_limit=0で_apply_default_limitを呼び出す
-        Then: Noneが返され（無制限）、infoログが出力される
+        Then: Noneが返され(無制限)、infoログが出力される
         """
         result = converter._apply_default_limit(large_dataset, 0)
-        
+
         assert result is None, "user_limit=0 should result in unlimited processing"
         mock_logger.info.assert_called_once_with(
             "JsonTable: Unlimited rows requested via :limit: 0"
@@ -133,14 +137,14 @@ class TestTableConverterPerformanceLimits:
     def test_apply_default_limit_user_limit_specified(self, converter, large_dataset):
         """
         明示的なユーザー制限が尊重されることを確認。
-        
+
         Given: 大量データセット
         When: 明示的なuser_limitで_apply_default_limitを呼び出す
         Then: 指定された制限値が返される
         """
         user_limit = 2000
         result = converter._apply_default_limit(large_dataset, user_limit)
-        
+
         assert result == user_limit, (
             f"Expected user-specified limit {user_limit}, got {result}"
         )
@@ -150,14 +154,14 @@ class TestTableConverterPerformanceLimits:
     ):
         """
         小さなデータセットでもユーザー制限が尊重されることを確認。
-        
+
         Given: 小さなデータセット
         When: 明示的なuser_limitで_apply_default_limitを呼び出す
         Then: 指定された制限値が返される
         """
         user_limit = 50
         result = converter._apply_default_limit(small_dataset, user_limit)
-        
+
         assert result == user_limit, (
             f"Expected user limit {user_limit} even for small dataset, got {result}"
         )
@@ -184,12 +188,17 @@ class TestTableConverterPerformanceLimits:
         result = converter._estimate_data_size(data)
         assert result == 0, f"Expected size 0 for empty list, got {result}"
 
-    @pytest.mark.parametrize("invalid_data,expected_size", [
-        ("string", 0),
-        (123, 0),
-        (None, 0),
-    ])
-    def test_estimate_data_size_invalid_type(self, converter, invalid_data, expected_size):
+    @pytest.mark.parametrize(
+        "invalid_data,expected_size",
+        [
+            ("string", 0),
+            (123, 0),
+            (None, 0),
+        ],
+    )
+    def test_estimate_data_size_invalid_type(
+        self, converter, invalid_data, expected_size
+    ):
         """Test data size estimation for invalid types."""
         result = converter._estimate_data_size(invalid_data)
         assert result == expected_size, (
@@ -205,7 +214,7 @@ class TestTableConverterPerformanceLimits:
     ):
         """Test that convert method applies default limit to large datasets."""
         result = converter.convert(large_dataset, include_header=True)
-        
+
         # Header + DEFAULT_MAX_ROWS data rows
         expected_length = DEFAULT_MAX_ROWS + 1
         assert len(result) == expected_length, (
@@ -216,17 +225,19 @@ class TestTableConverterPerformanceLimits:
     def test_convert_small_dataset_no_limit_applied(self, converter, small_dataset):
         """Test that convert method doesn't limit small datasets."""
         result = converter.convert(small_dataset, include_header=True)
-        
+
         # Header + all data rows
         expected_length = len(small_dataset) + 1
         assert len(result) == expected_length, (
             f"Expected {expected_length} rows (header + all data), got {len(result)}"
         )
 
-    def test_convert_with_explicit_limit_zero(self, converter, large_dataset, mock_logger):
+    def test_convert_with_explicit_limit_zero(
+        self, converter, large_dataset, mock_logger
+    ):
         """Test that explicit limit=0 disables all limits."""
         result = converter.convert(large_dataset, include_header=True, limit=0)
-        
+
         # Header + all data rows (unlimited)
         expected_length = len(large_dataset) + 1
         assert len(result) == expected_length, (
@@ -239,7 +250,7 @@ class TestTableConverterPerformanceLimits:
         result = converter.convert(
             large_dataset, include_header=True, limit=explicit_limit
         )
-        
+
         # Header + limited data rows
         expected_length = explicit_limit + 1
         assert len(result) == expected_length, (
@@ -254,25 +265,29 @@ class TestTableConverterPerformanceLimits:
     def test_warning_message_format(self, converter, large_dataset, mock_logger):
         """Test that warning message contains expected information."""
         converter._apply_default_limit(large_dataset, None)
-        
+
         warning_msg = mock_logger.warning.call_args[0][0]
         expected_phrases = [
             "Large dataset detected",
             "15,000 rows",
             "10,000 rows",
             ":limit: option",
-            "all rows"
+            "all rows",
         ]
-        
+
         for phrase in expected_phrases:
-            assert phrase in warning_msg, f"Warning message missing expected phrase: '{phrase}'"
+            assert phrase in warning_msg, (
+                f"Warning message missing expected phrase: '{phrase}'"
+            )
 
     def test_no_warning_for_small_dataset(self, converter, small_dataset, mock_logger):
         """Test that no warning is issued for small datasets."""
         converter._apply_default_limit(small_dataset, None)
         mock_logger.warning.assert_not_called()
 
-    def test_info_message_for_unlimited_request(self, converter, large_dataset, mock_logger):
+    def test_info_message_for_unlimited_request(
+        self, converter, large_dataset, mock_logger
+    ):
         """Test that info message is logged for unlimited requests."""
         converter._apply_default_limit(large_dataset, 0)
         mock_logger.info.assert_called_once_with(
@@ -283,17 +298,20 @@ class TestTableConverterPerformanceLimits:
     # Edge Cases and Error Handling
     # ========================================
 
-    @pytest.mark.parametrize("dataset_size,expected_limit", [
-        (10000, None),           # 境界値（等しい）
-        (10001, DEFAULT_MAX_ROWS),  # 境界値（超過）
-    ])
+    @pytest.mark.parametrize(
+        "dataset_size,expected_limit",
+        [
+            (10000, None),  # 境界値(等しい)
+            (10001, DEFAULT_MAX_ROWS),  # 境界値(超過)
+        ],
+    )
     def test_apply_default_limit_boundary_conditions(
         self, converter, dataset_generator, dataset_size, expected_limit, mock_logger
     ):
         """Test behavior at threshold boundaries."""
         dataset = dataset_generator(dataset_size)
         result = converter._apply_default_limit(dataset, None)
-        
+
         assert result == expected_limit, (
             f"Dataset size {dataset_size}: expected {expected_limit}, got {result}"
         )
@@ -305,7 +323,7 @@ class TestTableConverterPerformanceLimits:
         large_dataset = [{"id": i} for i in range(6000)]
 
         result = converter._apply_default_limit(large_dataset, None)
-        
+
         assert result == custom_limit, (
             f"Expected custom limit {custom_limit}, got {result}"
         )
@@ -526,7 +544,9 @@ class TestPerformanceLimitsBenchmarks:
         )
 
     @pytest.mark.benchmark
-    def test_large_dataset_processing_benchmark(self, converter, benchmark, mock_logger):
+    def test_large_dataset_processing_benchmark(
+        self, converter, benchmark, mock_logger
+    ):
         """Benchmark large dataset processing with various configurations."""
         large_dataset = [{"field": f"value_{i}"} for i in range(15000)]
 
@@ -539,7 +559,9 @@ class TestPerformanceLimitsBenchmarks:
         )
 
     @pytest.mark.benchmark
-    def test_scalability_benchmark_multiple_sizes(self, converter, benchmark, mock_logger):
+    def test_scalability_benchmark_multiple_sizes(
+        self, converter, benchmark, mock_logger
+    ):
         """Benchmark scalability across different dataset sizes."""
         # Test with moderate size for stable benchmarking
         dataset = [{"id": i, "data": f"value_{i}"} for i in range(2000)]

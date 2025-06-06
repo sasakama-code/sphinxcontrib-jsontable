@@ -39,6 +39,7 @@ class TestTableConverterPerformanceLimitsIntegration:
     @pytest.fixture
     def dataset_generator(self):
         """Unified test data generator for consistent test data creation."""
+
         def _generate(size: int, data_type: str = "object") -> list:
             if data_type == "object":
                 return [{"id": i, "value": f"item_{i}"} for i in range(size)]
@@ -46,6 +47,7 @@ class TestTableConverterPerformanceLimitsIntegration:
                 return [[i, f"value_{i}"] for i in range(size)]
             else:
                 raise ValueError(f"Unsupported data_type: {data_type}")
+
         return _generate
 
     @pytest.fixture
@@ -67,7 +69,7 @@ class TestTableConverterPerformanceLimitsIntegration:
     ):
         """
         大量オブジェクトリストに対してデフォルト制限が適用されることを確認。
-        
+
         Given: DEFAULT_MAX_ROWSを超える大量オブジェクトリスト
         When: convert メソッドを呼び出す
         Then: DEFAULT_MAX_ROWS + ヘッダーに制限され、警告が出力される
@@ -98,9 +100,7 @@ class TestTableConverterPerformanceLimitsIntegration:
         self, converter_custom_limit, large_object_list, mock_logger
     ):
         """Test that convert method respects custom default limit."""
-        result = converter_custom_limit.convert(
-            large_object_list, include_header=True
-        )
+        result = converter_custom_limit.convert(large_object_list, include_header=True)
 
         # Should be limited to custom limit + header
         expected_length = 5000 + 1
@@ -163,10 +163,13 @@ class TestTableConverterPerformanceLimitsIntegration:
         )
         mock_logger.warning.assert_not_called()
 
-    @pytest.mark.parametrize("dataset_size,should_limit", [
-        (DEFAULT_MAX_ROWS, False),     # 境界値（等しい）
-        (DEFAULT_MAX_ROWS + 1, True),  # 境界値（超過）
-    ])
+    @pytest.mark.parametrize(
+        "dataset_size,should_limit",
+        [
+            (DEFAULT_MAX_ROWS, False),  # 境界値(等しい)
+            (DEFAULT_MAX_ROWS + 1, True),  # 境界値(超過)
+        ],
+    )
     def test_limit_threshold_behavior(
         self, converter, dataset_generator, dataset_size, should_limit, mock_logger
     ):
@@ -187,11 +190,14 @@ class TestTableConverterPerformanceLimitsIntegration:
     # Error handling integration
     # ========================================
 
-    @pytest.mark.parametrize("invalid_data", [
-        "invalid_string",
-        123,
-        None,
-    ])
+    @pytest.mark.parametrize(
+        "invalid_data",
+        [
+            "invalid_string",
+            123,
+            None,
+        ],
+    )
     def test_error_handling_not_affected_by_limits(self, converter, invalid_data):
         """Test that error handling works normally with limit functionality."""
         with pytest.raises(JsonTableError):
@@ -242,7 +248,9 @@ class TestJsonTableDirectivePerformanceLimitsIntegration:
     def test_directive_uses_custom_config_value(self, directive_with_custom_config):
         """Test that directive uses custom config value."""
         expected_limit = 7500
-        assert directive_with_custom_config.converter.default_max_rows == expected_limit, (
+        assert (
+            directive_with_custom_config.converter.default_max_rows == expected_limit
+        ), (
             f"Expected directive to use custom config {expected_limit}, "
             f"got {directive_with_custom_config.converter.default_max_rows}"
         )
@@ -257,7 +265,15 @@ class TestJsonTableDirectivePerformanceLimitsIntegration:
     def test_directive_limit_option_parsing(self, mock_env, limit_value):
         """Test that directive correctly parses limit options."""
         directive = JsonTableDirective(
-            "jsontable", [], {"limit": limit_value}, [], 1, 0, "", MagicMock(), MagicMock()
+            "jsontable",
+            [],
+            {"limit": limit_value},
+            [],
+            1,
+            0,
+            "",
+            MagicMock(),
+            MagicMock(),
         )
         directive.env = mock_env
 
@@ -338,10 +354,13 @@ class TestBackwardCompatibilityWithLimits:
             f"Expected utf-16 encoding, got {directive.loader.encoding}"
         )
 
-    @pytest.mark.parametrize("invalid_data", [
-        "invalid",
-        [None],  # Invalid first element
-    ])
+    @pytest.mark.parametrize(
+        "invalid_data",
+        [
+            "invalid",
+            [None],  # Invalid first element
+        ],
+    )
     def test_error_conditions_unchanged(self, converter, invalid_data):
         """Test that error conditions continue to work as expected."""
         with pytest.raises(JsonTableError):
