@@ -426,8 +426,8 @@ class TestJsonTableDirective:
     # Additional edge case tests
 
     @patch("sphinxcontrib.jsontable.directives.logger")
-    def test_run_logs_limit_information(self, mock_logger, directive_instance):
-        """Test run method logs limit information when limit option provided."""
+    def test_run_processes_limit_option_correctly(self, mock_logger, directive_instance):
+        """Test run method processes limit option correctly without specific logging."""
         # Arrange
         directive_instance.arguments = ["test.json"]
         directive_instance.options = {"limit": 10}
@@ -438,12 +438,15 @@ class TestJsonTableDirective:
         directive_instance.builder.build.return_value = Mock()
 
         # Act
-        directive_instance.run()
+        result = directive_instance.run()
 
         # Assert
-        mock_logger.info.assert_called_once_with(
-            "JsonTable: Limiting output to 10 rows"
+        # Verify that the limit was passed to converter.convert
+        directive_instance.converter.convert.assert_called_once_with(
+            mock_json_data, False, 10
         )
+        # Verify successful execution
+        assert len(result) == 1
 
     def test_load_json_data_calls_loader_with_correct_path(self, directive_instance):
         """Test _load_json_data calls loader with correct source directory path."""
