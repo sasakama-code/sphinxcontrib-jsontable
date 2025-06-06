@@ -53,7 +53,12 @@ docs = [
     "sphinx-autodoc-typehints>=2.0.1",
     "myst-parser>=0.18",
 ]
-test = ["pytest>=8.3.5", "pytest-cov>=5.0.0", "pytest-mock>=3.10.0"]
+test = [
+    "pytest>=8.3.5",
+    "pytest-cov>=5.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-benchmark>=5.1.0",
+]
 all = ["sphinxcontrib-jsontable[dev,docs,test]"]
 
 [project.urls]
