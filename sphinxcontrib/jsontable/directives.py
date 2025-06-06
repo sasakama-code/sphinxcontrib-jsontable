@@ -21,6 +21,7 @@ JsonData = list[Any] | dict[str, Any]
 TableData = list[list[str]]
 
 DEFAULT_ENCODING = "utf-8"
+DEFAULT_MAX_ROWS = 10000  # Conservative limit for performance and memory safety
 NO_JSON_SOURCE_ERROR = "No JSON data source provided"
 INVALID_JSON_DATA_ERROR = "JSON data must be an array or object"
 EMPTY_CONTENT_ERROR = "No inline JSON content provided"
@@ -205,9 +206,18 @@ class TableConverter:
     """
     Convert JSON data into a 2D list (TableData) suitable for table building.
 
-    Methods:
-        convert: Entry point for conversion of object or array.
+    This class handles the conversion of JSON data (objects or arrays) into
+    tabular format while applying performance safeguards and memory limits.
     """
+
+    def __init__(self, default_max_rows: int | None = None):
+        """
+        Initialize TableConverter with optional custom default limit.
+
+        Args:
+            default_max_rows: Custom default row limit (None uses DEFAULT_MAX_ROWS).
+        """
+        self.default_max_rows = default_max_rows or DEFAULT_MAX_ROWS
 
     def convert(
         self,
@@ -221,7 +231,7 @@ class TableConverter:
         Args:
             data: JSON data as dict or list.
             include_header: Whether to include header row (default False).
-            limit: Maximum number of rows to include (None for no limit).
+            limit: Maximum number of rows to include (None for default limit).
 
         Returns:
             TableData: A list of rows, each row itself a list of strings.
@@ -231,12 +241,69 @@ class TableConverter:
         """
         validate_not_empty(data, "No JSON data to process")
 
+        # Apply default limit if no explicit limit provided
+        effective_limit = self._apply_default_limit(data, limit)
+
         if isinstance(data, dict):
-            return self._convert_dict(data, include_header, limit)
+            return self._convert_dict(data, include_header, effective_limit)
         elif isinstance(data, list):
-            return self._convert_list(data, include_header, limit)
+            return self._convert_list(data, include_header, effective_limit)
         else:
             raise JsonTableError(INVALID_JSON_DATA_ERROR)
+
+    def _apply_default_limit(
+        self, data: JsonData, user_limit: int | None
+    ) -> int | None:
+        """
+        Apply default limit logic with user-friendly warnings.
+
+        Args:
+            data: The JSON data to process.
+            user_limit: User-specified limit (None, 0, or positive int).
+
+        Returns:
+            Effective limit to use (None for unlimited, positive int for limit).
+        """
+        # If user explicitly sets limit=0, disable all limits
+        if user_limit == 0:
+            logger.info("JsonTable: Unlimited rows requested via :limit: 0")
+            return None
+
+        # If user provides explicit limit, use it
+        if user_limit is not None:
+            return user_limit
+
+        # Estimate data size for default limit logic
+        estimated_size = self._estimate_data_size(data)
+
+        # Apply default limit if data is large
+        if estimated_size > self.default_max_rows:
+            logger.warning(
+                f"Large dataset detected ({estimated_size:,} rows). "
+                f"Showing first {self.default_max_rows:,} rows for performance. "
+                f"Use :limit: option to customize (e.g., :limit: 0 for all rows)."
+            )
+            return self.default_max_rows
+
+        # Data is small enough, no limit needed
+        return None
+
+    def _estimate_data_size(self, data: JsonData) -> int:
+        """
+        Estimate the number of rows that will be generated from JSON data.
+
+        Args:
+            data: JSON data to estimate.
+
+        Returns:
+            Estimated number of rows.
+        """
+        if isinstance(data, dict):
+            return 1  # Single object = 1 row
+        elif isinstance(data, list):
+            return len(data)  # Array length = row count
+        else:
+            return 0
 
     def _convert_dict(
         self,
@@ -525,7 +592,7 @@ class JsonTableDirective(SphinxDirective):
     Options:
         header: Flag to include the first row of JSON objects as table header.
         encoding: Character encoding for JSON file reading.
-        limit: Positive integer to limit the number of rows.
+        limit: Positive integer to limit the number of rows, or 0 for unlimited.
     """
 
     has_content = True
@@ -534,7 +601,7 @@ class JsonTableDirective(SphinxDirective):
     option_spec: ClassVar[dict] = {
         "header": directives.flag,
         "encoding": directives.unchanged,
-        "limit": directives.positive_int,  # Accept only positive integers
+        "limit": directives.nonnegative_int,  # Accept 0 or positive integers
     }
 
     def __init__(self, *args, **kwargs):
@@ -543,8 +610,14 @@ class JsonTableDirective(SphinxDirective):
         """
         super().__init__(*args, **kwargs)
         encoding = self.options.get("encoding", DEFAULT_ENCODING)
+
+        # Get custom max rows from Sphinx config if available
+        default_max_rows = getattr(
+            self.env.config, "jsontable_max_rows", DEFAULT_MAX_ROWS
+        )
+
         self.loader = JsonDataLoader(encoding)
-        self.converter = TableConverter()
+        self.converter = TableConverter(default_max_rows)
         self.builder = TableBuilder()
 
     def run(self) -> list[nodes.Node]:
@@ -558,11 +631,7 @@ class JsonTableDirective(SphinxDirective):
         try:
             json_data = self._load_json_data()
             include_header = "header" in self.options
-            limit = self.options.get("limit")  # None or positive integer
-
-            # Output debug information to log
-            if limit is not None:
-                logger.info(f"JsonTable: Limiting output to {limit} rows")
+            limit = self.options.get("limit")  # None, 0, or positive integer
 
             table_data = self.converter.convert(json_data, include_header, limit)
             table_node = self.builder.build(table_data, include_header)

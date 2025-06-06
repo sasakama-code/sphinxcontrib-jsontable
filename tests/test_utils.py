@@ -703,6 +703,10 @@ class DummyApp:
     def add_directive(self, name, directive):
         self.called = (name, directive)
 
+    def add_config_value(self, name, default, rebuild, types=None):
+        """Mock implementation of add_config_value."""
+        self.config_called = (name, default, rebuild, types)
+
 
 def test_setup_returns_metadata():
     app = DummyApp()
