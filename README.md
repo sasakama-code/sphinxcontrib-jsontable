@@ -40,6 +40,12 @@ Against this backdrop, sphinxcontrib-jsontable was developed to directly embed s
 * Encoding validation
 * Detailed logging for debugging
 
+⚡ **Performance Optimized**
+* Automatic row limiting for large datasets (10,000 rows by default)
+* Configurable performance limits
+* Memory-safe processing
+* User-friendly warnings for large data
+
 ## Installation
 
 ### From PyPI
@@ -65,6 +71,9 @@ extensions = [
     # ... your other extensions
     'sphinxcontrib.jsontable',
 ]
+
+# Optional: Configure performance limits
+jsontable_max_rows = 5000  # Default: 10000
 ```
 
 ### 2. Create Sample Data
@@ -204,9 +213,56 @@ Configuration objects, settings, metadata:
 |--------|------|---------|-------------|---------|
 | `header` | flag | off | Include first row as table header | `:header:` |
 | `encoding` | string | `utf-8` | File encoding for JSON files | `:encoding: utf-16` |
-| `limit` | positive int | unlimited | Maximum rows to display | `:limit: 50` |
+| `limit` | positive int/0 | automatic | Maximum rows to display (0 = unlimited) | `:limit: 50` |
+
+## Configuration Options
+
+Configure sphinxcontrib-jsontable in your `conf.py`:
+
+### Performance Settings
+
+```python
+# Maximum rows before automatic limiting kicks in (default: 10000)
+jsontable_max_rows = 5000
+
+# Example configurations for different use cases:
+
+# For documentation with mostly small datasets
+jsontable_max_rows = 100
+
+# For large data-heavy documentation
+jsontable_max_rows = 50000
+
+# Disable automatic limiting entirely (not recommended for web deployment)
+# jsontable_max_rows = None  # Will use unlimited by default
+```
 
 ### Advanced Examples
+
+#### Automatic Performance Protection
+
+When no `:limit:` is specified, the extension automatically protects against large datasets:
+
+```rst
+.. jsontable:: data/huge_dataset.json
+   :header:
+
+# If dataset > 10,000 rows, automatically shows first 10,000 with warning
+# User sees: "Large dataset detected (25,000 rows). Showing first 10,000 
+# rows for performance. Use :limit: option to customize."
+```
+
+#### Explicit Unlimited Processing
+
+For cases where you need to display all data regardless of size:
+
+```rst
+.. jsontable:: data/large_but_manageable.json
+   :header:
+   :limit: 0
+
+# ⚠️ Shows ALL rows - use with caution for web deployment
+```
 
 #### Large Dataset with Pagination
 
@@ -215,9 +271,11 @@ For performance and readability with large datasets:
 ```rst
 .. jsontable:: data/large_dataset.json
    :header:
-   :limit: 20
+   :limit: 100
 
-*Showing first 20 of 1000+ records. See full dataset in source file.*
+.. note::
+   This table shows the first 100 entries out of 50,000+ total records. 
+   Download the complete dataset: :download:`large_dataset.json <data/large_dataset.json>`
 ```
 
 #### Non-UTF8 Encoding
@@ -386,32 +444,124 @@ docs/
 
 ### Performance Considerations
 
-#### Large Files
+#### Automatic Protection for Large Datasets
 
-For files over 1000 rows, consider:
+The extension automatically protects against performance issues:
 
+- **Default Limit**: 10,000 rows maximum by default
+- **Smart Detection**: Automatically estimates dataset size
+- **User Warnings**: Clear messages when limits are applied
+- **Configurable**: Adjust limits via `jsontable_max_rows` setting
+
+#### Performance Behavior
+
+| Dataset Size | Default Behavior | User Action Required |
+|--------------|------------------|---------------------|
+| ≤ 10,000 rows | ✅ Display all rows | None |
+| > 10,000 rows | ⚠️ Auto-limit + warning | Use `:limit:` to customize |
+| Any size with `:limit: 0` | 🚨 Display all (unlimited) | Use with caution |
+
+#### Build Time Optimization
+
+**Small Datasets (< 1,000 rows):**
+```rst
+.. jsontable:: data/small_dataset.json
+   :header:
+   # No limit needed - processes quickly
+```
+
+**Medium Datasets (1,000-10,000 rows):**
+```rst
+.. jsontable:: data/medium_dataset.json
+   :header:
+   # Automatic protection applies - good performance
+```
+
+**Large Datasets (> 10,000 rows):**
 ```rst
 .. jsontable:: data/large_dataset.json
    :header:
    :limit: 100
-
-.. note::
-   This table shows the first 100 entries. Download the complete dataset: 
-   :download:`large_dataset.json <data/large_dataset.json>`
+   # Explicit limit recommended for predictable performance
 ```
 
-#### Build Time Optimization
+#### Memory Considerations
 
-- Use `:limit:` for very large datasets
-- Consider splitting large files into smaller chunks
-- Cache processed JSON when possible
+**Safe Configurations:**
+```python
+# Conservative (good for low-memory environments)
+jsontable_max_rows = 1000
 
-#### Memory Usage
+# Balanced (default - good for most use cases)
+jsontable_max_rows = 10000
 
-The extension loads entire JSON files into memory. For extremely large files (>100MB), consider:
-- Preprocessing data into smaller chunks
-- Using database views instead of static JSON
-- Implementing custom pagination
+# Aggressive (high-memory environments only)
+jsontable_max_rows = 100000
+```
+
+**Memory Usage Guidelines:**
+- **~1MB JSON**: ~1,000-5,000 rows (safe for all environments)
+- **~10MB JSON**: ~10,000-50,000 rows (requires adequate memory)
+- **>50MB JSON**: Consider data preprocessing or database solutions
+
+#### Best Practices for Large Data
+
+1. **Use Appropriate Limits**:
+   ```rst
+   .. jsontable:: data/sales_data.json
+      :header:
+      :limit: 50
+      
+   *Showing top 50 sales records. Full data available in source file.*
+   ```
+
+2. **Consider Data Preprocessing**:
+   - Split large files into logical chunks
+   - Create summary datasets for documentation
+   - Use database views instead of static files
+
+3. **Optimize for Build Performance**:
+   ```python
+   # In conf.py - faster builds for large projects
+   jsontable_max_rows = 100
+   ```
+
+4. **Provide Context for Limited Data**:
+   ```rst
+   .. jsontable:: data/user_activity.json
+      :header:
+      :limit: 20
+      
+   .. note::
+      This table shows recent activity only. For complete logs, 
+      see the :doc:`admin-dashboard` or download the 
+      :download:`full dataset <data/user_activity.json>`.
+   ```
+
+### Migration Guide
+
+#### Upgrading from Previous Versions
+
+**No Breaking Changes**: Existing documentation continues to work unchanged.
+
+**New Features Available**:
+```rst
+# Before: Manual limit required for large datasets
+.. jsontable:: large_data.json
+   :header:
+   :limit: 100
+
+# After: Automatic protection (manual limit still supported)
+.. jsontable:: large_data.json
+   :header:
+   # Automatically limited to 10,000 rows with user warning
+```
+
+**Recommended Configuration Update**:
+```python
+# Add to conf.py for customized behavior
+jsontable_max_rows = 5000  # Adjust based on your needs
+```
 
 ### Troubleshooting
 
@@ -436,6 +586,16 @@ The extension loads entire JSON files into memory. For extremely large files (>1
 - Check for trailing commas, unquoted keys
 - Ensure proper escaping of special characters
 
+**Performance Warnings**
+```
+WARNING: Large dataset detected (25,000 rows). Showing first 10,000 rows for performance.
+```
+**Solutions:**
+- Add explicit `:limit:` option: `:limit: 50`
+- Use `:limit: 0` for unlimited (if needed)
+- Increase global limit: `jsontable_max_rows = 25000`
+- Consider data preprocessing for smaller files
+
 **Encoding Issues**
 ```rst
 # For non-UTF8 files
@@ -446,7 +606,7 @@ The extension loads entire JSON files into memory. For extremely large files (>1
 **Empty Tables**
 - Check if JSON file is empty or null
 - Verify JSON structure (must be array or object)
-- Use `:limit:` option to check if data exists beyond limit
+- Check if automatic limiting is hiding your data
 
 #### Debug Mode
 
@@ -458,6 +618,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 # For sphinx-specific logs
 extensions = ['sphinxcontrib.jsontable']
+
+# Performance monitoring
+jsontable_max_rows = 1000  # Lower limit for debugging
 ```
 
 #### Testing Configuration
@@ -492,6 +655,12 @@ The extension automatically prevents directory traversal attacks:
 - Only files within the Sphinx source directory are accessible
 - No network URLs or absolute system paths allowed
 - File permissions respected by the system
+
+#### Performance Security
+
+- Default limits prevent accidental resource exhaustion
+- Memory usage is bounded by configurable limits
+- Large dataset warnings help prevent unintentional performance impact
 
 ### Migration Guide
 
@@ -531,6 +700,7 @@ The extension automatically prevents directory traversal attacks:
 - Transforms JSON structures into 2D table data
 - Handles different data formats (objects, arrays, mixed)
 - Manages header extraction and row limiting
+- Applies automatic performance limits
 
 **`TableBuilder`**
 - Generates Docutils table nodes
