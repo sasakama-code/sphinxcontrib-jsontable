@@ -252,8 +252,8 @@ class TableConverter:
             raise JsonTableError(INVALID_JSON_DATA_ERROR)
 
     def _apply_default_limit(
-        self, 
-        data: JsonData, 
+        self,
+        data: JsonData,
         user_limit: int | None
     ) -> int | None:
         """
@@ -270,14 +270,14 @@ class TableConverter:
         if user_limit == 0:
             logger.info("JsonTable: Unlimited rows requested via :limit: 0")
             return None
-        
+
         # If user provides explicit limit, use it
         if user_limit is not None:
             return user_limit
-        
+
         # Estimate data size for default limit logic
         estimated_size = self._estimate_data_size(data)
-        
+
         # Apply default limit if data is large
         if estimated_size > self.default_max_rows:
             logger.warning(
@@ -286,7 +286,7 @@ class TableConverter:
                 f"Use :limit: option to customize (e.g., :limit: 0 for all rows)."
             )
             return self.default_max_rows
-        
+
         # Data is small enough, no limit needed
         return None
 
@@ -612,10 +612,10 @@ class JsonTableDirective(SphinxDirective):
         """
         super().__init__(*args, **kwargs)
         encoding = self.options.get("encoding", DEFAULT_ENCODING)
-        
+
         # Get custom max rows from Sphinx config if available
         default_max_rows = getattr(self.env.config, 'jsontable_max_rows', DEFAULT_MAX_ROWS)
-        
+
         self.loader = JsonDataLoader(encoding)
         self.converter = TableConverter(default_max_rows)
         self.builder = TableBuilder()

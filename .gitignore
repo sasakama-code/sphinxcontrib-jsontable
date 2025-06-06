@@ -66,3 +66,5 @@ ehthumbs.db
 
 # Local config
 .local/
+CLAUDE.md
+uv.lock

@@ -6,7 +6,6 @@ including both normal and error scenarios. Tests follow the AAA pattern with sin
 and proper isolation using mocks.
 """
 
-import os
 import time
 from typing import Any
 from unittest.mock import patch
@@ -644,7 +643,7 @@ class TestTableConverterExtractHeaders:
     @pytest.mark.performance
     def test_large_dataset_performance_ci_safe(self, converter, large_dataset):
         """
-        大量データでの機能ベースパフォーマンステスト（CI環境安全版）。
+        大量データでの機能ベースパフォーマンステスト(CI環境安全版)。
 
         Given: 大量のオブジェクト(1000個)
         When: _extract_headers を呼び出す
@@ -659,8 +658,8 @@ class TestTableConverterExtractHeaders:
         assert isinstance(result, list)
         assert len(result) > 0
         assert all(isinstance(key, str) for key in result)
-        
-        # 性能情報をログ出力（参考値として）
+
+        # 性能情報をログ出力(参考値として)
         print(f"\n処理時間: {processing_time:.4f}秒 (参考値)")
         print(f"処理オブジェクト数: {len(large_dataset)}")
         print(f"抽出キー数: {len(result)}")
@@ -668,7 +667,7 @@ class TestTableConverterExtractHeaders:
     @pytest.mark.performance
     def test_scalability_functional_verification(self, converter):
         """
-        スケーラビリティの機能ベース検証テスト（時間アサーションなし）。
+        スケーラビリティの機能ベース検証テスト(時間アサーションなし)。
 
         Given: 異なるサイズのデータセット
         When: _extract_headers を呼び出す
@@ -676,7 +675,7 @@ class TestTableConverterExtractHeaders:
         """
         # Test different object counts
         object_counts = [100, 500, 1000, 2000]
-        
+
         for object_count in object_counts:
             # Arrange
             objects = []
@@ -689,11 +688,11 @@ class TestTableConverterExtractHeaders:
             result = converter._extract_headers(objects)
             processing_time = time.perf_counter() - start_time
 
-            # Assert - 機能確認のみ（時間アサーションなし）
+            # Assert - 機能確認のみ(時間アサーションなし)
             assert len(result) == 5  # 期待されるキー数
             assert isinstance(result, list)
             assert all(isinstance(key, str) for key in result)
-            
+
             # 情報ログ出力
             print(f"\nオブジェクト数 {object_count}: {processing_time:.4f}秒")
 
@@ -861,7 +860,7 @@ class TestTableConverterExtractHeaders:
 
 class TestExtractHeadersPerformance:
     """pytest-benchmarkベースの安定的なパフォーマンステスト。"""
-    
+
     @pytest.mark.benchmark
     def test_extract_headers_benchmark(self, converter, benchmark):
         """
@@ -884,7 +883,7 @@ class TestExtractHeadersPerformance:
     @pytest.mark.benchmark
     def test_scalability_benchmark_stable(self, converter, benchmark):
         """
-        スケーラビリティのbenchmarkテスト（安定版）。
+        スケーラビリティのbenchmarkテスト(安定版)。
         """
         # Arrange
         very_large_objects = [
@@ -898,7 +897,7 @@ class TestExtractHeadersPerformance:
     @pytest.mark.performance
     def test_extract_headers_performance_reference_only(self, converter):
         """
-        _extract_headers メソッドのパフォーマンス参考測定（CI安全版）。
+        _extract_headers メソッドのパフォーマンス参考測定(CI安全版)。
         時間アサーションなし、機能確認と参考値出力のみ。
         """
         # Arrange
@@ -915,9 +914,9 @@ class TestExtractHeadersPerformance:
         assert isinstance(result, list)
         assert len(result) <= 1000
         assert all(isinstance(key, str) for key in result)
-        
+
         # 参考値ログ出力
-        print(f"\n_extract_headers performance reference:")
+        print("\n_extract_headers performance reference:")
         print(f"  Processing time: {processing_time:.4f}s")
         print(f"  Objects processed: {len(large_objects):,}")
         print(f"  Keys extracted: {len(result)}")

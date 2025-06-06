@@ -5,13 +5,14 @@ This module contains test cases for the new performance limit features,
 including default limits, warning systems, and configuration options.
 """
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 
 from sphinxcontrib.jsontable.directives import (
-    TableConverter,
     DEFAULT_MAX_ROWS,
     JsonTableDirective,
+    TableConverter,
 )
 
 
@@ -156,7 +157,7 @@ class TestTableConverterPerformanceLimits:
         with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
             converter._apply_default_limit(large_dataset, None)
             warning_msg = mock_logger.warning.call_args[0][0]
-            
+
             # Check message contains key information
             assert "Large dataset detected" in warning_msg
             assert "15,000 rows" in warning_msg
@@ -201,7 +202,7 @@ class TestTableConverterPerformanceLimits:
         custom_limit = 5000
         converter = TableConverter(default_max_rows=custom_limit)
         large_dataset = [{"id": i} for i in range(6000)]
-        
+
         with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
             result = converter._apply_default_limit(large_dataset, None)
             assert result == custom_limit
@@ -234,7 +235,7 @@ class TestJsonTableDirectivePerformanceLimits:
         block_text = ""
         state = MagicMock()
         state_machine = MagicMock()
-        
+
         directive = JsonTableDirective(
             name, arguments, options, content, lineno,
             content_offset, block_text, state, state_machine
@@ -251,13 +252,13 @@ class TestJsonTableDirectivePerformanceLimits:
         """Test that directive respects custom config max rows."""
         custom_limit = 7500
         mock_env.config.jsontable_max_rows = custom_limit
-        
+
         # Create directive with custom config
         directive = JsonTableDirective(
             "jsontable", [], {}, [], 1, 0, "", MagicMock(), MagicMock()
         )
         directive.env = mock_env
-        
+
         assert directive.converter.default_max_rows == custom_limit
 
     def test_directive_limit_option_nonnegative_int(self, directive_instance):
@@ -274,7 +275,7 @@ class TestJsonTableDirectivePerformanceLimits:
         """Test that existing usage without :limit: option still works."""
         # Simulate directive without limit option
         directive_instance.options = {"header": True}
-        
+
         # Should work without errors (tested via integration)
         assert hasattr(directive_instance, 'converter')
         assert directive_instance.converter.default_max_rows == DEFAULT_MAX_ROWS
@@ -284,7 +285,7 @@ class TestJsonTableDirectivePerformanceLimits:
         # Existing positive limit should work as before
         directive_instance.options = {"limit": 1000}
         limit_value = directive_instance.options.get("limit")
-        
+
         assert limit_value == 1000
 
     # ========================================
@@ -296,42 +297,42 @@ class TestJsonTableDirectivePerformanceLimits:
         """Test that memory usage is controlled with default limit (CI-safe version)."""
         # Create a very large dataset
         huge_dataset = [{"id": i, "data": f"value_{i}" * 100} for i in range(50000)]
-        
+
         with patch('sphinxcontrib.jsontable.directives.logger'):
             # Should apply default limit automatically
             result = converter.convert(huge_dataset, include_header=True)
-            
+
             # Memory should be controlled by limiting to DEFAULT_MAX_ROWS
             assert len(result) <= DEFAULT_MAX_ROWS + 1  # +1 for header
             assert isinstance(result, list)
             assert all(isinstance(row, list) for row in result)
 
-    @pytest.mark.performance  
+    @pytest.mark.performance
     def test_processing_efficiency_with_limit_functional(self, converter):
         """Test that processing efficiency is maintained with limits (functional test)."""
         import time
-        
+
         # Large dataset that benefits from limits
         large_dataset = [{"field": f"value_{i}"} for i in range(25000)]
-        
+
         # Test with default limit (should efficiently process limited data)
         with patch('sphinxcontrib.jsontable.directives.logger'):
             start_time = time.perf_counter()
             limited_result = converter.convert(large_dataset, include_header=True)
             limited_time = time.perf_counter() - start_time
-        
+
         # Test with unlimited (should process all data)
         with patch('sphinxcontrib.jsontable.directives.logger'):
             start_time = time.perf_counter()
             unlimited_result = converter.convert(large_dataset, include_header=True, limit=0)
             unlimited_time = time.perf_counter() - start_time
-        
+
         # Functional assertions (not time-based)
         assert len(limited_result) == DEFAULT_MAX_ROWS + 1  # Limited processing
         assert len(unlimited_result) == len(large_dataset) + 1  # Full processing
-        
+
         # Log performance information for reference (not asserted)
-        print(f"\nPerformance reference (not asserted):")
+        print("\nPerformance reference (not asserted):")
         print(f"  Limited processing:   {limited_time:.4f}s ({len(limited_result):,} rows)")
         print(f"  Unlimited processing: {unlimited_time:.4f}s ({len(unlimited_result):,} rows)")
         print(f"  Data reduction: {(1 - len(limited_result)/len(unlimited_result))*100:.1f}%")
@@ -355,7 +356,7 @@ class TestPerformanceLimitsBenchmarks:
         """Benchmark convert method performance with default limits."""
         with patch('sphinxcontrib.jsontable.directives.logger'):
             result = benchmark(converter.convert, benchmark_dataset, True)
-            
+
             # Functional verification (no time assertions)
             assert isinstance(result, list)
             assert len(result) <= len(benchmark_dataset) + 1
@@ -365,7 +366,7 @@ class TestPerformanceLimitsBenchmarks:
         """Benchmark _apply_default_limit method performance."""
         with patch('sphinxcontrib.jsontable.directives.logger'):
             result = benchmark(converter._apply_default_limit, benchmark_dataset, None)
-            
+
             # Functional verification
             assert result is None or isinstance(result, int)
 
@@ -373,7 +374,7 @@ class TestPerformanceLimitsBenchmarks:
     def test_estimate_data_size_benchmark(self, converter, benchmark_dataset, benchmark):
         """Benchmark _estimate_data_size method performance."""
         result = benchmark(converter._estimate_data_size, benchmark_dataset)
-        
+
         # Functional verification
         assert result == len(benchmark_dataset)
 
@@ -381,22 +382,22 @@ class TestPerformanceLimitsBenchmarks:
     def test_large_dataset_processing_benchmark(self, converter, benchmark):
         """Benchmark large dataset processing with various configurations."""
         large_dataset = [{"field": f"value_{i}"} for i in range(15000)]
-        
+
         with patch('sphinxcontrib.jsontable.directives.logger'):
             result = benchmark(converter.convert, large_dataset, True)
-            
+
             # Should be limited by default
             assert len(result) == DEFAULT_MAX_ROWS + 1
 
-    @pytest.mark.benchmark  
+    @pytest.mark.benchmark
     def test_scalability_benchmark_multiple_sizes(self, converter, benchmark):
         """Benchmark scalability across different dataset sizes."""
         # Test with moderate size for stable benchmarking
         dataset = [{"id": i, "data": f"value_{i}"} for i in range(2000)]
-        
+
         with patch('sphinxcontrib.jsontable.directives.logger'):
             result = benchmark(converter.convert, dataset, True)
-            
+
             # Functional verification
             assert len(result) == len(dataset) + 1  # All data + header
             assert all(isinstance(row, list) for row in result)

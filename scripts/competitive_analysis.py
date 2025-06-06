@@ -16,7 +16,7 @@ PANDAS_PATTERNS = {
     },
     "display.max_columns": {
         "default": 20,
-        "description": "Maximum number of columns to display", 
+        "description": "Maximum number of columns to display",
         "behavior": "Shows first/last N columns with '...' in between",
         "user_override": "pd.set_option('display.max_columns', None)",
         "lesson": "Prevents wide tables from breaking display"
@@ -150,7 +150,7 @@ RECOMMENDATIONS = {
     },
     "override_mechanisms": {
         "immediate": ":limit: directive option",
-        "project_wide": "jsontable_max_rows in conf.py", 
+        "project_wide": "jsontable_max_rows in conf.py",
         "unlimited": ":limit: 0 (explicit override)",
         "reasoning": "Multiple levels of control"
     },
@@ -173,7 +173,7 @@ IMPLEMENTATION_STRATEGY = {
         ]
     },
     "phase2": {
-        "priority": "Medium", 
+        "priority": "Medium",
         "features": [
             "conf.py configuration option",
             "Memory usage monitoring",
@@ -193,38 +193,37 @@ IMPLEMENTATION_STRATEGY = {
 def summarize_findings():
     """
     Key findings from competitive analysis:
-    
+
     1. CONSERVATIVE DEFAULTS ARE UNIVERSAL
        - Most libraries default to 10-100 items
        - Performance and UX over completeness
        - Examples: Pandas (60), Django (25), GitHub (100)
-    
+
     2. EASY OVERRIDE IS ESSENTIAL
        - Multiple override mechanisms
        - Configuration, parameters, environment
        - Power users expect full control
-    
+
     3. TRANSPARENCY IS CRITICAL
        - Clear indication when data is truncated
        - Helpful messages with guidance
        - Resource usage visibility
-    
+
     4. GRACEFUL DEGRADATION
        - Handle edge cases gracefully
        - Provide helpful error messages
        - Maintain system stability
-    
+
     5. CONTEXT-AWARE LIMITS
        - Different limits for different use cases
        - Configurable per project/environment
        - Smart defaults based on typical usage
     """
-    pass
 
 if __name__ == "__main__":
     print("🔍 COMPETITIVE ANALYSIS SUMMARY")
     print("=" * 50)
-    
+
     print("\n📊 Common Patterns Across Libraries:")
     for pattern, details in COMMON_PATTERNS.items():
         print(f"\n🎯 {pattern.replace('_', ' ').title()}:")
@@ -234,11 +233,11 @@ if __name__ == "__main__":
             print(f"   Methods: {', '.join(details['methods'])}")
         print(f"   Reasoning: {details['reasoning']}")
         print(f"   Examples: {', '.join(details['examples'])}")
-    
-    print(f"\n💡 KEY RECOMMENDATIONS:")
+
+    print("\n💡 KEY RECOMMENDATIONS:")
     print(f"   🎯 DEFAULT_MAX_ROWS: {RECOMMENDATIONS['default_limit']['value']:,}")
-    print(f"   ⚠️  Warning when limit applied")
-    print(f"   🔧 Multiple override mechanisms")
-    print(f"   🛡️  Graceful error handling")
-    
-    print(f"\n✅ Analysis complete - Ready for implementation!")
+    print("   ⚠️  Warning when limit applied")
+    print("   🔧 Multiple override mechanisms")
+    print("   🛡️  Graceful error handling")
+
+    print("\n✅ Analysis complete - Ready for implementation!")
