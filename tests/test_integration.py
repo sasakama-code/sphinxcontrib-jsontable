@@ -42,7 +42,9 @@ def test_basic_functionality():
 
 def test_default_limit_application():
     """Test that default limit is applied to large datasets."""
-    print(f"\n🛡️  Testing Default Limit Application (DEFAULT_MAX_ROWS = {DEFAULT_MAX_ROWS:,})...")
+    print(
+        f"\n🛡️  Testing Default Limit Application (DEFAULT_MAX_ROWS = {DEFAULT_MAX_ROWS:,})..."
+    )
 
     converter = TableConverter()
 
@@ -51,7 +53,7 @@ def test_default_limit_application():
 
     # Capture warnings
     StringIO()
-    with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
+    with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
         result = converter.convert(large_dataset, include_header=True)
 
         # Check that limit was applied
@@ -75,7 +77,7 @@ def test_unlimited_override():
     # Large dataset
     large_dataset = [{"id": i} for i in range(12000)]
 
-    with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
+    with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
         result = converter.convert(large_dataset, include_header=True, limit=0)
 
         # Should process all rows
@@ -116,7 +118,7 @@ def test_custom_default_max_rows():
     # Dataset larger than custom default but smaller than DEFAULT_MAX_ROWS
     medium_dataset = [{"id": i} for i in range(7000)]
 
-    with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
+    with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
         result = converter.convert(medium_dataset, include_header=True)
 
         # Should be limited by custom default
@@ -138,26 +140,29 @@ def test_performance_improvement():
 
     # Create large dataset for performance testing
     large_dataset = [
-        {f"field_{j}": f"value_{i}_{j}" for j in range(10)}
-        for i in range(20000)
+        {f"field_{j}": f"value_{i}_{j}" for j in range(10)} for i in range(20000)
     ]
 
     # Test with default limit
-    with patch('sphinxcontrib.jsontable.directives.logger'):
+    with patch("sphinxcontrib.jsontable.directives.logger"):
         start_time = time.perf_counter()
         limited_result = converter.convert(large_dataset, include_header=True)
         limited_time = time.perf_counter() - start_time
 
-    print(f"   ⏱️  Limited processing: {limited_time:.3f}s ({len(limited_result):,} rows)")
+    print(
+        f"   ⏱️  Limited processing: {limited_time:.3f}s ({len(limited_result):,} rows)"
+    )
 
     # Test with unlimited (subset for reasonable test time)
     test_dataset = large_dataset[:12000]  # Smaller subset for unlimited test
-    with patch('sphinxcontrib.jsontable.directives.logger'):
+    with patch("sphinxcontrib.jsontable.directives.logger"):
         start_time = time.perf_counter()
         unlimited_result = converter.convert(test_dataset, include_header=True, limit=0)
         unlimited_time = time.perf_counter() - start_time
 
-    print(f"   ⏱️  Unlimited processing: {unlimited_time:.3f}s ({len(unlimited_result):,} rows)")
+    print(
+        f"   ⏱️  Unlimited processing: {unlimited_time:.3f}s ({len(unlimited_result):,} rows)"
+    )
 
     # Performance benefit check
     efficiency_ratio = limited_time / unlimited_time if unlimited_time > 0 else 0
@@ -252,6 +257,7 @@ def run_all_tests():
     except Exception as e:
         print(f"\n❌ TEST FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

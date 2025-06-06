@@ -21,10 +21,7 @@ def run_command(cmd, description, capture_output=True):
     try:
         start_time = time.time()
         result = subprocess.run(
-            cmd,
-            capture_output=capture_output,
-            text=True,
-            check=False
+            cmd, capture_output=capture_output, text=True, check=False
         )
         end_time = time.time()
 
@@ -63,17 +60,20 @@ def unset_ci_environment():
 
 def test_basic_functionality():
     """Test basic functionality without performance tests."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🧪 TESTING BASIC FUNCTIONALITY")
-    print("="*60)
+    print("=" * 60)
 
     # Run basic unit tests (excluding performance tests)
     cmd = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "tests/",
         "-v",
-        "-m", "not performance and not benchmark",
-        "--tb=short"
+        "-m",
+        "not performance and not benchmark",
+        "--tb=short",
     ]
 
     result = run_command(cmd, "Running basic unit tests")
@@ -82,9 +82,9 @@ def test_basic_functionality():
 
 def test_performance_tests_ci_safe():
     """Test that performance tests are CI-safe."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🏃 TESTING PERFORMANCE TESTS (CI SAFE)")
-    print("="*60)
+    print("=" * 60)
 
     # Set CI environment
     set_ci_environment()
@@ -92,12 +92,15 @@ def test_performance_tests_ci_safe():
     try:
         # Run only performance tests
         cmd = [
-            "python", "-m", "pytest",
+            "python",
+            "-m",
+            "pytest",
             "tests/",
             "-v",
-            "-m", "performance",
+            "-m",
+            "performance",
             "--tb=short",
-            "--no-cov"  # Skip coverage for performance tests
+            "--no-cov",  # Skip coverage for performance tests
         ]
 
         result = run_command(cmd, "Running performance tests in CI environment")
@@ -116,20 +119,23 @@ def test_performance_tests_ci_safe():
 
 def test_benchmark_tests():
     """Test benchmark functionality."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("📊 TESTING BENCHMARK FUNCTIONALITY")
-    print("="*60)
+    print("=" * 60)
 
     # Run benchmark tests
     cmd = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "tests/",
         "-v",
-        "-m", "benchmark",
+        "-m",
+        "benchmark",
         "--benchmark-only",
         "--benchmark-min-rounds=1",
         "--benchmark-max-time=10",
-        "--tb=short"
+        "--tb=short",
     ]
 
     result = run_command(cmd, "Running benchmark tests")
@@ -138,17 +144,19 @@ def test_benchmark_tests():
 
 def test_new_functionality():
     """Test new performance limits functionality."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🚀 TESTING NEW PERFORMANCE LIMITS FUNCTIONALITY")
-    print("="*60)
+    print("=" * 60)
 
     # Run tests for new functionality
     cmd = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "tests/test_performance_limits.py",
         "tests/test_performance_limits_integration.py",
         "-v",
-        "--tb=short"
+        "--tb=short",
     ]
 
     result = run_command(cmd, "Running new functionality tests")
@@ -157,9 +165,9 @@ def test_new_functionality():
 
 def test_integration_script():
     """Test the integration script."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🔗 TESTING INTEGRATION SCRIPT")
-    print("="*60)
+    print("=" * 60)
 
     # Run integration test script
     script_path = Path(__file__).parent / "test_integration.py"
@@ -171,18 +179,21 @@ def test_integration_script():
 
 def test_local_vs_ci_behavior():
     """Test that behavior differs appropriately between local and CI."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🔄 TESTING LOCAL VS CI BEHAVIOR")
-    print("="*60)
+    print("=" * 60)
 
     # Test in local environment
     print("\n📍 Testing in LOCAL environment:")
     unset_ci_environment()
 
     cmd_local = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "tests/test_table_converter.py::TestExtractHeadersPerformance::test_extract_headers_performance_local_only",
-        "-v", "-s"
+        "-v",
+        "-s",
     ]
 
     local_result = run_command(cmd_local, "Running local-only performance test")
@@ -193,9 +204,12 @@ def test_local_vs_ci_behavior():
 
     try:
         cmd_ci = [
-            "python", "-m", "pytest",
+            "python",
+            "-m",
+            "pytest",
             "tests/test_table_converter.py::TestExtractHeadersPerformance::test_extract_headers_performance_local_only",
-            "-v", "-s"
+            "-v",
+            "-s",
         ]
 
         ci_result = run_command(cmd_ci, "Running local-only test in CI (should skip)")
@@ -216,15 +230,12 @@ def test_local_vs_ci_behavior():
 
 def validate_test_markers():
     """Validate that test markers are properly configured."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🏷️  VALIDATING TEST MARKERS")
-    print("="*60)
+    print("=" * 60)
 
     # Check that markers are properly configured
-    cmd = [
-        "python", "-m", "pytest",
-        "--markers"
-    ]
+    cmd = ["python", "-m", "pytest", "--markers"]
 
     result = run_command(cmd, "Checking pytest markers configuration")
 
@@ -246,20 +257,23 @@ def validate_test_markers():
 
 def generate_test_report():
     """Generate a comprehensive test report."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("📋 GENERATING COMPREHENSIVE TEST REPORT")
-    print("="*60)
+    print("=" * 60)
 
     # Run all tests with coverage
     cmd = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "tests/",
         "--cov=sphinxcontrib.jsontable",
         "--cov-report=term-missing",
         "--cov-report=html:htmlcov_ci",
         "-v",
-        "-m", "not benchmark",  # Exclude benchmarks from coverage
-        "--tb=short"
+        "-m",
+        "not benchmark",  # Exclude benchmarks from coverage
+        "--tb=short",
     ]
 
     result = run_command(cmd, "Generating comprehensive test report")
@@ -304,9 +318,9 @@ def main():
             results[suite_name] = False
 
     # Print final results
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("📊 FINAL VALIDATION RESULTS")
-    print("="*80)
+    print("=" * 80)
 
     all_passed = True
     for suite_name, passed in results.items():
@@ -315,7 +329,7 @@ def main():
         if not passed:
             all_passed = False
 
-    print("="*80)
+    print("=" * 80)
     if all_passed:
         print("🎉 ALL TESTS PASSED - CI ENVIRONMENT READY!")
         print("✅ Performance limits functionality is CI-stable")

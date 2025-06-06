@@ -252,9 +252,7 @@ class TableConverter:
             raise JsonTableError(INVALID_JSON_DATA_ERROR)
 
     def _apply_default_limit(
-        self,
-        data: JsonData,
-        user_limit: int | None
+        self, data: JsonData, user_limit: int | None
     ) -> int | None:
         """
         Apply default limit logic with user-friendly warnings.
@@ -614,7 +612,9 @@ class JsonTableDirective(SphinxDirective):
         encoding = self.options.get("encoding", DEFAULT_ENCODING)
 
         # Get custom max rows from Sphinx config if available
-        default_max_rows = getattr(self.env.config, 'jsontable_max_rows', DEFAULT_MAX_ROWS)
+        default_max_rows = getattr(
+            self.env.config, "jsontable_max_rows", DEFAULT_MAX_ROWS
+        )
 
         self.loader = JsonDataLoader(encoding)
         self.converter = TableConverter(default_max_rows)

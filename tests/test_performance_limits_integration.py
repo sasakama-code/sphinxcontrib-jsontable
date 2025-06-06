@@ -48,7 +48,7 @@ class TestTableConverterPerformanceLimitsIntegration:
         self, converter, large_object_list
     ):
         """Test that convert method applies default limit to large object lists."""
-        with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
+        with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
             result = converter.convert(large_object_list, include_header=True)
 
             # Should be limited to DEFAULT_MAX_ROWS + header
@@ -59,7 +59,7 @@ class TestTableConverterPerformanceLimitsIntegration:
         self, converter, large_array_list
     ):
         """Test that convert method applies default limit to large array lists."""
-        with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
+        with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
             result = converter.convert(large_array_list, include_header=False)
 
             # Should be limited to DEFAULT_MAX_ROWS
@@ -70,8 +70,10 @@ class TestTableConverterPerformanceLimitsIntegration:
         self, converter_custom_limit, large_object_list
     ):
         """Test that convert method respects custom default limit."""
-        with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
-            result = converter_custom_limit.convert(large_object_list, include_header=True)
+        with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
+            result = converter_custom_limit.convert(
+                large_object_list, include_header=True
+            )
 
             # Should be limited to custom limit + header
             assert len(result) == 5000 + 1
@@ -81,7 +83,7 @@ class TestTableConverterPerformanceLimitsIntegration:
         self, converter, large_object_list
     ):
         """Test that :limit: 0 override works with large datasets."""
-        with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
+        with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
             result = converter.convert(large_object_list, include_header=True, limit=0)
 
             # Should process all data
@@ -93,7 +95,9 @@ class TestTableConverterPerformanceLimitsIntegration:
     ):
         """Test that explicit limit overrides default limit."""
         custom_limit = 3000
-        result = converter.convert(large_object_list, include_header=True, limit=custom_limit)
+        result = converter.convert(
+            large_object_list, include_header=True, limit=custom_limit
+        )
 
         # Should be limited to explicit limit + header
         assert len(result) == custom_limit + 1
@@ -114,7 +118,7 @@ class TestTableConverterPerformanceLimitsIntegration:
         """Test that small datasets are not affected by default limit."""
         small_data = [{"id": i} for i in range(100)]
 
-        with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
+        with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
             result = converter.convert(small_data, include_header=True)
 
             # Should process all data without warning
@@ -125,7 +129,7 @@ class TestTableConverterPerformanceLimitsIntegration:
         """Test behavior when dataset size exactly equals the limit."""
         exact_limit_data = [{"id": i} for i in range(DEFAULT_MAX_ROWS)]
 
-        with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
+        with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
             result = converter.convert(exact_limit_data, include_header=True)
 
             # Should process all data (size == limit, not >)
@@ -136,7 +140,7 @@ class TestTableConverterPerformanceLimitsIntegration:
         """Test behavior when dataset size is one over the limit."""
         over_limit_data = [{"id": i} for i in range(DEFAULT_MAX_ROWS + 1)]
 
-        with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
+        with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
             result = converter.convert(over_limit_data, include_header=True)
 
             # Should be limited
@@ -205,6 +209,7 @@ class TestJsonTableDirectivePerformanceLimitsIntegration:
     def test_directive_option_spec_includes_nonnegative_int(self):
         """Test that directive option_spec includes nonnegative_int for limit."""
         from docutils.parsers.rst import directives
+
         assert JsonTableDirective.option_spec["limit"] == directives.nonnegative_int
 
     def test_directive_limit_option_parsing(self, mock_env):
@@ -263,20 +268,28 @@ class TestBackwardCompatibilityWithLimits:
         large_data = [{"field": f"value_{i}"} for i in range(15000)]
 
         # With header
-        with patch('sphinxcontrib.jsontable.directives.logger'):
+        with patch("sphinxcontrib.jsontable.directives.logger"):
             result_with_header = converter.convert(large_data, include_header=True)
             assert result_with_header[0] == ["field"]  # Header row
             assert len(result_with_header) == DEFAULT_MAX_ROWS + 1
 
         # Without header
-        with patch('sphinxcontrib.jsontable.directives.logger'):
+        with patch("sphinxcontrib.jsontable.directives.logger"):
             result_without_header = converter.convert(large_data, include_header=False)
             assert len(result_without_header) == DEFAULT_MAX_ROWS
 
     def test_encoding_option_unaffected(self, mock_env):
         """Test that encoding option continues to work with limits."""
         directive = JsonTableDirective(
-            "jsontable", [], {"encoding": "utf-16"}, [], 1, 0, "", MagicMock(), MagicMock()
+            "jsontable",
+            [],
+            {"encoding": "utf-16"},
+            [],
+            1,
+            0,
+            "",
+            MagicMock(),
+            MagicMock(),
         )
         directive.env = mock_env
 
@@ -309,11 +322,11 @@ class TestPerformanceLimitsWithComplexData:
                 "id": i,
                 "user": {"name": f"User_{i}", "email": f"user{i}@example.com"},
                 "settings": {"theme": "dark", "notifications": True},
-                "data": [1, 2, 3, 4, 5]
+                "data": [1, 2, 3, 4, 5],
             }
             complex_data.append(obj)
 
-        with patch('sphinxcontrib.jsontable.directives.logger') as mock_logger:
+        with patch("sphinxcontrib.jsontable.directives.logger") as mock_logger:
             result = converter.convert(complex_data, include_header=True)
 
             # Should be limited and flattened appropriately
@@ -333,11 +346,11 @@ class TestPerformanceLimitsWithComplexData:
                 "price": 99.99 + i,
                 "available": i % 2 == 0,
                 "tags": ["tag1", "tag2"],
-                "metadata": None if i % 100 == 0 else {"created": "2023-01-01"}
+                "metadata": None if i % 100 == 0 else {"created": "2023-01-01"},
             }
             mixed_data.append(obj)
 
-        with patch('sphinxcontrib.jsontable.directives.logger'):
+        with patch("sphinxcontrib.jsontable.directives.logger"):
             result = converter.convert(mixed_data, include_header=True)
 
             # Should handle mixed types and be limited
@@ -351,7 +364,7 @@ class TestPerformanceLimitsWithComplexData:
             obj = {f"field_{j}": f"value_{i}_{j}" for j in range(50)}
             wide_data.append(obj)
 
-        with patch('sphinxcontrib.jsontable.directives.logger'):
+        with patch("sphinxcontrib.jsontable.directives.logger"):
             result = converter.convert(wide_data, include_header=True)
 
             # Should be limited in rows but preserve all columns

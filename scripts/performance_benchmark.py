@@ -99,23 +99,27 @@ def benchmark_table_converter():
         print(f"   📋 Rows generated: {len(table_data):,}")
 
         # Calculate rates
-        headers_rate = size / headers_time if headers_time > 0 else float('inf')
-        conversion_rate = size / conversion_time if conversion_time > 0 else float('inf')
+        headers_rate = size / headers_time if headers_time > 0 else float("inf")
+        conversion_rate = (
+            size / conversion_time if conversion_time > 0 else float("inf")
+        )
 
         print(f"   ⚡ Header rate: {headers_rate:,.0f} objects/sec")
         print(f"   ⚡ Conversion rate: {conversion_rate:,.0f} objects/sec")
 
-        results.append({
-            'size': size,
-            'headers_time': headers_time,
-            'conversion_time': conversion_time,
-            'headers_memory_mb': peak_mem / 1024 / 1024,
-            'conversion_memory_mb': peak_mem_full / 1024 / 1024,
-            'headers_rate': headers_rate,
-            'conversion_rate': conversion_rate,
-            'headers_count': len(headers),
-            'rows_count': len(table_data)
-        })
+        results.append(
+            {
+                "size": size,
+                "headers_time": headers_time,
+                "conversion_time": conversion_time,
+                "headers_memory_mb": peak_mem / 1024 / 1024,
+                "conversion_memory_mb": peak_mem_full / 1024 / 1024,
+                "headers_rate": headers_rate,
+                "conversion_rate": conversion_rate,
+                "headers_count": len(headers),
+                "rows_count": len(table_data),
+            }
+        )
 
         # Early exit if performance becomes unreasonable
         if conversion_time > 30.0:  # 30 seconds threshold
@@ -127,21 +131,25 @@ def benchmark_table_converter():
     print("=" * 60)
 
     for result in results:
-        print(f"Size: {result['size']:>6,} | "
-              f"Headers: {result['headers_time']:>6.3f}s | "
-              f"Convert: {result['conversion_time']:>6.3f}s | "
-              f"Memory: {result['conversion_memory_mb']:>5.1f}MB | "
-              f"Rate: {result['conversion_rate']:>7,.0f} obj/s")
+        print(
+            f"Size: {result['size']:>6,} | "
+            f"Headers: {result['headers_time']:>6.3f}s | "
+            f"Convert: {result['conversion_time']:>6.3f}s | "
+            f"Memory: {result['conversion_memory_mb']:>5.1f}MB | "
+            f"Rate: {result['conversion_rate']:>7,.0f} obj/s"
+        )
 
     # Analysis and recommendations
     print("\n🔍 ANALYSIS & RECOMMENDATIONS")
     print("-" * 40)
 
     # Find performance degradation points
-    large_datasets = [r for r in results if r['size'] >= 10000]
+    large_datasets = [r for r in results if r["size"] >= 10000]
     if large_datasets:
-        avg_rate = sum(r['conversion_rate'] for r in large_datasets) / len(large_datasets)
-        max_memory = max(r['conversion_memory_mb'] for r in large_datasets)
+        avg_rate = sum(r["conversion_rate"] for r in large_datasets) / len(
+            large_datasets
+        )
+        max_memory = max(r["conversion_memory_mb"] for r in large_datasets)
 
         print(f"📈 Large dataset avg rate: {avg_rate:,.0f} objects/sec")
         print(f"🧠 Max memory usage: {max_memory:.1f} MB")
@@ -149,8 +157,8 @@ def benchmark_table_converter():
         # Recommend default limit based on performance
         recommended_limit = None
         for result in results:
-            if result['conversion_time'] > 5.0:  # 5 second threshold
-                recommended_limit = result['size'] // 2
+            if result["conversion_time"] > 5.0:  # 5 second threshold
+                recommended_limit = result["size"] // 2
                 break
 
         if recommended_limit:
@@ -184,7 +192,11 @@ def benchmark_with_limit():
 
         actual_rows = len(table_data)
         memory_mb = peak_mem / 1024 / 1024
-        rate = (limit or len(large_dataset)) / processing_time if processing_time > 0 else float('inf')
+        rate = (
+            (limit or len(large_dataset)) / processing_time
+            if processing_time > 0
+            else float("inf")
+        )
 
         print(f"   ⏱️  Time: {processing_time:.3f}s")
         print(f"   🧠 Memory: {memory_mb:.1f} MB")

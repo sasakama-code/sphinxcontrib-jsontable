@@ -37,7 +37,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
         "jsontable_max_rows",
         DEFAULT_MAX_ROWS,
         "env",  # Rebuild environment when changed
-        [int]   # Type validation
+        [int],  # Type validation
     )
 
     return {

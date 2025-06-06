@@ -45,7 +45,9 @@ def analyze_memory_usage():
 
     print("\n📊 Estimated Memory Usage by Configuration:")
     print("-" * 80)
-    print(f"{'Config':<15} {'Objects':<10} {'Per Object':<12} {'Total (MB)':<12} {'Headers (KB)':<15}")
+    print(
+        f"{'Config':<15} {'Objects':<10} {'Per Object':<12} {'Total (MB)':<12} {'Headers (KB)':<15}"
+    )
     print("-" * 80)
 
     recommendations = []
@@ -57,13 +59,15 @@ def analyze_memory_usage():
 
         # Estimate single object size
         sample_obj = {
-            f"key_{i:02d}{'x' * (key_len-6)}": f"value_{i}{'x' * (value_len-8)}"
+            f"key_{i:02d}{'x' * (key_len - 6)}": f"value_{i}{'x' * (value_len - 8)}"
             for i in range(keys)
         }
         obj_size = estimate_object_memory_size(sample_obj)
 
         # Estimate header memory (list of strings)
-        headers_size = sum(sys.getsizeof(f"key_{i:02d}{'x' * (key_len-6)}") for i in range(keys))
+        headers_size = sum(
+            sys.getsizeof(f"key_{i:02d}{'x' * (key_len - 6)}") for i in range(keys)
+        )
         headers_size += sys.getsizeof([])  # List overhead
 
         config_name = f"{keys}keys/{key_len}c/{value_len}c"
@@ -72,28 +76,36 @@ def analyze_memory_usage():
             total_size_mb = (obj_size * size) / (1024 * 1024)
             headers_size_kb = headers_size / 1024
 
-            print(f"{config_name:<15} {size:<10,} {obj_size:<12} {total_size_mb:<12.1f} {headers_size_kb:<15.1f}")
+            print(
+                f"{config_name:<15} {size:<10,} {obj_size:<12} {total_size_mb:<12.1f} {headers_size_kb:<15.1f}"
+            )
 
             # Add to recommendations if within reasonable limits
             if total_size_mb <= 100:  # 100MB threshold
-                recommendations.append({
-                    'config': config_name,
-                    'max_safe_objects': size,
-                    'memory_mb': total_size_mb
-                })
+                recommendations.append(
+                    {
+                        "config": config_name,
+                        "max_safe_objects": size,
+                        "memory_mb": total_size_mb,
+                    }
+                )
             elif size == dataset_sizes[0]:  # Even smallest size exceeds limit
-                recommendations.append({
-                    'config': config_name,
-                    'max_safe_objects': int(100 * 1024 * 1024 / obj_size),  # 100MB limit
-                    'memory_mb': 100.0
-                })
+                recommendations.append(
+                    {
+                        "config": config_name,
+                        "max_safe_objects": int(
+                            100 * 1024 * 1024 / obj_size
+                        ),  # 100MB limit
+                        "memory_mb": 100.0,
+                    }
+                )
                 break
 
     print("\n💡 MEMORY-BASED RECOMMENDATIONS:")
     print("-" * 50)
 
     # Find conservative recommendation
-    min_safe_objects = min(r['max_safe_objects'] for r in recommendations)
+    min_safe_objects = min(r["max_safe_objects"] for r in recommendations)
     print(f"🛡️  Conservative limit (100MB threshold): {min_safe_objects:,} objects")
 
     # Table conversion memory overhead
@@ -119,29 +131,29 @@ def analyze_performance_bottlenecks():
             "complexity": "O(n * k)",
             "description": "Iterates through all objects and keys",
             "current_limits": "MAX_OBJECTS=10,000, MAX_KEYS=1,000",
-            "bottleneck_factor": "High for many objects with many keys"
+            "bottleneck_factor": "High for many objects with many keys",
         },
         {
             "component": "_object_to_row",
             "complexity": "O(n * k)",
             "description": "Converts each object to row format",
             "current_limits": "None",
-            "bottleneck_factor": "Linear scaling, but no protection"
+            "bottleneck_factor": "Linear scaling, but no protection",
         },
         {
             "component": "_convert_array_list",
             "complexity": "O(n * m)",
             "description": "String conversion for all elements",
             "current_limits": "None",
-            "bottleneck_factor": "Memory allocation for string conversion"
+            "bottleneck_factor": "Memory allocation for string conversion",
         },
         {
             "component": "TableBuilder.build",
             "complexity": "O(n * m)",
             "description": "Creates docutils nodes for each cell",
             "current_limits": "None",
-            "bottleneck_factor": "DOM node creation overhead"
-        }
+            "bottleneck_factor": "DOM node creation overhead",
+        },
     ]
 
     for bottleneck in bottlenecks:
@@ -169,36 +181,36 @@ def recommend_implementation_strategy():
             "component": "TableConverter.convert()",
             "action": "Add DEFAULT_MAX_ROWS = 10,000",
             "reasoning": "Prevent runaway memory usage",
-            "implementation": "Check input size before processing"
+            "implementation": "Check input size before processing",
         },
         {
             "priority": "High",
             "component": "Logging/Warning System",
             "action": "Warn when limit is applied",
             "reasoning": "User awareness and guidance",
-            "implementation": "logger.warning() with helpful message"
+            "implementation": "logger.warning() with helpful message",
         },
         {
             "priority": "Medium",
             "component": "Configuration System",
             "action": "Add jsontable_max_rows config option",
             "reasoning": "Allow per-project customization",
-            "implementation": "Read from Sphinx config in directive"
+            "implementation": "Read from Sphinx config in directive",
         },
         {
             "priority": "Medium",
             "component": "Memory Monitoring",
             "action": "Add memory usage tracking",
             "reasoning": "Better understanding of resource usage",
-            "implementation": "Optional tracemalloc integration"
+            "implementation": "Optional tracemalloc integration",
         },
         {
             "priority": "Low",
             "component": "Streaming Processing",
             "action": "Consider streaming for very large datasets",
             "reasoning": "Handle datasets larger than memory",
-            "implementation": "Future enhancement for specialized use cases"
-        }
+            "implementation": "Future enhancement for specialized use cases",
+        },
     ]
 
     for strategy in strategies:
@@ -225,4 +237,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"❌ Analysis failed: {e}")
         import traceback
+
         traceback.print_exc()
