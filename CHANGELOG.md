@@ -8,13 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Planned features for future releases
+- **Automatic Performance Protection**: Default row limit of 10,000 rows to prevent performance issues with large datasets (#29)
+- **Sphinx Configuration Option**: `jsontable_max_rows` setting in `conf.py` to customize default row limits (#29)
+- **Unlimited Mode**: Support for `:limit: 0` to disable all row restrictions when needed (#29)
+- **Smart Data Detection**: Automatic estimation of dataset size for intelligent limit application (#29)
+- **User-Friendly Warnings**: Clear messages when automatic limits are applied to large datasets (#29)
+- **Enhanced Documentation**: Comprehensive performance guidelines and best practices in README (#29)
+- **Configuration Examples**: Multiple `conf.py` examples for different environment needs (#29)
 
 ### Changed
-- Planned improvements for future releases
+- **Improved Performance Behavior**: Large datasets (>10,000 rows) are now automatically limited with user warnings instead of potential memory issues (#29)
+- **Enhanced TableConverter**: Added `_apply_default_limit()` method for intelligent limit management (#29)
+- **Better User Experience**: Clear feedback when automatic performance protections are applied (#29)
 
-### Fixed
-- Planned bug fixes for future releases
+### Performance
+- **Memory Safety**: Automatic protection against accidentally processing extremely large datasets
+- **Configurable Limits**: Users can adjust performance thresholds based on their environment
+- **Build Optimization**: Faster documentation builds with predictable resource usage for large data
+
+### Security
+- **Resource Protection**: Default limits prevent potential denial-of-service through large data processing
 
 ## [0.1.0] - 2025-06-02
 
@@ -57,6 +70,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release Notes
 
+### Upcoming v0.2.0 - Performance & Usability Enhancements
+
+**Coming Soon:** Major performance improvements and enhanced user experience for handling large datasets.
+
+**Key Features:**
+- 🚀 **Automatic Performance Protection**: Smart detection and handling of large datasets
+- ⚙️ **Configurable Limits**: Customize performance thresholds via `conf.py`
+- 🛡️ **Memory Safety**: Built-in protection against resource exhaustion
+- 📊 **Enhanced Documentation**: Comprehensive performance guidelines and best practices
+- 🔧 **Better User Experience**: Clear warnings and guidance for large data handling
+
+**Performance Improvements:**
+- Default 10,000 row limit for automatic protection
+- Intelligent data size estimation
+- User-friendly warnings for limit application
+- Configurable behavior via `jsontable_max_rows` setting
+
+**Compatibility:**
+- No breaking changes - all existing documentation continues to work
+- New features are opt-in and backwards compatible
+- Enhanced performance for existing projects
+
 ### v0.1.0 - Initial Release
 
 This is the first stable release of sphinxcontrib-jsontable, providing a robust solution for embedding JSON data as tables in Sphinx documentation.
@@ -91,6 +126,43 @@ For detailed usage instructions, see [README.md](README.md).
 
 ## Migration Guide
 
+### Upgrading to v0.2.0 (Performance Enhancements)
+
+**No Breaking Changes**: All existing documentation will continue to work without modification.
+
+**New Features Available:**
+
+1. **Automatic Protection**: Large datasets are now automatically limited to 10,000 rows with clear user warnings
+   ```rst
+   # Before: Manual limit required for large datasets
+   .. jsontable:: large_data.json
+      :header:
+      :limit: 100
+
+   # After: Automatic protection (manual limit still supported)
+   .. jsontable:: large_data.json
+      :header:
+      # Automatically limited with user warning if >10,000 rows
+   ```
+
+2. **Custom Configuration**: Add to your `conf.py` for personalized behavior
+   ```python
+   # Recommended addition to conf.py
+   jsontable_max_rows = 5000  # Adjust based on your needs
+   ```
+
+3. **Unlimited Mode**: Use `:limit: 0` when you need to display all data
+   ```rst
+   .. jsontable:: large_but_needed.json
+      :header:
+      :limit: 0  # Show all rows regardless of size
+   ```
+
+**Recommended Actions:**
+- Review your documentation for large datasets that could benefit from explicit limits
+- Consider adding `jsontable_max_rows` configuration for consistent behavior
+- Update documentation to mention performance features for users
+
 ### Python Version Requirements
 
 **Important:** This package requires Python 3.10 or later. If you're using an older Python version:
@@ -107,6 +179,7 @@ If you're currently using custom scripts or other methods to generate tables fro
 2. **Replace custom table generation** with `.. jsontable::` directive
 3. **Update file paths** to be relative to your Sphinx source directory
 4. **Add appropriate options** (`:header:`, `:limit:`, etc.) based on your needs
+5. **Consider performance settings** for large datasets
 
 ### From Other Extensions
 
@@ -114,11 +187,46 @@ If you're currently using custom scripts or other methods to generate tables fro
 - Replace `.. jsonschema::` with `.. jsontable::`
 - Remove schema validation options (not applicable)
 - Add `:header:` option if you want column headers
+- Benefit from automatic performance protection
 
 **From manual table creation:**
 - Replace manual reStructuredText tables with `.. jsontable::` directive
 - Move your data to JSON files for easier maintenance
 - Leverage automatic header extraction for object arrays
+- Use performance features for large datasets
+
+---
+
+## Best Practices for Large Data
+
+### Performance Configuration Examples
+
+**Conservative (Low-memory environments):**
+```python
+# conf.py
+jsontable_max_rows = 1000
+```
+
+**Balanced (Most use cases):**
+```python
+# conf.py  
+jsontable_max_rows = 10000  # Default
+```
+
+**Aggressive (High-memory environments):**
+```python
+# conf.py
+jsontable_max_rows = 50000
+```
+
+### Data Size Guidelines
+
+| Data Size | Recommended Approach | Configuration |
+|-----------|---------------------|---------------|
+| < 1,000 rows | No configuration needed | Default settings |
+| 1,000-10,000 rows | Default automatic protection | `jsontable_max_rows = 10000` |
+| > 10,000 rows | Explicit limits recommended | Custom limits + `:limit:` option |
+| > 100,000 rows | Consider data preprocessing | Split files or database approach |
 
 ---
 
