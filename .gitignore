@@ -70,4 +70,4 @@ CLAUDE.md
 uv.lock
 
 #Claude
-plan
+# plan - 進捗管理のためコミット対象とする
