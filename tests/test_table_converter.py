@@ -814,7 +814,6 @@ class TestTableConverterExtractHeaders:
         # ビジネス的に重要な情報が最初に来ることを確認
         assert result[:4] == ["id", "name", "price", "category"]
 
-
     # ========================================
     # エラーハンドリングテスト
     # ========================================
