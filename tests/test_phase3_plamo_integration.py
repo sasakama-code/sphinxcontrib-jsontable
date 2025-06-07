@@ -648,6 +648,7 @@ class TestPhase3Integration:
                     chunk_id=f"extended_{i}_{j}",
                     content=chunk.content + f" (拡張データ{i})",
                     chunk_type=chunk.chunk_type,
+                    embedding_hint=chunk.embedding_hint,
                     metadata=chunk.metadata.copy(),
                     search_weight=chunk.search_weight,
                 )
