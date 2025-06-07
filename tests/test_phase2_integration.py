@@ -40,7 +40,7 @@ class TestPhase2Integration:
                 "email": "tanaka@company.co.jp",
                 "hire_date": "2020-04-01",
                 "skills": ["Python", "機械学習", "データ分析"],
-                "position": "シニアエンジニア"
+                "position": "シニアエンジニア",
             },
             {
                 "name": "佐藤花子",
@@ -50,7 +50,7 @@ class TestPhase2Integration:
                 "email": "sato@company.co.jp",
                 "hire_date": "2021-07-15",
                 "skills": ["営業戦略", "顧客管理", "プレゼンテーション"],
-                "position": "営業マネージャー"
+                "position": "営業マネージャー",
             },
             {
                 "name": "山田次郎",
@@ -60,7 +60,7 @@ class TestPhase2Integration:
                 "email": "yamada@company.co.jp",
                 "hire_date": "2018-03-01",
                 "skills": ["Java", "システム設計", "チームリーダーシップ"],
-                "position": "テックリード"
+                "position": "テックリード",
             },
             {
                 "name": "鈴木美咲",
@@ -70,8 +70,8 @@ class TestPhase2Integration:
                 "email": "suzuki@company.co.jp",
                 "hire_date": "2022-01-10",
                 "skills": ["採用", "労務管理", "人材育成"],
-                "position": "人事スペシャリスト"
-            }
+                "position": "人事スペシャリスト",
+            },
         ]
 
     @pytest.fixture
@@ -86,7 +86,7 @@ class TestPhase2Integration:
                 "project_duration": "3ヶ月",
                 "completion_date": "2024-03-15",
                 "team_size": 5,
-                "technologies": ["React Native", "Firebase", "Node.js"]
+                "technologies": ["React Native", "Firebase", "Node.js"],
             },
             {
                 "product_name": "Webサイトリニューアル",
@@ -96,7 +96,7 @@ class TestPhase2Integration:
                 "project_duration": "2ヶ月",
                 "completion_date": "2024-02-20",
                 "team_size": 3,
-                "technologies": ["Vue.js", "WordPress", "PHP"]
+                "technologies": ["Vue.js", "WordPress", "PHP"],
             },
             {
                 "product_name": "データ分析システム構築",
@@ -106,7 +106,7 @@ class TestPhase2Integration:
                 "project_duration": "6ヶ月",
                 "completion_date": "2024-06-30",
                 "team_size": 8,
-                "technologies": ["Python", "PostgreSQL", "Apache Spark"]
+                "technologies": ["Python", "PostgreSQL", "Apache Spark"],
             },
             {
                 "product_name": "モバイルアプリ保守",
@@ -116,8 +116,8 @@ class TestPhase2Integration:
                 "project_duration": "12ヶ月",
                 "completion_date": "2024-12-31",
                 "team_size": 4,
-                "technologies": ["React Native", "AWS", "MongoDB"]
-            }
+                "technologies": ["React Native", "AWS", "MongoDB"],
+            },
         ]
 
     def test_complete_pipeline_japanese_employees(self, japanese_employee_data):
@@ -126,28 +126,31 @@ class TestPhase2Integration:
         basic_metadata = {
             "source_info": {"file_path": "employees.json", "data_type": "json"},
             "processing_timestamp": "2024-06-07T10:00:00Z",
-            "rag_version": "2.0.0"
+            "rag_version": "2.0.0",
         }
 
         # Phase 2 Step 1: 高度メタデータ生成
         advanced_metadata = self.advanced_generator.generate_advanced_metadata(
-            json_data=japanese_employee_data,
-            basic_metadata=basic_metadata
+            json_data=japanese_employee_data, basic_metadata=basic_metadata
         )
 
         # 統計分析結果の検証
         assert "numerical_fields" in advanced_metadata.statistical_analysis
         assert "categorical_fields" in advanced_metadata.statistical_analysis
-        
+
         # 年齢フィールドの統計分析検証
-        age_stats = advanced_metadata.statistical_analysis["numerical_fields"].get("age")
+        age_stats = advanced_metadata.statistical_analysis["numerical_fields"].get(
+            "age"
+        )
         assert age_stats is not None
         assert age_stats["min_value"] == 26
         assert age_stats["max_value"] == 35
         assert 29 <= age_stats["mean"] <= 30  # 平均年齢検証
 
         # 部署フィールドのカテゴリ分析検証
-        dept_stats = advanced_metadata.statistical_analysis["categorical_fields"].get("department")
+        dept_stats = advanced_metadata.statistical_analysis["categorical_fields"].get(
+            "department"
+        )
         assert dept_stats is not None
         assert "開発部" in dept_stats["value_counts"]
         assert dept_stats["value_counts"]["開発部"] == 2  # 開発部は2名
@@ -155,7 +158,7 @@ class TestPhase2Integration:
         # 日本語エンティティ検証
         entities = advanced_metadata.entity_classification
         assert len(entities.persons) >= 4  # 4名の名前を検出
-        
+
         # 組織エンティティ検証（部署名）
         detected_orgs = [org.organization for org in entities.organizations]
         expected_departments = ["開発部", "営業部", "人事部"]
@@ -173,8 +176,12 @@ class TestPhase2Integration:
         # カテゴリカルファセット検証
         assert len(generated_facets.categorical_facets) >= 1
         dept_facet = next(
-            (f for f in generated_facets.categorical_facets if f.field_name == "department"),
-            None
+            (
+                f
+                for f in generated_facets.categorical_facets
+                if f.field_name == "department"
+            ),
+            None,
         )
         assert dept_facet is not None
         assert dept_facet.display_name == "部署"
@@ -184,7 +191,7 @@ class TestPhase2Integration:
         assert len(generated_facets.numerical_facets) >= 2
         salary_facet = next(
             (f for f in generated_facets.numerical_facets if f.field_name == "salary"),
-            None
+            None,
         )
         assert salary_facet is not None
         assert salary_facet.display_name == "給与"
@@ -195,7 +202,7 @@ class TestPhase2Integration:
         assert len(generated_facets.entity_facets) >= 1
         person_facet = next(
             (f for f in generated_facets.entity_facets if f.entity_type == "persons"),
-            None
+            None,
         )
         assert person_facet is not None
         assert person_facet.display_name == "人名"
@@ -205,7 +212,7 @@ class TestPhase2Integration:
         exported_data = self.metadata_exporter.export_metadata(
             advanced_metadata=advanced_metadata,
             generated_facets=generated_facets,
-            formats=export_formats
+            formats=export_formats,
         )
 
         # JSON-LD出力検証
@@ -220,7 +227,7 @@ class TestPhase2Integration:
         opensearch = exported_data["opensearch"]
         assert "mappings" in opensearch
         assert "properties" in opensearch["mappings"]
-        
+
         # 日本語解析器の設定確認
         settings = opensearch.get("settings", {})
         analysis = settings.get("index", {}).get("analysis", {})
@@ -238,44 +245,43 @@ class TestPhase2Integration:
         basic_metadata = {
             "source_info": {"file_path": "projects.json"},
             "processing_timestamp": "2024-06-07T10:00:00Z",
-            "rag_version": "2.0.0"
+            "rag_version": "2.0.0",
         }
 
         # 高度メタデータ生成
         advanced_metadata = self.advanced_generator.generate_advanced_metadata(
-            json_data=business_data,
-            basic_metadata=basic_metadata
+            json_data=business_data, basic_metadata=basic_metadata
         )
 
         # ビジネス用語の検出検証
         business_terms = advanced_metadata.entity_classification.business_terms
         expected_terms = ["株式会社", "有限会社"]
         detected_terms = [term.term for term in business_terms]
-        
+
         for expected in expected_terms:
             assert any(expected in term for term in detected_terms)
 
         # 価格分析検証
-        price_stats = advanced_metadata.statistical_analysis["numerical_fields"].get("price")
+        price_stats = advanced_metadata.statistical_analysis["numerical_fields"].get(
+            "price"
+        )
         assert price_stats is not None
         assert price_stats["min_value"] == 800000
         assert price_stats["max_value"] == 5000000
 
         # ファセット生成
         facets = self.facet_generator.generate_facets(advanced_metadata)
-        
+
         # 価格範囲ファセット検証
         price_facet = next(
-            (f for f in facets.numerical_facets if f.field_name == "price"),
-            None
+            (f for f in facets.numerical_facets if f.field_name == "price"), None
         )
         assert price_facet is not None
         assert len(price_facet.ranges) >= 3  # 適切な範囲分割
 
         # カテゴリファセット検証
         category_facet = next(
-            (f for f in facets.categorical_facets if f.field_name == "category"),
-            None
+            (f for f in facets.categorical_facets if f.field_name == "category"), None
         )
         assert category_facet is not None
         assert "IT サービス" in category_facet.values
@@ -287,38 +293,39 @@ class TestPhase2Integration:
         # 1000件のデータを生成
         large_dataset = []
         for i in range(1000):
-            large_dataset.append({
-                "id": i,
-                "name": f"テストユーザー{i}",
-                "category": f"カテゴリ{i % 10}",
-                "value": i * 1000,
-                "date": f"2024-{(i % 12) + 1:02d}-01",
-                "description": f"これはテストデータ{i}の説明です。"
-            })
+            large_dataset.append(
+                {
+                    "id": i,
+                    "name": f"テストユーザー{i}",
+                    "category": f"カテゴリ{i % 10}",
+                    "value": i * 1000,
+                    "date": f"2024-{(i % 12) + 1:02d}-01",
+                    "description": f"これはテストデータ{i}の説明です。",
+                }
+            )
 
         basic_metadata = {"source_info": {"file_path": "large_test.json"}}
 
         # パフォーマンス測定
         start_time = time.time()
-        
+
         advanced_metadata = self.advanced_generator.generate_advanced_metadata(
-            json_data=large_dataset,
-            basic_metadata=basic_metadata
+            json_data=large_dataset, basic_metadata=basic_metadata
         )
-        
+
         facets = self.facet_generator.generate_facets(advanced_metadata)
-        
+
         exported = self.metadata_exporter.export_metadata(
             advanced_metadata=advanced_metadata,
             generated_facets=facets,
-            formats=["opensearch", "plamo-ready"]
+            formats=["opensearch", "plamo-ready"],
         )
-        
+
         processing_time = time.time() - start_time
-        
+
         # パフォーマンス検証（30秒以内で完了すること）
         assert processing_time < 30.0
-        
+
         # 結果の妥当性検証
         assert len(facets.categorical_facets) > 0
         assert len(facets.numerical_facets) > 0
@@ -329,8 +336,7 @@ class TestPhase2Integration:
         """不正データでのエラーハンドリングテスト"""
         # 空データ
         advanced_metadata = self.advanced_generator.generate_advanced_metadata(
-            json_data=[],
-            basic_metadata={}
+            json_data=[], basic_metadata={}
         )
         assert advanced_metadata is not None
         assert advanced_metadata.data_quality.overall_score >= 0.0
@@ -340,17 +346,16 @@ class TestPhase2Integration:
             {"valid_field": "value"},
             None,
             {"another_field": 123},
-            {"mixed": [1, 2, "three"]}
+            {"mixed": [1, 2, "three"]},
         ]
-        
+
         advanced_metadata = self.advanced_generator.generate_advanced_metadata(
-            json_data=invalid_data,
-            basic_metadata={}
+            json_data=invalid_data, basic_metadata={}
         )
-        
+
         # エラーが発生しても処理は完了すること
         assert advanced_metadata is not None
-        
+
         # 品質スコアが妥当な範囲であること
         quality_score = advanced_metadata.data_quality.overall_score
         assert 0.0 <= quality_score <= 1.0
@@ -358,38 +363,37 @@ class TestPhase2Integration:
     def test_file_integration_test(self, japanese_employee_data):
         """ファイル経由での統合テスト"""
         # 一時ファイルに書き込み
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(japanese_employee_data, f, ensure_ascii=False, indent=2)
             temp_file_path = f.name
 
         try:
             # ファイルから読み込んで処理
-            with open(temp_file_path, 'r', encoding='utf-8') as f:
+            with open(temp_file_path, encoding="utf-8") as f:
                 loaded_data = json.load(f)
 
             basic_metadata = {
                 "source_info": {"file_path": temp_file_path},
-                "processing_timestamp": "2024-06-07T10:00:00Z"
+                "processing_timestamp": "2024-06-07T10:00:00Z",
             }
 
             # パイプライン実行
             advanced_metadata = self.advanced_generator.generate_advanced_metadata(
-                json_data=loaded_data,
-                basic_metadata=basic_metadata
+                json_data=loaded_data, basic_metadata=basic_metadata
             )
 
             facets = self.facet_generator.generate_facets(advanced_metadata)
 
             # ファイルパス情報の保持確認
             assert temp_file_path in str(advanced_metadata.basic_metadata)
-            
+
             # メタデータ出力にファイル情報が含まれること
             exported = self.metadata_exporter.export_metadata(
                 advanced_metadata=advanced_metadata,
                 generated_facets=facets,
-                formats=["json-ld"]
+                formats=["json-ld"],
             )
-            
+
             json_ld = exported["json-ld"]
             assert temp_file_path in json_ld["name"]
 
@@ -406,7 +410,7 @@ class TestPhase2Integration:
                 "department": "Engineering",
                 "部署": "開発部",
                 "skills": ["Python", "機械学習", "Machine Learning"],
-                "location": "Tokyo, Japan"
+                "location": "Tokyo, Japan",
             },
             {
                 "name": "John Smith",
@@ -414,29 +418,30 @@ class TestPhase2Integration:
                 "department": "Sales",
                 "部署": "営業部",
                 "skills": ["Salesforce", "CRM", "営業戦略"],
-                "location": "New York, USA"
-            }
+                "location": "New York, USA",
+            },
         ]
 
         basic_metadata = {"source_info": {"file_path": "multilingual.json"}}
 
         advanced_metadata = self.advanced_generator.generate_advanced_metadata(
-            json_data=mixed_data,
-            basic_metadata=basic_metadata
+            json_data=mixed_data, basic_metadata=basic_metadata
         )
 
         # 日本語名・英語名両方の検出確認
         persons = advanced_metadata.entity_classification.persons
         person_names = [p.name for p in persons]
-        
+
         # 日本語名が検出されること
-        japanese_names = [name for name in person_names if any(char >= '\u3040' for char in name)]
+        japanese_names = [
+            name for name in person_names if any(char >= "\u3040" for char in name)
+        ]
         assert len(japanese_names) >= 1
 
         # 組織名（部署）の検出
         organizations = advanced_metadata.entity_classification.organizations
         org_names = [o.organization for o in organizations]
-        
+
         # 日本語部署名が検出されること
         assert any("部" in org for org in org_names)
 
@@ -445,19 +450,17 @@ class TestPhase2Integration:
         basic_metadata = {"source_info": {"file_path": "ui_test.json"}}
 
         advanced_metadata = self.advanced_generator.generate_advanced_metadata(
-            json_data=japanese_employee_data,
-            basic_metadata=basic_metadata
+            json_data=japanese_employee_data, basic_metadata=basic_metadata
         )
 
         facets = self.facet_generator.generate_facets(advanced_metadata)
 
         # 給与ファセットのUI設定検証
         salary_facet = next(
-            (f for f in facets.numerical_facets if f.field_name == "salary"),
-            None
+            (f for f in facets.numerical_facets if f.field_name == "salary"), None
         )
         assert salary_facet is not None
-        
+
         ui_config = salary_facet.ui_config
         assert ui_config["widget_type"] == "range_slider"
         assert ui_config["number_format"] == "currency"
@@ -465,22 +468,20 @@ class TestPhase2Integration:
 
         # 年齢ファセットのUI設定検証
         age_facet = next(
-            (f for f in facets.numerical_facets if f.field_name == "age"),
-            None
+            (f for f in facets.numerical_facets if f.field_name == "age"), None
         )
         assert age_facet is not None
-        
+
         age_ui_config = age_facet.ui_config
         assert age_ui_config["number_format"] == "integer"
         assert age_ui_config["suffix"] == "歳"
 
         # エンティティファセットのUI設定検証
         person_facet = next(
-            (f for f in facets.entity_facets if f.entity_type == "persons"),
-            None
+            (f for f in facets.entity_facets if f.entity_type == "persons"), None
         )
         assert person_facet is not None
-        
+
         person_ui_config = person_facet.ui_config
         assert person_ui_config["icon"] == "👤"
         assert "color" in person_ui_config
@@ -491,18 +492,24 @@ class TestPhase2Integration:
         basic_metadata = {"source_info": {"file_path": "export_test.json"}}
 
         advanced_metadata = self.advanced_generator.generate_advanced_metadata(
-            json_data=japanese_employee_data,
-            basic_metadata=basic_metadata
+            json_data=japanese_employee_data, basic_metadata=basic_metadata
         )
 
         facets = self.facet_generator.generate_facets(advanced_metadata)
 
         # 全形式での出力テスト
-        all_formats = ["json-ld", "opensearch", "elasticsearch", "plamo-ready", "search-config", "facet-config"]
+        all_formats = [
+            "json-ld",
+            "opensearch",
+            "elasticsearch",
+            "plamo-ready",
+            "search-config",
+            "facet-config",
+        ]
         exported = self.metadata_exporter.export_metadata(
             advanced_metadata=advanced_metadata,
             generated_facets=facets,
-            formats=all_formats
+            formats=all_formats,
         )
 
         # 全形式が正常に出力されること
@@ -514,7 +521,9 @@ class TestPhase2Integration:
         # Elasticsearch特有の設定確認
         elasticsearch = exported["elasticsearch"]
         assert "embedding_vector" in elasticsearch["mappings"]["properties"]
-        assert elasticsearch["mappings"]["properties"]["embedding_vector"]["dims"] == 1024
+        assert (
+            elasticsearch["mappings"]["properties"]["embedding_vector"]["dims"] == 1024
+        )
 
         # PLaMo-ready形式の詳細確認
         plamo_ready = exported["plamo-ready"]

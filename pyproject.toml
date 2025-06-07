@@ -43,6 +43,7 @@ dev = [
     "pytest>=8.3.5",
     "pytest-cov>=5.0.0",
     "pytest-benchmark>=5.1.0",
+    "pytest-asyncio>=0.24.0",
     "coverage>=7.6.1",
     "mypy>=1.14.1",
     "ruff>=0.11.11",
@@ -133,6 +134,7 @@ addopts = [
     "--tb=short",                    # 短いトレースバック
 ]
 testpaths = ["tests"]
+asyncio_mode = "auto"
 markers = [
     "slow: marks tests as slow (use -m 'not slow' to deselect)",
     "integration: marks tests as integration tests",

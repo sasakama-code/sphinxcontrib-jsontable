@@ -55,7 +55,9 @@ class MetadataExporter:
                 elif format_type == "opensearch":
                     exports["opensearch"] = self._export_opensearch(advanced_metadata)
                 elif format_type == "elasticsearch":
-                    exports["elasticsearch"] = self._export_elasticsearch(advanced_metadata)
+                    exports["elasticsearch"] = self._export_elasticsearch(
+                        advanced_metadata
+                    )
                 elif format_type == "plamo-ready":
                     exports["plamo-ready"] = self._export_plamo_ready(advanced_metadata)
                 elif format_type == "search-config":
@@ -63,7 +65,9 @@ class MetadataExporter:
                         advanced_metadata, generated_facets
                     )
                 elif format_type == "facet-config":
-                    exports["facet-config"] = self._export_facet_config(generated_facets)
+                    exports["facet-config"] = self._export_facet_config(
+                        generated_facets
+                    )
                 elif format_type == "custom":
                     exports["custom"] = self._export_custom(
                         advanced_metadata, custom_config or {}
@@ -108,7 +112,9 @@ class MetadataExporter:
             "rag:entityClassification": self._format_entity_classification_for_jsonld(
                 metadata.entity_classification
             ),
-            "rag:dataQuality": self._format_data_quality_for_jsonld(metadata.data_quality),
+            "rag:dataQuality": self._format_data_quality_for_jsonld(
+                metadata.data_quality
+            ),
             "rag:plamoFeatures": self._format_plamo_features_for_jsonld(
                 metadata.plamo_features
             ),
@@ -158,7 +164,9 @@ class MetadataExporter:
         statistical_analysis = metadata.statistical_analysis
 
         # 数値フィールド
-        for field_name, stats in statistical_analysis.get("numerical_fields", {}).items():
+        for field_name, stats in statistical_analysis.get(
+            "numerical_fields", {}
+        ).items():
             properties[field_name] = {
                 "type": "float",
                 "fields": {
@@ -172,7 +180,9 @@ class MetadataExporter:
             }
 
         # カテゴリフィールド
-        for field_name, stats in statistical_analysis.get("categorical_fields", {}).items():
+        for field_name, stats in statistical_analysis.get(
+            "categorical_fields", {}
+        ).items():
             field_mapping = {
                 "type": "text",
                 "analyzer": "japanese_analyzer",
@@ -288,7 +298,9 @@ class MetadataExporter:
                     "max_chunk_length": plamo_features.vector_optimization.get(
                         "max_chunk_length", 512
                     ),
-                    "overlap_ratio": plamo_features.vector_optimization.get("overlap_ratio", 0.1),
+                    "overlap_ratio": plamo_features.vector_optimization.get(
+                        "overlap_ratio", 0.1
+                    ),
                     "prioritize_entities": plamo_features.vector_optimization.get(
                         "prioritize_entities", True
                     ),
@@ -316,8 +328,12 @@ class MetadataExporter:
             "quality_metrics": {
                 "overall_score": metadata.data_quality.overall_score,
                 "text_quality_indicators": {
-                    "formality_level": plamo_features.embedding_hints.get("formality_level"),
-                    "technical_level": plamo_features.embedding_hints.get("technical_level"),
+                    "formality_level": plamo_features.embedding_hints.get(
+                        "formality_level"
+                    ),
+                    "technical_level": plamo_features.embedding_hints.get(
+                        "technical_level"
+                    ),
                     "domain": plamo_features.embedding_hints.get("domain"),
                 },
             },
@@ -388,7 +404,10 @@ class MetadataExporter:
         custom_format = config.get("format", {})
         include_sections = config.get("include_sections", ["all"])
 
-        custom_output = {"metadata_format": "custom", "generated_at": datetime.now().isoformat()}
+        custom_output = {
+            "metadata_format": "custom",
+            "generated_at": datetime.now().isoformat(),
+        }
 
         if "all" in include_sections or "basic" in include_sections:
             custom_output["basic_metadata"] = metadata.basic_metadata
@@ -447,7 +466,7 @@ class MetadataExporter:
         numerical_fields = len(stats.get("numerical_fields", {}))
         categorical_fields = len(stats.get("categorical_fields", {}))
 
-        description = f"JSONテーブルデータセット。"
+        description = "JSONテーブルデータセット。"
         description += f"数値フィールド{numerical_fields}個、"
         description += f"カテゴリフィールド{categorical_fields}個を含む。"
 
@@ -581,24 +600,32 @@ class MetadataExporter:
         variables = []
 
         # 数値変数
-        for field_name, stats in metadata.statistical_analysis.get("numerical_fields", {}).items():
-            variables.append({
-                "@type": "PropertyValue",
-                "name": field_name,
-                "description": f"数値フィールド: {field_name}",
-                "minValue": stats.get("min_value"),
-                "maxValue": stats.get("max_value"),
-                "unitText": self._guess_unit(field_name),
-            })
+        for field_name, stats in metadata.statistical_analysis.get(
+            "numerical_fields", {}
+        ).items():
+            variables.append(
+                {
+                    "@type": "PropertyValue",
+                    "name": field_name,
+                    "description": f"数値フィールド: {field_name}",
+                    "minValue": stats.get("min_value"),
+                    "maxValue": stats.get("max_value"),
+                    "unitText": self._guess_unit(field_name),
+                }
+            )
 
         # カテゴリ変数
-        for field_name, stats in metadata.statistical_analysis.get("categorical_fields", {}).items():
-            variables.append({
-                "@type": "PropertyValue",
-                "name": field_name,
-                "description": f"カテゴリフィールド: {field_name}",
-                "valueReference": list(stats.get("value_counts", {}).keys())[:10],
-            })
+        for field_name, stats in metadata.statistical_analysis.get(
+            "categorical_fields", {}
+        ).items():
+            variables.append(
+                {
+                    "@type": "PropertyValue",
+                    "name": field_name,
+                    "description": f"カテゴリフィールド: {field_name}",
+                    "valueReference": list(stats.get("value_counts", {}).keys())[:10],
+                }
+            )
 
         return variables
 
@@ -608,7 +635,10 @@ class MetadataExporter:
 
         if any(keyword in field_lower for keyword in ["age", "年齢"]):
             return "歳"
-        elif any(keyword in field_lower for keyword in ["price", "salary", "cost", "金額", "給与"]):
+        elif any(
+            keyword in field_lower
+            for keyword in ["price", "salary", "cost", "金額", "給与"]
+        ):
             return "円"
         elif any(keyword in field_lower for keyword in ["percent", "rate", "割合"]):
             return "%"
@@ -686,7 +716,9 @@ class MetadataExporter:
 
         # 統計集計
         for facet in facets.numerical_facets:
-            aggregations[f"{facet.field_name}_stats"] = {"stats": {"field": facet.field_name}}
+            aggregations[f"{facet.field_name}_stats"] = {
+                "stats": {"field": facet.field_name}
+            }
 
         return aggregations
 
@@ -695,7 +727,9 @@ class MetadataExporter:
         suggestion_fields = []
 
         # 高い多様性を持つカテゴリフィールド
-        for field_name, stats in metadata.statistical_analysis.get("categorical_fields", {}).items():
+        for field_name, stats in metadata.statistical_analysis.get(
+            "categorical_fields", {}
+        ).items():
             diversity = stats.get("diversity_index", 0)
             if diversity > 0.5:  # 多様性が高い
                 suggestion_fields.append(field_name)
@@ -707,36 +741,44 @@ class MetadataExporter:
         groups = []
 
         if facets.categorical_facets:
-            groups.append({
-                "group_name": "カテゴリ",
-                "group_id": "categorical",
-                "facets": [f.field_name for f in facets.categorical_facets],
-                "collapsed": False,
-            })
+            groups.append(
+                {
+                    "group_name": "カテゴリ",
+                    "group_id": "categorical",
+                    "facets": [f.field_name for f in facets.categorical_facets],
+                    "collapsed": False,
+                }
+            )
 
         if facets.numerical_facets:
-            groups.append({
-                "group_name": "数値範囲",
-                "group_id": "numerical",
-                "facets": [f.field_name for f in facets.numerical_facets],
-                "collapsed": False,
-            })
+            groups.append(
+                {
+                    "group_name": "数値範囲",
+                    "group_id": "numerical",
+                    "facets": [f.field_name for f in facets.numerical_facets],
+                    "collapsed": False,
+                }
+            )
 
         if facets.temporal_facets:
-            groups.append({
-                "group_name": "日付・時間",
-                "group_id": "temporal",
-                "facets": [f.field_name for f in facets.temporal_facets],
-                "collapsed": True,
-            })
+            groups.append(
+                {
+                    "group_name": "日付・時間",
+                    "group_id": "temporal",
+                    "facets": [f.field_name for f in facets.temporal_facets],
+                    "collapsed": True,
+                }
+            )
 
         if facets.entity_facets:
-            groups.append({
-                "group_name": "エンティティ",
-                "group_id": "entities",
-                "facets": [f.entity_type for f in facets.entity_facets],
-                "collapsed": True,
-            })
+            groups.append(
+                {
+                    "group_name": "エンティティ",
+                    "group_id": "entities",
+                    "facets": [f.entity_type for f in facets.entity_facets],
+                    "collapsed": True,
+                }
+            )
 
         return groups
 

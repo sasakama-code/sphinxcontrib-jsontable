@@ -153,7 +153,9 @@ class SearchFacetGenerator:
 
         return facets
 
-    def _generate_categorical_facets(self, statistical_analysis: dict) -> list[CategoricalFacet]:
+    def _generate_categorical_facets(
+        self, statistical_analysis: dict
+    ) -> list[CategoricalFacet]:
         """カテゴリカルファセットの生成"""
         categorical_facets = []
 
@@ -191,7 +193,9 @@ class SearchFacetGenerator:
 
         return categorical_facets
 
-    def _generate_numerical_facets(self, statistical_analysis: dict) -> list[NumericalFacet]:
+    def _generate_numerical_facets(
+        self, statistical_analysis: dict
+    ) -> list[NumericalFacet]:
         """数値ファセットの生成"""
         numerical_facets = []
 
@@ -233,7 +237,9 @@ class SearchFacetGenerator:
 
         return numerical_facets
 
-    def _generate_temporal_facets(self, statistical_analysis: dict) -> list[TemporalFacet]:
+    def _generate_temporal_facets(
+        self, statistical_analysis: dict
+    ) -> list[TemporalFacet]:
         """時系列ファセットの生成"""
         temporal_facets = []
 
@@ -267,7 +273,9 @@ class SearchFacetGenerator:
 
         return temporal_facets
 
-    def _generate_entity_facets(self, entity_classification: EntityClassification) -> list[EntityFacet]:
+    def _generate_entity_facets(
+        self, entity_classification: EntityClassification
+    ) -> list[EntityFacet]:
         """エンティティファセットの生成"""
         entity_facets = []
 
@@ -285,13 +293,17 @@ class SearchFacetGenerator:
 
         # 組織ファセット
         if entity_classification.organizations:
-            org_facet = self._create_organization_facet(entity_classification.organizations)
+            org_facet = self._create_organization_facet(
+                entity_classification.organizations
+            )
             if org_facet:
                 entity_facets.append(org_facet)
 
         # ビジネス用語ファセット
         if entity_classification.business_terms:
-            business_facet = self._create_business_facet(entity_classification.business_terms)
+            business_facet = self._create_business_facet(
+                entity_classification.business_terms
+            )
             if business_facet:
                 entity_facets.append(business_facet)
 
@@ -306,7 +318,8 @@ class SearchFacetGenerator:
         return (
             1 < unique_count <= self.config.max_categorical_values
             and total_values >= 3  # 最小データ数（5→3に緩和）
-            and (unique_count / total_values) <= 0.9  # 多様性が高すぎない（0.8→0.9に緩和）
+            and (unique_count / total_values)
+            <= 0.9  # 多様性が高すぎない（0.8→0.9に緩和）
         )
 
     def _is_suitable_for_numerical_facet(self, stats: dict) -> bool:
@@ -368,58 +381,68 @@ class SearchFacetGenerator:
 
         # Q1未満
         if quartiles[0] > min_val:
-            ranges.append({
-                "from": min_val,
-                "to": quartiles[0],
-                "label": f"{self._format_number(min_val)} 以下",
-                "type": "below_q1",
-            })
+            ranges.append(
+                {
+                    "from": min_val,
+                    "to": quartiles[0],
+                    "label": f"{self._format_number(min_val)} 以下",
+                    "type": "below_q1",
+                }
+            )
 
         # Q1-Q2
-        ranges.append({
-            "from": quartiles[0],
-            "to": quartiles[1],
-            "label": f"{self._format_number(quartiles[0])} - {self._format_number(quartiles[1])}",
-            "type": "q1_q2",
-        })
+        ranges.append(
+            {
+                "from": quartiles[0],
+                "to": quartiles[1],
+                "label": f"{self._format_number(quartiles[0])} - {self._format_number(quartiles[1])}",
+                "type": "q1_q2",
+            }
+        )
 
         # Q2-Q3
-        ranges.append({
-            "from": quartiles[1],
-            "to": quartiles[2],
-            "label": f"{self._format_number(quartiles[1])} - {self._format_number(quartiles[2])}",
-            "type": "q2_q3",
-        })
+        ranges.append(
+            {
+                "from": quartiles[1],
+                "to": quartiles[2],
+                "label": f"{self._format_number(quartiles[1])} - {self._format_number(quartiles[2])}",
+                "type": "q2_q3",
+            }
+        )
 
         # Q3超過
         if quartiles[2] < max_val:
-            ranges.append({
-                "from": quartiles[2],
-                "to": max_val,
-                "label": f"{self._format_number(quartiles[2])} 以上",
-                "type": "above_q3",
-            })
+            ranges.append(
+                {
+                    "from": quartiles[2],
+                    "to": max_val,
+                    "label": f"{self._format_number(quartiles[2])} 以上",
+                    "type": "above_q3",
+                }
+            )
 
         # 外れ値が多い場合の特別範囲
         outliers = stats.get("outliers", [])
         if len(outliers) > len(stats.get("data", [])) * 0.1:  # 10%以上が外れ値
             outlier_min = min(outliers) if outliers else min_val
             outlier_max = max(outliers) if outliers else max_val
-            ranges.append({
-                "from": outlier_min,
-                "to": outlier_max,
-                "label": "外れ値範囲",
-                "type": "outliers",
-            })
+            ranges.append(
+                {
+                    "from": outlier_min,
+                    "to": outlier_max,
+                    "label": "外れ値範囲",
+                    "type": "outliers",
+                }
+            )
 
         return ranges
 
     def _format_number(self, number: float) -> str:
         """数値の日本語向けフォーマット"""
         if number >= 10000:
-            return f"{number/10000:.1f}万"
+            return f"{number / 10000:.1f}万"
         elif number >= 1000:
-            return f"{number/1000:.1f}千"
+            return f"{number / 1000:.1f}千"
         elif number == int(number):
             return str(int(number))
         else:
@@ -486,7 +509,7 @@ class SearchFacetGenerator:
 
         # 日付値の解析
         dates = []
-        for value in value_counts.keys():
+        for value in value_counts:
             parsed_date = self._parse_date(str(value))
             if parsed_date:
                 dates.append(parsed_date)
@@ -555,23 +578,29 @@ class SearchFacetGenerator:
 
         return ranges
 
-    def _generate_daily_ranges(self, start_date: datetime, end_date: datetime) -> list[dict]:
+    def _generate_daily_ranges(
+        self, start_date: datetime, end_date: datetime
+    ) -> list[dict]:
         """日別範囲生成"""
         ranges = []
         current = start_date
 
         while current <= end_date:
-            ranges.append({
-                "from": current.isoformat(),
-                "to": current.isoformat(),
-                "label": current.strftime("%Y年%m月%d日"),
-                "type": "daily",
-            })
+            ranges.append(
+                {
+                    "from": current.isoformat(),
+                    "to": current.isoformat(),
+                    "label": current.strftime("%Y年%m月%d日"),
+                    "type": "daily",
+                }
+            )
             current = current.replace(day=current.day + 1)
 
         return ranges
 
-    def _generate_weekly_ranges(self, start_date: datetime, end_date: datetime) -> list[dict]:
+    def _generate_weekly_ranges(
+        self, start_date: datetime, end_date: datetime
+    ) -> list[dict]:
         """週別範囲生成"""
         ranges = []
         current = start_date
@@ -579,20 +608,25 @@ class SearchFacetGenerator:
         week_num = 1
         while current <= end_date:
             week_end = min(current.replace(day=current.day + 6), end_date)
-            ranges.append({
-                "from": current.isoformat(),
-                "to": week_end.isoformat(),
-                "label": f"第{week_num}週 ({current.strftime('%m/%d')} - {week_end.strftime('%m/%d')})",
-                "type": "weekly",
-            })
+            ranges.append(
+                {
+                    "from": current.isoformat(),
+                    "to": week_end.isoformat(),
+                    "label": f"第{week_num}週 ({current.strftime('%m/%d')} - {week_end.strftime('%m/%d')})",
+                    "type": "weekly",
+                }
+            )
             current = week_end.replace(day=week_end.day + 1)
             week_num += 1
 
         return ranges
 
-    def _generate_monthly_ranges(self, start_date: datetime, end_date: datetime) -> list[dict]:
+    def _generate_monthly_ranges(
+        self, start_date: datetime, end_date: datetime
+    ) -> list[dict]:
         """月別範囲生成"""
         import calendar
+
         ranges = []
         current = start_date
 
@@ -602,12 +636,14 @@ class SearchFacetGenerator:
             month_end = current.replace(day=last_day_of_month)
             month_end = min(month_end, end_date)
 
-            ranges.append({
-                "from": current.isoformat(),
-                "to": month_end.isoformat(),
-                "label": f"{current.year}年{current.month}月",
-                "type": "monthly",
-            })
+            ranges.append(
+                {
+                    "from": current.isoformat(),
+                    "to": month_end.isoformat(),
+                    "label": f"{current.year}年{current.month}月",
+                    "type": "monthly",
+                }
+            )
 
             # 次の月の1日に移動
             if current.month == 12:
@@ -617,7 +653,9 @@ class SearchFacetGenerator:
 
         return ranges
 
-    def _generate_yearly_ranges(self, start_date: datetime, end_date: datetime) -> list[dict]:
+    def _generate_yearly_ranges(
+        self, start_date: datetime, end_date: datetime
+    ) -> list[dict]:
         """年別範囲生成"""
         ranges = []
         current_year = start_date.year
@@ -630,12 +668,14 @@ class SearchFacetGenerator:
             year_start = max(year_start, start_date)
             year_end = min(year_end, end_date)
 
-            ranges.append({
-                "from": year_start.isoformat(),
-                "to": year_end.isoformat(),
-                "label": f"{current_year}年",
-                "type": "yearly",
-            })
+            ranges.append(
+                {
+                    "from": year_start.isoformat(),
+                    "to": year_end.isoformat(),
+                    "label": f"{current_year}年",
+                    "type": "yearly",
+                }
+            )
 
             current_year += 1
 
@@ -785,7 +825,9 @@ class SearchFacetGenerator:
             return None
 
         high_confidence_terms = [
-            b for b in business_terms if b.confidence >= self.config.confidence_threshold
+            b
+            for b in business_terms
+            if b.confidence >= self.config.confidence_threshold
         ]
 
         if not high_confidence_terms:
@@ -820,7 +862,9 @@ class SearchFacetGenerator:
         unique_count = stats.get("unique_count", 0)
 
         ui_config = {
-            "widget_type": "checkbox_list" if unique_count <= 10 else "searchable_dropdown",
+            "widget_type": "checkbox_list"
+            if unique_count <= 10
+            else "searchable_dropdown",
             "max_visible_items": min(unique_count, 8),
             "enable_search": unique_count > 5,
             "enable_select_all": unique_count > 3,
@@ -851,7 +895,10 @@ class SearchFacetGenerator:
         }
 
         # フィールド特有の設定
-        if any(keyword in field_name.lower() for keyword in ["price", "salary", "cost", "金額", "給与"]):
+        if any(
+            keyword in field_name.lower()
+            for keyword in ["price", "salary", "cost", "金額", "給与"]
+        ):
             ui_config["number_format"] = "currency"
             ui_config["currency_symbol"] = "¥"
 
@@ -859,13 +906,17 @@ class SearchFacetGenerator:
             ui_config["number_format"] = "integer"
             ui_config["suffix"] = "歳"
 
-        elif any(keyword in field_name.lower() for keyword in ["percent", "rate", "割合"]):
+        elif any(
+            keyword in field_name.lower() for keyword in ["percent", "rate", "割合"]
+        ):
             ui_config["number_format"] = "percentage"
             ui_config["suffix"] = "%"
 
         return ui_config
 
-    def _generate_temporal_ui_config(self, field_name: str, temporal_info: dict) -> dict:
+    def _generate_temporal_ui_config(
+        self, field_name: str, temporal_info: dict
+    ) -> dict:
         """時系列ファセット用UIコンフィグ生成"""
         span_days = temporal_info.get("span_days", 0)
 
@@ -905,11 +956,19 @@ class SearchFacetGenerator:
 
     def _detect_number_format(self, field_name: str) -> str:
         """数値フォーマットの検出"""
-        if any(keyword in field_name.lower() for keyword in ["price", "salary", "cost", "金額"]):
+        if any(
+            keyword in field_name.lower()
+            for keyword in ["price", "salary", "cost", "金額"]
+        ):
             return "currency"
-        elif any(keyword in field_name.lower() for keyword in ["percent", "rate", "割合"]):
+        elif any(
+            keyword in field_name.lower() for keyword in ["percent", "rate", "割合"]
+        ):
             return "percentage"
-        elif any(keyword in field_name.lower() for keyword in ["age", "count", "number", "年齢"]):
+        elif any(
+            keyword in field_name.lower()
+            for keyword in ["age", "count", "number", "年齢"]
+        ):
             return "integer"
         else:
             return "decimal"

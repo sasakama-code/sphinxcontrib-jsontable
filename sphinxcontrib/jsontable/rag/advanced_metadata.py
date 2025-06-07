@@ -218,7 +218,9 @@ class StatisticalAnalyzer:
         )
 
         # 多様性指数 (Simpson's Diversity Index)
-        diversity_index = 1 - sum((count / total) ** 2 for count in value_counts.values())
+        diversity_index = 1 - sum(
+            (count / total) ** 2 for count in value_counts.values()
+        )
 
         # 最頻値
         most_common = value_counts.most_common(10)
@@ -235,7 +237,9 @@ class StatisticalAnalyzer:
             patterns=patterns,
         )
 
-    def _calculate_skewness(self, data: list[float], mean: float, std_dev: float) -> float:
+    def _calculate_skewness(
+        self, data: list[float], mean: float, std_dev: float
+    ) -> float:
         """歪度の計算"""
         if std_dev == 0:
             return 0.0
@@ -243,11 +247,15 @@ class StatisticalAnalyzer:
         if n < 3:  # 歪度計算には最低3つのデータポイントが必要
             return 0.0
         try:
-            return (n / ((n - 1) * (n - 2))) * sum(((x - mean) / std_dev) ** 3 for x in data)
+            return (n / ((n - 1) * (n - 2))) * sum(
+                ((x - mean) / std_dev) ** 3 for x in data
+            )
         except ZeroDivisionError:
             return 0.0
 
-    def _calculate_kurtosis(self, data: list[float], mean: float, std_dev: float) -> float:
+    def _calculate_kurtosis(
+        self, data: list[float], mean: float, std_dev: float
+    ) -> float:
         """尖度の計算"""
         if std_dev == 0:
             return 0.0
@@ -557,7 +565,9 @@ class JapaneseEntityClassifier:
         else:
             return "general"
 
-    def _calculate_confidence_scores(self, classification: EntityClassification) -> dict[str, float]:
+    def _calculate_confidence_scores(
+        self, classification: EntityClassification
+    ) -> dict[str, float]:
         """全体的な信頼度スコアの計算"""
         scores = {}
 
@@ -596,10 +606,7 @@ class DataQualityAssessor:
 
         # 総合スコア計算（重み付き平均）
         overall_score = (
-            completeness * 0.3
-            + consistency * 0.25
-            + validity * 0.25
-            + accuracy * 0.2
+            completeness * 0.3 + consistency * 0.25 + validity * 0.25 + accuracy * 0.2
         )
 
         return DataQualityReport(
@@ -726,7 +733,9 @@ class DataQualityAssessor:
                 return False
 
         # NaNや無限大は無効
-        return not (isinstance(item, int | float) and (np.isnan(item) or np.isinf(item)))
+        return not (
+            isinstance(item, int | float) and (np.isnan(item) or np.isinf(item))
+        )
 
     def _collect_detailed_issues(self, data: Any) -> dict[str, list[str]]:
         """詳細な問題点の収集"""
@@ -737,10 +746,16 @@ class DataQualityAssessor:
                 if isinstance(item, dict):
                     for key, value in item.items():
                         if value is None or value == "":
-                            issues["missing_data"].append(f"Row {i}, field '{key}': missing value")
+                            issues["missing_data"].append(
+                                f"Row {i}, field '{key}': missing value"
+                            )
 
                         # フォーマット問題の検出
-                        if isinstance(value, str) and "email" in key.lower() and "@" not in value:
+                        if (
+                            isinstance(value, str)
+                            and "email" in key.lower()
+                            and "@" not in value
+                        ):
                             issues["format_issues"].append(
                                 f"Row {i}, field '{key}': invalid email format"
                             )
@@ -780,7 +795,9 @@ class AdvancedMetadataGenerator:
         data_quality = self.data_quality_assessor.assess_data_quality(json_data)
 
         # 検索ファセット生成
-        search_facets = self._generate_search_facets(statistical_analysis, entity_classification)
+        search_facets = self._generate_search_facets(
+            statistical_analysis, entity_classification
+        )
 
         # PLaMo特徴量準備
         plamo_features = self._prepare_plamo_features(json_data, entity_classification)
@@ -796,30 +813,42 @@ class AdvancedMetadataGenerator:
 
     def _perform_statistical_analysis(self, data: Any) -> dict[str, Any]:
         """統計分析の実行"""
-        analysis = {"numerical_fields": {}, "categorical_fields": {}, "temporal_fields": {}}
+        analysis = {
+            "numerical_fields": {},
+            "categorical_fields": {},
+            "temporal_fields": {},
+        }
 
         if isinstance(data, list) and data and isinstance(data[0], dict):
             # オブジェクト配列の場合
             for key in data[0]:
-                    field_values = [
-                        item.get(key) for item in data if isinstance(item, dict) and key in item
-                    ]
+                field_values = [
+                    item.get(key)
+                    for item in data
+                    if isinstance(item, dict) and key in item
+                ]
 
-                    # 数値フィールドの分析
-                    if field_values and isinstance(field_values[0], int | float):
-                        numerical_values = [v for v in field_values if isinstance(v, int | float)]
-                        if numerical_values:
-                            analysis["numerical_fields"][key] = self.statistical_analyzer.analyze_numerical_data(
+                # 数値フィールドの分析
+                if field_values and isinstance(field_values[0], int | float):
+                    numerical_values = [
+                        v for v in field_values if isinstance(v, int | float)
+                    ]
+                    if numerical_values:
+                        analysis["numerical_fields"][key] = (
+                            self.statistical_analyzer.analyze_numerical_data(
                                 numerical_values
                             ).__dict__
+                        )
 
-                    # カテゴリフィールドの分析
-                    elif field_values and isinstance(field_values[0], str):
-                        string_values = [v for v in field_values if isinstance(v, str)]
-                        if string_values:
-                            analysis["categorical_fields"][key] = self.statistical_analyzer.analyze_categorical_data(
+                # カテゴリフィールドの分析
+                elif field_values and isinstance(field_values[0], str):
+                    string_values = [v for v in field_values if isinstance(v, str)]
+                    if string_values:
+                        analysis["categorical_fields"][key] = (
+                            self.statistical_analyzer.analyze_categorical_data(
                                 string_values
                             ).__dict__
+                        )
 
         return analysis
 
@@ -846,7 +875,9 @@ class AdvancedMetadataGenerator:
         facets = SearchFacets()
 
         # カテゴリカルファセット
-        for field_name, stats in statistical_analysis.get("categorical_fields", {}).items():
+        for field_name, stats in statistical_analysis.get(
+            "categorical_fields", {}
+        ).items():
             if stats["unique_count"] <= 20:  # ファセット化に適した値数
                 facets.categorical[field_name] = {
                     "type": "terms",
@@ -855,7 +886,9 @@ class AdvancedMetadataGenerator:
                 }
 
         # 数値範囲ファセット
-        for field_name, stats in statistical_analysis.get("numerical_fields", {}).items():
+        for field_name, stats in statistical_analysis.get(
+            "numerical_fields", {}
+        ).items():
             min_val = stats["min_value"]
             max_val = stats["max_value"]
             if max_val > min_val:
@@ -893,11 +926,13 @@ class AdvancedMetadataGenerator:
         for i in range(range_count):
             start = min_val + (i * step)
             end = min_val + ((i + 1) * step)
-            ranges.append({
-                "from": round(start, 2),
-                "to": round(end, 2),
-                "label": f"{round(start, 0)}-{round(end, 0)}"
-            })
+            ranges.append(
+                {
+                    "from": round(start, 2),
+                    "to": round(end, 2),
+                    "label": f"{round(start, 0)}-{round(end, 0)}",
+                }
+            )
 
         return ranges
 
@@ -988,12 +1023,15 @@ class AdvancedMetadataGenerator:
 
         return list(katakana_terms)
 
-    def _analyze_business_context(self, entity_classification: EntityClassification) -> dict:
+    def _analyze_business_context(
+        self, entity_classification: EntityClassification
+    ) -> dict:
         """ビジネスコンテキストの分析"""
         context = {
             "has_company_entities": len(entity_classification.organizations) > 0,
             "has_job_titles": any(
-                "job_title" in term.category for term in entity_classification.business_terms
+                "job_title" in term.category
+                for term in entity_classification.business_terms
             ),
             "formality_indicators": [],
         }
@@ -1004,7 +1042,9 @@ class AdvancedMetadataGenerator:
 
         return context
 
-    def _calculate_entity_richness(self, entity_classification: EntityClassification) -> float:
+    def _calculate_entity_richness(
+        self, entity_classification: EntityClassification
+    ) -> float:
         """エンティティの豊富さを計算"""
         total_entities = (
             len(entity_classification.persons)
@@ -1095,4 +1135,3 @@ class AdvancedMetadataGenerator:
             return "moderately_technical"
         else:
             return "non_technical"
-

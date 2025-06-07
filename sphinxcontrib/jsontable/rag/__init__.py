@@ -25,16 +25,16 @@ Phase 3: PLaMo-Embedding-1B Integration
 
 # Phase 2 modules (implemented)
 from .advanced_metadata import AdvancedMetadataGenerator
-from .search_facets import SearchFacetGenerator
 from .metadata_exporter import MetadataExporter
+from .search_facets import SearchFacetGenerator
 
 __version__ = "0.2.0-dev"
 __all__ = [
     # Phase 1 (pending)
-    # "RAGMetadataExtractor", 
+    # "RAGMetadataExtractor",
     # "SemanticChunker",
     # Phase 2 (implemented)
     "AdvancedMetadataGenerator",
-    "SearchFacetGenerator", 
+    "SearchFacetGenerator",
     "MetadataExporter",
 ]

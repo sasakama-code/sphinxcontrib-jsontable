@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 SemanticChunker - テーブルデータのセマンティックチャンク化
 
@@ -17,11 +16,10 @@ Author: Claude Code Assistant
 """
 
 import json
-import re
-from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass
-from datetime import datetime
 import logging
+import re
+from dataclasses import dataclass
+from typing import Any
 
 from .metadata_extractor import BasicMetadata, JsonData
 
@@ -31,24 +29,25 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SemanticChunk:
     """セマンティックチャンクの構造"""
+
     chunk_id: str
     chunk_type: str
     content: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     search_weight: float
     embedding_hint: str
 
 
 class SemanticChunker:
     """テーブルデータのセマンティックチャンク化クラス
-    
+
     構造に基づく意味のある単位でデータを分割し、
     検索・埋め込み処理に最適化されたチャンクを生成します。
     """
-    
-    def __init__(self, chunk_strategy: str = 'adaptive', max_chunk_size: int = 1000):
+
+    def __init__(self, chunk_strategy: str = "adaptive", max_chunk_size: int = 1000):
         """セマンティックチャンカーを初期化
-        
+
         Args:
             chunk_strategy: チャンク戦略 ('row_based', 'semantic_blocks', 'adaptive')
             max_chunk_size: チャンクの最大文字数
@@ -56,56 +55,62 @@ class SemanticChunker:
         self.chunk_strategy = chunk_strategy
         self.max_chunk_size = max_chunk_size
         self.japanese_patterns = self._init_japanese_patterns()
-        
-    def _init_japanese_patterns(self) -> Dict[str, re.Pattern]:
+
+    def _init_japanese_patterns(self) -> dict[str, re.Pattern]:
         """日本語処理用パターンを初期化"""
         return {
-            'sentence_boundary': re.compile(r'[。！？\.\!\?]+'),
-            'phrase_boundary': re.compile(r'[、，,]+'),
-            'numeric_with_unit': re.compile(r'\d+(\.\d+)?[円¥%個件人歳年月日時分秒]+'),
-            'japanese_name': re.compile(r'[一-龯]{1,4}[　\s]*[一-龯]{1,3}'),
-            'organization': re.compile(r'[一-龯]+[会社部課係室局省庁]\b')
+            "sentence_boundary": re.compile(r"[。！？\.\!\?]+"),  # noqa: RUF001
+            "phrase_boundary": re.compile(r"[、，,]+"),  # noqa: RUF001
+            "numeric_with_unit": re.compile(r"\d+(\.\d+)?[円¥%個件人歳年月日時分秒]+"),
+            "japanese_name": re.compile(r"[一-龯]{1,4}[　\s]*[一-龯]{1,3}"),
+            "organization": re.compile(r"[一-龯]+[会社部課係室局省庁]\b"),
         }
-    
-    def process(self, json_data: JsonData, basic_metadata: BasicMetadata) -> List[SemanticChunk]:
+
+    def process(
+        self, json_data: JsonData, basic_metadata: BasicMetadata
+    ) -> list[SemanticChunk]:
         """JSONデータをセマンティックチャンクに分割
-        
+
         Args:
             json_data: 分割対象のJSONデータ
             basic_metadata: RAGMetadataExtractorで生成されたメタデータ
-            
+
         Returns:
             List[SemanticChunk]: 生成されたセマンティックチャンクのリスト
-            
+
         Raises:
             ValueError: データ形式が不正な場合
         """
         try:
-            if self.chunk_strategy == 'row_based':
+            if self.chunk_strategy == "row_based":
                 return self._chunk_by_rows(json_data, basic_metadata)
-            elif self.chunk_strategy == 'semantic_blocks':
+            elif self.chunk_strategy == "semantic_blocks":
                 return self._chunk_by_semantic_blocks(json_data, basic_metadata)
-            elif self.chunk_strategy == 'adaptive':
+            elif self.chunk_strategy == "adaptive":
                 return self._chunk_adaptive(json_data, basic_metadata)
             else:
-                raise ValueError(f"サポートされていないチャンク戦略: {self.chunk_strategy}")
-                
+                raise ValueError(
+                    f"サポートされていないチャンク戦略: {self.chunk_strategy}"
+                )
+
         except Exception as e:
             logger.error(f"セマンティックチャンク化エラー: {e}")
-            raise ValueError(f"チャンク化に失敗しました: {e}")
-    
-    def _chunk_by_rows(self, data: JsonData, metadata: BasicMetadata) -> List[SemanticChunk]:
+            raise ValueError(f"チャンク化に失敗しました: {e}") from e
+
+    def _chunk_by_rows(
+        self, data: JsonData, metadata: BasicMetadata
+    ) -> list[SemanticChunk]:
         """行ベースでのチャンク化
-        
+
         各テーブル行を個別のチャンクとして処理し、
         スキーマ情報も含めてチャンク化します。
         """
         chunks = []
-        
+
         # スキーマ情報チャンク
         schema_chunk = self._create_schema_chunk(data, metadata)
         chunks.append(schema_chunk)
-        
+
         # データ行チャンク
         if isinstance(data, list):
             for i, row in enumerate(data):
@@ -120,40 +125,46 @@ class SemanticChunker:
             # 単一オブジェクトの場合
             object_chunk = self._create_object_chunk(data, metadata)
             chunks.append(object_chunk)
-        
+
         return chunks
-    
-    def _chunk_by_semantic_blocks(self, data: JsonData, metadata: BasicMetadata) -> List[SemanticChunk]:
+
+    def _chunk_by_semantic_blocks(
+        self, data: JsonData, metadata: BasicMetadata
+    ) -> list[SemanticChunk]:
         """セマンティックブロックベースでのチャンク化
-        
+
         データの意味的な関連性に基づいてチャンクを生成し、
         関連する情報をまとめて処理します。
         """
         chunks = []
-        
+
         # スキーマ情報チャンク
         schema_chunk = self._create_schema_chunk(data, metadata)
         chunks.append(schema_chunk)
-        
+
         if isinstance(data, list) and data and isinstance(data[0], dict):
             # カラムベースのグルーピング
             grouped_chunks = self._group_by_semantic_similarity(data, metadata)
             chunks.extend(grouped_chunks)
         else:
             # フォールバックとして行ベース処理
-            row_chunks = self._chunk_by_rows(data, metadata)[1:]  # スキーマチャンクを除く
+            row_chunks = self._chunk_by_rows(data, metadata)[
+                1:
+            ]  # スキーマチャンクを除く
             chunks.extend(row_chunks)
-        
+
         return chunks
-    
-    def _chunk_adaptive(self, data: JsonData, metadata: BasicMetadata) -> List[SemanticChunk]:
+
+    def _chunk_adaptive(
+        self, data: JsonData, metadata: BasicMetadata
+    ) -> list[SemanticChunk]:
         """アダプティブチャンク化
-        
+
         データサイズと構造に基づいて最適なチャンク戦略を自動選択
         """
         if isinstance(data, list):
             data_size = len(data)
-            
+
             if data_size <= 10:
                 # 小さなデータセット: 行ベース
                 return self._chunk_by_rows(data, metadata)
@@ -166,194 +177,204 @@ class SemanticChunker:
         else:
             # 非リストデータ: 行ベース
             return self._chunk_by_rows(data, metadata)
-    
-    def _create_schema_chunk(self, data: JsonData, metadata: BasicMetadata) -> SemanticChunk:
+
+    def _create_schema_chunk(
+        self, data: JsonData, metadata: BasicMetadata
+    ) -> SemanticChunk:
         """スキーマ情報チャンクを作成"""
         schema_content = self._format_schema_for_search(data, metadata)
-        
+
         chunk_metadata = {
             **self._get_base_chunk_metadata(metadata),
-            'chunk_type': 'schema',
-            'table_structure': True,
-            'column_count': metadata.data_statistics.get('column_count', 0),
-            'record_count': metadata.data_statistics.get('record_count', 0)
+            "chunk_type": "schema",
+            "table_structure": True,
+            "column_count": metadata.data_statistics.get("column_count", 0),
+            "record_count": metadata.data_statistics.get("record_count", 0),
         }
-        
+
         return SemanticChunk(
             chunk_id=f"{metadata.table_id}_schema",
             chunk_type="schema",
             content=schema_content,
             metadata=chunk_metadata,
             search_weight=1.5,  # スキーマ情報の重み付け
-            embedding_hint="table_structure_description"
+            embedding_hint="table_structure_description",
         )
-    
-    def _create_row_chunk(self, row: Dict[str, Any], row_index: int, metadata: BasicMetadata) -> SemanticChunk:
+
+    def _create_row_chunk(
+        self, row: dict[str, Any], row_index: int, metadata: BasicMetadata
+    ) -> SemanticChunk:
         """データ行チャンクを作成"""
         row_content = self._format_row_as_text(row, metadata)
-        
+
         chunk_metadata = {
             **self._get_base_chunk_metadata(metadata),
-            'chunk_type': 'data_row',
-            'row_index': row_index,
-            'entity_data': self._extract_row_entities(row, metadata),
-            'searchable_fields': list(row.keys())
+            "chunk_type": "data_row",
+            "row_index": row_index,
+            "entity_data": self._extract_row_entities(row, metadata),
+            "searchable_fields": list(row.keys()),
         }
-        
+
         # 行の重要度を計算
         importance_score = self._calculate_row_importance(row, metadata)
-        
+
         return SemanticChunk(
             chunk_id=f"{metadata.table_id}_row_{row_index}",
             chunk_type="data_row",
             content=row_content,
             metadata=chunk_metadata,
             search_weight=importance_score,
-            embedding_hint="structured_data_record"
+            embedding_hint="structured_data_record",
         )
-    
-    def _create_primitive_chunk(self, value: Any, index: int, metadata: BasicMetadata) -> SemanticChunk:
+
+    def _create_primitive_chunk(
+        self, value: Any, index: int, metadata: BasicMetadata
+    ) -> SemanticChunk:
         """プリミティブ値チャンクを作成"""
-        content = f"値{index + 1}: {str(value)}"
-        
+        content = f"値{index + 1}: {value!s}"
+
         chunk_metadata = {
             **self._get_base_chunk_metadata(metadata),
-            'chunk_type': 'primitive_value',
-            'value_index': index,
-            'value_type': type(value).__name__
+            "chunk_type": "primitive_value",
+            "value_index": index,
+            "value_type": type(value).__name__,
         }
-        
+
         return SemanticChunk(
             chunk_id=f"{metadata.table_id}_value_{index}",
             chunk_type="primitive_value",
             content=content,
             metadata=chunk_metadata,
             search_weight=0.8,
-            embedding_hint="simple_value"
+            embedding_hint="simple_value",
         )
-    
-    def _create_object_chunk(self, obj: Dict[str, Any], metadata: BasicMetadata) -> SemanticChunk:
+
+    def _create_object_chunk(
+        self, obj: dict[str, Any], metadata: BasicMetadata
+    ) -> SemanticChunk:
         """オブジェクトチャンクを作成"""
         object_content = self._format_row_as_text(obj, metadata)
-        
+
         chunk_metadata = {
             **self._get_base_chunk_metadata(metadata),
-            'chunk_type': 'object_data',
-            'entity_data': self._extract_row_entities(obj, metadata),
-            'searchable_fields': list(obj.keys())
+            "chunk_type": "object_data",
+            "entity_data": self._extract_row_entities(obj, metadata),
+            "searchable_fields": list(obj.keys()),
         }
-        
+
         return SemanticChunk(
             chunk_id=f"{metadata.table_id}_object",
             chunk_type="object_data",
             content=object_content,
             metadata=chunk_metadata,
             search_weight=1.0,
-            embedding_hint="structured_object"
+            embedding_hint="structured_object",
         )
-    
+
     def _format_schema_for_search(self, data: JsonData, metadata: BasicMetadata) -> str:
         """スキーマ情報を検索向けテキストにフォーマット"""
         parts = []
-        
+
         # 基本情報
         parts.append(f"テーブル: {metadata.semantic_summary}")
-        
+
         # カラム情報
         if isinstance(data, list) and data and isinstance(data[0], dict):
             columns = list(data[0].keys())
             column_descriptions = []
-            
+
             for col in columns:
-                semantic_type = metadata.entity_mapping.get(col, '不明')
+                semantic_type = metadata.entity_mapping.get(col, "不明")
                 human_readable = self._get_human_readable_column_name(col)
                 column_descriptions.append(f"{human_readable}({semantic_type})")
-            
+
             parts.append(f"カラム構成: {', '.join(column_descriptions)}")
-        
+
         # 統計情報
         stats = metadata.data_statistics
-        if stats.get('record_count', 0) > 0:
+        if stats.get("record_count", 0) > 0:
             parts.append(f"データ件数: {stats['record_count']}件")
-        
+
         # 検索キーワード
         if metadata.search_keywords:
             keywords = metadata.search_keywords[:5]  # 主要キーワードのみ
             parts.append(f"関連キーワード: {', '.join(keywords)}")
-        
+
         return " | ".join(parts)
-    
-    def _format_row_as_text(self, row: Dict[str, Any], metadata: BasicMetadata) -> str:
+
+    def _format_row_as_text(self, row: dict[str, Any], metadata: BasicMetadata) -> str:
         """行データをセマンティック検索向けテキストに変換"""
         text_parts = []
-        
+
         # 重要なフィールドを優先的に処理
         important_fields = self._identify_important_fields(row, metadata)
-        
+
         for key in important_fields:
             if key in row and row[key] is not None:
                 value = row[key]
                 human_readable_key = self._get_human_readable_column_name(key)
                 formatted_value = self._format_value_for_search(value, key, metadata)
                 text_parts.append(f"{human_readable_key}: {formatted_value}")
-        
+
         # 残りのフィールド
         for key, value in row.items():
             if key not in important_fields and value is not None:
                 human_readable_key = self._get_human_readable_column_name(key)
                 formatted_value = self._format_value_for_search(value, key, metadata)
                 text_parts.append(f"{human_readable_key}: {formatted_value}")
-        
+
         result = " | ".join(text_parts)
-        
+
         # 最大長制限
         if len(result) > self.max_chunk_size:
-            result = result[:self.max_chunk_size-3] + "..."
-        
+            result = result[: self.max_chunk_size - 3] + "..."
+
         return result
-    
+
     def _get_human_readable_column_name(self, column: str) -> str:
         """カラム名を人間が読みやすい形式に変換"""
         # 一般的な変換規則
         mapping = {
-            'id': 'ID',
-            'name': '名前',
-            'age': '年齢',
-            'email': 'メール',
-            'phone': '電話',
-            'address': '住所',
-            'company': '会社',
-            'department': '部署',
-            'salary': '給与',
-            'price': '価格',
-            'amount': '金額',
-            'date': '日付',
-            'time': '時刻',
-            'created_at': '作成日',
-            'updated_at': '更新日',
-            'status': 'ステータス',
-            'category': 'カテゴリ',
-            'description': '説明',
-            'notes': '備考'
+            "id": "ID",
+            "name": "名前",
+            "age": "年齢",
+            "email": "メール",
+            "phone": "電話",
+            "address": "住所",
+            "company": "会社",
+            "department": "部署",
+            "salary": "給与",
+            "price": "価格",
+            "amount": "金額",
+            "date": "日付",
+            "time": "時刻",
+            "created_at": "作成日",
+            "updated_at": "更新日",
+            "status": "ステータス",
+            "category": "カテゴリ",
+            "description": "説明",
+            "notes": "備考",
         }
-        
+
         return mapping.get(column.lower(), column)
-    
-    def _format_value_for_search(self, value: Any, key: str, metadata: BasicMetadata) -> str:
+
+    def _format_value_for_search(
+        self, value: Any, key: str, metadata: BasicMetadata
+    ) -> str:
         """値を検索向けにフォーマット"""
         if isinstance(value, str):
             # 日本語テキストの自然な表現
-            if self.japanese_patterns['numeric_with_unit'].match(value):
+            if self.japanese_patterns["numeric_with_unit"].match(value):
                 return value  # 単位付き数値はそのまま
             return value.strip()
         elif isinstance(value, (int, float)):
             # 数値の場合、意味的なコンテキストを追加
-            semantic_type = metadata.entity_mapping.get(key, '')
-            if 'monetary' in semantic_type:
+            semantic_type = metadata.entity_mapping.get(key, "")
+            if "monetary" in semantic_type:
                 return f"{value:,}円"
-            elif 'age' in key.lower():
+            elif "age" in key.lower():
                 return f"{value}歳"
-            elif 'count' in key.lower() or 'number' in key.lower():
+            elif "count" in key.lower() or "number" in key.lower():
                 return f"{value}件"
             else:
                 return str(value)
@@ -363,128 +384,142 @@ class SemanticChunker:
             return "未設定"
         else:
             return str(value)
-    
-    def _identify_important_fields(self, row: Dict[str, Any], metadata: BasicMetadata) -> List[str]:
+
+    def _identify_important_fields(
+        self, row: dict[str, Any], metadata: BasicMetadata
+    ) -> list[str]:
         """重要なフィールドを特定（優先順位順）"""
         fields = list(row.keys())
         important_fields = []
-        
+
         # 名前・タイトル系フィールド（最優先）
-        name_patterns = ['name', '名前', 'title', 'タイトル', '件名']
+        name_patterns = ["name", "名前", "title", "タイトル", "件名"]
         for field in fields:
             if any(pattern in field.lower() for pattern in name_patterns):
                 important_fields.append(field)
-        
+
         # ID系フィールド
-        id_patterns = ['id', 'code', 'コード', '番号']
+        id_patterns = ["id", "code", "コード", "番号"]
         for field in fields:
             if any(pattern in field.lower() for pattern in id_patterns):
                 if field not in important_fields:
                     important_fields.append(field)
-        
+
         # その他のフィールドは元の順序を維持
         for field in fields:
             if field not in important_fields:
                 important_fields.append(field)
-        
+
         return important_fields[:5]  # 最大5つの重要フィールド
-    
-    def _calculate_row_importance(self, row: Dict[str, Any], metadata: BasicMetadata) -> float:
+
+    def _calculate_row_importance(
+        self, row: dict[str, Any], metadata: BasicMetadata
+    ) -> float:
         """行の重要度を計算"""
         importance = 1.0
-        
+
         # フィールド数による重み
         field_count = len([v for v in row.values() if v is not None])
         if field_count > 5:
             importance += 0.2
-        
+
         # 特別なフィールドがある場合の重み
         for key, value in row.items():
             if value is not None:
-                semantic_type = metadata.entity_mapping.get(key, '')
-                
+                semantic_type = metadata.entity_mapping.get(key, "")
+
                 # 名前・タイトル系は重要
-                if 'name' in semantic_type or 'title' in key.lower():
+                if "name" in semantic_type or "title" in key.lower():
                     importance += 0.3
-                
+
                 # 金額・数値データは重要
-                if 'monetary' in semantic_type and isinstance(value, (int, float)):
+                if "monetary" in semantic_type and isinstance(value, (int, float)):
                     importance += 0.2
-        
+
         return min(importance, 2.0)  # 最大重み2.0
-    
-    def _extract_row_entities(self, row: Dict[str, Any], metadata: BasicMetadata) -> Dict[str, Any]:
+
+    def _extract_row_entities(
+        self, row: dict[str, Any], metadata: BasicMetadata
+    ) -> dict[str, Any]:
         """行からエンティティ情報を抽出"""
         entities = {}
-        
+
         for key, value in row.items():
             if value is not None:
-                semantic_type = metadata.entity_mapping.get(key, '')
-                
+                semantic_type = metadata.entity_mapping.get(key, "")
+
                 if semantic_type and isinstance(value, str):
                     # 特定のエンティティタイプの場合、追加情報を抽出
-                    if 'person_name' in semantic_type:
+                    if "person_name" in semantic_type:
                         entities[f"{key}_type"] = "人名"
-                        if self.japanese_patterns['japanese_name'].match(value):
+                        if self.japanese_patterns["japanese_name"].match(value):
                             entities[f"{key}_language"] = "日本語"
-                    
-                    elif 'organization' in semantic_type:
+
+                    elif "organization" in semantic_type:
                         entities[f"{key}_type"] = "組織名"
-                        if self.japanese_patterns['organization'].search(value):
+                        if self.japanese_patterns["organization"].search(value):
                             entities[f"{key}_language"] = "日本語"
-        
+
         return entities
-    
-    def _group_by_semantic_similarity(self, data: List[Dict[str, Any]], metadata: BasicMetadata) -> List[SemanticChunk]:
+
+    def _group_by_semantic_similarity(
+        self, data: list[dict[str, Any]], metadata: BasicMetadata
+    ) -> list[SemanticChunk]:
         """セマンティックな類似性に基づいてグループ化"""
         chunks = []
-        
+
         # 簡易的なグループ化: 同じカテゴリの値でグルーピング
         categorical_fields = self._identify_categorical_fields(data, metadata)
-        
+
         if categorical_fields:
             # カテゴリフィールドでグループ化
             groups = self._group_by_category(data, categorical_fields[0])
-            
+
             for category, items in groups.items():
                 if len(items) > 1:  # 複数アイテムがある場合のみグループ化
                     group_chunk = self._create_group_chunk(category, items, metadata)
                     chunks.append(group_chunk)
                 else:
                     # 単一アイテムは個別チャンク
-                    row_chunk = self._create_row_chunk(items[0], data.index(items[0]), metadata)
+                    row_chunk = self._create_row_chunk(
+                        items[0], data.index(items[0]), metadata
+                    )
                     chunks.append(row_chunk)
         else:
             # カテゴリフィールドがない場合は行ベース
             for i, row in enumerate(data):
                 row_chunk = self._create_row_chunk(row, i, metadata)
                 chunks.append(row_chunk)
-        
+
         return chunks
-    
-    def _identify_categorical_fields(self, data: List[Dict[str, Any]], metadata: BasicMetadata) -> List[str]:
+
+    def _identify_categorical_fields(
+        self, data: list[dict[str, Any]], metadata: BasicMetadata
+    ) -> list[str]:
         """カテゴリカルフィールドを特定"""
         categorical_fields = []
-        
+
         if not data:
             return categorical_fields
-        
-        for key in data[0].keys():
+
+        for key in data[0]:
             unique_values = set()
             for item in data[:20]:  # サンプリング
                 if isinstance(item, dict) and key in item and item[key] is not None:
                     unique_values.add(item[key])
-            
+
             # ユニーク値が2-10個の範囲ならカテゴリカル
             if 2 <= len(unique_values) <= 10:
                 categorical_fields.append(key)
-        
+
         return categorical_fields
-    
-    def _group_by_category(self, data: List[Dict[str, Any]], category_field: str) -> Dict[str, List[Dict[str, Any]]]:
+
+    def _group_by_category(
+        self, data: list[dict[str, Any]], category_field: str
+    ) -> dict[str, list[dict[str, Any]]]:
         """指定フィールドでデータをグループ化"""
         groups = {}
-        
+
         for item in data:
             if isinstance(item, dict) and category_field in item:
                 category_value = item[category_field]
@@ -493,106 +528,114 @@ class SemanticChunker:
                     if category_key not in groups:
                         groups[category_key] = []
                     groups[category_key].append(item)
-        
+
         return groups
-    
-    def _create_group_chunk(self, category: str, items: List[Dict[str, Any]], metadata: BasicMetadata) -> SemanticChunk:
+
+    def _create_group_chunk(
+        self, category: str, items: list[dict[str, Any]], metadata: BasicMetadata
+    ) -> SemanticChunk:
         """グループチャンクを作成"""
         # グループの要約を作成
         summary_parts = [f"カテゴリ: {category}", f"件数: {len(items)}件"]
-        
+
         # 代表的なアイテムの情報を含める
         if items:
             sample_item = items[0]
             sample_text = self._format_row_as_text(sample_item, metadata)
             summary_parts.append(f"代表例: {sample_text}")
-        
+
         content = " | ".join(summary_parts)
-        
+
         chunk_metadata = {
             **self._get_base_chunk_metadata(metadata),
-            'chunk_type': 'category_group',
-            'category_value': category,
-            'group_size': len(items),
-            'item_indices': [hash(json.dumps(item, sort_keys=True)) for item in items[:5]]
+            "chunk_type": "category_group",
+            "category_value": category,
+            "group_size": len(items),
+            "item_indices": [
+                hash(json.dumps(item, sort_keys=True)) for item in items[:5]
+            ],
         }
-        
+
         chunk_id = f"{metadata.table_id}_group_{hash(category)}"
-        
+
         return SemanticChunk(
             chunk_id=chunk_id,
             chunk_type="category_group",
             content=content,
             metadata=chunk_metadata,
             search_weight=1.2,  # グループの重み付け
-            embedding_hint="categorical_summary"
+            embedding_hint="categorical_summary",
         )
-    
-    def _chunk_large_dataset(self, data: List[Any], metadata: BasicMetadata) -> List[SemanticChunk]:
+
+    def _chunk_large_dataset(
+        self, data: list[Any], metadata: BasicMetadata
+    ) -> list[SemanticChunk]:
         """大規模データセット用のチャンク化"""
         chunks = []
-        
+
         # スキーマチャンク
         schema_chunk = self._create_schema_chunk(data, metadata)
         chunks.append(schema_chunk)
-        
+
         # 統計サマリーチャンク
         summary_chunk = self._create_statistical_summary_chunk(data, metadata)
         chunks.append(summary_chunk)
-        
+
         # サンプルデータチャンク（最初の10件）
         sample_data = data[:10]
         for i, item in enumerate(sample_data):
             if isinstance(item, dict):
                 sample_chunk = self._create_row_chunk(item, i, metadata)
                 sample_chunk.chunk_type = "sample_row"
-                sample_chunk.metadata['is_sample'] = True
+                sample_chunk.metadata["is_sample"] = True
                 chunks.append(sample_chunk)
-        
+
         return chunks
-    
-    def _create_statistical_summary_chunk(self, data: List[Any], metadata: BasicMetadata) -> SemanticChunk:
+
+    def _create_statistical_summary_chunk(
+        self, data: list[Any], metadata: BasicMetadata
+    ) -> SemanticChunk:
         """統計サマリーチャンクを作成"""
         stats_parts = []
-        
+
         # 基本統計
         stats_parts.append(f"総レコード数: {len(data)}件")
-        
+
         if data and isinstance(data[0], dict):
             # カラム統計
             columns = list(data[0].keys())
             stats_parts.append(f"カラム数: {len(columns)}個")
-            
+
             # データ型分布
-            type_dist = metadata.data_statistics.get('data_types', {})
+            type_dist = metadata.data_statistics.get("data_types", {})
             if type_dist:
                 type_summary = ", ".join([f"{t}: {c}個" for t, c in type_dist.items()])
                 stats_parts.append(f"データ型分布: {type_summary}")
-        
+
         content = " | ".join(stats_parts)
-        
+
         chunk_metadata = {
             **self._get_base_chunk_metadata(metadata),
-            'chunk_type': 'statistical_summary',
-            'is_summary': True,
-            'dataset_size': len(data)
+            "chunk_type": "statistical_summary",
+            "is_summary": True,
+            "dataset_size": len(data),
         }
-        
+
         return SemanticChunk(
             chunk_id=f"{metadata.table_id}_stats",
             chunk_type="statistical_summary",
             content=content,
             metadata=chunk_metadata,
             search_weight=1.3,
-            embedding_hint="dataset_statistics"
+            embedding_hint="dataset_statistics",
         )
-    
-    def _get_base_chunk_metadata(self, metadata: BasicMetadata) -> Dict[str, Any]:
+
+    def _get_base_chunk_metadata(self, metadata: BasicMetadata) -> dict[str, Any]:
         """チャンクの基本メタデータを取得"""
         return {
-            'table_id': metadata.table_id,
-            'generation_timestamp': metadata.generation_timestamp,
-            'schema_reference': metadata.table_id + "_schema",
-            'search_keywords': metadata.search_keywords[:10],  # 上位10個
-            'custom_tags': metadata.custom_tags
+            "table_id": metadata.table_id,
+            "generation_timestamp": metadata.generation_timestamp,
+            "schema_reference": metadata.table_id + "_schema",
+            "search_keywords": metadata.search_keywords[:10],  # 上位10個
+            "custom_tags": metadata.custom_tags,
         }
