@@ -32,7 +32,11 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 requires-python = ">=3.10"
-dependencies = ["sphinx>=3.0", "docutils>=0.18"]
+dependencies = [
+    "sphinx>=3.0",
+ "docutils>=0.18",
+ "numpy>=2.2.6",
+]
 
 [project.optional-dependencies]
 dev = [

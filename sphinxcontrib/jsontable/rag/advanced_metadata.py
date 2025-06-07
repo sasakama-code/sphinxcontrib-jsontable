@@ -1,0 +1,1098 @@
+"""
+Advanced Metadata Generator for Phase 2 RAG Integration
+
+高度なメタデータ生成機能：
+- 統計分析の深化
+- 日本語エンティティ分類
+- データ品質評価
+- PLaMo-Embedding-1B連携準備
+"""
+
+from __future__ import annotations
+
+import re
+import statistics
+from dataclasses import dataclass, field
+from typing import Any
+
+import numpy as np
+
+
+@dataclass
+class NumericalStats:
+    """数値データの統計情報"""
+
+    mean: float
+    median: float
+    std_dev: float
+    min_value: float
+    max_value: float
+    quartiles: tuple[float, float, float]
+    outliers: list[float]
+    distribution_type: str
+    skewness: float
+    kurtosis: float
+
+
+@dataclass
+class CategoricalStats:
+    """カテゴリデータの統計情報"""
+
+    unique_count: int
+    value_counts: dict[str, int]
+    entropy: float
+    diversity_index: float
+    most_common: list[tuple[str, int]]
+    patterns: list[str]
+
+
+@dataclass
+class TemporalStats:
+    """時系列データの統計情報"""
+
+    time_range: tuple[str, str]
+    duration: str
+    frequency_pattern: str
+    seasonal_indicators: dict[str, Any]
+    trend_direction: str
+
+
+@dataclass
+class PersonEntity:
+    """人名エンティティ"""
+
+    name: str
+    confidence: float
+    name_type: str  # "japanese_kanji", "katakana", "western"
+    position: tuple[int, int]  # テキスト内位置
+
+
+@dataclass
+class PlaceEntity:
+    """場所エンティティ"""
+
+    place: str
+    confidence: float
+    place_type: str  # "prefecture", "city", "district", "station"
+    position: tuple[int, int]
+
+
+@dataclass
+class OrganizationEntity:
+    """組織エンティティ"""
+
+    organization: str
+    confidence: float
+    org_type: str  # "company", "department", "government"
+    position: tuple[int, int]
+
+
+@dataclass
+class BusinessTermEntity:
+    """ビジネス用語エンティティ"""
+
+    term: str
+    confidence: float
+    category: str  # "job_title", "industry", "skill"
+    position: tuple[int, int]
+
+
+@dataclass
+class EntityClassification:
+    """エンティティ分類結果"""
+
+    persons: list[PersonEntity] = field(default_factory=list)
+    places: list[PlaceEntity] = field(default_factory=list)
+    organizations: list[OrganizationEntity] = field(default_factory=list)
+    business_terms: list[BusinessTermEntity] = field(default_factory=list)
+    confidence_scores: dict[str, float] = field(default_factory=dict)
+
+
+@dataclass
+class DataQualityReport:
+    """データ品質評価レポート"""
+
+    completeness_score: float
+    consistency_score: float
+    validity_score: float
+    accuracy_score: float
+    overall_score: float
+    detailed_issues: dict[str, list[str]] = field(default_factory=dict)
+
+
+@dataclass
+class SearchFacets:
+    """検索ファセット定義"""
+
+    categorical: dict[str, Any] = field(default_factory=dict)
+    numerical: dict[str, Any] = field(default_factory=dict)
+    temporal: dict[str, Any] = field(default_factory=dict)
+    entities: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class PLaMoFeatures:
+    """PLaMo-Embedding-1B用特徴量"""
+
+    text_segments: list[str]
+    japanese_features: dict[str, Any]
+    embedding_hints: dict[str, Any]
+    vector_optimization: dict[str, Any]
+
+
+@dataclass
+class AdvancedMetadata:
+    """Phase 2高度メタデータ構造"""
+
+    basic_metadata: dict
+    statistical_analysis: dict[str, Any]
+    entity_classification: EntityClassification
+    data_quality: DataQualityReport
+    search_facets: SearchFacets
+    plamo_features: PLaMoFeatures
+
+
+class StatisticalAnalyzer:
+    """高度統計分析機能"""
+
+    def analyze_numerical_data(self, data: list[float]) -> NumericalStats:
+        """数値データの詳細統計分析"""
+        if not data:
+            return self._empty_numerical_stats()
+
+        # 基本統計量
+        mean_val = statistics.mean(data)
+        median_val = statistics.median(data)
+        try:
+            std_dev = statistics.stdev(data) if len(data) > 1 else 0.0
+        except statistics.StatisticsError:
+            std_dev = 0.0
+
+        min_val = min(data)
+        max_val = max(data)
+
+        # 四分位数
+        q1 = np.percentile(data, 25)
+        q2 = median_val
+        q3 = np.percentile(data, 75)
+
+        # 外れ値検出 (IQR method)
+        iqr = q3 - q1
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+        outliers = [x for x in data if x < lower_bound or x > upper_bound]
+
+        # 分布の形状
+        skewness = self._calculate_skewness(data, mean_val, std_dev)
+        kurtosis = self._calculate_kurtosis(data, mean_val, std_dev)
+        distribution_type = self._classify_distribution(skewness, kurtosis)
+
+        return NumericalStats(
+            mean=mean_val,
+            median=median_val,
+            std_dev=std_dev,
+            min_value=min_val,
+            max_value=max_val,
+            quartiles=(q1, q2, q3),
+            outliers=outliers,
+            distribution_type=distribution_type,
+            skewness=skewness,
+            kurtosis=kurtosis,
+        )
+
+    def analyze_categorical_data(self, data: list[str]) -> CategoricalStats:
+        """カテゴリデータの詳細分析"""
+        if not data:
+            return self._empty_categorical_stats()
+
+        # 頻度計算
+        from collections import Counter
+
+        value_counts = Counter(data)
+        unique_count = len(value_counts)
+
+        # エントロピー計算
+        total = len(data)
+        entropy = -sum(
+            (count / total) * np.log2(count / total) for count in value_counts.values()
+        )
+
+        # 多様性指数 (Simpson's Diversity Index)
+        diversity_index = 1 - sum((count / total) ** 2 for count in value_counts.values())
+
+        # 最頻値
+        most_common = value_counts.most_common(10)
+
+        # パターン検出
+        patterns = self._detect_categorical_patterns(data)
+
+        return CategoricalStats(
+            unique_count=unique_count,
+            value_counts=dict(value_counts),
+            entropy=entropy,
+            diversity_index=diversity_index,
+            most_common=most_common,
+            patterns=patterns,
+        )
+
+    def _calculate_skewness(self, data: list[float], mean: float, std_dev: float) -> float:
+        """歪度の計算"""
+        if std_dev == 0:
+            return 0.0
+        n = len(data)
+        if n < 3:  # 歪度計算には最低3つのデータポイントが必要
+            return 0.0
+        try:
+            return (n / ((n - 1) * (n - 2))) * sum(((x - mean) / std_dev) ** 3 for x in data)
+        except ZeroDivisionError:
+            return 0.0
+
+    def _calculate_kurtosis(self, data: list[float], mean: float, std_dev: float) -> float:
+        """尖度の計算"""
+        if std_dev == 0:
+            return 0.0
+        n = len(data)
+        if n < 4:  # 尖度計算には最低4つのデータポイントが必要
+            return 0.0
+        try:
+            return (n * (n + 1) / ((n - 1) * (n - 2) * (n - 3))) * sum(
+                ((x - mean) / std_dev) ** 4 for x in data
+            ) - (3 * (n - 1) ** 2 / ((n - 2) * (n - 3)))
+        except ZeroDivisionError:
+            return 0.0
+
+    def _classify_distribution(self, skewness: float, kurtosis: float) -> str:
+        """分布の種類を分類"""
+        if abs(skewness) < 0.5 and abs(kurtosis) < 3:
+            return "normal"
+        elif skewness > 1:
+            return "right_skewed"
+        elif skewness < -1:
+            return "left_skewed"
+        elif kurtosis > 3:
+            return "leptokurtic"
+        elif kurtosis < 3:
+            return "platykurtic"
+        else:
+            return "unknown"
+
+    def _detect_categorical_patterns(self, data: list[str]) -> list[str]:
+        """カテゴリデータのパターン検出"""
+        patterns = []
+
+        # 共通パターンの検出
+        if any("株式会社" in item for item in data):
+            patterns.append("company_names")
+        if any(re.match(r"[一-龯]{1,4}[一-龯]{1,3}", item) for item in data):
+            patterns.append("japanese_names")
+        if any(re.match(r"\d{4}-\d{2}-\d{2}", item) for item in data):
+            patterns.append("date_format")
+        if any("@" in item for item in data):
+            patterns.append("email_addresses")
+
+        return patterns
+
+    def _empty_numerical_stats(self) -> NumericalStats:
+        """空の数値統計"""
+        return NumericalStats(
+            mean=0.0,
+            median=0.0,
+            std_dev=0.0,
+            min_value=0.0,
+            max_value=0.0,
+            quartiles=(0.0, 0.0, 0.0),
+            outliers=[],
+            distribution_type="empty",
+            skewness=0.0,
+            kurtosis=0.0,
+        )
+
+    def _empty_categorical_stats(self) -> CategoricalStats:
+        """空のカテゴリ統計"""
+        return CategoricalStats(
+            unique_count=0,
+            value_counts={},
+            entropy=0.0,
+            diversity_index=0.0,
+            most_common=[],
+            patterns=[],
+        )
+
+
+class JapaneseEntityClassifier:
+    """日本語特化エンティティ認識・分類"""
+
+    def __init__(self):
+        """日本語エンティティ分類器の初期化"""
+        # 日本語人名パターン
+        self.person_patterns = [
+            r"[一-龯]{1,4}[　\s][一-龯]{1,3}",  # 漢字姓名（スペース区切り）
+            r"[一-龯]{2,4}",  # 漢字のみ（姓または名）
+            r"[ア-ン]{2,8}",  # カタカナ名
+            r"[a-zA-Z]{2,20}\s[a-zA-Z]{2,20}",  # 英語名
+        ]
+
+        # 場所名パターン
+        self.place_patterns = [
+            r"[一-龯]{2,3}[都道府県]",  # 都道府県
+            r"[一-龯]{1,8}[市区町村]",  # 市区町村
+            r"[一-龯]{1,10}駅",  # 駅名
+            r"[一-龯]{1,8}[町丁目]",  # 町丁目
+        ]
+
+        # 組織名パターン
+        self.organization_patterns = [
+            r"[一-龯ァ-ヴa-zA-Z0-9]+株式会社",  # 株式会社
+            r"株式会社[一-龯ァ-ヴa-zA-Z0-9]+",  # 株式会社
+            r"[一-龯ァ-ヴa-zA-Z0-9]+[部課係室]",  # 部署名
+            r"[一-龯ァ-ヴa-zA-Z0-9]+省",  # 省庁
+        ]
+
+        # ビジネス用語パターン
+        self.business_patterns = [
+            r"[一-龯]{2,6}[主任係長課長部長取締役社長]",  # 役職
+            r"[エンジニアマネージャーディレクター]{4,12}",  # カタカナ職種
+            r"[SE|PM|PL|QA]{2,3}",  # IT職種略語
+        ]
+
+    def classify_entities(self, text_data: list[str]) -> EntityClassification:
+        """テキストデータからエンティティを分類"""
+        classification = EntityClassification()
+
+        for text in text_data:
+            if not isinstance(text, str):
+                continue
+
+            # 人名の抽出
+            persons = self._extract_persons(text)
+            classification.persons.extend(persons)
+
+            # 場所名の抽出
+            places = self._extract_places(text)
+            classification.places.extend(places)
+
+            # 組織名の抽出
+            organizations = self._extract_organizations(text)
+            classification.organizations.extend(organizations)
+
+            # ビジネス用語の抽出
+            business_terms = self._extract_business_terms(text)
+            classification.business_terms.extend(business_terms)
+
+        # 信頼度スコアの計算
+        classification.confidence_scores = self._calculate_confidence_scores(
+            classification
+        )
+
+        return classification
+
+    def _extract_persons(self, text: str) -> list[PersonEntity]:
+        """日本語人名の抽出"""
+        persons = []
+
+        for pattern in self.person_patterns:
+            matches = re.finditer(pattern, text)
+            for match in matches:
+                name = match.group()
+                confidence = self._calculate_person_confidence(name)
+                name_type = self._classify_name_type(name)
+
+                persons.append(
+                    PersonEntity(
+                        name=name,
+                        confidence=confidence,
+                        name_type=name_type,
+                        position=(match.start(), match.end()),
+                    )
+                )
+
+        return persons
+
+    def _extract_places(self, text: str) -> list[PlaceEntity]:
+        """日本語地名の抽出"""
+        places = []
+
+        for pattern in self.place_patterns:
+            matches = re.finditer(pattern, text)
+            for match in matches:
+                place = match.group()
+                confidence = self._calculate_place_confidence(place)
+                place_type = self._classify_place_type(place)
+
+                places.append(
+                    PlaceEntity(
+                        place=place,
+                        confidence=confidence,
+                        place_type=place_type,
+                        position=(match.start(), match.end()),
+                    )
+                )
+
+        return places
+
+    def _extract_organizations(self, text: str) -> list[OrganizationEntity]:
+        """組織名の抽出"""
+        organizations = []
+
+        for pattern in self.organization_patterns:
+            matches = re.finditer(pattern, text)
+            for match in matches:
+                org = match.group()
+                confidence = self._calculate_org_confidence(org)
+                org_type = self._classify_org_type(org)
+
+                organizations.append(
+                    OrganizationEntity(
+                        organization=org,
+                        confidence=confidence,
+                        org_type=org_type,
+                        position=(match.start(), match.end()),
+                    )
+                )
+
+        return organizations
+
+    def _extract_business_terms(self, text: str) -> list[BusinessTermEntity]:
+        """ビジネス用語の抽出"""
+        business_terms = []
+
+        for pattern in self.business_patterns:
+            matches = re.finditer(pattern, text)
+            for match in matches:
+                term = match.group()
+                confidence = self._calculate_business_confidence(term)
+                category = self._classify_business_category(term)
+
+                business_terms.append(
+                    BusinessTermEntity(
+                        term=term,
+                        confidence=confidence,
+                        category=category,
+                        position=(match.start(), match.end()),
+                    )
+                )
+
+        return business_terms
+
+    def _calculate_person_confidence(self, name: str) -> float:
+        """人名の信頼度計算"""
+        # 長さベースの基本信頼度
+        if 2 <= len(name) <= 4:
+            return 0.8
+        elif 5 <= len(name) <= 8:
+            return 0.6
+        else:
+            return 0.4
+
+    def _classify_name_type(self, name: str) -> str:
+        """名前の種類分類"""
+        if re.match(r"[一-龯]+", name):
+            return "japanese_kanji"
+        elif re.match(r"[ア-ン]+", name):
+            return "katakana"
+        elif re.match(r"[a-zA-Z\s]+", name):
+            return "western"
+        else:
+            return "mixed"
+
+    def _calculate_place_confidence(self, place: str) -> float:
+        """地名の信頼度計算"""
+        if place.endswith(("都", "道", "府", "県")):
+            return 0.9
+        elif place.endswith(("市", "区", "町", "村")):
+            return 0.8
+        elif place.endswith("駅"):
+            return 0.7
+        else:
+            return 0.5
+
+    def _classify_place_type(self, place: str) -> str:
+        """地名の種類分類"""
+        if place.endswith(("都", "道", "府", "県")):
+            return "prefecture"
+        elif place.endswith(("市", "区", "町", "村")):
+            return "city"
+        elif place.endswith("駅"):
+            return "station"
+        else:
+            return "district"
+
+    def _calculate_org_confidence(self, org: str) -> float:
+        """組織名の信頼度計算"""
+        if "株式会社" in org:
+            return 0.9
+        elif org.endswith(("部", "課", "係", "室")):
+            return 0.8
+        elif org.endswith("省"):
+            return 0.9
+        else:
+            return 0.6
+
+    def _classify_org_type(self, org: str) -> str:
+        """組織の種類分類"""
+        if "株式会社" in org:
+            return "company"
+        elif org.endswith(("部", "課", "係", "室")):
+            return "department"
+        elif org.endswith("省"):
+            return "government"
+        else:
+            return "other"
+
+    def _calculate_business_confidence(self, term: str) -> float:
+        """ビジネス用語の信頼度計算"""
+        job_titles = ["主任", "係長", "課長", "部長", "取締役", "社長"]
+        if any(title in term for title in job_titles):
+            return 0.8
+        else:
+            return 0.6
+
+    def _classify_business_category(self, term: str) -> str:
+        """ビジネス用語のカテゴリ分類"""
+        job_titles = ["主任", "係長", "課長", "部長", "取締役", "社長"]
+        if any(title in term for title in job_titles):
+            return "job_title"
+        elif term in ["SE", "PM", "PL", "QA"]:
+            return "it_role"
+        else:
+            return "general"
+
+    def _calculate_confidence_scores(self, classification: EntityClassification) -> dict[str, float]:
+        """全体的な信頼度スコアの計算"""
+        scores = {}
+
+        if classification.persons:
+            scores["persons"] = sum(p.confidence for p in classification.persons) / len(
+                classification.persons
+            )
+
+        if classification.places:
+            scores["places"] = sum(p.confidence for p in classification.places) / len(
+                classification.places
+            )
+
+        if classification.organizations:
+            scores["organizations"] = sum(
+                o.confidence for o in classification.organizations
+            ) / len(classification.organizations)
+
+        if classification.business_terms:
+            scores["business_terms"] = sum(
+                b.confidence for b in classification.business_terms
+            ) / len(classification.business_terms)
+
+        return scores
+
+
+class DataQualityAssessor:
+    """データ品質の多角的評価"""
+
+    def assess_data_quality(self, data: Any) -> DataQualityReport:
+        """包括的なデータ品質評価"""
+        completeness = self._assess_completeness(data)
+        consistency = self._assess_consistency(data)
+        validity = self._assess_validity(data)
+        accuracy = self._assess_accuracy(data)
+
+        # 総合スコア計算（重み付き平均）
+        overall_score = (
+            completeness * 0.3
+            + consistency * 0.25
+            + validity * 0.25
+            + accuracy * 0.2
+        )
+
+        return DataQualityReport(
+            completeness_score=completeness,
+            consistency_score=consistency,
+            validity_score=validity,
+            accuracy_score=accuracy,
+            overall_score=overall_score,
+            detailed_issues=self._collect_detailed_issues(data),
+        )
+
+    def _assess_completeness(self, data: Any) -> float:
+        """データ完全性の評価"""
+        if isinstance(data, list):
+            if not data:
+                return 0.0
+
+            total_fields = 0
+            missing_fields = 0
+
+            for item in data:
+                if isinstance(item, dict):
+                    for value in item.values():
+                        total_fields += 1
+                        if value is None or value == "" or value == []:
+                            missing_fields += 1
+                else:
+                    total_fields += 1
+                    if item is None or item == "":
+                        missing_fields += 1
+
+            if total_fields == 0:
+                return 1.0
+
+            return 1.0 - (missing_fields / total_fields)
+
+        return 1.0
+
+    def _assess_consistency(self, data: Any) -> float:
+        """データ一貫性の評価"""
+        if isinstance(data, list) and data:
+            consistency_score = 1.0
+
+            # データ型の一貫性チェック
+            if isinstance(data[0], dict):
+                # オブジェクト配列の場合
+                expected_keys = set(data[0].keys())
+                for item in data[1:]:
+                    if isinstance(item, dict):
+                        if set(item.keys()) != expected_keys:
+                            consistency_score -= 0.1
+                    else:
+                        consistency_score -= 0.2
+
+            # フォーマットの一貫性チェック（簡単な例）
+            formats = {}
+            for item in data:
+                if isinstance(item, str):
+                    # 日付フォーマットのチェック
+                    if re.match(r"\d{4}-\d{2}-\d{2}", item):
+                        formats.setdefault("date", 0)
+                        formats["date"] += 1
+                    # メールフォーマットのチェック
+                    elif "@" in item:
+                        formats.setdefault("email", 0)
+                        formats["email"] += 1
+
+            return max(0.0, consistency_score)
+
+        return 1.0
+
+    def _assess_validity(self, data: Any) -> float:
+        """データ妥当性の評価"""
+        if isinstance(data, list):
+            valid_count = 0
+            total_count = 0
+
+            for item in data:
+                total_count += 1
+                if self._is_valid_item(item):
+                    valid_count += 1
+
+            if total_count == 0:
+                return 1.0
+
+            return valid_count / total_count
+
+        return 1.0
+
+    def _assess_accuracy(self, data: Any) -> float:
+        """データ正確性の評価（基本的な推定）"""
+        # 実際の正確性評価は外部データとの比較が必要
+        # ここでは基本的なヒューリスティクスを使用
+        if isinstance(data, list):
+            accuracy_indicators = []
+
+            for item in data:
+                if isinstance(item, dict):
+                    # 数値の範囲チェック
+                    for key, value in item.items():
+                        if isinstance(value, int | float):
+                            # 年齢などの合理的な範囲チェック
+                            if "age" in key.lower() and not (0 <= value <= 150):
+                                accuracy_indicators.append(0.0)
+                            else:
+                                accuracy_indicators.append(1.0)
+
+            if accuracy_indicators:
+                return sum(accuracy_indicators) / len(accuracy_indicators)
+
+        return 0.8  # デフォルト推定値
+
+    def _is_valid_item(self, item: Any) -> bool:
+        """個別アイテムの妥当性チェック"""
+        if item is None:
+            return False
+
+        if isinstance(item, str):
+            # 空文字列や空白のみは無効
+            if not item.strip():
+                return False
+            # 明らかに無効な値
+            if item.lower() in ["null", "undefined", "n/a", "none"]:
+                return False
+
+        # NaNや無限大は無効
+        return not (isinstance(item, int | float) and (np.isnan(item) or np.isinf(item)))
+
+    def _collect_detailed_issues(self, data: Any) -> dict[str, list[str]]:
+        """詳細な問題点の収集"""
+        issues = {"missing_data": [], "format_issues": [], "consistency_issues": []}
+
+        if isinstance(data, list):
+            for i, item in enumerate(data):
+                if isinstance(item, dict):
+                    for key, value in item.items():
+                        if value is None or value == "":
+                            issues["missing_data"].append(f"Row {i}, field '{key}': missing value")
+
+                        # フォーマット問題の検出
+                        if isinstance(value, str) and "email" in key.lower() and "@" not in value:
+                            issues["format_issues"].append(
+                                f"Row {i}, field '{key}': invalid email format"
+                            )
+
+        return issues
+
+
+class AdvancedMetadataGenerator:
+    """
+    Phase 2: 高度なメタデータ生成機能
+
+    Phase 1のRAGMetadataExtractorを拡張し、以下を追加:
+    - 高度統計分析 (分布、相関、外れ値検出)
+    - 日本語エンティティ分類 (人名、地名、組織名)
+    - データ品質評価 (完全性、一貫性、妥当性)
+    - PLaMo-Embedding-1B連携準備
+    """
+
+    def __init__(self):
+        """高度メタデータ生成器の初期化"""
+        self.statistical_analyzer = StatisticalAnalyzer()
+        self.japanese_entity_classifier = JapaneseEntityClassifier()
+        self.data_quality_assessor = DataQualityAssessor()
+
+    def generate_advanced_metadata(
+        self, json_data: Any, basic_metadata: dict
+    ) -> AdvancedMetadata:
+        """高度メタデータの生成メイン処理"""
+
+        # 統計分析
+        statistical_analysis = self._perform_statistical_analysis(json_data)
+
+        # エンティティ分類
+        entity_classification = self._perform_entity_classification(json_data)
+
+        # データ品質評価
+        data_quality = self.data_quality_assessor.assess_data_quality(json_data)
+
+        # 検索ファセット生成
+        search_facets = self._generate_search_facets(statistical_analysis, entity_classification)
+
+        # PLaMo特徴量準備
+        plamo_features = self._prepare_plamo_features(json_data, entity_classification)
+
+        return AdvancedMetadata(
+            basic_metadata=basic_metadata,
+            statistical_analysis=statistical_analysis,
+            entity_classification=entity_classification,
+            data_quality=data_quality,
+            search_facets=search_facets,
+            plamo_features=plamo_features,
+        )
+
+    def _perform_statistical_analysis(self, data: Any) -> dict[str, Any]:
+        """統計分析の実行"""
+        analysis = {"numerical_fields": {}, "categorical_fields": {}, "temporal_fields": {}}
+
+        if isinstance(data, list) and data and isinstance(data[0], dict):
+            # オブジェクト配列の場合
+            for key in data[0]:
+                    field_values = [
+                        item.get(key) for item in data if isinstance(item, dict) and key in item
+                    ]
+
+                    # 数値フィールドの分析
+                    if field_values and isinstance(field_values[0], int | float):
+                        numerical_values = [v for v in field_values if isinstance(v, int | float)]
+                        if numerical_values:
+                            analysis["numerical_fields"][key] = self.statistical_analyzer.analyze_numerical_data(
+                                numerical_values
+                            ).__dict__
+
+                    # カテゴリフィールドの分析
+                    elif field_values and isinstance(field_values[0], str):
+                        string_values = [v for v in field_values if isinstance(v, str)]
+                        if string_values:
+                            analysis["categorical_fields"][key] = self.statistical_analyzer.analyze_categorical_data(
+                                string_values
+                            ).__dict__
+
+        return analysis
+
+    def _perform_entity_classification(self, data: Any) -> EntityClassification:
+        """エンティティ分類の実行"""
+        text_data = []
+
+        # テキストデータの抽出
+        if isinstance(data, list):
+            for item in data:
+                if isinstance(item, dict):
+                    for value in item.values():
+                        if isinstance(value, str):
+                            text_data.append(value)
+                elif isinstance(item, str):
+                    text_data.append(item)
+
+        return self.japanese_entity_classifier.classify_entities(text_data)
+
+    def _generate_search_facets(
+        self, statistical_analysis: dict, entity_classification: EntityClassification
+    ) -> SearchFacets:
+        """検索ファセットの生成"""
+        facets = SearchFacets()
+
+        # カテゴリカルファセット
+        for field_name, stats in statistical_analysis.get("categorical_fields", {}).items():
+            if stats["unique_count"] <= 20:  # ファセット化に適した値数
+                facets.categorical[field_name] = {
+                    "type": "terms",
+                    "values": stats["value_counts"],
+                    "display_name": field_name.replace("_", " ").title(),
+                }
+
+        # 数値範囲ファセット
+        for field_name, stats in statistical_analysis.get("numerical_fields", {}).items():
+            min_val = stats["min_value"]
+            max_val = stats["max_value"]
+            if max_val > min_val:
+                facets.numerical[field_name] = {
+                    "type": "range",
+                    "min": min_val,
+                    "max": max_val,
+                    "ranges": self._generate_optimal_ranges(min_val, max_val),
+                    "display_name": field_name.replace("_", " ").title(),
+                }
+
+        # エンティティファセット
+        if entity_classification.persons:
+            facets.entities["persons"] = {
+                "type": "terms",
+                "values": {p.name: 1 for p in entity_classification.persons},
+                "display_name": "人名",
+            }
+
+        if entity_classification.places:
+            facets.entities["places"] = {
+                "type": "terms",
+                "values": {p.place: 1 for p in entity_classification.places},
+                "display_name": "場所",
+            }
+
+        return facets
+
+    def _generate_optimal_ranges(self, min_val: float, max_val: float) -> list[dict]:
+        """最適な数値範囲の生成"""
+        range_count = min(5, max(2, int((max_val - min_val) / 10)))  # 2-5の範囲
+        step = (max_val - min_val) / range_count
+
+        ranges = []
+        for i in range(range_count):
+            start = min_val + (i * step)
+            end = min_val + ((i + 1) * step)
+            ranges.append({
+                "from": round(start, 2),
+                "to": round(end, 2),
+                "label": f"{round(start, 0)}-{round(end, 0)}"
+            })
+
+        return ranges
+
+    def _prepare_plamo_features(
+        self, data: Any, entity_classification: EntityClassification
+    ) -> PLaMoFeatures:
+        """PLaMo-Embedding-1B用特徴量の準備"""
+        text_segments = []
+        japanese_features = {}
+
+        # テキストセグメントの抽出
+        if isinstance(data, list):
+            for item in data:
+                if isinstance(item, dict):
+                    # オブジェクトを自然な日本語文に変換
+                    segments = self._convert_object_to_japanese_text(item)
+                    text_segments.extend(segments)
+
+        # 日本語特有の特徴量
+        japanese_features = {
+            "kanji_density": self._calculate_kanji_density(text_segments),
+            "katakana_terms": self._extract_katakana_terms(text_segments),
+            "business_context": self._analyze_business_context(entity_classification),
+            "entity_richness": self._calculate_entity_richness(entity_classification),
+        }
+
+        # 埋め込みヒント
+        embedding_hints = {
+            "domain": self._detect_domain(text_segments, entity_classification),
+            "formality_level": self._assess_formality(text_segments),
+            "technical_level": self._assess_technical_level(text_segments),
+        }
+
+        # ベクトル最適化設定
+        vector_optimization = {
+            "chunk_strategy": "semantic_boundary",
+            "overlap_ratio": 0.1,
+            "max_chunk_length": 512,  # PLaMo-Embedding-1Bに最適
+            "prioritize_entities": True,
+        }
+
+        return PLaMoFeatures(
+            text_segments=text_segments,
+            japanese_features=japanese_features,
+            embedding_hints=embedding_hints,
+            vector_optimization=vector_optimization,
+        )
+
+    def _convert_object_to_japanese_text(self, obj: dict) -> list[str]:
+        """オブジェクトを自然な日本語文に変換"""
+        segments = []
+
+        # キーと値のペアを自然な文に変換
+        for key, value in obj.items():
+            if isinstance(value, str) and value.strip():
+                if key.lower() in ["name", "名前"]:
+                    segments.append(f"名前は{value}です。")
+                elif key.lower() in ["age", "年齢"]:
+                    segments.append(f"年齢は{value}歳です。")
+                elif key.lower() in ["department", "部署"]:
+                    segments.append(f"所属部署は{value}です。")
+                else:
+                    segments.append(f"{key}は{value}です。")
+
+        return segments
+
+    def _calculate_kanji_density(self, text_segments: list[str]) -> float:
+        """漢字密度の計算"""
+        if not text_segments:
+            return 0.0
+
+        total_chars = 0
+        kanji_chars = 0
+
+        for segment in text_segments:
+            total_chars += len(segment)
+            kanji_chars += len(re.findall(r"[一-龯]", segment))
+
+        return kanji_chars / total_chars if total_chars > 0 else 0.0
+
+    def _extract_katakana_terms(self, text_segments: list[str]) -> list[str]:
+        """カタカナ用語の抽出"""
+        katakana_terms = set()
+
+        for segment in text_segments:
+            matches = re.findall(r"[ア-ン]{3,}", segment)
+            katakana_terms.update(matches)
+
+        return list(katakana_terms)
+
+    def _analyze_business_context(self, entity_classification: EntityClassification) -> dict:
+        """ビジネスコンテキストの分析"""
+        context = {
+            "has_company_entities": len(entity_classification.organizations) > 0,
+            "has_job_titles": any(
+                "job_title" in term.category for term in entity_classification.business_terms
+            ),
+            "formality_indicators": [],
+        }
+
+        # 敬語・丁寧語の検出
+        formal_patterns = ["です", "ます", "であります", "いたします"]
+        context["formality_indicators"] = formal_patterns  # 簡略化
+
+        return context
+
+    def _calculate_entity_richness(self, entity_classification: EntityClassification) -> float:
+        """エンティティの豊富さを計算"""
+        total_entities = (
+            len(entity_classification.persons)
+            + len(entity_classification.places)
+            + len(entity_classification.organizations)
+            + len(entity_classification.business_terms)
+        )
+
+        # エンティティタイプの多様性を考慮
+        entity_types = 0
+        if entity_classification.persons:
+            entity_types += 1
+        if entity_classification.places:
+            entity_types += 1
+        if entity_classification.organizations:
+            entity_types += 1
+        if entity_classification.business_terms:
+            entity_types += 1
+
+        return (total_entities * entity_types) / 100.0  # 正規化
+
+    def _detect_domain(
+        self, _text_segments: list[str], entity_classification: EntityClassification
+    ) -> str:
+        """ドメインの検出"""
+        # ビジネス関連エンティティが多い場合
+        if entity_classification.business_terms or entity_classification.organizations:
+            return "business"
+
+        # 地名が多い場合
+        if len(entity_classification.places) > len(entity_classification.persons):
+            return "geography"
+
+        # 人名が多い場合
+        if entity_classification.persons:
+            return "social"
+
+        return "general"
+
+    def _assess_formality(self, text_segments: list[str]) -> str:
+        """文体の丁寧さレベル評価"""
+        formal_count = 0
+        total_segments = len(text_segments)
+
+        if total_segments == 0:
+            return "neutral"
+
+        for segment in text_segments:
+            if any(pattern in segment for pattern in ["です", "ます", "であります"]):
+                formal_count += 1
+
+        formal_ratio = formal_count / total_segments
+
+        if formal_ratio > 0.7:
+            return "formal"
+        elif formal_ratio > 0.3:
+            return "polite"
+        else:
+            return "casual"
+
+    def _assess_technical_level(self, text_segments: list[str]) -> str:
+        """技術レベルの評価"""
+        technical_terms = [
+            "システム",
+            "データ",
+            "プログラム",
+            "API",
+            "データベース",
+            "サーバー",
+            "ネットワーク",
+        ]
+
+        technical_count = 0
+        total_segments = len(text_segments)
+
+        if total_segments == 0:
+            return "non_technical"
+
+        for segment in text_segments:
+            if any(term in segment for term in technical_terms):
+                technical_count += 1
+
+        technical_ratio = technical_count / total_segments
+
+        if technical_ratio > 0.5:
+            return "highly_technical"
+        elif technical_ratio > 0.2:
+            return "moderately_technical"
+        else:
+            return "non_technical"
+
