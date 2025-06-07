@@ -141,6 +141,7 @@ markers = [
     "benchmark: marks tests as benchmark tests (use pytest-benchmark)",
     "property: marks tests related to property handling",
     "error_handling: marks tests related to error handling",
+    "asyncio: marks tests as asyncio tests",
 ]
 # Performance test environment handling
 filterwarnings = [

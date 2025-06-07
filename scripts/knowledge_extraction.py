@@ -696,6 +696,19 @@ def pre_check_knowledge(args):
     
     print(f"🔍 タスク着手前ナレッジ確認: {args.task}")
     
+    # Step 0: ブランチ戦略確認 (最優先)
+    try:
+        branch_check_result = check_branch_strategy(args.task)
+        print(f"🌿 ブランチ戦略確認: {branch_check_result['status']}")
+        
+        if branch_check_result['action_required']:
+            print(f"⚠️ ブランチアクション必要: {branch_check_result['recommendation']}")
+            print("📋 適切なブランチに切り替え後、再度実行してください")
+            return
+    except Exception as e:
+        print(f"⚠️ ブランチ戦略確認でエラーが発生: {e}")
+        print("📋 手動でブランチを確認してから続行してください")
+    
     # ナレッジディレクトリ存在確認
     knowledge_dir = Path(args.knowledge_dir)
     if not knowledge_dir.exists():
@@ -794,7 +807,13 @@ def extract_task_keywords(task_description: str) -> List[str]:
         "ドキュメント", "コミュニケーション", "協力", "Phase"
     ]
     
-    all_keywords = technical_keywords + business_keywords + process_keywords
+    # ブランチ戦略キーワード
+    branch_keywords = [
+        "ブランチ", "マージ", "統合", "feature", "main", "切り替え",
+        "Phase", "実装", "開発", "リリース"
+    ]
+    
+    all_keywords = technical_keywords + business_keywords + process_keywords + branch_keywords
     
     # タスク記述内のキーワード検出
     detected_keywords = []
@@ -1034,6 +1053,112 @@ def review_knowledge(args):
         with open(args.output_report, 'w', encoding='utf-8') as f:
             json.dump(result, f, ensure_ascii=False, indent=2)
         print(f"\n📄 レポート出力: {args.output_report}")
+
+def check_branch_strategy(task_description: str) -> Dict[str, Any]:
+    """ブランチ戦略確認"""
+    
+    try:
+        import subprocess
+        
+        # 現在のブランチ名を取得
+        result = subprocess.run(['git', 'branch', '--show-current'], 
+                              capture_output=True, text=True, check=True)
+        current_branch = result.stdout.strip()
+        
+        # 推奨ブランチを決定
+        recommended_branch = determine_appropriate_branch(task_description)
+        
+        # ブランチが適切かチェック
+        is_appropriate = is_branch_appropriate(current_branch, task_description)
+        
+        branch_check_result = {
+            'current_branch': current_branch,
+            'recommended_branch': recommended_branch,
+            'is_appropriate': is_appropriate,
+            'action_required': not is_appropriate,
+            'status': 'OK' if is_appropriate else 'ブランチ切り替え推奨',
+            'recommendation': f"推奨ブランチ: {recommended_branch}" if not is_appropriate else f"現在のブランチ({current_branch})は適切です"
+        }
+        
+        return branch_check_result
+        
+    except subprocess.CalledProcessError:
+        return {
+            'current_branch': 'unknown',
+            'recommended_branch': 'unknown',
+            'is_appropriate': True,  # エラー時は続行を許可
+            'action_required': False,
+            'status': 'gitコマンドエラー',
+            'recommendation': '手動でブランチを確認してください'
+        }
+    except Exception as e:
+        return {
+            'current_branch': 'error',
+            'recommended_branch': 'error',
+            'is_appropriate': True,  # エラー時は続行を許可
+            'action_required': False,
+            'status': f'エラー: {e}',
+            'recommendation': '手動でブランチを確認してください'
+        }
+
+def determine_appropriate_branch(task_description: str) -> str:
+    """タスクに応じた適切なブランチを決定"""
+    
+    task_lower = task_description.lower()
+    
+    # タスク内容に基づくブランチマッピング
+    branch_mapping = {
+        'phase 3': 'feature/rag-phase3-plamo-integration',
+        'phase3': 'feature/rag-phase3-plamo-integration',
+        'plamo': 'feature/rag-phase3-plamo-integration',
+        'embedding': 'feature/rag-phase3-plamo-integration',
+        'vector': 'feature/rag-phase3-plamo-integration',
+        'phase 2': 'feature/rag-phase2-advanced-metadata',
+        'phase2': 'feature/rag-phase2-advanced-metadata',
+        'metadata': 'feature/rag-phase2-advanced-metadata',
+        'phase 1': 'feature/rag-phase1-basic-implementation',
+        'phase1': 'feature/rag-phase1-basic-implementation',
+        'rag': 'feature/rag-phase1-basic-implementation',
+        'hotfix': 'hotfix/',
+        'bugfix': 'bugfix/',
+        'docs': 'feature/documentation',
+        'ドキュメント': 'feature/documentation',
+        'テスト': 'feature/testing',
+        'test': 'feature/testing'
+    }
+    
+    # キーワードマッチング
+    for keyword, branch in branch_mapping.items():
+        if keyword in task_lower:
+            return branch
+    
+    # デフォルトはmain
+    return 'main'
+
+def is_branch_appropriate(current_branch: str, task_description: str) -> bool:
+    """現在のブランチがタスクに適切かチェック"""
+    
+    recommended_branch = determine_appropriate_branch(task_description)
+    
+    # 完全一致
+    if current_branch == recommended_branch:
+        return True
+    
+    # mainブランチは汎用的なタスクには適切
+    if current_branch == 'main' and recommended_branch == 'main':
+        return True
+    
+    # feature/ブランチの部分一致チェック
+    if current_branch.startswith('feature/') and recommended_branch.startswith('feature/'):
+        # 同一フェーズのブランチなら適切とする
+        if 'phase1' in current_branch and 'phase1' in recommended_branch:
+            return True
+        if 'phase2' in current_branch and 'phase2' in recommended_branch:
+            return True
+        if 'phase3' in current_branch and 'phase3' in recommended_branch:
+            return True
+    
+    return False
 
 if __name__ == "__main__":
     main()

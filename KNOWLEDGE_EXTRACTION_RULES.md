@@ -336,6 +336,12 @@ class KnowledgeSecurityGuidelines:
 □ 日本語特化設計の確認
 □ コード品質標準の確認
 □ 統合・デプロイパターンの選択
+
+**Step 5: ブランチ戦略確認 (必須)**
+□ 現在のブランチが作業内容に適切か確認
+□ 必要に応じて適切なブランチに切り替え
+□ 依存関係のあるブランチからの最新変更マージ
+□ ブランチ命名規則・戦略の遵守確認
 ```
 
 ### ナレッジ検索・発見システム
@@ -364,6 +370,11 @@ class PreTaskKnowledgeCheck:
                 "search_keywords": ["意思決定", "判断", "選択", "戦略"],
                 "priority": "medium",
                 "mandatory_check": False
+            },
+            "branch_strategy": {
+                "search_keywords": ["ブランチ", "Phase", "統合", "マージ"],
+                "priority": "high",
+                "mandatory_check": True
             }
         }
     
@@ -630,6 +641,12 @@ class KnowledgeUtilizationPromotion:
 □ 制約条件・前提条件の確認完了
 □ 軽減策・対応策の準備完了
 □ エスカレーション手順の確認完了
+
+**ブランチ戦略確認 (必須)**
+□ 現在のブランチ名・目的の確認完了
+□ 作業内容とブランチの適合性確認完了
+□ 必要な依存ブランチのマージ完了
+□ ブランチ命名規則・戦略の遵守確認完了
 
 **品質・効率化確認**
 □ 品質基準・成功指標の設定完了
