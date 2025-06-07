@@ -81,3 +81,22 @@ api_keys.json
 
 #Claude
 # plan - 進捗管理のためコミット対象とする
+
+# Knowledge Base - 機密情報・内部戦略文書のため非公開
+knowledge/
+*.knowledge.md
+*_internal.md
+
+# KPT分析ファイル（機密情報・戦略分析含む）
+plan/analysis/
+*_kpt_*.md
+
+# 内部戦略・競合分析文書
+*_strategy_*.md
+*_competitive_*.md
+*_confidential_*.md
+
+# ビジネス機密文書
+*_roi_*.md
+*_market_*.md
+*_revenue_*.md
