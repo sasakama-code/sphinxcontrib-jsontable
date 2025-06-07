@@ -544,6 +544,7 @@ class IntelligentQueryProcessor:
                 chunk_id="query_embedding",
                 content=query,
                 chunk_type="query",
+                embedding_hint="japanese_query_text",
                 metadata={"query_analysis": query_analysis.__dict__},
                 search_weight=1.0,
             )

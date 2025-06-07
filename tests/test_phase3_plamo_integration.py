@@ -696,8 +696,9 @@ class TestPhase3Integration:
         assert max(query_times) < 2.0  # 最大2秒以内
         assert sum(query_times) / len(query_times) < 1.0  # 平均1秒以内
 
-        # 成功率検証
-        assert vector_result.processing_stats["success_rate"] == 1.0
+        # 成功率検証（get_processing_stats()メソッドで計算された値を使用）
+        stats = vector_processor.get_processing_stats()
+        assert stats["success_rate"] == 1.0
         assert len(search_index.vector_index.chunk_metadata) == len(extended_chunks)
 
     def test_phase3_quality_assurance(self):
