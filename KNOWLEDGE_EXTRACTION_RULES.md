@@ -307,6 +307,254 @@ class KnowledgeSecurityGuidelines:
 
 ---
 
+## 🎯 タスク着手前ナレッジ確認ルール
+
+### 必須確認プロセス
+```markdown
+📋 **タスク開始前チェックリスト**
+
+**Step 1: ナレッジベース事前確認 (必須)**
+□ 関連技術アーキテクチャナレッジの確認
+□ 類似開発パターンの実装事例検索
+□ 過去の教訓・失敗事例の確認
+□ 成功要因・ベストプラクティスの適用可能性評価
+
+**Step 2: 戦略的意思決定ナレッジの活用**
+□ VTRR意思決定フレームワークの適用
+□ 類似判断事例の参照
+□ リスク軽減戦略の確認
+□ ステークホルダー整合手法の適用
+
+**Step 3: 品質保証ナレッジの適用**
+□ テスト戦略パターンの選択
+□ 品質基準・成功指標の設定
+□ エラーハンドリングパターンの確認
+□ パフォーマンス最適化手法の適用
+
+**Step 4: 実装効率化ナレッジの活用**
+□ 高速実装パターンの適用
+□ 日本語特化設計の確認
+□ コード品質標準の確認
+□ 統合・デプロイパターンの選択
+```
+
+### ナレッジ検索・発見システム
+```python
+class PreTaskKnowledgeCheck:
+    """タスク着手前ナレッジ確認"""
+    
+    def __init__(self):
+        self.knowledge_categories = {
+            "technical_patterns": {
+                "search_keywords": ["アーキテクチャ", "設計", "実装", "統合"],
+                "priority": "high",
+                "mandatory_check": True
+            },
+            "success_factors": {
+                "search_keywords": ["成功要因", "ベストプラクティス", "効率化"],
+                "priority": "high", 
+                "mandatory_check": True
+            },
+            "risk_mitigation": {
+                "search_keywords": ["リスク", "失敗", "問題", "教訓"],
+                "priority": "medium",
+                "mandatory_check": True
+            },
+            "decision_frameworks": {
+                "search_keywords": ["意思決定", "判断", "選択", "戦略"],
+                "priority": "medium",
+                "mandatory_check": False
+            }
+        }
+    
+    def conduct_pre_task_knowledge_review(self, task_description: str) -> Dict[str, Any]:
+        """タスク着手前ナレッジレビュー"""
+        
+        review_results = {
+            "task_description": task_description,
+            "knowledge_matches": {},
+            "applicable_patterns": [],
+            "risk_factors": [],
+            "recommended_approaches": [],
+            "quality_standards": []
+        }
+        
+        # タスクキーワード抽出
+        task_keywords = self._extract_task_keywords(task_description)
+        
+        # カテゴリ別ナレッジ検索
+        for category, config in self.knowledge_categories.items():
+            matches = self._search_knowledge_by_category(task_keywords, category, config)
+            review_results["knowledge_matches"][category] = matches
+        
+        # 適用可能パターン特定
+        review_results["applicable_patterns"] = self._identify_applicable_patterns(
+            task_keywords, review_results["knowledge_matches"]
+        )
+        
+        # リスク要因特定
+        review_results["risk_factors"] = self._identify_risk_factors(
+            task_keywords, review_results["knowledge_matches"]
+        )
+        
+        # 推奨アプローチ生成
+        review_results["recommended_approaches"] = self._generate_recommendations(
+            task_keywords, review_results["knowledge_matches"]
+        )
+        
+        return review_results
+    
+    def _extract_task_keywords(self, task_description: str) -> List[str]:
+        """タスクキーワード抽出"""
+        
+        # 技術キーワード
+        technical_keywords = [
+            "実装", "設計", "統合", "テスト", "デプロイ", "最適化",
+            "アーキテクチャ", "API", "データベース", "パフォーマンス"
+        ]
+        
+        # ビジネスキーワード  
+        business_keywords = [
+            "戦略", "計画", "分析", "改善", "効率化", "品質",
+            "ユーザー", "市場", "競合", "ROI"
+        ]
+        
+        # プロセスキーワード
+        process_keywords = [
+            "プロジェクト", "管理", "レビュー", "承認", "リリース",
+            "ドキュメント", "コミュニケーション", "協力"
+        ]
+        
+        all_keywords = technical_keywords + business_keywords + process_keywords
+        
+        # タスク記述内のキーワード検出
+        detected_keywords = []
+        task_lower = task_description.lower()
+        
+        for keyword in all_keywords:
+            if keyword in task_lower:
+                detected_keywords.append(keyword)
+        
+        return detected_keywords
+    
+    def _search_knowledge_by_category(
+        self, 
+        task_keywords: List[str], 
+        category: str, 
+        config: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """カテゴリ別ナレッジ検索"""
+        
+        # 実際の実装では、ナレッジベースファイルを検索
+        # ここでは模擬的な結果を返す
+        
+        matches = []
+        search_keywords = config["search_keywords"]
+        
+        # タスクキーワードと検索キーワードの一致度計算
+        relevance_score = len(set(task_keywords) & set(search_keywords)) / len(search_keywords)
+        
+        if relevance_score > 0.3:  # 30%以上の関連性
+            matches.append({
+                "category": category,
+                "relevance_score": relevance_score,
+                "matching_keywords": list(set(task_keywords) & set(search_keywords)),
+                "knowledge_files": self._find_relevant_knowledge_files(category, task_keywords)
+            })
+        
+        return matches
+    
+    def _find_relevant_knowledge_files(self, category: str, keywords: List[str]) -> List[str]:
+        """関連ナレッジファイル検索"""
+        
+        # 実際の実装では、knowledge/ディレクトリを検索
+        # カテゴリとキーワードに基づいてファイルを特定
+        
+        category_file_map = {
+            "technical_patterns": [
+                "technical_architecture/rag_pipeline_design.md",
+                "development_patterns/testing_strategies.md",
+                "development_patterns/japanese_localization_patterns.md"
+            ],
+            "success_factors": [
+                "lessons_learned/critical_success_factors.md",
+                "development_patterns/phase_integration_methodology.md"
+            ],
+            "risk_mitigation": [
+                "project_management/strategic_decision_patterns.md",
+                "lessons_learned/common_pitfalls.md"
+            ],
+            "decision_frameworks": [
+                "project_management/strategic_decision_patterns.md",
+                "business_insights/market_differentiation.md"
+            ]
+        }
+        
+        return category_file_map.get(category, [])
+```
+
+### タスク着手前確認の自動化
+```python
+class AutomatedKnowledgeCheck:
+    """自動ナレッジ確認システム"""
+    
+    def generate_task_guidance(self, task_description: str) -> str:
+        """タスクガイダンス生成"""
+        
+        checker = PreTaskKnowledgeCheck()
+        review_results = checker.conduct_pre_task_knowledge_review(task_description)
+        
+        guidance = f"""
+# 🎯 タスク実行ガイダンス
+
+**タスク**: {task_description}
+
+## 📚 関連ナレッジ
+
+### 適用推奨パターン
+{self._format_applicable_patterns(review_results["applicable_patterns"])}
+
+### 注意すべきリスク要因
+{self._format_risk_factors(review_results["risk_factors"])}
+
+### 推奨アプローチ
+{self._format_recommendations(review_results["recommended_approaches"])}
+
+## ✅ 実行前チェックリスト
+□ 関連ナレッジの詳細確認完了
+□ 適用パターンの実装準備完了
+□ リスク軽減策の準備完了
+□ 品質基準・成功指標の設定完了
+
+## 🔗 参照ナレッジファイル
+{self._format_knowledge_references(review_results["knowledge_matches"])}
+"""
+        
+        return guidance
+    
+    def _format_applicable_patterns(self, patterns: List[str]) -> str:
+        """適用パターン整形"""
+        if not patterns:
+            return "- 新規パターンの可能性 - 慎重な設計・実装を推奨"
+        
+        formatted = []
+        for pattern in patterns:
+            formatted.append(f"- {pattern}")
+        
+        return "\n".join(formatted)
+    
+    def _format_risk_factors(self, risks: List[str]) -> str:
+        """リスク要因整形"""
+        if not risks:
+            return "- 特定の既知リスクなし - 一般的な注意事項を適用"
+        
+        formatted = []
+        for risk in risks:
+            formatted.append(f"⚠️ {risk}")
+        
+        return "\n".join(formatted)
+```
+
 ## 🔄 ナレッジ活用・更新サイクル
 
 ### 定期レビュー・更新プロセス
@@ -366,6 +614,35 @@ class KnowledgeUtilizationPromotion:
 ---
 
 ## 🎯 実装チェックリスト
+
+### タスク着手前ナレッジ確認実施チェックリスト
+```markdown
+📋 **タスク開始前ナレッジ確認チェックリスト (必須)**
+
+**事前ナレッジ確認**
+□ ナレッジベース検索実行完了
+□ 関連技術パターンの確認完了
+□ 過去の成功・失敗事例の確認完了
+□ 適用可能なベストプラクティスの特定完了
+
+**リスク・制約事項確認**
+□ 既知のリスク要因の確認完了
+□ 制約条件・前提条件の確認完了
+□ 軽減策・対応策の準備完了
+□ エスカレーション手順の確認完了
+
+**品質・効率化確認**
+□ 品質基準・成功指標の設定完了
+□ テスト戦略・検証方法の確認完了
+□ 効率化パターンの適用準備完了
+□ 実装方針・アプローチの決定完了
+
+**意思決定支援確認**
+□ VTRR意思決定フレームワーク適用完了
+□ ステークホルダー整合手法の確認完了
+□ 類似判断事例の参照完了
+□ 戦略的選択肢の評価完了
+```
 
 ### ナレッジ抽出実施チェックリスト
 ```markdown

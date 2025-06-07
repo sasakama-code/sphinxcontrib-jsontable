@@ -3,8 +3,16 @@
 KPT分析からナレッジ抽出・管理スクリプト
 
 Usage:
+    # タスク着手前ナレッジ確認 (新機能)
+    python scripts/knowledge_extraction.py pre-check --task "Phase 3 PLaMo-Embedding-1B統合実装"
+    
+    # KPT分析からナレッジ抽出
     python scripts/knowledge_extraction.py extract --kpt-file plan/analysis/kpt_analysis.md
+    
+    # ナレッジ品質検証
     python scripts/knowledge_extraction.py validate --knowledge-dir knowledge/
+    
+    # 詳細品質レビュー
     python scripts/knowledge_extraction.py review --knowledge-file knowledge/technical_architecture/rag_pipeline.md
 """
 
@@ -648,6 +656,12 @@ def main():
     parser = argparse.ArgumentParser(description="KPT分析ナレッジ抽出・管理ツール")
     subparsers = parser.add_subparsers(dest="command", help="利用可能なコマンド")
     
+    # pre-check コマンド (新規追加)
+    precheck_parser = subparsers.add_parser("pre-check", help="タスク着手前ナレッジ確認")
+    precheck_parser.add_argument("--task", required=True, help="タスク説明")
+    precheck_parser.add_argument("--knowledge-dir", default="knowledge/", help="ナレッジディレクトリ")
+    precheck_parser.add_argument("--output-guidance", help="ガイダンス出力ファイル")
+
     # extract コマンド
     extract_parser = subparsers.add_parser("extract", help="KPT分析からナレッジ抽出")
     extract_parser.add_argument("--kpt-file", required=True, help="KPT分析ファイルパス")
@@ -666,7 +680,9 @@ def main():
     
     args = parser.parse_args()
     
-    if args.command == "extract":
+    if args.command == "pre-check":
+        pre_check_knowledge(args)
+    elif args.command == "extract":
         extract_knowledge(args)
     elif args.command == "validate":
         validate_knowledge(args)
@@ -674,6 +690,221 @@ def main():
         review_knowledge(args)
     else:
         parser.print_help()
+
+def pre_check_knowledge(args):
+    """タスク着手前ナレッジ確認実行"""
+    
+    print(f"🔍 タスク着手前ナレッジ確認: {args.task}")
+    
+    # ナレッジディレクトリ存在確認
+    knowledge_dir = Path(args.knowledge_dir)
+    if not knowledge_dir.exists():
+        print(f"⚠️ ナレッジディレクトリが見つかりません: {knowledge_dir}")
+        print("📋 新規タスクとして進行します")
+        return
+    
+    # 関連ナレッジファイル検索
+    md_files = list(knowledge_dir.rglob("*.md"))
+    
+    if not md_files:
+        print(f"📋 ナレッジファイルが見つかりません。新規パターンとして慎重に進行してください。")
+        return
+    
+    print(f"📚 {len(md_files)}個のナレッジファイルを検索中...")
+    
+    # タスクキーワード抽出
+    task_keywords = extract_task_keywords(args.task)
+    print(f"🔍 検出キーワード: {', '.join(task_keywords)}")
+    
+    # 関連ナレッジ検索
+    relevant_knowledge = []
+    
+    for md_file in md_files:
+        try:
+            with open(md_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # キーワードマッチング
+            relevance_score = calculate_relevance_score(content, task_keywords)
+            
+            if relevance_score > 0.2:  # 20%以上の関連性
+                relevant_knowledge.append({
+                    "file": md_file,
+                    "relevance": relevance_score,
+                    "category": md_file.parent.name,
+                    "matching_keywords": find_matching_keywords(content, task_keywords)
+                })
+                
+        except Exception as e:
+            print(f"⚠️ ファイル読み込みエラー: {md_file} - {e}")
+    
+    # 関連度順にソート
+    relevant_knowledge.sort(key=lambda x: x["relevance"], reverse=True)
+    
+    if relevant_knowledge:
+        print(f"\n📋 関連ナレッジ発見: {len(relevant_knowledge)}件")
+        print("=" * 50)
+        
+        for i, knowledge in enumerate(relevant_knowledge[:5], 1):  # 上位5件表示
+            print(f"{i}. {knowledge['file'].name}")
+            print(f"   カテゴリ: {knowledge['category']}")
+            print(f"   関連度: {knowledge['relevance']:.2f}")
+            print(f"   マッチキーワード: {', '.join(knowledge['matching_keywords'])}")
+            print()
+        
+        # ガイダンス生成
+        guidance = generate_task_guidance(args.task, relevant_knowledge)
+        
+        if args.output_guidance:
+            with open(args.output_guidance, 'w', encoding='utf-8') as f:
+                f.write(guidance)
+            print(f"📄 タスクガイダンス出力: {args.output_guidance}")
+        else:
+            print("📋 タスク実行ガイダンス:")
+            print(guidance)
+    
+    else:
+        print("📋 直接関連するナレッジは見つかりませんでした")
+        print("💡 新規パターンの可能性があります。慎重な設計・実装を推奨します")
+        
+        # 一般的なガイダンス生成
+        general_guidance = generate_general_guidance(args.task)
+        print("\n📋 一般的なガイダンス:")
+        print(general_guidance)
+
+def extract_task_keywords(task_description: str) -> List[str]:
+    """タスクキーワード抽出"""
+    
+    # 技術キーワード
+    technical_keywords = [
+        "実装", "設計", "統合", "テスト", "デプロイ", "最適化",
+        "アーキテクチャ", "API", "データベース", "パフォーマンス",
+        "RAG", "日本語", "PLaMo", "Embedding", "メタデータ", "検索"
+    ]
+    
+    # ビジネスキーワード  
+    business_keywords = [
+        "戦略", "計画", "分析", "改善", "効率化", "品質",
+        "ユーザー", "市場", "競合", "ROI", "差別化", "価値"
+    ]
+    
+    # プロセスキーワード
+    process_keywords = [
+        "プロジェクト", "管理", "レビュー", "承認", "リリース",
+        "ドキュメント", "コミュニケーション", "協力", "Phase"
+    ]
+    
+    all_keywords = technical_keywords + business_keywords + process_keywords
+    
+    # タスク記述内のキーワード検出
+    detected_keywords = []
+    task_lower = task_description.lower()
+    
+    for keyword in all_keywords:
+        if keyword.lower() in task_lower:
+            detected_keywords.append(keyword)
+    
+    return detected_keywords
+
+def calculate_relevance_score(content: str, task_keywords: List[str]) -> float:
+    """関連度スコア計算"""
+    
+    if not task_keywords:
+        return 0.0
+    
+    content_lower = content.lower()
+    matches = 0
+    
+    for keyword in task_keywords:
+        if keyword.lower() in content_lower:
+            matches += 1
+    
+    return matches / len(task_keywords)
+
+def find_matching_keywords(content: str, task_keywords: List[str]) -> List[str]:
+    """マッチングキーワード検索"""
+    
+    content_lower = content.lower()
+    matching = []
+    
+    for keyword in task_keywords:
+        if keyword.lower() in content_lower:
+            matching.append(keyword)
+    
+    return matching
+
+def generate_task_guidance(task_description: str, relevant_knowledge: List[Dict[str, Any]]) -> str:
+    """タスクガイダンス生成"""
+    
+    guidance = f"""# 🎯 タスク実行ガイダンス
+
+**タスク**: {task_description}
+
+## 📚 関連ナレッジ (上位5件)
+
+"""
+    
+    for i, knowledge in enumerate(relevant_knowledge[:5], 1):
+        guidance += f"### {i}. {knowledge['file'].name}\n"
+        guidance += f"- **カテゴリ**: {knowledge['category']}\n"
+        guidance += f"- **関連度**: {knowledge['relevance']:.2f}\n"
+        guidance += f"- **マッチキーワード**: {', '.join(knowledge['matching_keywords'])}\n"
+        guidance += f"- **ファイルパス**: `{knowledge['file']}`\n\n"
+    
+    guidance += """## ✅ 実行前チェックリスト
+
+□ 上記関連ナレッジの詳細確認完了
+□ 適用可能パターンの特定完了
+□ 既知リスク要因の確認完了
+□ 品質基準・成功指標の設定完了
+□ 実装方針・アプローチの決定完了
+
+## 🔍 推奨確認事項
+
+1. **技術パターン**: 類似実装の設計・アーキテクチャを確認
+2. **成功要因**: 過去の成功事例から適用可能な要因を抽出
+3. **リスク対策**: 既知の問題・失敗事例から予防策を準備
+4. **品質基準**: 期待される品質レベル・測定方法を明確化
+
+## 🚀 次ステップ
+
+関連ナレッジの詳細確認後、実装に着手してください。
+不明点があれば、過去の成功事例・KPT分析を参照してください。
+"""
+    
+    return guidance
+
+def generate_general_guidance(task_description: str) -> str:
+    """一般的なガイダンス生成"""
+    
+    return f"""# 🎯 新規タスクガイダンス
+
+**タスク**: {task_description}
+
+## 📋 新規パターン実行指針
+
+### ✅ 基本チェック項目
+□ 要件・目標の明確化
+□ 技術的実現可能性の検証
+□ リスク要因の事前特定
+□ 成功指標・測定方法の設定
+□ 実装アプローチの検討
+
+### 🔍 推奨分析事項
+1. **技術調査**: 関連技術・ライブラリの調査
+2. **設計検討**: アーキテクチャ・インターフェース設計
+3. **品質計画**: テスト戦略・品質保証手法
+4. **リスク管理**: 潜在的問題・軽減策の準備
+
+### 📚 参考推奨
+- 類似プロジェクトの事例調査
+- 業界ベストプラクティスの確認
+- 技術文書・公式ドキュメントの精読
+
+### 🎯 実装方針
+新規パターンのため、慎重かつ段階的なアプローチを推奨します。
+小規模なプロトタイプから開始し、段階的に機能を拡張してください。
+"""
 
 def extract_knowledge(args):
     """ナレッジ抽出実行"""
