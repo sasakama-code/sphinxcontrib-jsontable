@@ -23,6 +23,9 @@ A next-generation Sphinx extension that renders JSON data as structured tables w
 - **Business Term Enhancement**: Specialized processing for Japanese business documents
 - **Vector Search Indexing**: Production-ready search infrastructure
 
+### 📚 **Complete Feature Guide**
+**🎓 [v0.3.0 New Features Tutorial](docs/v0.3.0_feature_tutorial.md)** - Comprehensive guide with flowcharts, examples, and migration strategies
+
 ## Background / Motivation
 
 In recent years, there has been an increasing trend of using documents as data sources for Retrieval Augmented Generation (RAG). However, tabular data within documents often loses its structural relevance during the process of being ingested by RAG systems. This presented a challenge where the original value of the structured data could not be fully leveraged.

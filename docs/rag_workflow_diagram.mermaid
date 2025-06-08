@@ -1,0 +1,65 @@
+graph TD
+    A[JSONデータ入力] --> B[enhanced-jsontable ディレクティブ]
+    B --> C{RAGメタデータ有効?}
+    
+    C -->|Yes| D[RAGMetadataExtractor]
+    C -->|No| Z[従来のテーブル生成]
+    
+    D --> E[基本メタデータ抽出]
+    E --> F[スキーマ分析]
+    F --> G[統計分析]
+    
+    G --> H{日本語エンティティ認識?}
+    H -->|Yes| I[JapaneseEntityRecognizer]
+    H -->|No| M[AdvancedMetadataGenerator]
+    
+    I --> J[人名・地名・組織名検出]
+    J --> K[ビジネス用語強化]
+    K --> L[Unicode正規化]
+    L --> M
+    
+    M --> N[高度統計分析]
+    N --> O[データ品質評価]
+    O --> P{ファセット生成?}
+    
+    P -->|Yes| Q[SearchFacetGenerator]
+    P -->|No| U[SemanticChunker]
+    
+    Q --> R[カテゴリカルファセット]
+    R --> S[数値範囲ファセット]
+    S --> T[エンティティファセット]
+    T --> U
+    
+    U --> V{セマンティックチャンキング?}
+    V -->|Yes| W[日本語文書構造分析]
+    V -->|No| AA[MetadataExporter]
+    
+    W --> X[意味単位分割]
+    X --> Y[ビジネス文脈強化]
+    Y --> AA
+    
+    AA --> BB{エクスポート形式指定?}
+    BB -->|JSON-LD| CC[セマンティックWeb形式]
+    BB -->|OpenSearch| DD[検索エンジン最適化]
+    BB -->|PLaMo-ready| EE[日本語AI最適化]
+    BB -->|なし| FF[HTMLテーブル生成]
+    
+    CC --> GG[knowledge_graph.jsonld]
+    DD --> HH[search_mapping.json]
+    EE --> II[plamo_optimized.json]
+    
+    GG --> FF
+    HH --> FF
+    II --> FF
+    
+    FF --> JJ[最終HTMLテーブル出力]
+    Z --> JJ
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style D fill:#fff3e0
+    style I fill:#e8f5e8
+    style Q fill:#fff8e1
+    style U fill:#fce4ec
+    style AA fill:#f1f8e9
+    style JJ fill:#e3f2fd
