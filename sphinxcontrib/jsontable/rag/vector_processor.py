@@ -1,8 +1,18 @@
-"""
-PLaMo-Embedding-1B統合ベクトル処理エンジン
+"""Vector Processing Engine with PLaMo-Embedding-1B Integration.
 
-Phase 3のコア機能として、日本語特化AI統合による
-世界最高水準のベクトル生成・検索機能を提供
+Phase 3 core functionality providing world-class vector generation and search
+capabilities through Japanese-specialized AI integration.
+
+Features:
+- PLaMo-Embedding-1B model integration
+- Japanese text normalization and enhancement
+- Business term context optimization
+- Hierarchical context preservation
+- Batch processing with memory optimization
+- Comprehensive error handling and fallback processing
+
+Created: 2025-06-07
+Author: Claude Code Assistant
 """
 
 import json
@@ -30,7 +40,17 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class VectorChunk:
-    """ベクトル化されたチャンクデータ"""
+    """Vectorized chunk data container.
+
+    Args:
+        chunk_id: Unique identifier for the vector chunk.
+        original_chunk: Original semantic chunk before vectorization.
+        embedding: Generated embedding vector as NumPy array.
+        embedding_metadata: Metadata about the embedding generation process.
+        japanese_enhancement: Japanese-specific enhancement information.
+        search_boost: Search relevance boost factor (default 1.0).
+        created_at: Timestamp when the vector chunk was created.
+    """
 
     chunk_id: str
     original_chunk: SemanticChunk
@@ -43,7 +63,14 @@ class VectorChunk:
 
 @dataclass
 class VectorProcessingResult:
-    """ベクトル処理結果"""
+    """Vector processing result container.
+
+    Args:
+        vector_chunks: List of generated vector chunks.
+        processing_stats: Statistics about the processing operation.
+        model_info: Information about the model used for processing.
+        japanese_optimization_applied: Whether Japanese optimizations were applied.
+    """
 
     vector_chunks: list[VectorChunk]
     processing_stats: dict[str, Any]
@@ -52,7 +79,14 @@ class VectorProcessingResult:
 
 
 class JapaneseTextNormalizer:
-    """日本語テキスト正規化"""
+    """Japanese text normalization processor.
+
+    Handles comprehensive Japanese text normalization including:
+    - Full-width to half-width character conversion
+    - Business term standardization
+    - Unicode normalization (NFKC)
+    - Whitespace standardization
+    """
 
     def __init__(self):
         # 全角・半角変換マップ
@@ -71,7 +105,14 @@ class JapaneseTextNormalizer:
         ]
 
     def normalize(self, text: str) -> str:
-        """包括的テキスト正規化"""
+        """Perform comprehensive text normalization.
+
+        Args:
+            text: Input Japanese text to normalize.
+
+        Returns:
+            Normalized text with standardized characters and formatting.
+        """
 
         # Unicode正規化 (NFKC)
         import unicodedata
@@ -93,7 +134,11 @@ class JapaneseTextNormalizer:
 
 
 class BusinessTermEnhancer:
-    """ビジネス用語文脈強化"""
+    """Business term context enhancement processor.
+
+    Enhances business-related terms and contexts in Japanese text to improve
+    search relevance and understanding for business documents.
+    """
 
     def __init__(self):
         # ビジネス用語カテゴリ
@@ -128,7 +173,14 @@ class BusinessTermEnhancer:
         }
 
     def enhance(self, text: str) -> str:
-        """ビジネス文脈強化"""
+        """Enhance business context in text.
+
+        Args:
+            text: Input text to enhance with business context markers.
+
+        Returns:
+            Enhanced text with business context markers applied.
+        """
 
         enhanced_text = text
 
@@ -144,7 +196,14 @@ class BusinessTermEnhancer:
         return enhanced_text
 
     def extract_business_features(self, text: str) -> dict[str, Any]:
-        """ビジネス特徴抽出"""
+        """Extract business features from text.
+
+        Args:
+            text: Input text to analyze for business features.
+
+        Returns:
+            Dictionary containing business terms, categories, and boost scores.
+        """
 
         features = {"business_terms": [], "categories": {}, "boost_score": 1.0}
 
@@ -170,10 +229,22 @@ class BusinessTermEnhancer:
 
 
 class ContextPreserver:
-    """文脈保持・階層情報管理"""
+    """Context preservation and hierarchical information management.
+
+    Preserves hierarchical context from table structure and semantic
+    information to maintain meaning during vectorization.
+    """
 
     def preserve_hierarchical_context(self, text: str, metadata: dict[str, Any]) -> str:
-        """階層文脈保持"""
+        """Preserve hierarchical context in text.
+
+        Args:
+            text: Input text to enhance with context markers.
+            metadata: Metadata containing context information.
+
+        Returns:
+            Text enhanced with hierarchical context markers.
+        """
 
         context_markers = []
 
@@ -206,10 +277,18 @@ class ContextPreserver:
 
 
 class PLaMoVectorProcessor:
-    """PLaMo-Embedding-1B統合ベクトル処理エンジン"""
+    """PLaMo-Embedding-1B integrated vector processing engine.
+
+    Main processor class that orchestrates the complete vector generation
+    pipeline with Japanese text optimization and PLaMo model integration.
+    """
 
     def __init__(self, config: dict[str, Any] | None = None):
-        """初期化"""
+        """Initialize PLaMo vector processor.
+
+        Args:
+            config: Optional configuration dictionary for model and processing settings.
+        """
 
         self.config = config or self._get_default_config()
 
@@ -238,7 +317,11 @@ class PLaMoVectorProcessor:
         )
 
     def _get_default_config(self) -> dict[str, Any]:
-        """デフォルト設定"""
+        """Get default configuration settings.
+
+        Returns:
+            Default configuration dictionary with model and processing parameters.
+        """
 
         return {
             "model": {
@@ -266,7 +349,14 @@ class PLaMoVectorProcessor:
     async def process_chunks(
         self, chunks: list[SemanticChunk]
     ) -> VectorProcessingResult:
-        """チャンクのベクトル処理（非同期）"""
+        """Process semantic chunks into vector embeddings asynchronously.
+
+        Args:
+            chunks: List of semantic chunks to vectorize.
+
+        Returns:
+            VectorProcessingResult containing generated vectors and processing stats.
+        """
 
         start_time = time.time()
 
@@ -298,7 +388,14 @@ class PLaMoVectorProcessor:
     async def _enhance_chunks(
         self, chunks: list[SemanticChunk]
     ) -> list[dict[str, Any]]:
-        """チャンク前処理・文脈強化"""
+        """Preprocess and enhance chunks with context information.
+
+        Args:
+            chunks: List of semantic chunks to enhance.
+
+        Returns:
+            List of enhanced chunk dictionaries with Japanese optimizations.
+        """
 
         enhanced_chunks = []
 
@@ -338,7 +435,14 @@ class PLaMoVectorProcessor:
     async def _generate_embeddings_batch(
         self, enhanced_chunks: list[dict[str, Any]]
     ) -> list[VectorChunk]:
-        """バッチ処理によるベクトル生成"""
+        """Generate embeddings using batch processing.
+
+        Args:
+            enhanced_chunks: List of enhanced chunks ready for vectorization.
+
+        Returns:
+            List of VectorChunk objects with generated embeddings.
+        """
 
         vector_chunks = []
         batch_size = self.model_config.get("batch_size", 16)
@@ -368,7 +472,14 @@ class PLaMoVectorProcessor:
         return vector_chunks
 
     async def _process_batch(self, batch: list[dict[str, Any]]) -> list[VectorChunk]:
-        """個別バッチ処理"""
+        """Process individual batch of enhanced chunks.
+
+        Args:
+            batch: Batch of enhanced chunks to process.
+
+        Returns:
+            List of VectorChunk objects for the batch.
+        """
 
         batch_texts = [item["enhanced_text"] for item in batch]
 
@@ -413,7 +524,14 @@ class PLaMoVectorProcessor:
         return vector_chunks
 
     async def _generate_plamo_embeddings(self, texts: list[str]) -> list[np.ndarray]:
-        """PLaMo-Embedding-1B ベクトル生成"""
+        """Generate embeddings using PLaMo-Embedding-1B model.
+
+        Args:
+            texts: List of texts to generate embeddings for.
+
+        Returns:
+            List of embedding vectors as NumPy arrays.
+        """
 
         # 実際のPLaMo-Embedding-1B統合実装
         # 現在は開発用の模擬実装
@@ -455,7 +573,14 @@ class PLaMoVectorProcessor:
         return embeddings
 
     def _extract_text_features(self, text: str) -> dict[str, bool]:
-        """テキスト特徴抽出"""
+        """Extract text features for embedding optimization.
+
+        Args:
+            text: Text to analyze for features.
+
+        Returns:
+            Dictionary with boolean flags for different text features.
+        """
 
         return {
             "has_japanese": bool(re.search(r"[ひ-ん一-龯ア-ン]", text)),
@@ -467,7 +592,14 @@ class PLaMoVectorProcessor:
     async def _fallback_processing(
         self, batch: list[dict[str, Any]]
     ) -> list[VectorChunk]:
-        """フォールバック処理"""
+        """Fallback processing for failed batches.
+
+        Args:
+            batch: Batch of chunks that failed normal processing.
+
+        Returns:
+            List of VectorChunk objects with fallback embeddings.
+        """
 
         logger.warning("Using fallback processing for failed batch")
 
@@ -501,7 +633,13 @@ class PLaMoVectorProcessor:
     def _update_processing_stats(
         self, total: int, successful: int, processing_time: float
     ):
-        """処理統計更新"""
+        """Update processing statistics.
+
+        Args:
+            total: Total number of chunks processed.
+            successful: Number of successfully processed chunks.
+            processing_time: Time taken for processing.
+        """
 
         self.processing_stats["total_processed"] += total
         self.processing_stats["successful_embeddings"] += successful
@@ -520,7 +658,11 @@ class PLaMoVectorProcessor:
             self.processing_stats["japanese_enhancements_applied"] += successful
 
     def get_processing_stats(self) -> dict[str, Any]:
-        """処理統計取得"""
+        """Get current processing statistics.
+
+        Returns:
+            Dictionary containing processing statistics including success rates.
+        """
 
         stats = self.processing_stats.copy()
 
@@ -538,7 +680,12 @@ class PLaMoVectorProcessor:
         return stats
 
     def save_processing_results(self, result: VectorProcessingResult, output_path: str):
-        """処理結果保存"""
+        """Save vector processing results to disk.
+
+        Args:
+            result: VectorProcessingResult to save.
+            output_path: Directory path to save results.
+        """
 
         # ベクトルデータの保存（NumPy形式）
         embeddings_path = Path(output_path) / "embeddings.npz"
@@ -582,7 +729,14 @@ class PLaMoVectorProcessor:
 
     @classmethod
     def load_processing_results(cls, input_path: str) -> VectorProcessingResult:
-        """処理結果読み込み"""
+        """Load vector processing results from disk.
+
+        Args:
+            input_path: Directory path containing saved results.
+
+        Returns:
+            Loaded VectorProcessingResult object.
+        """
 
         # 埋め込みベクトル読み込み
         embeddings_path = Path(input_path) / "embeddings.npz"
