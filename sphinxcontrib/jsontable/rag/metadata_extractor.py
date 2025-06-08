@@ -1,15 +1,15 @@
-"""
-RAGMetadataExtractor - JSONテーブルからRAG用基本メタデータを抽出
+"""RAG Metadata Extractor for JSON table data.
 
-このモジュールは、JSONデータから検索・AI理解に必要な基本メタデータを抽出します。
-PLaMo-Embedding-1Bとの連携に最適化された日本語特化設計です。
+This module extracts basic metadata from JSON data required for search
+and AI understanding. Optimized for PLaMo-Embedding-1B integration with
+Japanese language processing capabilities.
 
-特徴:
-- JSON Schema自動生成
-- セマンティック要約作成
-- 検索キーワード抽出
-- エンティティマッピング
-- カスタムタグ対応
+Features:
+- Automatic JSON schema generation
+- Semantic summary creation
+- Search keyword extraction
+- Entity mapping
+- Custom tag support
 
 Created: 2025-06-07
 Author: Claude Code Assistant
@@ -31,7 +31,19 @@ JsonData = dict[str, Any] | list[dict[str, Any]] | list[Any]
 
 @dataclass
 class BasicMetadata:
-    """基本メタデータの構造"""
+    """Basic metadata structure for RAG processing.
+    
+    Args:
+        table_id: Unique identifier for the table.
+        schema: JSON schema of the data structure.
+        semantic_summary: Human-readable summary of table content.
+        search_keywords: Keywords for search optimization.
+        entity_mapping: Mapping of field names to entity types.
+        custom_tags: User-defined tags for categorization.
+        data_statistics: Statistical information about the data.
+        embedding_ready_text: Text prepared for embedding generation.
+        generation_timestamp: Timestamp when metadata was generated.
+    """
 
     table_id: str
     schema: dict[str, Any]
@@ -45,19 +57,23 @@ class BasicMetadata:
 
 
 class RAGMetadataExtractor:
-    """JSONテーブルからRAG用メタデータを抽出するクラス
-
-    Phase 1のコア機能として、Phase 2のAdvancedMetadataGeneratorの
-    基盤となるメタデータを提供します。
+    """Extract RAG metadata from JSON table data.
+    
+    Core Phase 1 functionality that provides foundational metadata
+    for Phase 2 AdvancedMetadataGenerator processing.
     """
 
     def __init__(self):
-        """メタデータ抽出器を初期化"""
+        """Initialize metadata extractor with Japanese language patterns."""
         self.japanese_patterns = self._init_japanese_patterns()
         self.type_inference_patterns = self._init_type_patterns()
 
     def _init_japanese_patterns(self) -> dict[str, list[str]]:
-        """日本語認識パターンを初期化"""
+        """Initialize Japanese language recognition patterns.
+        
+        Returns:
+            Dictionary mapping entity types to field name patterns.
+        """
         return {
             "name_indicators": [
                 "名前",
@@ -116,7 +132,11 @@ class RAGMetadataExtractor:
         }
 
     def _init_type_patterns(self) -> dict[str, Any]:
-        """型推論パターンを初期化"""
+        """Initialize type inference patterns.
+        
+        Returns:
+            Dictionary containing regex patterns for data type detection.
+        """
         return {
             "email_pattern": re.compile(
                 r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
@@ -131,24 +151,24 @@ class RAGMetadataExtractor:
         }
 
     def extract(self, json_data: JsonData, options: dict[str, Any]) -> BasicMetadata:
-        """JSONデータからRAG用基本メタデータを抽出
+        """Extract basic RAG metadata from JSON data.
 
         Args:
-            json_data: 処理対象のJSONデータ
-            options: ディレクティブから渡されるオプション
+            json_data: JSON data to process (dict, list of dicts, or list).
+            options: Options passed from directive.
 
         Returns:
-            BasicMetadata: 抽出されたメタデータ
+            BasicMetadata containing extracted metadata information.
 
         Raises:
-            ValueError: データ形式が不正な場合
+            ValueError: If data format is invalid or processing fails.
         """
         try:
-            # データの有効性チェック
+            # Validate data
             if json_data is None:
-                raise ValueError("データがNullです")
+                raise ValueError("Data is null")
 
-            # 基本情報の生成
+            # Generate basic information
             table_id = self._generate_table_id(json_data, options)
             schema = self._extract_schema(json_data)
             semantic_summary = self._generate_semantic_summary(json_data, schema)
@@ -171,32 +191,47 @@ class RAGMetadataExtractor:
             )
 
         except Exception as e:
-            logger.error(f"メタデータ抽出エラー: {e}")
-            raise ValueError(f"メタデータ抽出に失敗しました: {e}") from e
+            logger.error(f"Metadata extraction error: {e}")
+            raise ValueError(f"Failed to extract metadata: {e}") from e
 
     def _generate_table_id(self, json_data: JsonData, options: dict[str, Any]) -> str:
-        """テーブルの一意IDを生成"""
-        # データの内容ベースでハッシュ生成
+        """Generate unique table identifier.
+        
+        Args:
+            json_data: Input JSON data.
+            options: Processing options.
+            
+        Returns:
+            Unique table identifier string.
+        """
+        # Generate hash based on data content
         data_str = json.dumps(json_data, ensure_ascii=False, sort_keys=True)
         data_hash = hashlib.md5(data_str.encode("utf-8")).hexdigest()[:8]
 
-        # タイムスタンプ要素を追加
+        # Add timestamp element
         timestamp = datetime.now().strftime("%Y%m%d")
 
         return f"table_{timestamp}_{data_hash}"
 
     def _extract_schema(self, data: JsonData) -> dict[str, Any]:
-        """JSON Schemaを生成
-
-        OpenAPIやJSONLD仕様に準拠した構造化されたスキーマを生成
+        """Generate JSON Schema from data.
+        
+        Creates structured schema compliant with OpenAPI and JSON-LD
+        specifications for better interoperability.
+        
+        Args:
+            data: Input JSON data.
+            
+        Returns:
+            Generated JSON schema dictionary.
         """
         if isinstance(data, list) and data:
-            # 配列データの場合
+            # Handle array data
             sample_item = data[0]
             if isinstance(sample_item, dict):
                 properties = {}
 
-                # 全アイテムを分析してより正確な型推論
+                # Analyze all items for accurate type inference
                 for key in sample_item:
                     property_info = self._analyze_property(key, data, sample_item[key])
                     properties[key] = property_info
