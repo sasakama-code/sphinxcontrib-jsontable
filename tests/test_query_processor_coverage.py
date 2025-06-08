@@ -14,7 +14,6 @@ from sphinxcontrib.jsontable.rag.query_processor import (
     IntelligentQueryProcessor,
     QueryAnalysis,
     QueryExecutionResult,
-    QueryResult,
     SearchResult,
 )
 from sphinxcontrib.jsontable.rag.search_index_generator import (
@@ -287,7 +286,7 @@ class TestIntelligentQueryProcessorEdgeCases:
         result = await processor.process_query("")
 
         assert isinstance(result, QueryExecutionResult)
-        assert result.original_query == ""
+        assert result.query_analysis.original_query == ""
         assert len(result.search_results) == 0
 
     @pytest.mark.asyncio
@@ -301,8 +300,8 @@ class TestIntelligentQueryProcessorEdgeCases:
         special_query = "テスト@#$%検索!?&*()"
         result = await processor.process_query(special_query)
 
-        assert isinstance(result, QueryResult)
-        assert result.original_query == special_query
+        assert isinstance(result, QueryExecutionResult)
+        assert result.query_analysis.original_query == special_query
 
     @pytest.mark.asyncio
     async def test_vectorization_fallback(self):
@@ -318,7 +317,7 @@ class TestIntelligentQueryProcessorEdgeCases:
         # エラーが発生してもフォールバック処理で継続することを確認
         result = await processor.process_query("テストクエリ")
 
-        assert isinstance(result, QueryResult)
+        assert isinstance(result, QueryExecutionResult)
         # フォールバック処理が実行されたことを確認
         assert result.execution_time_ms >= 0
 
