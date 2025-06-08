@@ -1,8 +1,16 @@
-"""
-Phase 3: PLaMo-Embedding-1B統合テスト
+"""Comprehensive Phase 3 PLaMo-Embedding-1B integration tests.
 
-Phase 3で実装されたPLaMoVectorProcessor、SearchIndexGenerator、
-QueryProcessorの統合動作を包括的に検証
+Provides exhaustive integration testing for Phase 3 components including
+PLaMoVectorProcessor, SearchIndexGenerator, and QueryProcessor. Tests verify
+end-to-end functionality, Japanese language processing, and PLaMo-specific
+optimizations with comprehensive error handling validation.
+
+Test Coverage:
+- PLaMo-Embedding-1B vector processing pipeline
+- Japanese text normalization and business term enhancement
+- Search index generation with multiple index types
+- Intelligent query processing with intent classification
+- Integration error handling and fallback mechanisms
 """
 
 import pytest
@@ -34,7 +42,12 @@ from sphinxcontrib.jsontable.rag.vector_processor import (
 
 @pytest.fixture
 def sample_japanese_business_data():
-    """日本語ビジネスデータサンプル"""
+    """Create sample Japanese business data for PLaMo integration testing.
+
+    Returns:
+        List of Japanese business records with typical corporate data
+        including company names, financial metrics, and employee counts.
+    """
     return [
         {
             "会社名": "東京エレクトロニクス株式会社",

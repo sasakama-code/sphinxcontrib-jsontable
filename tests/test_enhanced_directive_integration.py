@@ -1,7 +1,16 @@
-"""
-EnhancedJsonTableDirective統合テスト
+"""Comprehensive integration tests for EnhancedJsonTableDirective.
 
-Phase 1&2統合版ディレクティブの動作を検証
+Provides complete integration testing for the enhanced directive including
+Phase 1 and Phase 2 RAG functionality integration. Tests verify end-to-end
+processing from JSON input through metadata extraction, semantic chunking,
+and advanced analytics with proper error handling.
+
+Test Coverage:
+- Enhanced directive initialization and configuration
+- RAG pipeline integration and processing
+- Metadata extraction and semantic chunking
+- Advanced metadata generation and export
+- Error handling and graceful fallbacks
 
 Created: 2025-06-07
 Author: Claude Code Assistant
@@ -23,7 +32,11 @@ from sphinxcontrib.jsontable.enhanced_directive import (
 
 
 class MockEnvironment:
-    """Sphinx環境のモック"""
+    """Mock Sphinx environment for testing enhanced directive functionality.
+
+    Provides minimal Sphinx environment simulation including source directory
+    configuration and application settings required for directive testing.
+    """
 
     def __init__(self):
         self.srcdir = "/tmp/test_src"
@@ -36,7 +49,11 @@ class MockEnvironment:
 
 
 class MockState:
-    """docutils状態のモック"""
+    """Mock docutils state for enhanced directive testing.
+
+    Simulates docutils processing state including document settings
+    and environment configuration required for directive execution.
+    """
 
     def __init__(self):
         self.document = Mock()
@@ -45,7 +62,12 @@ class MockState:
 
 
 class TestEnhancedJsonTableDirective:
-    """Enhanced JSON Table Directive の統合テスト"""
+    """Comprehensive integration test suite for EnhancedJsonTableDirective.
+
+    Tests all aspects of the enhanced directive including initialization,
+    RAG pipeline processing, metadata extraction, and error handling
+    with proper mocking for component isolation.
+    """
 
     def setup_method(self):
         """各テストの前に実行される初期化"""

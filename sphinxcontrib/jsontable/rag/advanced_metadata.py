@@ -1,10 +1,14 @@
-"""Advanced Metadata Generator for Phase 2 RAG Integration.
+"""Advanced metadata generator with Japanese language specialization.
 
-Advanced metadata generation capabilities:
-- Deep statistical analysis
-- Japanese entity classification
-- Data quality assessment
-- PLaMo-Embedding-1B integration preparation
+Provides comprehensive metadata generation capabilities including deep
+statistical analysis, Japanese entity classification, data quality assessment,
+and PLaMo-Embedding-1B integration preparation for enhanced RAG processing.
+
+Features:
+- Advanced statistical analysis with distribution classification
+- Japanese-specialized entity recognition and classification
+- Comprehensive data quality assessment and reporting
+- PLaMo-Embedding-1B optimized feature preparation
 """
 
 from __future__ import annotations
@@ -19,9 +23,9 @@ import numpy as np
 
 @dataclass
 class NumericalStats:
-    """Statistical information for numerical data.
+    """Comprehensive statistical analysis results for numerical data.
 
-    Args:
+    Attributes:
         mean: Arithmetic mean of the values.
         median: Middle value when sorted.
         std_dev: Standard deviation.
@@ -48,9 +52,9 @@ class NumericalStats:
 
 @dataclass
 class CategoricalStats:
-    """Statistical information for categorical data.
+    """Statistical analysis results for categorical data with pattern detection.
 
-    Args:
+    Attributes:
         unique_count: Number of unique values.
         value_counts: Frequency count for each value.
         entropy: Shannon entropy measure.
@@ -69,9 +73,9 @@ class CategoricalStats:
 
 @dataclass
 class TemporalStats:
-    """Statistical information for temporal data.
+    """Statistical analysis results for temporal data with trend detection.
 
-    Args:
+    Attributes:
         time_range: Start and end time range.
         duration: Total duration of the time series.
         frequency_pattern: Detected frequency pattern.
@@ -88,9 +92,9 @@ class TemporalStats:
 
 @dataclass
 class PersonEntity:
-    """Person name entity information.
+    """Person name entity with confidence scoring and type classification.
 
-    Args:
+    Attributes:
         name: Detected person name.
         confidence: Detection confidence score (0.0-1.0).
         name_type: Type of name format (japanese_kanji, katakana, western).
@@ -105,9 +109,9 @@ class PersonEntity:
 
 @dataclass
 class PlaceEntity:
-    """Place/location entity information.
+    """Geographic location entity with type classification and confidence.
 
-    Args:
+    Attributes:
         place: Detected place name.
         confidence: Detection confidence score (0.0-1.0).
         place_type: Type of place (prefecture, city, district, station).
@@ -122,9 +126,9 @@ class PlaceEntity:
 
 @dataclass
 class OrganizationEntity:
-    """Organization entity information.
+    """Organization entity with type classification and confidence scoring.
 
-    Args:
+    Attributes:
         organization: Detected organization name.
         confidence: Detection confidence score (0.0-1.0).
         org_type: Type of organization (company, department, government).
@@ -139,9 +143,9 @@ class OrganizationEntity:
 
 @dataclass
 class BusinessTermEntity:
-    """Business term entity information.
+    """Business terminology entity with category classification.
 
-    Args:
+    Attributes:
         term: Detected business term.
         confidence: Detection confidence score (0.0-1.0).
         category: Term category (job_title, industry, skill).
@@ -156,9 +160,9 @@ class BusinessTermEntity:
 
 @dataclass
 class EntityClassification:
-    """Entity classification results.
+    """Comprehensive entity classification results with confidence metrics.
 
-    Args:
+    Attributes:
         persons: List of detected person entities.
         places: List of detected place entities.
         organizations: List of detected organization entities.
@@ -175,9 +179,9 @@ class EntityClassification:
 
 @dataclass
 class DataQualityReport:
-    """Data quality assessment report.
+    """Comprehensive data quality assessment with multi-dimensional scoring.
 
-    Args:
+    Attributes:
         completeness_score: Completeness score (0.0-1.0).
         consistency_score: Consistency score (0.0-1.0).
         validity_score: Validity score (0.0-1.0).
@@ -196,9 +200,9 @@ class DataQualityReport:
 
 @dataclass
 class SearchFacets:
-    """Search facet definitions.
+    """Search facet configuration definitions for multi-dimensional filtering.
 
-    Args:
+    Attributes:
         categorical: Categorical facet configurations.
         numerical: Numerical facet configurations.
         temporal: Temporal facet configurations.
@@ -213,13 +217,13 @@ class SearchFacets:
 
 @dataclass
 class PLaMoFeatures:
-    """Features prepared for PLaMo-Embedding-1B processing.
+    """Optimized features prepared for PLaMo-Embedding-1B processing.
 
-    Args:
-        processed_text: Text processed for embedding generation.
-        entity_markers: Text with entity markers for enhanced processing.
-        business_context: Business context indicators.
-        semantic_tags: Semantic tags for content classification.
+    Attributes:
+        text_segments: Text segments processed for embedding generation.
+        japanese_features: Japanese language-specific feature enhancements.
+        embedding_hints: Optimization hints for embedding processing.
+        vector_optimization: Vector generation optimization parameters.
     """
 
     text_segments: list[str]
@@ -230,7 +234,16 @@ class PLaMoFeatures:
 
 @dataclass
 class AdvancedMetadata:
-    """Phase 2高度メタデータ構造"""
+    """Comprehensive advanced metadata structure for Phase 2 RAG integration.
+
+    Attributes:
+        basic_metadata: Basic metadata from Phase 1 processing.
+        statistical_analysis: Comprehensive statistical analysis results.
+        entity_classification: Classified entity extraction results.
+        data_quality: Data quality assessment report.
+        search_facets: Generated search facet configurations.
+        plamo_features: PLaMo-Embedding-1B optimized features.
+    """
 
     basic_metadata: dict
     statistical_analysis: dict[str, Any]
@@ -241,10 +254,22 @@ class AdvancedMetadata:
 
 
 class StatisticalAnalyzer:
-    """高度統計分析機能"""
+    """Advanced statistical analysis processor for comprehensive data analysis.
+
+    Provides sophisticated statistical analysis capabilities including numerical
+    distribution analysis, categorical pattern detection, outlier identification,
+    and data quality assessment with Japanese language optimization.
+    """
 
     def analyze_numerical_data(self, data: list[float]) -> NumericalStats:
-        """数値データの詳細統計分析"""
+        """Perform comprehensive statistical analysis on numerical data.
+
+        Args:
+            data: List of numerical values to analyze.
+
+        Returns:
+            NumericalStats containing detailed statistical analysis results.
+        """
         if not data:
             return self._empty_numerical_stats()
 

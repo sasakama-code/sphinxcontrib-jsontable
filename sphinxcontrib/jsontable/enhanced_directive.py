@@ -37,9 +37,9 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class RAGProcessingResult:
-    """Result container for RAG processing pipeline.
+    """Comprehensive result container for RAG processing pipeline execution.
 
-    Args:
+    Attributes:
         basic_metadata: Basic metadata extracted from JSON data.
         semantic_chunks: List of semantic chunks created from content.
         advanced_metadata: Advanced statistical analysis results (optional).
@@ -55,13 +55,19 @@ class RAGProcessingResult:
 
 
 class EnhancedJsonTableDirective(JsonTableDirective):
-    """
-    Enhanced JSON table directive with RAG integration capabilities.
+    """Enhanced JSON table directive with comprehensive RAG integration.
 
-    Extends JsonTableDirective with opt-in RAG features including metadata
-    extraction, semantic chunking, and advanced analytics. Provides zero
-    impact on existing functionality while enabling powerful search and
-    AI integration capabilities.
+    Extends the base JsonTableDirective with optional RAG capabilities including
+    advanced metadata extraction, semantic chunking, search facet generation,
+    and multi-format export. Maintains full backward compatibility while adding
+    powerful AI and search integration features through opt-in configuration.
+
+    Features:
+    - Zero-impact RAG integration (opt-in only)
+    - Advanced metadata generation with Japanese language support
+    - Semantic chunking for search optimization
+    - Multi-format export (JSON-LD, OpenSearch, PLaMo-ready)
+    - Comprehensive error handling with graceful fallbacks
     """
 
     # Extend base options with RAG-specific options
@@ -77,12 +83,11 @@ class EnhancedJsonTableDirective(JsonTableDirective):
     }
 
     def __init__(self, *args, **kwargs):
-        """
-        Initialize enhanced directive with RAG processing components.
+        """Initialize enhanced directive with conditional RAG component setup.
 
         Args:
-            *args: Positional arguments passed to parent directive.
-            **kwargs: Keyword arguments passed to parent directive.
+            *args: Positional arguments passed to parent JsonTableDirective.
+            **kwargs: Keyword arguments passed to parent JsonTableDirective.
         """
         super().__init__(*args, **kwargs)
 
@@ -109,12 +114,11 @@ class EnhancedJsonTableDirective(JsonTableDirective):
                     self.metadata_exporter = MetadataExporter()
 
     def run(self) -> list[nodes.Node]:
-        """
-        Execute directive processing with optional RAG pipeline.
+        """Execute directive processing with optional RAG pipeline integration.
 
-        Executes standard table generation and optionally processes RAG
-        features including metadata extraction, semantic chunking, and
-        advanced analytics when enabled through options.
+        Processes standard table generation and conditionally executes RAG
+        pipeline based on directive options. Includes comprehensive error
+        handling to ensure graceful fallback to standard functionality.
 
         Returns:
             List of docutils nodes representing the generated table.

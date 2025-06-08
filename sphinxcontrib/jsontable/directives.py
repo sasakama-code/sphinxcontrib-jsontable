@@ -1,7 +1,15 @@
-"""
-json_table_directive.py
+"""Sphinx directive for rendering JSON data as ReStructuredText tables.
 
-Sphinx directive for rendering JSON (file or inline) as ReStructuredText tables.
+Provides comprehensive JSON table rendering capabilities including file and inline
+content processing, security validation, performance optimization, and integration
+with Sphinx documentation generation workflow.
+
+Supported Features:
+- JSON file and inline content processing
+- Security validation with path traversal protection
+- Performance limits and memory safety
+- Multiple JSON format support (objects, arrays, mixed types)
+- Comprehensive error handling and validation
 """
 
 from __future__ import annotations
@@ -38,12 +46,14 @@ class JsonTableError(Exception):
 
 
 def validate_not_empty(data: Any, error_msg: str) -> None:
-    """
-    Raise JsonTableError with the given message if data is None or empty.
+    """Validate data is not None or empty, raising JsonTableError if invalid.
 
     Args:
-        data: The data to validate, may be None or an empty sequence.
-        error_msg: Error message for exception when data is empty.
+        data: Data to validate, may be None or an empty sequence.
+        error_msg: Error message to use in exception when data is empty.
+
+    Raises:
+        JsonTableError: If data is None, empty, or evaluates to False.
     """
     if not data:
         raise JsonTableError(error_msg)
@@ -63,43 +73,40 @@ def safe_str(value: Any) -> str:
 
 
 def ensure_file_exists(path: Path) -> None:
-    """
-    Check that the given file path exists; raise FileNotFoundError if not.
+    """Verify file path exists and raise FileNotFoundError if missing.
 
     Args:
-        path: Path object representing the file path to check.
+        path: Path object representing the file to verify.
 
     Raises:
-        FileNotFoundError: If the file does not exist at the given path.
+        FileNotFoundError: If the file does not exist at the specified path.
     """
     if not path.exists():
         raise FileNotFoundError(f"JSON file not found: {path}")
 
 
 def format_error(context: str, error: Exception) -> str:
-    """
-    Format an error message combining a context string with exception details.
+    """Format error message by combining context description with exception details.
 
     Args:
-        context: Description of the operation or location where the error occurred.
-        error: Exception instance containing details about the error.
+        context: Description of operation or location where error occurred.
+        error: Exception instance containing error details.
 
     Returns:
-        A formatted string "{context}: {error}".
+        Formatted error string in format "{context}: {error}".
     """
     return f"{context}: {error}"
 
 
 def is_safe_path(path: Path, base: Path) -> bool:
-    """
-    Determine if a given path is a subpath of a base directory to prevent directory traversal.
+    """Validate path is within base directory to prevent directory traversal attacks.
 
     Args:
-        path: The Path to validate.
-        base: The base directory Path against which to validate.
+        path: Path to validate for safety.
+        base: Base directory that should contain the path.
 
     Returns:
-        True if path is within base directory, False otherwise.
+        True if path is safely within base directory, False otherwise.
     """
     try:
         return path.resolve().is_relative_to(base.resolve())
@@ -112,22 +119,24 @@ def is_safe_path(path: Path, base: Path) -> bool:
 
 
 class JsonDataLoader:
-    """
-    Loader class for reading JSON data from files or inline content.
+    """JSON data loader with support for file and inline content processing.
 
-    Args:
-        encoding: Character encoding to use when reading files (default: "utf-8").
+    Provides secure JSON data loading capabilities with encoding validation,
+    path security checks, and comprehensive error handling for both file-based
+    and inline JSON content processing.
+
+    Attributes:
+        encoding: Character encoding used for file reading operations.
     """
 
     def __init__(self, encoding: str = DEFAULT_ENCODING):
         self.encoding = self._validate_encoding(encoding)
 
     def _validate_encoding(self, encoding: str) -> str:
-        """
-        Validate provided encoding; return default if invalid.
+        """Validate character encoding and return safe encoding name.
 
         Args:
-            encoding: Encoding name to validate.
+            encoding: Character encoding name to validate.
 
         Returns:
             Validated encoding name, or DEFAULT_ENCODING if invalid.
@@ -140,18 +149,17 @@ class JsonDataLoader:
             return DEFAULT_ENCODING
 
     def _validate_file_path(self, source: str, srcdir: Path) -> Path:
-        """
-        Validate and resolve a JSON file path relative to a source directory.
+        """Validate and resolve JSON file path to prevent security issues.
 
         Args:
-            source: Relative path string to the JSON file.
-            srcdir: Base directory Path for resolving the source.
+            source: Relative path string to JSON file.
+            srcdir: Base directory for path resolution.
 
         Returns:
-            Resolved Path object for the JSON file.
+            Resolved and validated Path object for JSON file.
 
         Raises:
-            JsonTableError: If the path is unsafe (directory traversal).
+            JsonTableError: If path contains directory traversal attempts.
         """
         file_path = srcdir / source
         if not is_safe_path(file_path, srcdir):
@@ -159,19 +167,18 @@ class JsonDataLoader:
         return file_path
 
     def load_from_file(self, source: str, srcdir: Path) -> JsonData:
-        """
-        Load JSON data from a file within the Sphinx source directory.
+        """Load and parse JSON data from file with security validation.
 
         Args:
-            source: Relative file path to JSON.
-            srcdir: Path of the Sphinx project source directory.
+            source: Relative file path to JSON data.
+            srcdir: Sphinx project source directory path.
 
         Returns:
-            Parsed JSON data (object or array).
+            Parsed JSON data as dict, list, or primitive value.
 
         Raises:
-            JsonTableError: If path validation fails or JSON decoding fails.
-            FileNotFoundError: If the file does not exist.
+            JsonTableError: If path validation or JSON parsing fails.
+            FileNotFoundError: If specified file does not exist.
         """
         file_path = self._validate_file_path(source, srcdir)
         ensure_file_exists(file_path)
@@ -183,17 +190,16 @@ class JsonDataLoader:
             raise JsonTableError(format_error(f"Failed to load {source}", e)) from e
 
     def parse_inline(self, content: list[str]) -> JsonData:
-        """
-        Parse inline JSON content provided as lines of text.
+        """Parse inline JSON content from directive content lines.
 
         Args:
-            content: List of strings representing lines of JSON.
+            content: List of strings representing JSON content lines.
 
         Returns:
-            Parsed JSON data (object or array).
+            Parsed JSON data as dict, list, or primitive value.
 
         Raises:
-            JsonTableError: If content is empty or invalid JSON.
+            JsonTableError: If content is empty or contains invalid JSON.
         """
         validate_not_empty(content, EMPTY_CONTENT_ERROR)
 
@@ -204,19 +210,22 @@ class JsonDataLoader:
 
 
 class TableConverter:
-    """
-    Convert JSON data into a 2D list (TableData) suitable for table building.
+    """JSON to tabular data converter with performance optimization.
 
-    This class handles the conversion of JSON data (objects or arrays) into
-    tabular format while applying performance safeguards and memory limits.
+    Converts various JSON data formats into 2D table structure suitable for
+    Sphinx table generation. Includes comprehensive performance safeguards,
+    memory limits, and support for multiple JSON formats including objects,
+    arrays, and mixed data types.
+
+    Attributes:
+        default_max_rows: Maximum number of rows to process for performance.
     """
 
     def __init__(self, default_max_rows: int | None = None):
-        """
-        Initialize TableConverter with optional custom default limit.
+        """Initialize table converter with optional row limit configuration.
 
         Args:
-            default_max_rows: Custom default row limit (None uses DEFAULT_MAX_ROWS).
+            default_max_rows: Maximum rows to process (None uses DEFAULT_MAX_ROWS).
         """
         self.default_max_rows = default_max_rows or DEFAULT_MAX_ROWS
 
@@ -226,16 +235,15 @@ class TableConverter:
         include_header: bool = False,
         limit: int | None = None,
     ) -> TableData:
-        """
-        Convert JSON data to a list of rows, optionally including headers and limiting rows.
+        """Convert JSON data to 2D table format with optional headers and limits.
 
         Args:
-            data: JSON data as dict or list.
-            include_header: Whether to include header row (default False).
-            limit: Maximum number of rows to include (None for default limit).
+            data: JSON data as dictionary, list, or primitive value.
+            include_header: Whether to prepend header row from object keys.
+            limit: Maximum number of data rows to include.
 
         Returns:
-            TableData: A list of rows, each row itself a list of strings.
+            2D list where each row is a list of string values.
 
         Raises:
             JsonTableError: If data is not dict or list, or if empty.

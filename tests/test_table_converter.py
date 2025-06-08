@@ -1,9 +1,16 @@
-"""
-Comprehensive unit tests for TableConverter class.
+"""Comprehensive unit tests for TableConverter class functionality.
 
-This module contains exhaustive test cases covering all methods of the TableConverter class,
-including both normal and error scenarios. Tests follow the AAA pattern with single assertions
-and proper isolation using mocks.
+Provides exhaustive test coverage for TableConverter including JSON to table
+conversion, performance limit handling, header generation, and data type
+processing. Tests follow pytest best practices with AAA pattern, single
+assertions, and proper isolation using mocks.
+
+Test Coverage:
+- JSON data conversion to tabular format
+- Performance limits and memory safety
+- Header extraction and management
+- Multiple data format support (objects, arrays, primitives)
+- Error handling for invalid data structures
 """
 
 import time
@@ -26,25 +33,41 @@ TableData = list[list[str]]
 # Test Fixtures
 @pytest.fixture
 def converter():
-    """Create TableConverter instance for testing."""
+    """Create TableConverter instance with default configuration for testing.
+
+    Returns:
+        TableConverter instance with default settings for test execution.
+    """
     return TableConverter()
 
 
 @pytest.fixture
 def sample_dict():
-    """Sample dictionary data for testing."""
+    """Create sample dictionary data for conversion testing.
+
+    Returns:
+        Dictionary with mixed data types for testing conversion logic.
+    """
     return {"name": "John", "age": 30, "city": "Tokyo"}
 
 
 @pytest.fixture
 def sample_list_of_dicts():
-    """Sample list of dictionaries for testing."""
+    """Create sample list of dictionaries for table conversion testing.
+
+    Returns:
+        List of dictionary objects with varying key sets for header testing.
+    """
     return [{"name": "John", "age": 30}, {"name": "Jane", "age": 25, "city": "Osaka"}]
 
 
 @pytest.fixture
 def sample_list_of_lists():
-    """Sample list of lists for testing."""
+    """Create sample nested list structure for array conversion testing.
+
+    Returns:
+        List of lists representing pre-formatted tabular data.
+    """
     return [["John", "30"], ["Jane", "25"]]
 
 

@@ -31,9 +31,9 @@ JsonData = dict[str, Any] | list[dict[str, Any]] | list[Any]
 
 @dataclass
 class BasicMetadata:
-    """Basic metadata structure for RAG processing.
+    """Basic metadata structure for RAG processing and search optimization.
 
-    Args:
+    Attributes:
         table_id: Unique identifier for the table.
         schema: JSON schema of the data structure.
         semantic_summary: Human-readable summary of table content.

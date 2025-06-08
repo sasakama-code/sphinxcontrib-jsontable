@@ -1,8 +1,15 @@
-"""
-Unit tests for JsonTableDirective class.
+"""Comprehensive unit tests for JsonTableDirective class.
 
-This module provides comprehensive test coverage for all methods of the
-JsonTableDirective class, including normal and error cases.
+Provides exhaustive test coverage for all JsonTableDirective methods including
+initiation, configuration parsing, JSON data processing, and table generation.
+Tests cover both successful operations and error conditions with proper mocking
+for component isolation and reliable test execution.
+
+Test Structure:
+- Initialization and configuration tests
+- JSON data loading and validation tests
+- Table conversion and rendering tests
+- Error handling and edge case validation
 """
 
 from pathlib import Path
@@ -20,11 +27,20 @@ from sphinxcontrib.jsontable.directives import (
 
 
 class TestJsonTableDirective:
-    """Test suite for JsonTableDirective class methods."""
+    """Comprehensive test suite for JsonTableDirective functionality.
+
+    Tests all aspects of JsonTableDirective including initialization,
+    configuration processing, data loading, table generation, and error
+    handling with comprehensive mocking for component isolation.
+    """
 
     @pytest.fixture
     def mock_state(self):
-        """Create a mock state with document and environment."""
+        """Create mock Sphinx state with document and environment configuration.
+
+        Returns:
+            Mock object configured to simulate Sphinx directive state.
+        """
         state = Mock()
         state.document = Mock()
         state.document.settings = Mock()
@@ -34,7 +50,14 @@ class TestJsonTableDirective:
 
     @pytest.fixture
     def directive_instance(self, mock_state):
-        """Create a JsonTableDirective instance with mocked dependencies."""
+        """Create JsonTableDirective instance with fully mocked dependencies.
+
+        Args:
+            mock_state: Mocked Sphinx state fixture.
+
+        Returns:
+            JsonTableDirective instance with mocked loader, converter, and builder.
+        """
         with (
             patch("sphinxcontrib.jsontable.directives.SphinxDirective.__init__"),
             patch(
