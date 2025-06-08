@@ -20,11 +20,11 @@ def test_rag_metadata_extractor():
         {"name": "佐藤花子", "age": 25, "department": "営業部"},
     ]
 
-    metadata = extractor.extract_metadata(test_data)
+    metadata = extractor.extract(test_data, {})
 
-    print(f"Data Type: {metadata['data_type']}")
-    print(f"Schema Type: {metadata['schema_info']['type']}")
-    print(f"Fields: {metadata['schema_info']['fields']}")
+    print(f"Table ID: {metadata.table_id}")
+    print(f"Schema: {metadata.schema}")
+    print(f"Keywords: {metadata.search_keywords}")
     print("✅ RAGMetadataExtractor test passed")
 
 
@@ -32,16 +32,17 @@ def test_semantic_chunker():
     """SemanticChunker の基本機能テスト"""
     print("\n=== SemanticChunker Test ===")
 
-    chunker = SemanticChunker(chunk_size=2)
+    chunker = SemanticChunker(chunk_strategy="row_based", max_chunk_size=1000)
 
-    table_data = [
-        ["名前", "年齢", "部署"],
-        ["田中太郎", "30", "開発部"],
-        ["佐藤花子", "25", "営業部"],
-        ["鈴木一郎", "35", "開発部"],
+    # RAGMetadataExtractorを使って基本メタデータを生成
+    extractor = RAGMetadataExtractor()
+    test_data = [
+        {"name": "田中太郎", "age": 30, "department": "開発部"},
+        {"name": "佐藤花子", "age": 25, "department": "営業部"},
     ]
-
-    chunks = chunker.create_semantic_chunks(table_data, {}, has_header=True)
+    
+    basic_metadata = extractor.extract(test_data, {})
+    chunks = chunker.process(test_data, basic_metadata)
 
     print(f"Generated {len(chunks)} chunks")
     print("✅ SemanticChunker test passed")

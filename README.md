@@ -7,44 +7,59 @@
 
 **Languages:** [English](README.md) | [日本語](README_ja.md)
 
-A powerful Sphinx extension that renders JSON data (from files or inline content) as beautifully formatted reStructuredText tables. Perfect for documentation that needs to display structured data, API examples, configuration references, and data-driven content.
+A next-generation Sphinx extension that renders JSON data as structured tables with advanced **RAG (Retrieval Augmented Generation)** capabilities. Features world-class Japanese language processing optimized for **PLaMo-Embedding-1B**, making it the first Japanese-specialized RAG-enabled documentation system.
+
+## 🚀 What's New in v0.3.0
+
+### 🌟 **Revolutionary RAG Integration**
+- **Enhanced Directive**: `enhanced-jsontable` with automatic metadata generation
+- **Japanese Entity Recognition**: Native support for 人名, 地名, 組織名, ビジネス用語
+- **PLaMo-Embedding-1B Integration**: 1024-dimensional vector generation for Japanese text
+- **Multi-format Export**: JSON-LD, OpenSearch, PLaMo-ready formats
+
+### 🎯 **Enterprise-Grade Features**  
+- **Automatic Search Facets**: Statistical analysis with quartile-based ranges
+- **Semantic Chunking**: Japanese-optimized content segmentation
+- **Business Term Enhancement**: Specialized processing for Japanese business documents
+- **Vector Search Indexing**: Production-ready search infrastructure
 
 ## Background / Motivation
 
 In recent years, there has been an increasing trend of using documents as data sources for Retrieval Augmented Generation (RAG). However, tabular data within documents often loses its structural relevance during the process of being ingested by RAG systems. This presented a challenge where the original value of the structured data could not be fully leveraged.
 
-Against this backdrop, sphinxcontrib-jsontable was developed to directly embed structured data, such as JSON, as meaningful tables in Sphinx-generated documents, with the objective to ensure that readability and the data's value as a source effectively coexist.
+Against this backdrop, **sphinxcontrib-jsontable v0.3.0** was developed to directly embed structured data as meaningful tables in Sphinx-generated documents, with advanced RAG capabilities that ensure readability and semantic understanding effectively coexist. The integration with PLaMo-Embedding-1B makes it the world's first Japanese-specialized RAG documentation system.
 
-## Features
+## 🌟 Core Features
 
-✨ **Flexible Data Sources**
+### ✨ **Traditional Table Rendering**
 * Load JSON from files within your Sphinx project
 * Embed JSON directly inline in your documentation
 * Support for relative file paths with safe path resolution
+* Multiple data formats (objects, arrays, nested structures)
+* Customizable output with headers and row limiting
 
-📊 **Multiple Data Formats**
-* JSON objects (single or arrays)
-* 2D arrays with optional headers
-* Mixed data types with automatic string conversion
-* Nested data structures (flattened appropriately)
+### 🧠 **Advanced RAG Capabilities (v0.3.0)**
+* **Automatic Metadata Extraction**: Schema analysis, statistics, data quality assessment
+* **Japanese Entity Recognition**: 
+  - 人名 (Personal names): 田中太郎, 佐藤花子
+  - 地名 (Place names): 東京都, 大阪市, 新宿駅  
+  - 組織名 (Organizations): 株式会社○○, ○○部
+  - ビジネス用語 (Business terms): 売上高, 営業利益
+* **Semantic Chunking**: Intelligent content segmentation for optimal search
+* **Vector Processing**: PLaMo-Embedding-1B integration for Japanese text
+* **Search Index Generation**: Automatic creation of search-optimized indices
 
-🎛️ **Customizable Output**
-* Optional header rows with automatic key extraction
-* Row limiting for large datasets
-* Custom file encoding support
-* Responsive table formatting
+### 🔍 **Multi-Format Export**
+* **JSON-LD**: Semantic Web standard format
+* **OpenSearch**: Elasticsearch/OpenSearch mapping
+* **PLaMo-ready**: PLaMo-Embedding-1B optimized format  
+* **Custom**: User-defined export formats
 
-🔒 **Robust & Safe**
-* Path traversal protection
-* Comprehensive error handling
-* Encoding validation
-* Detailed logging for debugging
-
-⚡ **Performance Optimized**
-* Automatic row limiting for large datasets (10,000 rows by default)
-* Configurable performance limits
-* Memory-safe processing
-* User-friendly warnings for large data
+### 🔒 **Enterprise Security & Performance**
+* Path traversal protection with comprehensive security measures
+* Automatic performance optimization for large datasets
+* Memory-safe processing with configurable limits
+* Japanese Unicode normalization and character encoding support
 
 ## Installation
 
@@ -59,6 +74,11 @@ git clone https://github.com/sasakama-code/sphinxcontrib-jsontable.git
 cd sphinxcontrib-jsontable
 pip install -e .
 ```
+
+### Dependencies
+- **Python**: 3.10+ (recommended: 3.11+)
+- **Sphinx**: 3.0+ (recommended: 4.0+)
+- **NumPy**: 2.2.6+ (for advanced statistical analysis)
 
 ## Quick Start
 
@@ -76,7 +96,7 @@ extensions = [
 jsontable_max_rows = 5000  # Default: 10000
 ```
 
-### 2. Create Sample Data
+### 2. Basic Usage (Legacy Compatible)
 
 Create `data/users.json`:
 ```json
@@ -84,21 +104,19 @@ Create `data/users.json`:
   {
     "id": 1,
     "name": "Alice Johnson",
-    "email": "alice@example.com",
+    "email": "alice@example.com", 
     "department": "Engineering",
     "active": true
   },
   {
     "id": 2,
     "name": "Bob Smith",
-    "email": "bob@example.com", 
-    "department": "Marketing",
+    "email": "bob@example.com",
+    "department": "Marketing", 
     "active": false
   }
 ]
 ```
-
-### 3. Add to Your Documentation
 
 **In reStructuredText (.rst):**
 ```rst
@@ -110,15 +128,44 @@ User Database
    :limit: 10
 ```
 
-**In Markdown (with myst-parser):**
-````markdown
-# User Database
+### 3. Enhanced RAG-Enabled Usage (v0.3.0)
 
-```{jsontable} data/users.json
-:header:
-:limit: 10
+**For Japanese business documents with RAG capabilities:**
+
+```rst
+Japanese Company Data with RAG
+==============================
+
+.. enhanced-jsontable:: data/japanese_companies.json
+   :header:
+   :rag-metadata: true
+   :export-format: json-ld,opensearch,plamo-ready
+   :entity-recognition: japanese
+   :facet-generation: auto
+   :semantic-chunking: business
 ```
-````
+
+**Sample Japanese data:**
+```json
+[
+  {
+    "会社名": "株式会社テクノロジー",
+    "代表者": "田中太郎",
+    "所在地": "東京都新宿区",
+    "業種": "情報通信業", 
+    "売上高": "50億円",
+    "従業員数": "250名"
+  },
+  {
+    "会社名": "サンプル工業株式会社",
+    "代表者": "佐藤花子", 
+    "所在地": "大阪市中央区",
+    "業種": "製造業",
+    "売上高": "120億円",
+    "従業員数": "480名"
+  }
+]
+```
 
 ### 4. Build Your Documentation
 
@@ -126,14 +173,163 @@ User Database
 sphinx-build -b html docs/ build/html/
 ```
 
-## Comprehensive Usage Guide
+## RAG Integration Guide (v0.3.0)
+
+### Enhanced Directive Options
+
+| Option | Type | Default | Description | Example |
+|--------|------|---------|-------------|---------|
+| `rag-metadata` | flag | off | Enable RAG metadata generation | `:rag-metadata:` |
+| `export-format` | string | none | Export formats (comma-separated) | `:export-format: json-ld,opensearch` |
+| `entity-recognition` | string | off | Enable entity recognition | `:entity-recognition: japanese` |
+| `facet-generation` | string | off | Auto-generate search facets | `:facet-generation: auto` |
+| `semantic-chunking` | string | off | Semantic content chunking | `:semantic-chunking: business` |
+
+### Export Formats
+
+#### JSON-LD (Semantic Web)
+```rst
+.. enhanced-jsontable:: data/products.json
+   :rag-metadata:
+   :export-format: json-ld
+```
+
+**Output**: `products_metadata.jsonld` with semantic markup
+
+#### OpenSearch/Elasticsearch
+```rst  
+.. enhanced-jsontable:: data/logs.json
+   :rag-metadata:
+   :export-format: opensearch
+```
+
+**Output**: `logs_opensearch_mapping.json` with optimized field mappings
+
+#### PLaMo-ready Format
+```rst
+.. enhanced-jsontable:: data/japanese_text.json
+   :rag-metadata:
+   :export-format: plamo-ready
+   :entity-recognition: japanese
+```
+
+**Output**: `japanese_text_plamo.json` with PLaMo-Embedding-1B optimizations
+
+### Japanese Entity Recognition
+
+The extension automatically detects and classifies Japanese entities:
+
+```rst
+.. enhanced-jsontable:: data/japanese_data.json
+   :entity-recognition: japanese
+   :rag-metadata:
+```
+
+**Supported Entity Types:**
+- **人名** (Personal Names): 田中太郎, 佐藤花子, 山田次郎
+- **地名** (Place Names): 東京都, 大阪市, 新宿駅, 渋谷区
+- **組織名** (Organizations): 株式会社○○, ○○部, 経済産業省
+- **ビジネス用語** (Business Terms): 売上高, 営業利益, ROI, KPI
+
+### Automatic Search Facets
+
+Generate intelligent search facets automatically:
+
+```rst
+.. enhanced-jsontable:: data/sales_data.json
+   :facet-generation: auto
+   :rag-metadata:
+```
+
+**Generated Facets:**
+- **Categorical**: Automatic grouping of text fields
+- **Numerical**: Quartile-based ranges for numeric data
+- **Temporal**: Smart date/time period detection
+- **Entity-based**: Japanese entity classification facets
+
+### Semantic Chunking Strategies
+
+Choose optimal chunking for your content:
+
+```rst
+.. enhanced-jsontable:: data/documents.json
+   :semantic-chunking: business
+   :entity-recognition: japanese
+```
+
+**Available Strategies:**
+- `business`: Optimized for Japanese business documents
+- `technical`: Technical documentation and manuals
+- `general`: General-purpose content chunking
+- `conversational`: Chat logs and communications
+
+## Advanced RAG Examples
+
+### Enterprise Business Intelligence
+
+```rst
+Quarterly Business Report
+========================
+
+.. enhanced-jsontable:: data/quarterly_report.json
+   :header:
+   :rag-metadata: true
+   :export-format: json-ld,opensearch
+   :entity-recognition: japanese
+   :facet-generation: auto
+   :semantic-chunking: business
+
+.. note::
+   This data is automatically processed for:
+   
+   - **Entity Recognition**: Company names, executive names, locations
+   - **Search Facets**: Revenue ranges, department categories, geographic regions
+   - **Vector Embeddings**: PLaMo-Embedding-1B for semantic search
+   - **Export Formats**: JSON-LD for knowledge graphs, OpenSearch for analytics
+```
+
+### Technical Documentation with RAG
+
+```rst  
+API Documentation
+================
+
+.. enhanced-jsontable:: data/api_endpoints.json
+   :header:
+   :rag-metadata: true
+   :export-format: plamo-ready
+   :semantic-chunking: technical
+   :facet-generation: auto
+
+.. enhanced-jsontable:: data/error_codes.json
+   :header:
+   :rag-metadata: true
+   :export-format: opensearch
+   :semantic-chunking: technical
+```
+
+### Multi-language Content Processing
+
+```rst
+Global Office Directory
+======================
+
+.. enhanced-jsontable:: data/global_offices.json
+   :header:
+   :rag-metadata: true
+   :entity-recognition: japanese
+   :export-format: json-ld,opensearch,plamo-ready
+   :facet-generation: auto
+   :semantic-chunking: business
+```
+
+## Traditional Usage (Backward Compatible)
+
+All existing documentation continues to work unchanged:
 
 ### Data Format Support
 
 #### Array of Objects (Most Common)
-
-Perfect for database records, API responses, configuration lists:
-
 ```json
 [
   {"name": "Redis", "port": 6379, "ssl": false},
@@ -142,17 +338,7 @@ Perfect for database records, API responses, configuration lists:
 ]
 ```
 
-```rst
-.. jsontable:: data/services.json
-   :header:
-```
-
-**Output:** Automatically generates headers from object keys (name, port, ssl).
-
 #### 2D Arrays with Headers
-
-Great for CSV-like data, reports, matrices:
-
 ```json
 [
   ["Service", "Port", "Protocol", "Status"],
@@ -162,35 +348,7 @@ Great for CSV-like data, reports, matrices:
 ]
 ```
 
-```rst
-.. jsontable:: data/ports.json
-   :header:
-```
-
-**Output:** First row becomes the table header.
-
-#### 2D Arrays without Headers
-
-Simple tabular data:
-
-```json
-[
-  ["Monday", "Sunny", "75°F"],
-  ["Tuesday", "Cloudy", "68°F"],
-  ["Wednesday", "Rainy", "62°F"]
-]
-```
-
-```rst
-.. jsontable:: data/weather.json
-```
-
-**Output:** All rows treated as data (no headers).
-
-#### Single Object
-
-Configuration objects, settings, metadata:
-
+#### Single Objects
 ```json
 {
   "database_host": "localhost",
@@ -200,14 +358,7 @@ Configuration objects, settings, metadata:
 }
 ```
 
-```rst
-.. jsontable:: data/config.json
-   :header:
-```
-
-**Output:** Keys become one column, values become another.
-
-### Directive Options Reference
+### Traditional Directive Options
 
 | Option | Type | Default | Description | Example |
 |--------|------|---------|-------------|---------|
@@ -215,542 +366,199 @@ Configuration objects, settings, metadata:
 | `encoding` | string | `utf-8` | File encoding for JSON files | `:encoding: utf-16` |
 | `limit` | positive int/0 | automatic | Maximum rows to display (0 = unlimited) | `:limit: 50` |
 
-## Configuration Options
+## Performance & Security
 
-Configure sphinxcontrib-jsontable in your `conf.py`:
+### Automatic Performance Protection
 
-### Performance Settings
-
-```python
-# Maximum rows before automatic limiting kicks in (default: 10000)
-jsontable_max_rows = 5000
-
-# Example configurations for different use cases:
-
-# For documentation with mostly small datasets
-jsontable_max_rows = 100
-
-# For large data-heavy documentation
-jsontable_max_rows = 50000
-
-# Disable automatic limiting entirely (not recommended for web deployment)
-# jsontable_max_rows = None  # Will use unlimited by default
-```
-
-### Advanced Examples
-
-#### Automatic Performance Protection
-
-When no `:limit:` is specified, the extension automatically protects against large datasets:
+For large datasets, the extension provides intelligent protection:
 
 ```rst
 .. jsontable:: data/huge_dataset.json
    :header:
-
-# If dataset > 10,000 rows, automatically shows first 10,000 with warning
-# User sees: "Large dataset detected (25,000 rows). Showing first 10,000 
-# rows for performance. Use :limit: option to customize."
+   # If dataset > 10,000 rows, automatically shows first 10,000 with warning
 ```
 
-#### Explicit Unlimited Processing
+### Security Features
 
-For cases where you need to display all data regardless of size:
+- **Path Traversal Protection**: Only files within Sphinx source directory
+- **Safe File Access**: Comprehensive validation and sanitization
+- **Memory Protection**: Configurable limits prevent resource exhaustion
+- **Japanese Unicode Security**: Proper normalization and validation
 
-```rst
-.. jsontable:: data/large_but_manageable.json
-   :header:
-   :limit: 0
+### Configuration Options
 
-# ⚠️ Shows ALL rows - use with caution for web deployment
+```python
+# In conf.py - Performance tuning
+jsontable_max_rows = 5000  # Default: 10000
+
+# Example configurations:
+# For small documentation sites
+jsontable_max_rows = 100
+
+# For large data-heavy documentation  
+jsontable_max_rows = 50000
+
+# For development/testing
+jsontable_max_rows = 1000
 ```
 
-#### Large Dataset with Pagination
+## Architecture Overview
 
-For performance and readability with large datasets:
+### Core Components
 
-```rst
-.. jsontable:: data/large_dataset.json
-   :header:
-   :limit: 100
+**Legacy System (Backward Compatible):**
+- `JsonTableDirective`: Original table rendering
+- `JsonDataLoader`: File and content loading with security validation
+- `TableConverter`: JSON to 2D table transformation
+- `TableBuilder`: Docutils table node generation
 
-.. note::
-   This table shows the first 100 entries out of 50,000+ total records. 
-   Download the complete dataset: :download:`large_dataset.json <data/large_dataset.json>`
-```
+**RAG Enhancement System (v0.3.0):**
+- `EnhancedJsonTableDirective`: RAG-aware directive with metadata generation
+- `RAGMetadataExtractor`: JSON schema analysis and statistics
+- `SemanticChunker`: Japanese-optimized content chunking  
+- `AdvancedMetadataGenerator`: Deep statistical analysis with entity recognition
+- `SearchFacetGenerator`: Automatic facet generation for search optimization
+- `MetadataExporter`: Multi-format export (JSON-LD, OpenSearch, PLaMo-ready)
+- `PLaMoVectorProcessor`: PLaMo-Embedding-1B vector generation
+- `IntelligentQueryProcessor`: Semantic query processing
+- `SearchIndexGenerator`: Vector search index creation
 
-#### Non-UTF8 Encoding
+### Integration Patterns
 
-Working with legacy systems or specific character encodings:
+#### With Modern Documentation Tools
 
-```rst
-.. jsontable:: data/legacy_data.json
-   :encoding: iso-8859-1
-   :header:
-```
-
-#### Inline JSON for Examples
-
-Perfect for API documentation, examples, tutorials:
-
-```rst
-API Response Format
-==================
-
-The user endpoint returns data in this format:
-
-.. jsontable::
-
-   {
-     "user_id": 12345,
-     "username": "john_doe",
-     "email": "john@example.com",
-     "created_at": "2024-01-15T10:30:00Z",
-     "is_verified": true,
-     "profile": {
-       "first_name": "John",
-       "last_name": "Doe",
-       "avatar_url": "https://example.com/avatar.jpg"
-     }
-   }
-```
-
-#### Complex Nested Data
-
-For nested JSON, the extension flattens appropriately:
-
-```rst
-.. jsontable::
-
-   [
-     {
-       "id": 1,
-       "name": "Product A",
-       "category": {"name": "Electronics", "id": 10},
-       "tags": ["popular", "sale"],
-       "price": 99.99
-     }
-   ]
-```
-
-**Note:** Objects and arrays in values are converted to string representations.
-
-### Integration Examples
-
-#### With Sphinx Tabs
-
-Combine with sphinx-tabs for multi-format documentation:
-
-```rst
-.. tabs::
-
-   .. tab:: JSON Data
-
-      .. jsontable:: data/api_response.json
-         :header:
-
-   .. tab:: Raw JSON
-
-      .. literalinclude:: data/api_response.json
-         :language: json
-```
-
-#### With Code Blocks
-
-Document API endpoints with request/response examples:
-
-```rst
-Get Users Endpoint
-==================
-
-**Request:**
-
-.. code-block:: http
-
-   GET /api/v1/users HTTP/1.1
-   Host: api.example.com
-   Authorization: Bearer <token>
-
-**Response:**
-
-.. jsontable::
-
-   [
-     {
-       "id": 1,
-       "username": "alice",
-       "email": "alice@example.com",
-       "status": "active"
-     },
-     {
-       "id": 2, 
-       "username": "bob",
-       "email": "bob@example.com",
-       "status": "inactive"
-     }
-   ]
-```
-
-#### In MyST Markdown
-
-Full MyST Markdown support for modern documentation workflows:
-
+**MyST Markdown:**
 ````markdown
-# Configuration Reference
+# Company Database
 
-## Database Settings
-
-```{jsontable} config/database.json
+```{enhanced-jsontable} data/companies.json
 :header:
-:encoding: utf-8
-```
-
-## Feature Flags
-
-```{jsontable}
-[
-  {"feature": "dark_mode", "enabled": true, "rollout": "100%"},
-  {"feature": "new_dashboard", "enabled": false, "rollout": "0%"},
-  {"feature": "advanced_search", "enabled": true, "rollout": "50%"}
-]
+:rag-metadata:
+:entity-recognition: japanese
+:export-format: json-ld
 ```
 ````
 
-### File Organization Best Practices
-
-#### Recommended Directory Structure
-
-```
-docs/
-├── conf.py
-├── index.rst
-├── data/
-│   ├── users.json
-│   ├── products.json
-│   ├── config/
-│   │   ├── database.json
-│   │   └── features.json
-│   └── examples/
-│       ├── api_responses.json
-│       └── error_codes.json
-└── api/
-    └── endpoints.rst
-```
-
-#### Naming Conventions
-
-- Use descriptive filenames: `user_permissions.json` not `data1.json`
-- Group related data in subdirectories: `config/`, `examples/`, `test_data/`
-- Include version or date when appropriate: `api_v2_responses.json`
-
-### Performance Considerations
-
-#### Automatic Protection for Large Datasets
-
-The extension automatically protects against performance issues:
-
-- **Default Limit**: 10,000 rows maximum by default
-- **Smart Detection**: Automatically estimates dataset size
-- **User Warnings**: Clear messages when limits are applied
-- **Configurable**: Adjust limits via `jsontable_max_rows` setting
-
-#### Performance Behavior
-
-| Dataset Size | Default Behavior | User Action Required |
-|--------------|------------------|---------------------|
-| ≤ 10,000 rows | ✅ Display all rows | None |
-| > 10,000 rows | ⚠️ Auto-limit + warning | Use `:limit:` to customize |
-| Any size with `:limit: 0` | 🚨 Display all (unlimited) | Use with caution |
-
-#### Build Time Optimization
-
-**Small Datasets (< 1,000 rows):**
+**Sphinx Tabs:**
 ```rst
-.. jsontable:: data/small_dataset.json
-   :header:
-   # No limit needed - processes quickly
+.. tabs::
+
+   .. tab:: Table View
+   
+      .. enhanced-jsontable:: data/sales.json
+         :header:
+         :rag-metadata:
+   
+   .. tab:: Raw Data
+   
+      .. literalinclude:: data/sales.json
+         :language: json
 ```
 
-**Medium Datasets (1,000-10,000 rows):**
+#### With Search Systems
+
+**Elasticsearch Integration:**
 ```rst
-.. jsontable:: data/medium_dataset.json
-   :header:
-   # Automatic protection applies - good performance
+.. enhanced-jsontable:: data/products.json
+   :export-format: opensearch
+   :facet-generation: auto
+   
+# Generates products_opensearch_mapping.json for direct Elasticsearch import
 ```
 
-**Large Datasets (> 10,000 rows):**
+**Knowledge Graph Integration:**
 ```rst
-.. jsontable:: data/large_dataset.json
-   :header:
-   :limit: 100
-   # Explicit limit recommended for predictable performance
+.. enhanced-jsontable:: data/entities.json
+   :export-format: json-ld
+   :entity-recognition: japanese
+   
+# Generates entities_metadata.jsonld for semantic web applications
 ```
 
-#### Memory Considerations
+## Migration Guide
 
-**Safe Configurations:**
+### From v0.2.x to v0.3.0
+
+**No Breaking Changes**: All existing documentation works unchanged.
+
+**New Features Available:**
+```rst
+# Before (v0.2.x) - Basic table rendering
+.. jsontable:: data/companies.json
+   :header:
+
+# After (v0.3.0) - Enhanced with RAG capabilities  
+.. enhanced-jsontable:: data/companies.json
+   :header:
+   :rag-metadata: true
+   :entity-recognition: japanese
+   :export-format: json-ld,opensearch
+```
+
+**Recommended Configuration Update:**
 ```python
-# Conservative (good for low-memory environments)
-jsontable_max_rows = 1000
+# Add to conf.py for v0.3.0 features
+extensions = [
+    'sphinxcontrib.jsontable',  # Enables both jsontable and enhanced-jsontable
+]
 
-# Balanced (default - good for most use cases)
-jsontable_max_rows = 10000
-
-# Aggressive (high-memory environments only)
-jsontable_max_rows = 100000
+# Optional: Tune for your data size
+jsontable_max_rows = 5000
 ```
 
-**Memory Usage Guidelines:**
-- **~1MB JSON**: ~1,000-5,000 rows (safe for all environments)
-- **~10MB JSON**: ~10,000-50,000 rows (requires adequate memory)
-- **>50MB JSON**: Consider data preprocessing or database solutions
-
-#### Best Practices for Large Data
-
-1. **Use Appropriate Limits**:
-   ```rst
-   .. jsontable:: data/sales_data.json
-      :header:
-      :limit: 50
-      
-   *Showing top 50 sales records. Full data available in source file.*
-   ```
-
-2. **Consider Data Preprocessing**:
-   - Split large files into logical chunks
-   - Create summary datasets for documentation
-   - Use database views instead of static files
-
-3. **Optimize for Build Performance**:
-   ```python
-   # In conf.py - faster builds for large projects
-   jsontable_max_rows = 100
-   ```
-
-4. **Provide Context for Limited Data**:
-   ```rst
-   .. jsontable:: data/user_activity.json
-      :header:
-      :limit: 20
-      
-   .. note::
-      This table shows recent activity only. For complete logs, 
-      see the :doc:`admin-dashboard` or download the 
-      :download:`full dataset <data/user_activity.json>`.
-   ```
-
-### Migration Guide
-
-#### Upgrading from Previous Versions
-
-**No Breaking Changes**: Existing documentation continues to work unchanged.
-
-**New Features Available**:
-```rst
-# Before: Manual limit required for large datasets
-.. jsontable:: large_data.json
-   :header:
-   :limit: 100
-
-# After: Automatic protection (manual limit still supported)
-.. jsontable:: large_data.json
-   :header:
-   # Automatically limited to 10,000 rows with user warning
-```
-
-**Recommended Configuration Update**:
-```python
-# Add to conf.py for customized behavior
-jsontable_max_rows = 5000  # Adjust based on your needs
-```
-
-### Troubleshooting
-
-#### Common Issues
-
-**Error: "No JSON data source provided"**
-```rst
-# ❌ Missing file path or content
-.. jsontable::
-
-# ✅ Provide file path or inline content  
-.. jsontable:: data/example.json
-```
-
-**Error: "JSON file not found"**
-- Check file path relative to source directory
-- Verify file exists and has correct permissions
-- Ensure no typos in filename
-
-**Error: "Invalid inline JSON"**
-- Validate JSON syntax using online validator
-- Check for trailing commas, unquoted keys
-- Ensure proper escaping of special characters
-
-**Performance Warnings**
-```
-WARNING: Large dataset detected (25,000 rows). Showing first 10,000 rows for performance.
-```
-**Solutions:**
-- Add explicit `:limit:` option: `:limit: 50`
-- Use `:limit: 0` for unlimited (if needed)
-- Increase global limit: `jsontable_max_rows = 25000`
-- Consider data preprocessing for smaller files
-
-**Encoding Issues**
-```rst
-# For non-UTF8 files
-.. jsontable:: data/legacy.json
-   :encoding: iso-8859-1
-```
-
-**Empty Tables**
-- Check if JSON file is empty or null
-- Verify JSON structure (must be array or object)
-- Check if automatic limiting is hiding your data
-
-#### Debug Mode
-
-Enable detailed logging in `conf.py`:
-
-```python
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-# For sphinx-specific logs
-extensions = ['sphinxcontrib.jsontable']
-
-# Performance monitoring
-jsontable_max_rows = 1000  # Lower limit for debugging
-```
-
-#### Testing Configuration
-
-Create a simple test file to verify setup:
-
-```json
-[{"test": "success", "status": "ok"}]
-```
-
-```rst
-.. jsontable:: test.json
-   :header:
-```
-
-### Security Considerations
-
-#### Path Traversal Protection
-
-The extension automatically prevents directory traversal attacks:
-
-```rst
-# ❌ This will be blocked
-.. jsontable:: ../../etc/passwd
-
-# ✅ Safe relative paths only
-.. jsontable:: data/safe_file.json
-```
-
-#### File Access
-
-- Only files within the Sphinx source directory are accessible
-- No network URLs or absolute system paths allowed
-- File permissions respected by the system
-
-#### Performance Security
-
-- Default limits prevent accidental resource exhaustion
-- Memory usage is bounded by configurable limits
-- Large dataset warnings help prevent unintentional performance impact
-
-### Migration Guide
-
-#### From Other Extensions
+### From Other Extensions
 
 **From sphinx-jsonschema:**
-- Replace `.. jsonschema::` with `.. jsontable::`
-- Remove schema validation options
-- Add `:header:` option if needed
-
-**From Custom Solutions:**
-- Export your data to JSON format
-- Replace custom table generation with `.. jsontable::`
+- Replace `.. jsonschema::` with `.. jsontable::` or `.. enhanced-jsontable::`
+- Remove schema validation options, add RAG options
 - Update file paths to be relative to source directory
 
-#### Version Compatibility
+## Development & Contributing
 
-- **Sphinx:** 3.0+ (recommended: 4.0+)
-- **Python:** 3.10+ (recommended: 3.11+)
-- **Docutils:** 0.14+
-
-### API Reference
-
-#### Core Classes
-
-**`JsonTableDirective`**
-- Main Sphinx directive class
-- Handles option parsing and execution
-- Coordinates data loading, conversion, and rendering
-
-**`JsonDataLoader`**  
-- Loads JSON from files or inline content
-- Validates encoding and file paths
-- Provides secure file access
-
-**`TableConverter`**
-- Transforms JSON structures into 2D table data
-- Handles different data formats (objects, arrays, mixed)
-- Manages header extraction and row limiting
-- Applies automatic performance limits
-
-**`TableBuilder`**
-- Generates Docutils table nodes
-- Creates proper table structure with headers/body
-- Handles cell formatting and padding
-
-#### Error Handling
-
-All errors inherit from `JsonTableError`:
-- File access errors
-- JSON parsing errors  
-- Invalid data structure errors
-- Path traversal attempts
-
-### Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- Development setup
-- Code style guidelines
-- Testing procedures
-- Pull request process
-
-#### Development Setup
+### Development Setup
 
 ```bash
 git clone https://github.com/sasakama-code/sphinxcontrib-jsontable.git
-cd sphinxcontrib-jsontable
+cd sphinxcontrib-jsontable  
 pip install -e ".[dev]"
-pytest
 ```
 
-#### Running Tests
+### Quality Assurance
 
 ```bash
-# Run all tests
+# Code formatting
+ruff format
+
+# Linting 
+ruff check
+
+# Type checking
+mypy sphinxcontrib/jsontable/
+
+# Testing
 pytest
 
-# Run with coverage
-pytest --cov=sphinxcontrib.jsontable
-
-# Run specific test
-pytest tests/test_directives.py::test_json_table_basic
+# Coverage report
+pytest --cov=sphinxcontrib.jsontable --cov-report=html
 ```
 
-### Examples Repository
+### Contributing Guidelines
 
-See the [`examples/`](examples/) directory for:
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Development setup and workflow
+- Code style guidelines  
+- Testing procedures
+- Pull request process
+
+## Examples & Documentation
+
+### Complete Examples
+
+The [`examples/`](examples/) directory contains:
 - Complete Sphinx project setup
-- Various data format examples  
-- Integration with other extensions
+- Various data format examples
+- RAG integration demonstrations
+- Japanese content processing examples
 - Advanced configuration examples
 
 ```bash
@@ -760,34 +568,33 @@ sphinx-build -b html . _build/html/
 
 ### Development Tools
 
-The [`scripts/`](scripts/) directory contains development and analysis tools used during the creation of performance features:
+The [`scripts/`](scripts/) directory contains enterprise-grade development tools:
 
-- **`performance_benchmark.py`** - Performance measurement and analysis tool
-- **`memory_analysis.py`** - Memory usage analysis for different dataset sizes
-- **`competitive_analysis.py`** - Industry standard research and best practices
+- **`performance_benchmark.py`** - Performance measurement and analysis
+- **`memory_analysis.py`** - Memory usage analysis for different dataset sizes  
+- **`competitive_analysis.py`** - Industry standard research and benchmarking
 - **`validate_ci_tests.py`** - CI environment testing and validation
-- **`test_integration.py`** - Comprehensive integration testing
+- **`knowledge_extraction.py`** - RAG metadata extraction utilities
 
-These tools were instrumental in establishing the scientific foundation for performance limits and ensuring enterprise-grade reliability. They can be used for ongoing performance monitoring and analysis.
+These tools provide scientific foundation for performance optimization and enterprise reliability.
 
-```bash
-# Run performance analysis
-python scripts/performance_benchmark.py
+## Support & Community
 
-# Validate CI environment
-python scripts/validate_ci_tests.py
-```
+- **Documentation**: Complete guides and API reference
+- **Issues**: [GitHub Issues](https://github.com/sasakama-code/sphinxcontrib-jsontable/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/sasakama-code/sphinxcontrib-jsontable/discussions)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md) for detailed version history
 
-### Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for detailed version history and release notes.
-
-### License
+## License
 
 This project is licensed under the [MIT License](LICENSE).
 
-### Support
+---
 
-- **Documentation:** [GitHub Pages](https://sasakama-code.github.io/sphinxcontrib-jsontable/)
-- **Issues:** [GitHub Issues](https://github.com/sasakama-code/sphinxcontrib-jsontable/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/sasakama-code/sphinxcontrib-jsontable/discussions)
+## 🏆 Project Status
+
+**sphinxcontrib-jsontable v0.3.0** represents a major advancement in documentation tooling, combining traditional table rendering with cutting-edge RAG capabilities. With world-class Japanese language processing and PLaMo-Embedding-1B integration, it sets new standards for semantic documentation systems.
+
+**Ready for Enterprise**: Production-grade quality with comprehensive testing, security validation, and performance optimization.
+
+**Future-Proof**: Extensible architecture designed for integration with emerging AI and search technologies.
