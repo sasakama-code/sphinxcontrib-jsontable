@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sphinxcontrib-jsontable"
-version = "0.2.0"
+version = "0.3.0"
 description = "Sphinx extension to render JSON data as tables"
 readme = "README.md"
 license = "MIT"
@@ -135,6 +135,7 @@ addopts = [
 ]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 markers = [
     "slow: marks tests as slow (use -m 'not slow' to deselect)",
     "integration: marks tests as integration tests",

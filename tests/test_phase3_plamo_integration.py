@@ -565,6 +565,7 @@ class TestPhase3Integration:
                 chunk_type="business_info",
                 metadata={"company": company},
                 search_weight=1.0,
+                embedding_hint="structured_data_record",
             )
             chunks.append(chunk)
 

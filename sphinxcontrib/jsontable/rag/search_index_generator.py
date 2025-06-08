@@ -146,7 +146,10 @@ class JapaneseQueryProcessor:
         }
 
         # ビジネス用語チェック
-        business_keywords = ["会社", "売上", "利益", "従業員", "年度", "ROI", "KPI"]
+        business_keywords = [
+            "会社", "売上", "利益", "従業員", "年度", "ROI", "KPI",
+            "株式会社", "企業", "業績", "売上高", "製造業", "情報"
+        ]
         if any(keyword in query for keyword in business_keywords):
             features["has_business_terms"] = True
             features["query_type"] = "business"
@@ -403,7 +406,8 @@ class SearchIndexGenerator:
 
         # ビジネス用語パターン
         business_patterns = [
-            r"株式会社[一-龯]+",
+            r"[一-龯\w]+株式会社",  # 会社名 + 株式会社
+            r"株式会社[一-龯]+",    # 株式会社 + 名前
             r"[一-龯]+部",
             r"[一-龯]+課",
             r"\d+(?:,\d{3})*円",

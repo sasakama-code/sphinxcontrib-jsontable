@@ -183,7 +183,7 @@ class HybridSearchEngine:
                     result = SearchResult(
                         chunk_id=chunk_metadata["chunk_id"],
                         content=chunk_metadata["content"],
-                        relevance_score=float(score),
+                        relevance_score=max(0.0, float(score)),  # 非負値を保証
                         search_method="vector",
                         metadata=chunk_metadata,
                         japanese_enhancement=chunk_metadata.get(
@@ -605,10 +605,10 @@ class IntelligentQueryProcessor:
 
         for result in search_results:
             # 日本語ブーストの適用
-            if query_analysis.japanese_features.get("has_japanese", False):
-                if result.japanese_enhancement.get("enhancement_applied", False):
-                    boost_score = result.japanese_enhancement.get("boost_score", 1.0)
-                    result.relevance_score *= boost_score
+            if (query_analysis.japanese_features.get("has_japanese", False) and
+                result.japanese_enhancement.get("enhancement_applied", False)):
+                boost_score = result.japanese_enhancement.get("boost_score", 1.0)
+                result.relevance_score *= boost_score
 
             # ビジネス文脈ブーストの適用
             if query_analysis.japanese_features.get("has_business_terms", False):

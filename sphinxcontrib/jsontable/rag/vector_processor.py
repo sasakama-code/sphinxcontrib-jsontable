@@ -9,19 +9,18 @@ import json
 import logging
 import re
 import time
+
+# PLaMo-Embedding-1B関連インポート (実装時に調整)
+from contextlib import suppress
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-# PLaMo-Embedding-1B関連インポート (実装時に調整)
-try:
+with suppress(ImportError):
     # 実際のPLaMoライブラリ統合時に更新
     # import plamo_embedding
-    pass
-except ImportError:
-    # 開発時のフォールバック
     pass
 
 from .semantic_chunker import SemanticChunk
@@ -134,10 +133,11 @@ class BusinessTermEnhancer:
         enhanced_text = text
 
         for _category, config in self.business_categories.items():
+            context_marker = config['context_marker']
             for pattern in config["patterns"]:
                 enhanced_text = re.sub(
                     pattern,
-                    lambda m: f"{config['context_marker']}{m.group(0)}",
+                    lambda m, marker=context_marker: f"{marker}{m.group(0)}",
                     enhanced_text,
                 )
 
@@ -284,7 +284,7 @@ class PLaMoVectorProcessor:
 
         result = VectorProcessingResult(
             vector_chunks=vector_chunks,
-            processing_stats=self.processing_stats.copy(),
+            processing_stats=self.get_processing_stats(),
             model_info=self.model_config.copy(),
             japanese_optimization_applied=True,
         )

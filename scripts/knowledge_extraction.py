@@ -273,10 +273,7 @@ class KPTAnalyzer:
             return False
 
         # 定量的指標の有無
-        if not re.search(r"[0-9]+(?:\.[0-9]+)?[%倍x]", content):
-            return False
-
-        return True
+        return re.search(r"[0-9]+(?:\.[0-9]+)?[%倍x]", content)
 
     def _assess_replication_potential(self, item: dict[str, Any]) -> str:
         """再現可能性評価"""

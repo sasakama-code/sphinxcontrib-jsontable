@@ -22,11 +22,11 @@ import re
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Union
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
-JsonData = Union[dict[str, Any], list[dict[str, Any]], list[Any]]
+JsonData = dict[str, Any] | list[dict[str, Any]] | list[Any]
 
 
 @dataclass
@@ -292,7 +292,7 @@ class RAGMetadataExtractor:
                 return "string"  # 単位付き数値
             else:
                 return "string"
-        elif isinstance(value, (list, tuple)):
+        elif isinstance(value, list | tuple):
             return "array"
         elif isinstance(value, dict):
             return "object"
@@ -388,7 +388,7 @@ class RAGMetadataExtractor:
             for item in data_list:
                 if isinstance(item, dict) and key in item:
                     value = item[key]
-                    if isinstance(value, (int, float)) and value is not None:
+                    if isinstance(value, int | float) and value is not None:
                         values.append(value)
 
             if len(values) < 2:
@@ -455,12 +455,11 @@ class RAGMetadataExtractor:
         if any(
             keyword in column_text
             for keyword in ["name", "名前", "employee", "社員", "staff", "氏名"]
+        ) and any(
+            keyword in column_text
+            for keyword in ["salary", "給与", "department", "部署"]
         ):
-            if any(
-                keyword in column_text
-                for keyword in ["salary", "給与", "department", "部署"]
-            ):
-                return "従業員"
+            return "従業員"
 
         # 商品・製品データ
         if any(

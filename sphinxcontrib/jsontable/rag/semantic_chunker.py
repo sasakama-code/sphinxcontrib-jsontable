@@ -367,7 +367,7 @@ class SemanticChunker:
             if self.japanese_patterns["numeric_with_unit"].match(value):
                 return value  # 単位付き数値はそのまま
             return value.strip()
-        elif isinstance(value, (int, float)):
+        elif isinstance(value, int | float):
             # 数値の場合、意味的なコンテキストを追加
             semantic_type = metadata.entity_mapping.get(key, "")
             if "monetary" in semantic_type:
@@ -401,9 +401,9 @@ class SemanticChunker:
         # ID系フィールド
         id_patterns = ["id", "code", "コード", "番号"]
         for field in fields:
-            if any(pattern in field.lower() for pattern in id_patterns):
-                if field not in important_fields:
-                    important_fields.append(field)
+            if (any(pattern in field.lower() for pattern in id_patterns) and
+                field not in important_fields):
+                important_fields.append(field)
 
         # その他のフィールドは元の順序を維持
         for field in fields:
@@ -433,7 +433,7 @@ class SemanticChunker:
                     importance += 0.3
 
                 # 金額・数値データは重要
-                if "monetary" in semantic_type and isinstance(value, (int, float)):
+                if "monetary" in semantic_type and isinstance(value, int | float):
                     importance += 0.2
 
         return min(importance, 2.0)  # 最大重み2.0

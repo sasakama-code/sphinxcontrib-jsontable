@@ -30,11 +30,11 @@ from .search_facets import SearchFacetGenerator
 
 __version__ = "0.2.0-dev"
 __all__ = [
+    # Phase 2 (implemented)
+    "AdvancedMetadataGenerator",
+    "MetadataExporter",
+    "SearchFacetGenerator",
     # Phase 1 (pending)
     # "RAGMetadataExtractor",
     # "SemanticChunker",
-    # Phase 2 (implemented)
-    "AdvancedMetadataGenerator",
-    "SearchFacetGenerator",
-    "MetadataExporter",
 ]
