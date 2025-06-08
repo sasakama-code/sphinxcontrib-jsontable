@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from .directives import DEFAULT_MAX_ROWS, JsonTableDirective
+from .enhanced_directive import EnhancedJsonTableDirective
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -31,6 +32,9 @@ def setup(app: Sphinx) -> dict[str, Any]:
     """
     # Register the jsontable directive
     app.add_directive("jsontable", JsonTableDirective)
+
+    # Register the enhanced jsontable directive (RAG-enabled)
+    app.add_directive("enhanced-jsontable", EnhancedJsonTableDirective)
 
     # Add configuration values for performance limits
     app.add_config_value(
