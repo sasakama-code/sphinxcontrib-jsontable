@@ -23,8 +23,9 @@ A next-generation Sphinx extension that renders JSON data as structured tables w
 - **Business Term Enhancement**: Specialized processing for Japanese business documents
 - **Vector Search Indexing**: Production-ready search infrastructure
 
-### 📚 **Complete Feature Guide**
-**🎓 [v0.3.0 New Features Tutorial](docs/v0.3.0_feature_tutorial.md)** - Comprehensive guide with flowcharts, examples, and migration strategies
+### 📚 **Quick Start & Documentation**
+- **🚀 [5-Minute Quick Start](docs/v0.3.0_quick_start.md)** - Start using new features immediately
+- **🎓 [Feature Guide](docs/v0.3.0_feature_tutorial.md)** - Complete reference with examples
 
 ## Background / Motivation
 
