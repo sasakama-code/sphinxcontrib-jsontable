@@ -1,8 +1,18 @@
-"""
-Phase 3: インテリジェントクエリ処理エンジン
+"""Intelligent Query Processing Engine for Phase 3 RAG Integration.
 
-自然言語クエリの解析・最適化・実行を統合的に管理し、
-日本語特化の高度な検索機能を提供
+Provides comprehensive natural language query analysis, optimization, and execution
+with advanced Japanese-specific search capabilities.
+
+Features:
+- Natural language query analysis and expansion
+- Multi-modal search execution (vector, semantic, faceted, hybrid)
+- Japanese language optimization and business context enhancement
+- Query intent classification and business context detection
+- Rank fusion for unified search results
+- Real-time search suggestions and statistics
+
+Created: 2025-06-07
+Author: Claude Code Assistant
 """
 
 import logging
@@ -25,7 +35,16 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class QueryAnalysis:
-    """クエリ分析結果"""
+    """Query analysis result container.
+
+    Args:
+        original_query: Original query string from user.
+        expanded_queries: List of expanded query variations.
+        query_type: Type of query (general, business, technical, numerical).
+        japanese_features: Detected Japanese language features.
+        search_intent: Intended search method (similarity, faceted, hybrid).
+        confidence_score: Confidence in the analysis (0.0-1.0).
+    """
 
     original_query: str
     expanded_queries: list[str] = field(default_factory=list)
@@ -37,7 +56,16 @@ class QueryAnalysis:
 
 @dataclass
 class SearchResult:
-    """検索結果"""
+    """Individual search result container.
+
+    Args:
+        chunk_id: Unique identifier for the result chunk.
+        content: Text content of the search result.
+        relevance_score: Relevance score for the query (higher is better).
+        search_method: Method used to find result (vector, semantic, faceted, hybrid).
+        metadata: Additional metadata about the result.
+        japanese_enhancement: Japanese-specific enhancement information.
+    """
 
     chunk_id: str
     content: str
@@ -49,7 +77,15 @@ class SearchResult:
 
 @dataclass
 class QueryExecutionResult:
-    """クエリ実行結果"""
+    """Complete query execution result container.
+
+    Args:
+        query_analysis: Analysis results for the processed query.
+        search_results: List of search results ranked by relevance.
+        execution_time_ms: Total execution time in milliseconds.
+        total_candidates: Total number of candidate results found.
+        search_statistics: Detailed statistics about the search execution.
+    """
 
     query_analysis: QueryAnalysis
     search_results: list[SearchResult]
@@ -59,7 +95,11 @@ class QueryExecutionResult:
 
 
 class QueryIntentClassifier:
-    """クエリ意図分類器"""
+    """Query intent classification engine.
+
+    Analyzes user queries to determine search intent and business context
+    for optimized search execution strategies.
+    """
 
     def __init__(self):
         # 意図分類パターン
@@ -102,7 +142,15 @@ class QueryIntentClassifier:
         }
 
     def classify_intent(self, query: str) -> tuple[str, float]:
-        """クエリ意図分類"""
+        """Classify query intent from natural language patterns.
+
+        Args:
+            query: User query string to analyze.
+
+        Returns:
+            Tuple of (intent_type, confidence_score) where intent_type is the
+            detected search intent and confidence_score is between 0.0 and 1.0.
+        """
 
         intent_scores = {}
 
@@ -124,7 +172,15 @@ class QueryIntentClassifier:
         return "similarity_search", 0.5  # デフォルト
 
     def classify_business_context(self, query: str) -> str | None:
-        """ビジネス文脈分類"""
+        """Classify business context from query content.
+
+        Args:
+            query: User query string to analyze for business context.
+
+        Returns:
+            Business context type (financial, organizational, operational, strategic)
+            or None if no business context detected.
+        """
 
         for context, patterns in self.business_context_patterns.items():
             if any(re.search(pattern, query) for pattern in patterns):
@@ -134,7 +190,11 @@ class QueryIntentClassifier:
 
 
 class HybridSearchEngine:
-    """ハイブリッド検索エンジン"""
+    """Hybrid search engine combining multiple search methods.
+
+    Integrates vector, semantic, and faceted search approaches using
+    rank fusion for optimal search results.
+    """
 
     def __init__(self, search_index: ComprehensiveSearchIndex):
         self.search_index = search_index
@@ -146,7 +206,16 @@ class HybridSearchEngine:
         query_embedding: np.ndarray | None = None,
         k: int = 10,
     ) -> list[SearchResult]:
-        """ハイブリッド検索実行"""
+        """Execute hybrid search combining multiple search methods.
+
+        Args:
+            query_analysis: Analyzed query with intent and features.
+            query_embedding: Optional pre-computed query embedding vector.
+            k: Maximum number of results to return.
+
+        Returns:
+            List of SearchResult objects ranked by unified relevance score.
+        """
 
         # 各検索手法の結果を収集
         vector_results = await self._execute_vector_search(query_embedding, k)
@@ -163,7 +232,15 @@ class HybridSearchEngine:
     async def _execute_vector_search(
         self, query_embedding: np.ndarray | None, k: int
     ) -> list[SearchResult]:
-        """ベクトル検索実行"""
+        """Execute vector similarity search.
+
+        Args:
+            query_embedding: Query embedding vector for similarity comparison.
+            k: Maximum number of results to return.
+
+        Returns:
+            List of SearchResult objects from vector similarity search.
+        """
 
         if query_embedding is None or self.search_index.vector_index is None:
             return []
@@ -201,7 +278,15 @@ class HybridSearchEngine:
     async def _execute_semantic_search(
         self, query_analysis: QueryAnalysis, k: int
     ) -> list[SearchResult]:
-        """セマンティック検索実行"""
+        """Execute semantic keyword-based search.
+
+        Args:
+            query_analysis: Analyzed query with expanded keywords.
+            k: Maximum number of results to return.
+
+        Returns:
+            List of SearchResult objects from semantic keyword matching.
+        """
 
         if self.search_index.semantic_index is None:
             return []
@@ -256,7 +341,15 @@ class HybridSearchEngine:
     async def _execute_faceted_search(
         self, query_analysis: QueryAnalysis, k: int
     ) -> list[SearchResult]:
-        """ファセット検索実行"""
+        """Execute faceted search using structured filters.
+
+        Args:
+            query_analysis: Analyzed query to extract facet conditions from.
+            k: Maximum number of results to return.
+
+        Returns:
+            List of SearchResult objects matching facet conditions.
+        """
 
         if self.search_index.facet_index is None:
             return []
@@ -309,7 +402,14 @@ class HybridSearchEngine:
         return results
 
     def _extract_facet_conditions(self, query: str) -> dict[str, str]:
-        """ファセット条件抽出"""
+        """Extract facet filter conditions from natural language query.
+
+        Args:
+            query: Natural language query to parse for facet conditions.
+
+        Returns:
+            Dictionary mapping facet types to extracted condition values.
+        """
 
         conditions = {}
 
@@ -338,7 +438,16 @@ class HybridSearchEngine:
         semantic_results: list[SearchResult],
         faceted_results: list[SearchResult],
     ) -> list[SearchResult]:
-        """ランクフュージョンによる結果統合"""
+        """Combine search results using rank fusion algorithm.
+
+        Args:
+            vector_results: Results from vector similarity search.
+            semantic_results: Results from semantic keyword search.
+            faceted_results: Results from faceted search.
+
+        Returns:
+            Unified list of SearchResult objects with combined relevance scores.
+        """
 
         if self.search_index.hybrid_index is None:
             # フォールバック: ベクトル検索結果を優先
@@ -432,7 +541,12 @@ class HybridSearchEngine:
 
 
 class IntelligentQueryProcessor:
-    """インテリジェントクエリ処理エンジン"""
+    """Intelligent query processing engine with Japanese optimization.
+
+    Main orchestrator class that manages the complete query processing pipeline
+    from natural language input to ranked search results with Japanese language
+    and business context optimization.
+    """
 
     def __init__(
         self,
@@ -450,7 +564,15 @@ class IntelligentQueryProcessor:
     async def process_query(
         self, query: str, options: dict[str, Any] | None = None
     ) -> QueryExecutionResult:
-        """クエリ処理・実行"""
+        """Process and execute complete query pipeline.
+
+        Args:
+            query: Natural language query string from user.
+            options: Optional processing and search configuration.
+
+        Returns:
+            QueryExecutionResult with analysis, results, and performance metrics.
+        """
 
         start_time = time.time()
 
@@ -499,7 +621,14 @@ class IntelligentQueryProcessor:
         return result
 
     async def _analyze_query(self, query: str) -> QueryAnalysis:
-        """クエリ分析"""
+        """Analyze query for intent, features, and optimization opportunities.
+
+        Args:
+            query: Natural language query to analyze.
+
+        Returns:
+            QueryAnalysis with expanded queries, features, and intent classification.
+        """
 
         # クエリ拡張
         expanded_queries = self.japanese_processor.expand_query(query)
@@ -534,7 +663,15 @@ class IntelligentQueryProcessor:
     async def _vectorize_query(
         self, query: str, query_analysis: QueryAnalysis
     ) -> np.ndarray | None:
-        """クエリベクトル化"""
+        """Convert query to embedding vector for similarity search.
+
+        Args:
+            query: Natural language query string.
+            query_analysis: Analysis results with Japanese features.
+
+        Returns:
+            Query embedding vector or None if vectorization fails.
+        """
 
         try:
             # クエリを疑似的なSemanticChunkに変換
@@ -568,7 +705,16 @@ class IntelligentQueryProcessor:
         query_embedding: np.ndarray | None,
         options: dict[str, Any] | None,
     ) -> list[SearchResult]:
-        """検索実行"""
+        """Execute search based on query analysis and intent.
+
+        Args:
+            query_analysis: Analyzed query with intent classification.
+            query_embedding: Optional query embedding vector.
+            options: Search execution options and parameters.
+
+        Returns:
+            List of SearchResult objects from the appropriate search method.
+        """
 
         search_options = options or {}
         k = search_options.get("max_results", 10)
@@ -599,7 +745,15 @@ class IntelligentQueryProcessor:
     async def _post_process_results(
         self, search_results: list[SearchResult], query_analysis: QueryAnalysis
     ) -> list[SearchResult]:
-        """結果後処理"""
+        """Post-process search results with boosting and formatting.
+
+        Args:
+            search_results: Raw search results to post-process.
+            query_analysis: Query analysis for context-aware boosting.
+
+        Returns:
+            Post-processed and ranked list of SearchResult objects.
+        """
 
         processed_results = []
 
@@ -632,7 +786,14 @@ class IntelligentQueryProcessor:
         return processed_results
 
     def get_search_suggestions(self, partial_query: str) -> list[str]:
-        """検索サジェスト生成"""
+        """Generate search suggestions for partial query input.
+
+        Args:
+            partial_query: Partial query string to generate suggestions for.
+
+        Returns:
+            List of suggested query completions based on indexed content.
+        """
 
         suggestions = []
 
@@ -668,7 +829,11 @@ class IntelligentQueryProcessor:
         return suggestions[:10]
 
     def get_query_statistics(self) -> dict[str, Any]:
-        """クエリ処理統計取得"""
+        """Get comprehensive query processing and index statistics.
+
+        Returns:
+            Dictionary containing index status, capabilities, and processing statistics.
+        """
 
         return {
             "total_indexed_chunks": self.search_index.total_chunks,
