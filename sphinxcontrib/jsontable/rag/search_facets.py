@@ -1,12 +1,11 @@
-"""
-Search Facet Generator for Phase 2 RAG Integration
+"""Search Facet Generator for Phase 2 RAG Integration.
 
-検索ファセット自動生成機能：
-- カテゴリカルファセット自動生成
-- 数値範囲ファセット最適化
-- 時系列ファセット対応
-- 日本語エンティティファセット
-- UI連携用メタデータ生成
+Automatic search facet generation capabilities:
+- Categorical facet automatic generation
+- Numerical range facet optimization
+- Temporal facet support
+- Japanese entity facets
+- UI integration metadata generation
 """
 
 from __future__ import annotations
@@ -21,7 +20,16 @@ from .advanced_metadata import AdvancedMetadata, EntityClassification
 
 @dataclass
 class FacetConfig:
-    """ファセット設定"""
+    """Configuration settings for facet generation.
+
+    Args:
+        max_categorical_values: Maximum number of values for categorical facets.
+        max_numerical_ranges: Maximum number of ranges for numerical facets.
+        min_frequency_threshold: Minimum frequency for facet value inclusion.
+        enable_entity_facets: Whether to generate entity-based facets.
+        japanese_display_names: Use Japanese display names when available.
+        confidence_threshold: Minimum confidence score for entity inclusion.
+    """
 
     max_categorical_values: int = 20
     max_numerical_ranges: int = 5
@@ -33,7 +41,17 @@ class FacetConfig:
 
 @dataclass
 class CategoricalFacet:
-    """カテゴリカルファセット"""
+    """Categorical facet definition for search interfaces.
+
+    Args:
+        field_name: Source field name from data.
+        display_name: Human-readable display name.
+        facet_type: Type of facet (terms, hierarchy, etc.).
+        values: Value counts for facet options.
+        total_count: Total number of records.
+        missing_count: Number of records with missing values.
+        ui_config: UI-specific configuration parameters.
+    """
 
     field_name: str
     display_name: str
@@ -46,7 +64,18 @@ class CategoricalFacet:
 
 @dataclass
 class NumericalFacet:
-    """数値ファセット"""
+    """Numerical facet definition for range-based filtering.
+
+    Args:
+        field_name: Source field name from data.
+        display_name: Human-readable display name.
+        facet_type: Type of facet (range, histogram, etc.).
+        min_value: Minimum value in the dataset.
+        max_value: Maximum value in the dataset.
+        ranges: List of predefined ranges with counts.
+        distribution_info: Statistical distribution information.
+        ui_config: UI-specific configuration parameters.
+    """
 
     field_name: str
     display_name: str
@@ -60,7 +89,18 @@ class NumericalFacet:
 
 @dataclass
 class TemporalFacet:
-    """時系列ファセット"""
+    """Temporal facet definition for date/time filtering.
+
+    Args:
+        field_name: Source field name from data.
+        display_name: Human-readable display name.
+        facet_type: Type of facet (date_range, date_histogram, etc.).
+        earliest_date: Earliest date in the dataset.
+        latest_date: Latest date in the dataset.
+        date_ranges: List of predefined date ranges.
+        temporal_patterns: Detected temporal patterns.
+        ui_config: UI-specific configuration parameters.
+    """
 
     field_name: str
     display_name: str
@@ -74,7 +114,15 @@ class TemporalFacet:
 
 @dataclass
 class EntityFacet:
-    """エンティティファセット"""
+    """Entity-based facet definition for semantic filtering.
+
+    Args:
+        entity_type: Type of entity (person, place, organization, etc.).
+        display_name: Human-readable display name.
+        entities: List of detected entities with counts.
+        confidence_scores: Confidence scores for entity detection.
+        ui_config: UI-specific configuration parameters.
+    """
 
     entity_type: str
     display_name: str
@@ -86,7 +134,15 @@ class EntityFacet:
 
 @dataclass
 class GeneratedFacets:
-    """生成されたファセット群"""
+    """Container for all generated search facets.
+
+    Args:
+        categorical_facets: List of categorical facets for discrete values.
+        numerical_facets: List of numerical facets for range-based filtering.
+        temporal_facets: List of temporal facets for date/time filtering.
+        entity_facets: List of entity-based facets for semantic filtering.
+        generation_metadata: Metadata about the facet generation process.
+    """
 
     categorical_facets: list[CategoricalFacet] = field(default_factory=list)
     numerical_facets: list[NumericalFacet] = field(default_factory=list)
@@ -96,10 +152,18 @@ class GeneratedFacets:
 
 
 class SearchFacetGenerator:
-    """検索ファセットの自動生成器"""
+    """Automatic search facet generator for advanced metadata.
+
+    Generates various types of search facets from statistical analysis and
+    entity classification data, optimized for Japanese content and business data.
+    """
 
     def __init__(self, config: FacetConfig | None = None):
-        """ファセット生成器の初期化"""
+        """Initialize search facet generator.
+
+        Args:
+            config: Optional facet generation configuration.
+        """
         self.config = config or FacetConfig()
         self.japanese_field_names = {
             "name": "名前",
@@ -124,7 +188,14 @@ class SearchFacetGenerator:
         }
 
     def generate_facets(self, advanced_metadata: AdvancedMetadata) -> GeneratedFacets:
-        """高度メタデータから検索ファセットを自動生成"""
+        """Generate search facets from advanced metadata analysis.
+
+        Args:
+            advanced_metadata: Advanced metadata containing statistical analysis and entity data.
+
+        Returns:
+            GeneratedFacets containing all types of search facets.
+        """
         facets = GeneratedFacets()
 
         # カテゴリカルファセット生成
@@ -156,7 +227,14 @@ class SearchFacetGenerator:
     def _generate_categorical_facets(
         self, statistical_analysis: dict
     ) -> list[CategoricalFacet]:
-        """カテゴリカルファセットの生成"""
+        """Generate categorical facets from statistical analysis data.
+
+        Args:
+            statistical_analysis: Statistical analysis data containing categorical fields.
+
+        Returns:
+            List of categorical facets suitable for search interfaces.
+        """
         categorical_facets = []
 
         categorical_fields = statistical_analysis.get("categorical_fields", {})
@@ -196,7 +274,14 @@ class SearchFacetGenerator:
     def _generate_numerical_facets(
         self, statistical_analysis: dict
     ) -> list[NumericalFacet]:
-        """数値ファセットの生成"""
+        """Generate numerical facets from statistical analysis data.
+
+        Args:
+            statistical_analysis: Statistical analysis data containing numerical fields.
+
+        Returns:
+            List of numerical facets with optimized ranges.
+        """
         numerical_facets = []
 
         numerical_fields = statistical_analysis.get("numerical_fields", {})
@@ -240,7 +325,14 @@ class SearchFacetGenerator:
     def _generate_temporal_facets(
         self, statistical_analysis: dict
     ) -> list[TemporalFacet]:
-        """時系列ファセットの生成"""
+        """Generate temporal facets from statistical analysis data.
+
+        Args:
+            statistical_analysis: Statistical analysis data to search for temporal patterns.
+
+        Returns:
+            List of temporal facets with date ranges and patterns.
+        """
         temporal_facets = []
 
         # 時系列フィールドの検出
@@ -276,7 +368,14 @@ class SearchFacetGenerator:
     def _generate_entity_facets(
         self, entity_classification: EntityClassification
     ) -> list[EntityFacet]:
-        """エンティティファセットの生成"""
+        """Generate entity-based facets from classification results.
+
+        Args:
+            entity_classification: Entity classification containing detected entities.
+
+        Returns:
+            List of entity facets for semantic search functionality.
+        """
         entity_facets = []
 
         # 人名ファセット
@@ -310,7 +409,14 @@ class SearchFacetGenerator:
         return entity_facets
 
     def _is_suitable_for_categorical_facet(self, stats: dict) -> bool:
-        """カテゴリカルファセット適正判定"""
+        """Check if field statistics are suitable for categorical faceting.
+
+        Args:
+            stats: Statistical data for a categorical field.
+
+        Returns:
+            True if field is suitable for categorical facet generation.
+        """
         unique_count = stats.get("unique_count", 0)
         total_values = sum(stats.get("value_counts", {}).values())
 
@@ -323,7 +429,14 @@ class SearchFacetGenerator:
         )
 
     def _is_suitable_for_numerical_facet(self, stats: dict) -> bool:
-        """数値ファセット適正判定"""
+        """Check if field statistics are suitable for numerical faceting.
+
+        Args:
+            stats: Statistical data for a numerical field.
+
+        Returns:
+            True if field is suitable for numerical facet generation.
+        """
         min_val = stats.get("min_value", 0)
         max_val = stats.get("max_value", 0)
 
@@ -335,13 +448,28 @@ class SearchFacetGenerator:
         )
 
     def _filter_by_frequency(self, value_counts: dict, threshold: int) -> dict:
-        """頻度による値のフィルタリング"""
+        """Filter values by frequency threshold.
+
+        Args:
+            value_counts: Dictionary mapping values to their frequency counts.
+            threshold: Minimum frequency threshold for inclusion.
+
+        Returns:
+            Filtered dictionary containing only values meeting threshold.
+        """
         return {
             value: count for value, count in value_counts.items() if count >= threshold
         }
 
     def _generate_display_name(self, field_name: str) -> str:
-        """日本語表示名の生成"""
+        """Generate human-readable display name for field.
+
+        Args:
+            field_name: Technical field name from data.
+
+        Returns:
+            Human-readable display name, preferring Japanese when configured.
+        """
         if self.config.japanese_display_names:
             # 日本語名マッピング
             japanese_name = self.japanese_field_names.get(field_name.lower())
@@ -371,7 +499,14 @@ class SearchFacetGenerator:
             return field_name.replace("_", " ").title()
 
     def _generate_optimal_numerical_ranges(self, stats: dict) -> list[dict]:
-        """最適な数値範囲の生成"""
+        """Generate optimal numerical ranges based on statistical distribution.
+
+        Args:
+            stats: Statistical analysis data for numerical field.
+
+        Returns:
+            List of range dictionaries with from/to values and labels.
+        """
         min_val = stats["min_value"]
         max_val = stats["max_value"]
         quartiles = stats.get("quartiles", [min_val, (min_val + max_val) / 2, max_val])
@@ -438,7 +573,14 @@ class SearchFacetGenerator:
         return ranges
 
     def _format_number(self, number: float) -> str:
-        """数値の日本語向けフォーマット"""
+        """Format numbers in Japanese style with appropriate units.
+
+        Args:
+            number: Numeric value to format.
+
+        Returns:
+            Formatted string with Japanese numerical units (万, 千).
+        """
         if number >= 10000:
             return f"{number / 10000:.1f}万"
         elif number >= 1000:
@@ -449,7 +591,14 @@ class SearchFacetGenerator:
             return f"{number:.1f}"
 
     def _detect_temporal_fields(self, statistical_analysis: dict) -> dict:
-        """時系列フィールドの検出"""
+        """Detect temporal fields from statistical analysis data.
+
+        Args:
+            statistical_analysis: Statistical analysis containing field information.
+
+        Returns:
+            Dictionary mapping field names to temporal information.
+        """
         temporal_fields = {}
 
         # カテゴリカルフィールドから日付形式を検出
@@ -464,7 +613,15 @@ class SearchFacetGenerator:
         return temporal_fields
 
     def _is_temporal_field(self, field_name: str, stats: dict) -> bool:
-        """時系列フィールド判定"""
+        """Determine if field contains temporal data.
+
+        Args:
+            field_name: Name of the field to check.
+            stats: Statistical information for the field.
+
+        Returns:
+            True if field contains temporal/date data.
+        """
         # フィールド名による判定
         temporal_keywords = [
             "date",
@@ -502,7 +659,14 @@ class SearchFacetGenerator:
         return False
 
     def _extract_temporal_info(self, stats: dict) -> dict | None:
-        """時系列情報の抽出"""
+        """Extract temporal information from field statistics.
+
+        Args:
+            stats: Statistical data for a temporal field.
+
+        Returns:
+            Dictionary with temporal info (earliest, latest, span) or None if invalid.
+        """
         value_counts = stats.get("value_counts", {})
         if not value_counts:
             return None
@@ -527,7 +691,14 @@ class SearchFacetGenerator:
         }
 
     def _parse_date(self, date_string: str) -> datetime | None:
-        """日付文字列の解析"""
+        """Parse date string in various formats including Japanese.
+
+        Args:
+            date_string: Date string to parse.
+
+        Returns:
+            Parsed datetime object or None if parsing fails.
+        """
         date_formats = [
             "%Y-%m-%d",
             "%Y/%m/%d",
@@ -556,7 +727,14 @@ class SearchFacetGenerator:
         return None
 
     def _generate_date_ranges(self, temporal_info: dict) -> list[dict]:
-        """日付範囲の生成"""
+        """Generate appropriate date ranges based on temporal span.
+
+        Args:
+            temporal_info: Temporal information with date span and patterns.
+
+        Returns:
+            List of date range dictionaries with from/to/label/type.
+        """
         if temporal_info["span_days"] <= 0:
             return []
 
@@ -581,7 +759,15 @@ class SearchFacetGenerator:
     def _generate_daily_ranges(
         self, start_date: datetime, end_date: datetime
     ) -> list[dict]:
-        """日別範囲生成"""
+        """Generate daily date ranges for short time periods.
+
+        Args:
+            start_date: Starting date for range generation.
+            end_date: Ending date for range generation.
+
+        Returns:
+            List of daily range dictionaries.
+        """
         ranges = []
         current = start_date
 
@@ -601,7 +787,15 @@ class SearchFacetGenerator:
     def _generate_weekly_ranges(
         self, start_date: datetime, end_date: datetime
     ) -> list[dict]:
-        """週別範囲生成"""
+        """Generate weekly date ranges for medium time periods.
+
+        Args:
+            start_date: Starting date for range generation.
+            end_date: Ending date for range generation.
+
+        Returns:
+            List of weekly range dictionaries.
+        """
         ranges = []
         current = start_date
 
@@ -624,7 +818,15 @@ class SearchFacetGenerator:
     def _generate_monthly_ranges(
         self, start_date: datetime, end_date: datetime
     ) -> list[dict]:
-        """月別範囲生成"""
+        """Generate monthly date ranges for longer time periods.
+
+        Args:
+            start_date: Starting date for range generation.
+            end_date: Ending date for range generation.
+
+        Returns:
+            List of monthly range dictionaries.
+        """
         import calendar
 
         ranges = []
@@ -656,7 +858,15 @@ class SearchFacetGenerator:
     def _generate_yearly_ranges(
         self, start_date: datetime, end_date: datetime
     ) -> list[dict]:
-        """年別範囲生成"""
+        """Generate yearly date ranges for very long time periods.
+
+        Args:
+            start_date: Starting date for range generation.
+            end_date: Ending date for range generation.
+
+        Returns:
+            List of yearly range dictionaries.
+        """
         ranges = []
         current_year = start_date.year
 
@@ -682,7 +892,14 @@ class SearchFacetGenerator:
         return ranges
 
     def _analyze_temporal_patterns(self, temporal_info: dict) -> dict:
-        """時系列パターンの分析"""
+        """Analyze temporal patterns and frequency in the data.
+
+        Args:
+            temporal_info: Temporal information with date span and count.
+
+        Returns:
+            Dictionary with detected patterns (frequency, duration_type).
+        """
         patterns = {}
 
         span_days = temporal_info["span_days"]
@@ -711,7 +928,14 @@ class SearchFacetGenerator:
         return patterns
 
     def _create_person_facet(self, persons) -> EntityFacet | None:
-        """人名ファセットの作成"""
+        """Create person name entity facet from detected persons.
+
+        Args:
+            persons: List of PersonEntity objects.
+
+        Returns:
+            EntityFacet for person names or None if insufficient data.
+        """
         if not persons:
             return None
 
@@ -748,7 +972,14 @@ class SearchFacetGenerator:
         )
 
     def _create_place_facet(self, places) -> EntityFacet | None:
-        """場所ファセットの作成"""
+        """Create place/location entity facet from detected places.
+
+        Args:
+            places: List of PlaceEntity objects.
+
+        Returns:
+            EntityFacet for places or None if insufficient data.
+        """
         if not places:
             return None
 
@@ -784,7 +1015,14 @@ class SearchFacetGenerator:
         )
 
     def _create_organization_facet(self, organizations) -> EntityFacet | None:
-        """組織ファセットの作成"""
+        """Create organization entity facet from detected organizations.
+
+        Args:
+            organizations: List of OrganizationEntity objects.
+
+        Returns:
+            EntityFacet for organizations or None if insufficient data.
+        """
         if not organizations:
             return None
 
@@ -820,7 +1058,14 @@ class SearchFacetGenerator:
         )
 
     def _create_business_facet(self, business_terms) -> EntityFacet | None:
-        """ビジネス用語ファセットの作成"""
+        """Create business term entity facet from detected business terms.
+
+        Args:
+            business_terms: List of BusinessTermEntity objects.
+
+        Returns:
+            EntityFacet for business terms or None if insufficient data.
+        """
         if not business_terms:
             return None
 
@@ -858,7 +1103,15 @@ class SearchFacetGenerator:
         )
 
     def _generate_categorical_ui_config(self, field_name: str, stats: dict) -> dict:
-        """カテゴリカルファセット用UIコンフィグ生成"""
+        """Generate UI configuration for categorical facets.
+
+        Args:
+            field_name: Name of the field this facet represents.
+            stats: Statistical data for the categorical field.
+
+        Returns:
+            Dictionary with UI-specific configuration parameters.
+        """
         unique_count = stats.get("unique_count", 0)
 
         ui_config = {
@@ -885,7 +1138,15 @@ class SearchFacetGenerator:
         return ui_config
 
     def _generate_numerical_ui_config(self, field_name: str, stats: dict) -> dict:
-        """数値ファセット用UIコンフィグ生成"""
+        """Generate UI configuration for numerical facets.
+
+        Args:
+            field_name: Name of the field this facet represents.
+            stats: Statistical data for the numerical field.
+
+        Returns:
+            Dictionary with UI-specific configuration parameters.
+        """
         ui_config = {
             "widget_type": "range_slider",
             "enable_histogram": True,
@@ -917,7 +1178,15 @@ class SearchFacetGenerator:
     def _generate_temporal_ui_config(
         self, field_name: str, temporal_info: dict
     ) -> dict:
-        """時系列ファセット用UIコンフィグ生成"""
+        """Generate UI configuration for temporal facets.
+
+        Args:
+            field_name: Name of the field this facet represents.
+            temporal_info: Temporal information including date span.
+
+        Returns:
+            Dictionary with UI-specific configuration parameters.
+        """
         span_days = temporal_info.get("span_days", 0)
 
         ui_config = {
@@ -938,7 +1207,14 @@ class SearchFacetGenerator:
         return ui_config
 
     def _calculate_step_size(self, stats: dict) -> float:
-        """数値ファセットのステップサイズ計算"""
+        """Calculate appropriate step size for numerical facet sliders.
+
+        Args:
+            stats: Statistical data containing min/max values.
+
+        Returns:
+            Step size value for UI slider components.
+        """
         min_val = stats["min_value"]
         max_val = stats["max_value"]
         range_val = max_val - min_val
@@ -955,7 +1231,14 @@ class SearchFacetGenerator:
             return 100
 
     def _detect_number_format(self, field_name: str) -> str:
-        """数値フォーマットの検出"""
+        """Detect appropriate number format based on field name.
+
+        Args:
+            field_name: Name of the numerical field.
+
+        Returns:
+            Format type string (currency, percentage, integer, decimal).
+        """
         if any(
             keyword in field_name.lower()
             for keyword in ["price", "salary", "cost", "金額"]
@@ -974,7 +1257,14 @@ class SearchFacetGenerator:
             return "decimal"
 
     def _create_generation_metadata(self, facets: GeneratedFacets) -> dict:
-        """ファセット生成メタデータの作成"""
+        """Create metadata about the facet generation process.
+
+        Args:
+            facets: Generated facets container with all facet types.
+
+        Returns:
+            Dictionary with generation timestamp, counts, and configuration.
+        """
         return {
             "generation_timestamp": datetime.now().isoformat(),
             "facet_counts": {
