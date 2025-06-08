@@ -1,11 +1,10 @@
-"""
-Advanced Metadata Generator for Phase 2 RAG Integration
+"""Advanced Metadata Generator for Phase 2 RAG Integration.
 
-高度なメタデータ生成機能：
-- 統計分析の深化
-- 日本語エンティティ分類
-- データ品質評価
-- PLaMo-Embedding-1B連携準備
+Advanced metadata generation capabilities:
+- Deep statistical analysis
+- Japanese entity classification
+- Data quality assessment
+- PLaMo-Embedding-1B integration preparation
 """
 
 from __future__ import annotations
@@ -20,7 +19,20 @@ import numpy as np
 
 @dataclass
 class NumericalStats:
-    """数値データの統計情報"""
+    """Statistical information for numerical data.
+    
+    Args:
+        mean: Arithmetic mean of the values.
+        median: Middle value when sorted.
+        std_dev: Standard deviation.
+        min_value: Minimum value in dataset.
+        max_value: Maximum value in dataset.
+        quartiles: Q1, Q2, Q3 quartile values.
+        outliers: Values identified as outliers.
+        distribution_type: Statistical distribution type.
+        skewness: Measure of asymmetry.
+        kurtosis: Measure of tail heaviness.
+    """
 
     mean: float
     median: float
@@ -36,7 +48,16 @@ class NumericalStats:
 
 @dataclass
 class CategoricalStats:
-    """カテゴリデータの統計情報"""
+    """Statistical information for categorical data.
+    
+    Args:
+        unique_count: Number of unique values.
+        value_counts: Frequency count for each value.
+        entropy: Shannon entropy measure.
+        diversity_index: Simpson diversity index.
+        most_common: Most frequently occurring values.
+        patterns: Detected patterns in the data.
+    """
 
     unique_count: int
     value_counts: dict[str, int]
@@ -48,7 +69,15 @@ class CategoricalStats:
 
 @dataclass
 class TemporalStats:
-    """時系列データの統計情報"""
+    """Statistical information for temporal data.
+    
+    Args:
+        time_range: Start and end time range.
+        duration: Total duration of the time series.
+        frequency_pattern: Detected frequency pattern.
+        seasonal_indicators: Seasonal pattern indicators.
+        trend_direction: Overall trend direction.
+    """
 
     time_range: tuple[str, str]
     duration: str
@@ -59,17 +88,31 @@ class TemporalStats:
 
 @dataclass
 class PersonEntity:
-    """人名エンティティ"""
+    """Person name entity information.
+    
+    Args:
+        name: Detected person name.
+        confidence: Detection confidence score (0.0-1.0).
+        name_type: Type of name format (japanese_kanji, katakana, western).
+        position: Position in text as (start, end) tuple.
+    """
 
     name: str
     confidence: float
     name_type: str  # "japanese_kanji", "katakana", "western"
-    position: tuple[int, int]  # テキスト内位置
+    position: tuple[int, int]  # Position in text
 
 
 @dataclass
 class PlaceEntity:
-    """場所エンティティ"""
+    """Place/location entity information.
+    
+    Args:
+        place: Detected place name.
+        confidence: Detection confidence score (0.0-1.0).
+        place_type: Type of place (prefecture, city, district, station).
+        position: Position in text as (start, end) tuple.
+    """
 
     place: str
     confidence: float
@@ -79,7 +122,14 @@ class PlaceEntity:
 
 @dataclass
 class OrganizationEntity:
-    """組織エンティティ"""
+    """Organization entity information.
+    
+    Args:
+        organization: Detected organization name.
+        confidence: Detection confidence score (0.0-1.0).
+        org_type: Type of organization (company, department, government).
+        position: Position in text as (start, end) tuple.
+    """
 
     organization: str
     confidence: float
@@ -89,7 +139,14 @@ class OrganizationEntity:
 
 @dataclass
 class BusinessTermEntity:
-    """ビジネス用語エンティティ"""
+    """Business term entity information.
+    
+    Args:
+        term: Detected business term.
+        confidence: Detection confidence score (0.0-1.0).
+        category: Term category (job_title, industry, skill).
+        position: Position in text as (start, end) tuple.
+    """
 
     term: str
     confidence: float
@@ -99,7 +156,15 @@ class BusinessTermEntity:
 
 @dataclass
 class EntityClassification:
-    """エンティティ分類結果"""
+    """Entity classification results.
+    
+    Args:
+        persons: List of detected person entities.
+        places: List of detected place entities.
+        organizations: List of detected organization entities.
+        business_terms: List of detected business term entities.
+        confidence_scores: Overall confidence scores by entity type.
+    """
 
     persons: list[PersonEntity] = field(default_factory=list)
     places: list[PlaceEntity] = field(default_factory=list)
@@ -110,7 +175,16 @@ class EntityClassification:
 
 @dataclass
 class DataQualityReport:
-    """データ品質評価レポート"""
+    """Data quality assessment report.
+    
+    Args:
+        completeness_score: Completeness score (0.0-1.0).
+        consistency_score: Consistency score (0.0-1.0).
+        validity_score: Validity score (0.0-1.0).
+        accuracy_score: Accuracy score (0.0-1.0).
+        overall_score: Overall quality score (0.0-1.0).
+        detailed_issues: Detailed list of issues by category.
+    """
 
     completeness_score: float
     consistency_score: float
@@ -122,7 +196,14 @@ class DataQualityReport:
 
 @dataclass
 class SearchFacets:
-    """検索ファセット定義"""
+    """Search facet definitions.
+    
+    Args:
+        categorical: Categorical facet configurations.
+        numerical: Numerical facet configurations.
+        temporal: Temporal facet configurations.
+        entities: Entity-based facet configurations.
+    """
 
     categorical: dict[str, Any] = field(default_factory=dict)
     numerical: dict[str, Any] = field(default_factory=dict)
@@ -132,7 +213,14 @@ class SearchFacets:
 
 @dataclass
 class PLaMoFeatures:
-    """PLaMo-Embedding-1B用特徴量"""
+    """Features prepared for PLaMo-Embedding-1B processing.
+    
+    Args:
+        processed_text: Text processed for embedding generation.
+        entity_markers: Text with entity markers for enhanced processing.
+        business_context: Business context indicators.
+        semantic_tags: Semantic tags for content classification.
+    """
 
     text_segments: list[str]
     japanese_features: dict[str, Any]
