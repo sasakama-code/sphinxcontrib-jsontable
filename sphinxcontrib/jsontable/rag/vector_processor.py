@@ -133,7 +133,7 @@ class BusinessTermEnhancer:
         enhanced_text = text
 
         for _category, config in self.business_categories.items():
-            context_marker = config['context_marker']
+            context_marker = config["context_marker"]
             for pattern in config["patterns"]:
                 enhanced_text = re.sub(
                     pattern,

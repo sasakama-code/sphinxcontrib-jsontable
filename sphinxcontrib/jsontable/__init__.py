@@ -15,7 +15,7 @@ from .enhanced_directive import EnhancedJsonTableDirective
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __author__ = "sasakama-code"
 __email__ = "sasakamacode@gmail.com"
 

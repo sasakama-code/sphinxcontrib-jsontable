@@ -41,12 +41,12 @@ def mock_search_index():
                 "japanese_enhancement": {
                     "business_features": {"boost_score": 1.2},
                     "enhancement_applied": True,
-                    "boost_score": 1.2
-                }
+                    "boost_score": 1.2,
+                },
             }
             for i in range(5)
         ],
-        dimension=1024
+        dimension=1024,
     )
 
     # セマンティックインデックス
@@ -54,7 +54,7 @@ def mock_search_index():
         text_segments=[f"セマンティックテキスト{i}" for i in range(3)],
         japanese_keyword_index={"日本語": [0, 1], "テスト": [1, 2]},
         business_term_index={"株式会社": [0], "売上": [1, 2]},
-        semantic_mappings={"ビジネス": [0, 1], "技術": [1, 2]}
+        semantic_mappings={"ビジネス": [0, 1], "技術": [1, 2]},
     )
 
     # ファセットインデックス
@@ -62,7 +62,7 @@ def mock_search_index():
         categorical_facets={"category": {"business": [0, 1], "tech": [2]}},
         numerical_facets={"score": {"range": [0.0, 1.0], "chunks": [0, 1, 2]}},
         temporal_facets={"year": {"2024": [0, 1], "2023": [2]}},
-        entity_facets={"company": {"TestCorp": [0, 1]}}
+        entity_facets={"company": {"TestCorp": [0, 1]}},
     )
 
     # ハイブリッドインデックス
@@ -70,7 +70,7 @@ def mock_search_index():
         vector_weight=0.7,
         semantic_weight=0.2,
         facet_weight=0.1,
-        fusion_algorithm="rank_fusion"
+        fusion_algorithm="rank_fusion",
     )
 
     return search_index
@@ -113,7 +113,7 @@ class TestHybridSearchEngineErrorHandling:
             query_type="general",
             japanese_features={"has_japanese": True},
             search_intent="semantic_search",
-            confidence_score=0.8
+            confidence_score=0.8,
         )
 
         results = await engine._execute_semantic_search(query_analysis, k=3)
@@ -137,10 +137,10 @@ class TestSemanticSearchImplementation:
             japanese_features={
                 "has_japanese": True,
                 "has_hiragana": True,
-                "has_business_terms": False
+                "has_business_terms": False,
             },
             search_intent="semantic_search",
-            confidence_score=0.9
+            confidence_score=0.9,
         )
 
         results = await engine._execute_semantic_search(query_analysis, k=2)
@@ -161,10 +161,10 @@ class TestSemanticSearchImplementation:
             japanese_features={
                 "has_japanese": True,
                 "has_business_terms": True,
-                "business_context": "financial"
+                "business_context": "financial",
             },
             search_intent="semantic_search",
-            confidence_score=0.85
+            confidence_score=0.85,
         )
 
         results = await engine._execute_semantic_search(query_analysis, k=3)
@@ -189,7 +189,7 @@ class TestFacetedSearchImplementation:
             query_type="temporal",
             japanese_features={"has_numbers": True},
             search_intent="temporal_search",
-            confidence_score=0.7
+            confidence_score=0.7,
         )
 
         results = await engine._execute_faceted_search(query_analysis, k=5)
@@ -208,7 +208,7 @@ class TestFacetedSearchImplementation:
             query_type="numerical",
             japanese_features={"has_numbers": True},
             search_intent="numerical_search",
-            confidence_score=0.75
+            confidence_score=0.75,
         )
 
         results = await engine._execute_faceted_search(query_analysis, k=3)
@@ -231,14 +231,14 @@ class TestHybridSearchFusion:
                 chunk_id="vec_1",
                 content="ベクトル検索結果1",
                 relevance_score=0.9,
-                search_method="vector"
+                search_method="vector",
             ),
             SearchResult(
                 chunk_id="vec_2",
                 content="ベクトル検索結果2",
                 relevance_score=0.7,
-                search_method="vector"
-            )
+                search_method="vector",
+            ),
         ]
 
         # セマンティック検索結果（モック）
@@ -247,7 +247,7 @@ class TestHybridSearchFusion:
                 chunk_id="sem_1",
                 content="セマンティック検索結果1",
                 relevance_score=0.8,
-                search_method="semantic"
+                search_method="semantic",
             )
         ]
 
@@ -257,7 +257,7 @@ class TestHybridSearchFusion:
                 chunk_id="fac_1",
                 content="ファセット検索結果1",
                 relevance_score=1.0,
-                search_method="faceted"
+                search_method="faceted",
             )
         ]
 
@@ -310,7 +310,9 @@ class TestIntelligentQueryProcessorEdgeCases:
         mock_vector_processor = MagicMock()
 
         # ベクトル化処理でエラーが発生する設定
-        mock_vector_processor.process_chunks = AsyncMock(side_effect=Exception("ベクトル化エラー"))
+        mock_vector_processor.process_chunks = AsyncMock(
+            side_effect=Exception("ベクトル化エラー")
+        )
 
         processor = IntelligentQueryProcessor(mock_vector_processor, mock_search_index)
 
@@ -334,7 +336,9 @@ class TestQueryAnalysisEnhancements:
 
         processor = JapaneseQueryProcessor()
 
-        complex_query = "2024年度の東京エレクトロニクス株式会社の売上高と従業員数について"
+        complex_query = (
+            "2024年度の東京エレクトロニクス株式会社の売上高と従業員数について"
+        )
 
         # クエリ拡張
         expanded = processor.expand_query(complex_query)
@@ -361,12 +365,14 @@ class TestQueryAnalysisEnhancements:
             "従業員数の変化",
             "株式会社の業績",
             "ROI改善策",
-            "KPI達成状況"
+            "KPI達成状況",
         ]
 
         for query in business_queries:
             features = processor.extract_japanese_features(query)
-            assert features["has_business_terms"] is True, f"'{query}'でビジネス用語が検出されませんでした"
+            assert features["has_business_terms"] is True, (
+                f"'{query}'でビジネス用語が検出されませんでした"
+            )
             assert features["query_type"] == "business"
 
 

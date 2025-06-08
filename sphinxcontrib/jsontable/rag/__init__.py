@@ -19,22 +19,27 @@ Phase 3: PLaMo-Embedding-1B Integration
 - SearchIndexGenerator: Vector index generation for semantic search
 """
 
-# Phase 1 modules (to be implemented)
-# from .metadata_extractor import RAGMetadataExtractor
-# from .semantic_chunker import SemanticChunker
-
+# Phase 1 modules (implemented)
 # Phase 2 modules (implemented)
 from .advanced_metadata import AdvancedMetadataGenerator
 from .metadata_exporter import MetadataExporter
+from .metadata_extractor import RAGMetadataExtractor
+from .query_processor import IntelligentQueryProcessor
 from .search_facets import SearchFacetGenerator
+from .search_index_generator import SearchIndexGenerator
+from .semantic_chunker import SemanticChunker
 
-__version__ = "0.2.0-dev"
+# Phase 3 modules (implemented)
+from .vector_processor import PLaMoVectorProcessor
+
+__version__ = "0.3.0"
 __all__ = [
-    # Phase 2 (implemented)
     "AdvancedMetadataGenerator",
+    "IntelligentQueryProcessor",
     "MetadataExporter",
+    "PLaMoVectorProcessor",
+    "RAGMetadataExtractor",
     "SearchFacetGenerator",
-    # Phase 1 (pending)
-    # "RAGMetadataExtractor",
-    # "SemanticChunker",
+    "SearchIndexGenerator",
+    "SemanticChunker",
 ]

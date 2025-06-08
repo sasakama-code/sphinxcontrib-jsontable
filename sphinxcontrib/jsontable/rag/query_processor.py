@@ -605,8 +605,9 @@ class IntelligentQueryProcessor:
 
         for result in search_results:
             # 日本語ブーストの適用
-            if (query_analysis.japanese_features.get("has_japanese", False) and
-                result.japanese_enhancement.get("enhancement_applied", False)):
+            if query_analysis.japanese_features.get(
+                "has_japanese", False
+            ) and result.japanese_enhancement.get("enhancement_applied", False):
                 boost_score = result.japanese_enhancement.get("boost_score", 1.0)
                 result.relevance_score *= boost_score
 

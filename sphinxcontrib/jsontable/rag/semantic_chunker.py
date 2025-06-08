@@ -401,8 +401,10 @@ class SemanticChunker:
         # ID系フィールド
         id_patterns = ["id", "code", "コード", "番号"]
         for field in fields:
-            if (any(pattern in field.lower() for pattern in id_patterns) and
-                field not in important_fields):
+            if (
+                any(pattern in field.lower() for pattern in id_patterns)
+                and field not in important_fields
+            ):
                 important_fields.append(field)
 
         # その他のフィールドは元の順序を維持
