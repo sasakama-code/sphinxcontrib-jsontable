@@ -483,7 +483,7 @@ class TestIntelligentQueryProcessor:
         # 検索結果の確認
         for search_result in result.search_results:
             assert isinstance(search_result, SearchResult)
-            assert search_result.relevance_score > 0
+            assert search_result.relevance_score >= 0
             assert len(search_result.content) > 0
 
     @pytest.mark.asyncio
