@@ -20,7 +20,7 @@ import logging
 import re
 import time
 
-# PLaMo-Embedding-1B関連インポート (実装時に調整)
+# PLaMo-Embedding-1B related imports (to be adjusted during implementation)
 from contextlib import suppress
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -29,7 +29,7 @@ from typing import Any
 import numpy as np
 
 with suppress(ImportError):
-    # 実際のPLaMoライブラリ統合時に更新
+    # To be updated when actual PLaMo library is integrated
     # import plamo_embedding
     pass
 
@@ -89,13 +89,13 @@ class JapaneseTextNormalizer:
     """
 
     def __init__(self):
-        # 全角・半角変換マップ
+        # Full-width to half-width character conversion map
         self.fullwidth_to_halfwidth = str.maketrans(
             "０１２３４５６７８９ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ",  # noqa: RUF001
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         )
 
-        # ビジネス用語正規化パターン
+        # Business term normalization patterns
         self.business_normalization_patterns = [
             (r"株式会社|㈱|\(株\)", "株式会社"),
             (r"有限会社|㈲|\(有\)", "有限会社"),

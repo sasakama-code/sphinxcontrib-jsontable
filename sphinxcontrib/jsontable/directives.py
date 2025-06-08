@@ -29,10 +29,11 @@ EMPTY_CONTENT_ERROR = "No inline JSON content provided"
 
 class JsonTableError(Exception):
     """
-    Exception raised for errors that occur during JSON to table conversion.
+    Exception raised for errors during JSON to table conversion.
 
-    Attributes:
-        message -- explanation of the error
+    This exception is raised when JSON data cannot be processed, converted,
+    or rendered as a table due to format issues, validation failures, or
+    other processing errors.
     """
 
 
@@ -469,10 +470,11 @@ class TableConverter:
 
 class TableBuilder:
     """
-    Build docutils.table nodes from TableData for Sphinx documentation.
+    Build docutils table nodes from structured table data.
 
-    Methods:
-        build: Create and populate table nodes with header/body.
+    Converts 2D string arrays into properly formatted docutils table nodes
+    suitable for Sphinx documentation generation with support for headers,
+    multi-column layouts, and proper content escaping.
     """
 
     def build(self, table_data: TableData, has_header: bool = False) -> nodes.table:
@@ -587,12 +589,17 @@ class TableBuilder:
 
 class JsonTableDirective(SphinxDirective):
     """
-    Sphinx directive to render JSON data as a reStructuredText table.
+    Sphinx directive to render JSON data as reStructuredText tables.
+
+    Processes JSON data from files or inline content and renders it as
+    formatted tables in Sphinx documentation. Supports various JSON formats
+    including objects, arrays, and nested structures with comprehensive
+    security and performance safeguards.
 
     Options:
-        header: Flag to include the first row of JSON objects as table header.
-        encoding: Character encoding for JSON file reading.
-        limit: Positive integer to limit the number of rows, or 0 for unlimited.
+        header: Include first row of JSON objects as table header.
+        encoding: Character encoding for JSON file reading (default: utf-8).
+        limit: Maximum number of rows to display (0 for unlimited).
     """
 
     has_content = True

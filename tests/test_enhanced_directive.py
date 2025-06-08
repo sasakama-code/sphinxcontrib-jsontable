@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-EnhancedJsonTableDirective の基本動作テスト
+Basic functionality tests for EnhancedJsonTableDirective.
+
+This module tests the core functionality of the enhanced directive
+including RAG metadata extraction and semantic chunking.
 """
 
 from sphinxcontrib.jsontable.enhanced_directive import (
@@ -10,7 +13,12 @@ from sphinxcontrib.jsontable.enhanced_directive import (
 
 
 def test_rag_metadata_extractor():
-    """RAGMetadataExtractor の基本機能テスト"""
+    """
+    Test basic functionality of RAGMetadataExtractor.
+
+    Verifies that the metadata extractor can process Japanese employee
+    data and generate appropriate metadata structures.
+    """
     print("=== RAGMetadataExtractor Test ===")
 
     extractor = RAGMetadataExtractor()
@@ -29,18 +37,23 @@ def test_rag_metadata_extractor():
 
 
 def test_semantic_chunker():
-    """SemanticChunker の基本機能テスト"""
+    """
+    Test basic functionality of SemanticChunker.
+
+    Verifies that the semantic chunker can process JSON data and
+    generate appropriate semantic chunks for search optimization.
+    """
     print("\n=== SemanticChunker Test ===")
 
     chunker = SemanticChunker(chunk_strategy="row_based", max_chunk_size=1000)
 
-    # RAGMetadataExtractorを使って基本メタデータを生成
+    # Generate basic metadata using RAGMetadataExtractor
     extractor = RAGMetadataExtractor()
     test_data = [
         {"name": "田中太郎", "age": 30, "department": "開発部"},
         {"name": "佐藤花子", "age": 25, "department": "営業部"},
     ]
-    
+
     basic_metadata = extractor.extract(test_data, {})
     chunks = chunker.process(test_data, basic_metadata)
 
@@ -49,9 +62,9 @@ def test_semantic_chunker():
 
 
 if __name__ == "__main__":
-    print("🚀 EnhancedJsonTableDirective テスト開始\n")
+    print("🚀 Starting EnhancedJsonTableDirective tests\n")
 
     test_rag_metadata_extractor()
     test_semantic_chunker()
 
-    print("\n🎉 基本テストが成功しました!")
+    print("\n🎉 All basic tests passed successfully!")

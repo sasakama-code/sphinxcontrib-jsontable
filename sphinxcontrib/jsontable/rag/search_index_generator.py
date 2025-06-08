@@ -1,8 +1,14 @@
-"""
-Phase 3: 高度検索インデックス生成エンジン
+"""Advanced Search Index Generator for Phase 3 RAG Integration.
 
-PLaMo-Embedding-1Bと統合されたベクトル検索インデックスの
-包括的な構築・管理機能を提供
+Comprehensive vector search index construction and management capabilities
+integrated with PLaMo-Embedding-1B for optimal Japanese search performance.
+
+Features:
+- FAISS-based vector indexing with fallback support
+- Semantic search index with Japanese keyword optimization
+- Faceted search capabilities
+- Hybrid search index fusion
+- Japanese query processing and expansion
 """
 
 import json
@@ -14,7 +20,7 @@ from typing import Any
 
 import numpy as np
 
-# FAISS統合（オプション）
+# FAISS integration (optional)
 try:
     import faiss
 
@@ -33,10 +39,19 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class VectorIndex:
-    """ベクトル検索インデックス"""
+    """Vector search index container.
 
-    faiss_index: Any | None = None  # FAISSインデックス
-    fallback_embeddings: np.ndarray | None = None  # フォールバック用埋め込み
+    Args:
+        faiss_index: Optional FAISS index for vector similarity search.
+        fallback_embeddings: NumPy array fallback for vector storage.
+        chunk_metadata: Metadata for each indexed chunk.
+        search_parameters: Configuration parameters for search optimization.
+        dimension: Vector dimension (default 1024 for PLaMo-Embedding-1B).
+        index_type: Type of index implementation used.
+    """
+
+    faiss_index: Any | None = None  # FAISS index for vector search
+    fallback_embeddings: np.ndarray | None = None  # Fallback embedding storage
     chunk_metadata: list[dict[str, Any]] = field(default_factory=list)
     search_parameters: dict[str, Any] = field(default_factory=dict)
     dimension: int = 1024
@@ -45,7 +60,14 @@ class VectorIndex:
 
 @dataclass
 class SemanticSearchIndex:
-    """セマンティック検索インデックス"""
+    """Semantic search index for keyword-based retrieval.
+
+    Args:
+        text_segments: List of text content segments for search.
+        semantic_mappings: Mappings between semantic concepts and chunk indices.
+        japanese_keyword_index: Japanese keyword to chunk index mappings.
+        business_term_index: Business terminology to chunk index mappings.
+    """
 
     text_segments: list[str] = field(default_factory=list)
     semantic_mappings: dict[str, list[int]] = field(default_factory=dict)
@@ -55,7 +77,14 @@ class SemanticSearchIndex:
 
 @dataclass
 class FacetedSearchIndex:
-    """ファセット検索インデックス"""
+    """Faceted search index for filtered retrieval.
+
+    Args:
+        categorical_facets: Categorical facet values mapped to chunk indices.
+        numerical_facets: Numerical range facets mapped to chunk indices.
+        temporal_facets: Temporal facets for date/time filtering.
+        entity_facets: Entity-based facets for semantic filtering.
+    """
 
     categorical_facets: dict[str, dict[str, list[int]]] = field(default_factory=dict)
     numerical_facets: dict[str, dict[str, list[int]]] = field(default_factory=dict)
@@ -65,7 +94,14 @@ class FacetedSearchIndex:
 
 @dataclass
 class HybridSearchIndex:
-    """ハイブリッド検索インデックス"""
+    """Hybrid search index configuration.
+
+    Args:
+        vector_weight: Weight for vector similarity scores in fusion.
+        semantic_weight: Weight for semantic keyword scores in fusion.
+        facet_weight: Weight for faceted search scores in fusion.
+        fusion_algorithm: Algorithm used for score fusion.
+    """
 
     vector_weight: float = 0.7
     semantic_weight: float = 0.2
@@ -75,7 +111,17 @@ class HybridSearchIndex:
 
 @dataclass
 class ComprehensiveSearchIndex:
-    """包括的検索インデックス"""
+    """Comprehensive search index containing all search capabilities.
+
+    Args:
+        vector_index: Vector-based similarity search index.
+        semantic_index: Keyword-based semantic search index.
+        facet_index: Faceted search and filtering index.
+        hybrid_index: Hybrid search fusion configuration.
+        creation_time: Timestamp when index was created.
+        total_chunks: Total number of chunks indexed.
+        index_statistics: Statistics about index performance and content.
+    """
 
     vector_index: VectorIndex | None = None
     semantic_index: SemanticSearchIndex | None = None
@@ -90,7 +136,11 @@ class ComprehensiveSearchIndex:
 
 
 class JapaneseQueryProcessor:
-    """日本語クエリ処理・最適化"""
+    """Japanese query processing and optimization engine.
+
+    Provides comprehensive Japanese language query processing including
+    synonym expansion, business term recognition, and morphological analysis.
+    """
 
     def __init__(self):
         # 日本語クエリ拡張辞書
@@ -169,10 +219,18 @@ class JapaneseQueryProcessor:
 
 
 class SearchIndexGenerator:
-    """検索インデックス生成エンジン"""
+    """Search index generation engine for comprehensive search capabilities.
+
+    Orchestrates the creation of vector, semantic, faceted, and hybrid search
+    indices with Japanese language optimization and PLaMo-Embedding-1B integration.
+    """
 
     def __init__(self, config: dict[str, Any] | None = None):
-        """初期化"""
+        """Initialize search index generator with configuration.
+
+        Args:
+            config: Optional configuration dictionary for index parameters.
+        """
 
         self.config = config or self._get_default_config()
         self.japanese_processor = JapaneseQueryProcessor()
@@ -188,7 +246,11 @@ class SearchIndexGenerator:
         logger.info("SearchIndexGenerator initialized")
 
     def _get_default_config(self) -> dict[str, Any]:
-        """デフォルト設定"""
+        """Get default configuration for search index generation.
+
+        Returns:
+            Default configuration dictionary with optimized settings for Japanese search.
+        """
 
         return {
             "vector_search": {

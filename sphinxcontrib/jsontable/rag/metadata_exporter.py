@@ -1,12 +1,11 @@
-"""
-Metadata Exporter for Phase 2 RAG Integration
+"""Metadata Exporter for Phase 2 RAG Integration.
 
-メタデータ多形式出力機能：
-- JSON-LD形式出力
-- OpenSearch/Elasticsearch マッピング生成
-- PLaMo-Embedding-1B用特殊形式
-- 検索エンジン用インデックス設定
-- カスタム形式対応
+Multi-format metadata export functionality:
+- JSON-LD format output
+- OpenSearch/Elasticsearch mapping generation
+- PLaMo-Embedding-1B specialized format
+- Search engine index configuration
+- Custom format support
 """
 
 from __future__ import annotations
@@ -21,10 +20,14 @@ from .search_facets import GeneratedFacets
 
 
 class MetadataExporter:
-    """多形式メタデータ出力器"""
+    """Multi-format metadata export processor.
+
+    Provides comprehensive metadata export capabilities for various search engines
+    and embedding systems with Japanese language optimization.
+    """
 
     def __init__(self):
-        """メタデータ出力器の初期化"""
+        """Initialize metadata exporter with supported format configurations."""
         self.supported_formats = [
             "json-ld",
             "opensearch",
@@ -42,7 +45,17 @@ class MetadataExporter:
         formats: list[str],
         custom_config: dict | None = None,
     ) -> dict[str, Any]:
-        """指定形式でメタデータを出力"""
+        """Export metadata in specified formats.
+
+        Args:
+            advanced_metadata: Advanced metadata from Phase 2 analysis.
+            generated_facets: Search facets generated for the dataset.
+            formats: List of export formats to generate.
+            custom_config: Optional custom configuration for export.
+
+        Returns:
+            Dictionary containing exported metadata in requested formats.
+        """
         exports = {}
 
         for format_type in formats:
@@ -78,7 +91,14 @@ class MetadataExporter:
         return exports
 
     def _export_json_ld(self, metadata: AdvancedMetadata) -> dict:
-        """JSON-LD形式でのメタデータ出力"""
+        """Export metadata in JSON-LD format.
+
+        Args:
+            metadata: Advanced metadata to export.
+
+        Returns:
+            JSON-LD structured data with schema.org compliance.
+        """
         # JSON-LD コンテキスト定義
         context = {
             "@vocab": "http://schema.org/",
@@ -131,7 +151,14 @@ class MetadataExporter:
         return json_ld
 
     def _export_opensearch(self, metadata: AdvancedMetadata) -> dict:
-        """OpenSearch用マッピング定義生成"""
+        """Generate OpenSearch mapping definitions.
+
+        Args:
+            metadata: Advanced metadata to generate mappings from.
+
+        Returns:
+            OpenSearch index configuration with Japanese analysis support.
+        """
         mapping = {
             "settings": {
                 "index": {
@@ -255,7 +282,14 @@ class MetadataExporter:
         return mapping
 
     def _export_elasticsearch(self, metadata: AdvancedMetadata) -> dict:
-        """Elasticsearch用マッピング定義生成"""
+        """Generate Elasticsearch mapping definitions.
+
+        Args:
+            metadata: Advanced metadata to generate mappings from.
+
+        Returns:
+            Elasticsearch index configuration with vector search support.
+        """
         # OpenSearchとほぼ同じだが、一部Elasticsearchの違いを反映
         opensearch_mapping = self._export_opensearch(metadata)
 
@@ -280,7 +314,14 @@ class MetadataExporter:
         return elasticsearch_mapping
 
     def _export_plamo_ready(self, metadata: AdvancedMetadata) -> dict:
-        """PLaMo-Embedding-1B用特殊形式出力"""
+        """Export PLaMo-Embedding-1B optimized format.
+
+        Args:
+            metadata: Advanced metadata with PLaMo features.
+
+        Returns:
+            PLaMo-ready configuration for optimal Japanese embedding generation.
+        """
         plamo_features = metadata.plamo_features
 
         plamo_config = {
@@ -344,7 +385,15 @@ class MetadataExporter:
     def _export_search_config(
         self, metadata: AdvancedMetadata, facets: GeneratedFacets
     ) -> dict:
-        """検索エンジン用設定出力"""
+        """Export search engine configuration.
+
+        Args:
+            metadata: Advanced metadata for search optimization.
+            facets: Generated facets for search interface.
+
+        Returns:
+            Search engine configuration with facets and boost settings.
+        """
         search_config = {
             "search_settings": {
                 "default_operator": "AND",
@@ -374,7 +423,14 @@ class MetadataExporter:
         return search_config
 
     def _export_facet_config(self, facets: GeneratedFacets) -> dict:
-        """ファセット設定専用出力"""
+        """Export facet-specific configuration.
+
+        Args:
+            facets: Generated facets for UI configuration.
+
+        Returns:
+            Facet configuration for search interface implementation.
+        """
         facet_config = {
             "ui_configuration": {
                 "layout": "sidebar",
@@ -400,7 +456,15 @@ class MetadataExporter:
         return facet_config
 
     def _export_custom(self, metadata: AdvancedMetadata, config: dict) -> dict:
-        """カスタム形式出力"""
+        """Export custom format based on user configuration.
+
+        Args:
+            metadata: Advanced metadata to export.
+            config: Custom configuration for export format.
+
+        Returns:
+            Custom formatted metadata based on user specifications.
+        """
         custom_format = config.get("format", {})
         include_sections = config.get("include_sections", ["all"])
 
@@ -444,7 +508,14 @@ class MetadataExporter:
     # ヘルパーメソッド群
 
     def _extract_dataset_name(self, metadata: AdvancedMetadata) -> str:
-        """データセット名の抽出"""
+        """Extract dataset name from metadata.
+
+        Args:
+            metadata: Advanced metadata containing source information.
+
+        Returns:
+            Human-readable dataset name string.
+        """
         source_info = metadata.basic_metadata.get("source_info", {})
         file_path = source_info.get("file_path")
 

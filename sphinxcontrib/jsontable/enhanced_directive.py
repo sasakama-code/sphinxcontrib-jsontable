@@ -5,7 +5,7 @@ on existing functionality through opt-in features.
 
 Integrated Components:
 - RAGMetadataExtractor (Phase 1): Basic metadata extraction
-- SemanticChunker (Phase 1): Content segmentation 
+- SemanticChunker (Phase 1): Content segmentation
 - AdvancedMetadataGenerator (Phase 2): Statistical analysis
 - SearchFacetGenerator (Phase 2): Search facet generation
 - MetadataExporter (Phase 2): Multi-format export
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class RAGProcessingResult:
     """Result container for RAG processing pipeline.
-    
+
     Args:
         basic_metadata: Basic metadata extracted from JSON data.
         semantic_chunks: List of semantic chunks created from content.
@@ -56,13 +56,15 @@ class RAGProcessingResult:
 
 class EnhancedJsonTableDirective(JsonTableDirective):
     """
-    RAG統合対応の拡張版JsonTableDirective
+    Enhanced JSON table directive with RAG integration capabilities.
 
-    既存のJsonTableDirectiveを継承し、RAG機能をオプト・イン形式で追加。
-    Phase 1と2の機能を統合して提供します。
+    Extends JsonTableDirective with opt-in RAG features including metadata
+    extraction, semantic chunking, and advanced analytics. Provides zero
+    impact on existing functionality while enabling powerful search and
+    AI integration capabilities.
     """
 
-    # 既存オプションに加えてRAG関連オプションを追加
+    # Extend base options with RAG-specific options
     option_spec: ClassVar[dict] = {
         **JsonTableDirective.option_spec,
         "rag-enabled": directives.flag,
@@ -75,17 +77,23 @@ class EnhancedJsonTableDirective(JsonTableDirective):
     }
 
     def __init__(self, *args, **kwargs):
-        """拡張ディレクティブを初期化"""
+        """
+        Initialize enhanced directive with RAG processing components.
+
+        Args:
+            *args: Positional arguments passed to parent directive.
+            **kwargs: Keyword arguments passed to parent directive.
+        """
         super().__init__(*args, **kwargs)
 
-        # RAG処理コンポーネントの初期化
+        # Initialize RAG processing components
         self.metadata_extractor = RAGMetadataExtractor()
         self.semantic_chunker = None
         self.advanced_generator = None
         self.facet_generator = None
         self.metadata_exporter = None
 
-        # RAGが有効な場合のみコンポーネントを初期化
+        # Initialize components only when RAG is enabled
         if "rag-enabled" in self.options:
             chunk_strategy = self.options.get("chunk-strategy", "adaptive")
             self.semantic_chunker = SemanticChunker(chunk_strategy=chunk_strategy)
@@ -101,30 +109,35 @@ class EnhancedJsonTableDirective(JsonTableDirective):
                     self.metadata_exporter = MetadataExporter()
 
     def run(self) -> list[nodes.Node]:
-        """ディレクティブの実行
+        """
+        Execute directive processing with optional RAG pipeline.
 
-        既存のテーブル生成機能に加えて、RAG機能が有効な場合は
-        メタデータ抽出・チャンク化・高度分析を実行します。
+        Executes standard table generation and optionally processes RAG
+        features including metadata extraction, semantic chunking, and
+        advanced analytics when enabled through options.
+
+        Returns:
+            List of docutils nodes representing the generated table.
         """
         try:
-            # 既存のテーブル生成処理を実行
+            # Execute standard table generation
             table_nodes = super().run()
 
-            # RAG機能が有効でない場合は既存動作をそのまま返す
+            # Return standard table if RAG is not enabled
             if "rag-enabled" not in self.options:
                 return table_nodes
 
-            # JSONデータを取得
+            # Load JSON data for RAG processing
             json_data = self._get_json_data()
 
-            # RAG処理を実行
+            # Execute RAG processing pipeline
             rag_result = self._process_rag_pipeline(json_data)
 
-            # テーブルノードにRAGメタデータを付加
+            # Attach RAG metadata to table nodes
             if table_nodes and rag_result:
                 self._attach_rag_metadata(table_nodes[0], rag_result)
 
-            # デバッグ出力
+            # Output debug information if enabled
             if self.env.app.config.get("rag_debug_mode", False):
                 self._output_debug_info(rag_result)
 
@@ -132,22 +145,22 @@ class EnhancedJsonTableDirective(JsonTableDirective):
 
         except Exception as e:
             logger.error(f"Enhanced directive RAG integration error: {e}")
-            # エラーが発生しても既存機能は動作させる
+            # Fallback to standard functionality on error
             return super().run()
 
     def _get_json_data(self) -> dict[str, Any] | list[Any]:
         """Get JSON data from file or inline content.
-        
+
         Reuses existing JsonTableDirective processing to load and parse
         JSON data from either file paths or inline content.
-        
+
         Returns:
             Parsed JSON data as dictionary or list.
-            
+
         Raises:
             ValueError: If path is unsafe or JSON data is invalid.
         """
-        # ファイルからの読み込み
+        # Load from file if file path is provided
         if self.arguments:
             file_path = Path(self.env.srcdir) / self.arguments[0]
             if not self._is_safe_path(file_path):
@@ -159,7 +172,7 @@ class EnhancedJsonTableDirective(JsonTableDirective):
             except (FileNotFoundError, json.JSONDecodeError) as e:
                 raise ValueError(f"Failed to load JSON file: {e}") from e
 
-        # インラインコンテンツからの読み込み
+        # Load from inline content if provided
         elif self.content:
             content_str = "\n".join(self.content)
             try:
@@ -171,13 +184,15 @@ class EnhancedJsonTableDirective(JsonTableDirective):
             raise ValueError("No JSON data specified")
 
     def _process_rag_pipeline(self, json_data: Any) -> RAGProcessingResult:
-        """Execute the RAG processing pipeline.
-        
+        """
+        Execute the complete RAG processing pipeline.
+
         Args:
-            json_data: Input JSON data to process.
-            
+            json_data: Input JSON data to process through the pipeline.
+
         Returns:
-            RAGProcessingResult containing all processing outputs.
+            RAGProcessingResult containing all processing outputs including
+            metadata, chunks, facets, and export data.
         """
         # Phase 1: Basic metadata extraction
         options_dict = dict(self.options)
@@ -224,11 +239,12 @@ class EnhancedJsonTableDirective(JsonTableDirective):
     def _attach_rag_metadata(
         self, table_node: nodes.Node, rag_result: RAGProcessingResult
     ) -> None:
-        """Attach RAG metadata to table node as custom attributes.
-        
+        """
+        Attach RAG processing metadata to table node as custom attributes.
+
         Args:
-            table_node: Docutils table node to annotate.
-            rag_result: RAG processing results to attach.
+            table_node: Docutils table node to annotate with metadata.
+            rag_result: Complete RAG processing results to attach.
         """
         # Add RAG metadata as custom attributes
         if not hasattr(table_node, "attributes"):
@@ -269,10 +285,11 @@ class EnhancedJsonTableDirective(JsonTableDirective):
             table_node.attributes["rag_export_formats"] = ",".join(export_formats)
 
     def _parse_export_formats(self) -> list[str]:
-        """Parse export formats from directive options.
-        
+        """
+        Parse export format specification from directive options.
+
         Returns:
-            List of export format names specified in options.
+            List of export format names specified in options, empty list if none.
         """
         if "export-formats" not in self.options:
             return []
@@ -281,11 +298,12 @@ class EnhancedJsonTableDirective(JsonTableDirective):
         return [fmt.strip() for fmt in formats_str.split(",") if fmt.strip()]
 
     def _is_safe_path(self, path: Path) -> bool:
-        """Check if file path is safe for access.
-        
+        """
+        Validate file path for security and access restrictions.
+
         Args:
-            path: File path to validate.
-            
+            path: File path to validate for safety.
+
         Returns:
             True if path is within source directory and safe to access.
         """
@@ -298,10 +316,11 @@ class EnhancedJsonTableDirective(JsonTableDirective):
             return False
 
     def _output_debug_info(self, rag_result: RAGProcessingResult) -> None:
-        """Output debug information for RAG processing results.
-        
+        """
+        Output comprehensive debug information for RAG processing results.
+
         Args:
-            rag_result: RAG processing results to log.
+            rag_result: Complete RAG processing results to log for debugging.
         """
         logger.info("=== RAG Processing Debug Information ===")
         logger.info(f"Table ID: {rag_result.basic_metadata.table_id}")
@@ -315,12 +334,16 @@ class EnhancedJsonTableDirective(JsonTableDirective):
             entities = rag_result.advanced_metadata.entity_classification
             person_count = len(entities.persons)
             org_count = len(entities.organizations)
-            logger.info(f"Detected entities: persons={person_count}, organizations={org_count}")
+            logger.info(
+                f"Detected entities: persons={person_count}, organizations={org_count}"
+            )
 
         if rag_result.generated_facets:
             cat_count = len(rag_result.generated_facets.categorical_facets)
             num_count = len(rag_result.generated_facets.numerical_facets)
-            logger.info(f"Generated facets: categorical={cat_count}, numerical={num_count}")
+            logger.info(
+                f"Generated facets: categorical={cat_count}, numerical={num_count}"
+            )
 
         if rag_result.export_data:
             formats = list(rag_result.export_data.keys())
@@ -330,18 +353,19 @@ class EnhancedJsonTableDirective(JsonTableDirective):
 
 
 def setup(app):
-    """Setup function for Sphinx extension.
-    
-    Args:
-        app: Sphinx application instance.
-        
-    Returns:
-        Extension metadata dictionary.
     """
-    # 既存のjsontableディレクティブを拡張版で上書き
+    Setup function for enhanced JSON table Sphinx extension.
+
+    Args:
+        app: Sphinx application instance to register with.
+
+    Returns:
+        Extension metadata dictionary with version and parallel safety.
+    """
+    # Register enhanced directive with Sphinx
     app.add_directive("jsontable-rag", EnhancedJsonTableDirective)
 
-    # 設定値の追加
+    # Add configuration values for RAG features
     app.add_config_value("rag_debug_mode", False, "env")
     app.add_config_value("rag_default_chunk_strategy", "adaptive", "env")
     app.add_config_value("rag_default_export_formats", [], "env")

@@ -32,7 +32,7 @@ JsonData = dict[str, Any] | list[dict[str, Any]] | list[Any]
 @dataclass
 class BasicMetadata:
     """Basic metadata structure for RAG processing.
-    
+
     Args:
         table_id: Unique identifier for the table.
         schema: JSON schema of the data structure.
@@ -58,7 +58,7 @@ class BasicMetadata:
 
 class RAGMetadataExtractor:
     """Extract RAG metadata from JSON table data.
-    
+
     Core Phase 1 functionality that provides foundational metadata
     for Phase 2 AdvancedMetadataGenerator processing.
     """
@@ -70,7 +70,7 @@ class RAGMetadataExtractor:
 
     def _init_japanese_patterns(self) -> dict[str, list[str]]:
         """Initialize Japanese language recognition patterns.
-        
+
         Returns:
             Dictionary mapping entity types to field name patterns.
         """
@@ -133,7 +133,7 @@ class RAGMetadataExtractor:
 
     def _init_type_patterns(self) -> dict[str, Any]:
         """Initialize type inference patterns.
-        
+
         Returns:
             Dictionary containing regex patterns for data type detection.
         """
@@ -196,11 +196,11 @@ class RAGMetadataExtractor:
 
     def _generate_table_id(self, json_data: JsonData, options: dict[str, Any]) -> str:
         """Generate unique table identifier.
-        
+
         Args:
             json_data: Input JSON data.
             options: Processing options.
-            
+
         Returns:
             Unique table identifier string.
         """
@@ -215,13 +215,13 @@ class RAGMetadataExtractor:
 
     def _extract_schema(self, data: JsonData) -> dict[str, Any]:
         """Generate JSON Schema from data.
-        
+
         Creates structured schema compliant with OpenAPI and JSON-LD
         specifications for better interoperability.
-        
+
         Args:
             data: Input JSON data.
-            
+
         Returns:
             Generated JSON schema dictionary.
         """

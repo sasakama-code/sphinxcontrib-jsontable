@@ -20,7 +20,7 @@ import numpy as np
 @dataclass
 class NumericalStats:
     """Statistical information for numerical data.
-    
+
     Args:
         mean: Arithmetic mean of the values.
         median: Middle value when sorted.
@@ -49,7 +49,7 @@ class NumericalStats:
 @dataclass
 class CategoricalStats:
     """Statistical information for categorical data.
-    
+
     Args:
         unique_count: Number of unique values.
         value_counts: Frequency count for each value.
@@ -70,7 +70,7 @@ class CategoricalStats:
 @dataclass
 class TemporalStats:
     """Statistical information for temporal data.
-    
+
     Args:
         time_range: Start and end time range.
         duration: Total duration of the time series.
@@ -89,7 +89,7 @@ class TemporalStats:
 @dataclass
 class PersonEntity:
     """Person name entity information.
-    
+
     Args:
         name: Detected person name.
         confidence: Detection confidence score (0.0-1.0).
@@ -106,7 +106,7 @@ class PersonEntity:
 @dataclass
 class PlaceEntity:
     """Place/location entity information.
-    
+
     Args:
         place: Detected place name.
         confidence: Detection confidence score (0.0-1.0).
@@ -123,7 +123,7 @@ class PlaceEntity:
 @dataclass
 class OrganizationEntity:
     """Organization entity information.
-    
+
     Args:
         organization: Detected organization name.
         confidence: Detection confidence score (0.0-1.0).
@@ -140,7 +140,7 @@ class OrganizationEntity:
 @dataclass
 class BusinessTermEntity:
     """Business term entity information.
-    
+
     Args:
         term: Detected business term.
         confidence: Detection confidence score (0.0-1.0).
@@ -157,7 +157,7 @@ class BusinessTermEntity:
 @dataclass
 class EntityClassification:
     """Entity classification results.
-    
+
     Args:
         persons: List of detected person entities.
         places: List of detected place entities.
@@ -176,7 +176,7 @@ class EntityClassification:
 @dataclass
 class DataQualityReport:
     """Data quality assessment report.
-    
+
     Args:
         completeness_score: Completeness score (0.0-1.0).
         consistency_score: Consistency score (0.0-1.0).
@@ -197,7 +197,7 @@ class DataQualityReport:
 @dataclass
 class SearchFacets:
     """Search facet definitions.
-    
+
     Args:
         categorical: Categorical facet configurations.
         numerical: Numerical facet configurations.
@@ -214,7 +214,7 @@ class SearchFacets:
 @dataclass
 class PLaMoFeatures:
     """Features prepared for PLaMo-Embedding-1B processing.
-    
+
     Args:
         processed_text: Text processed for embedding generation.
         entity_markers: Text with entity markers for enhanced processing.
@@ -348,7 +348,7 @@ class StatisticalAnalyzer:
         if std_dev == 0:
             return 0.0
         n = len(data)
-        if n < 4:  # 尖度計算には最低4つのデータポイントが必要
+        if n < 4:  # Kurtosis calculation requires at least 4 data points
             return 0.0
         try:
             return (n * (n + 1) / ((n - 1) * (n - 2) * (n - 3))) * sum(
@@ -358,7 +358,16 @@ class StatisticalAnalyzer:
             return 0.0
 
     def _classify_distribution(self, skewness: float, kurtosis: float) -> str:
-        """分布の種類を分類"""
+        """
+        Classify distribution type based on skewness and kurtosis values.
+
+        Args:
+            skewness: Skewness value of the distribution.
+            kurtosis: Kurtosis value of the distribution.
+
+        Returns:
+            String classification of distribution type.
+        """
         if abs(skewness) < 0.5 and abs(kurtosis) < 3:
             return "normal"
         elif skewness > 1:
@@ -373,10 +382,18 @@ class StatisticalAnalyzer:
             return "unknown"
 
     def _detect_categorical_patterns(self, data: list[str]) -> list[str]:
-        """カテゴリデータのパターン検出"""
+        """
+        Detect common patterns in categorical data.
+
+        Args:
+            data: List of categorical string values to analyze.
+
+        Returns:
+            List of detected pattern types found in the data.
+        """
         patterns = []
 
-        # 共通パターンの検出
+        # Detect common patterns
         if any("株式会社" in item for item in data):
             patterns.append("company_names")
         if any(re.match(r"[一-龯]{1,4}[一-龯]{1,3}", item) for item in data):
@@ -389,7 +406,12 @@ class StatisticalAnalyzer:
         return patterns
 
     def _empty_numerical_stats(self) -> NumericalStats:
-        """空の数値統計"""
+        """
+        Create empty numerical statistics structure.
+
+        Returns:
+            NumericalStats with zero/empty values for empty datasets.
+        """
         return NumericalStats(
             mean=0.0,
             median=0.0,
@@ -404,7 +426,12 @@ class StatisticalAnalyzer:
         )
 
     def _empty_categorical_stats(self) -> CategoricalStats:
-        """空のカテゴリ統計"""
+        """
+        Create empty categorical statistics structure.
+
+        Returns:
+            CategoricalStats with zero/empty values for empty datasets.
+        """
         return CategoricalStats(
             unique_count=0,
             value_counts={},
@@ -416,11 +443,22 @@ class StatisticalAnalyzer:
 
 
 class JapaneseEntityClassifier:
-    """日本語特化エンティティ認識・分類"""
+    """
+    Japanese-specialized entity recognition and classification processor.
+
+    Provides advanced entity recognition capabilities optimized for Japanese
+    text including person names, place names, organizations, and business terms
+    with high accuracy pattern matching and context awareness.
+    """
 
     def __init__(self):
-        """日本語エンティティ分類器の初期化"""
-        # 日本語人名パターン
+        """
+        Initialize Japanese entity classifier with pattern recognition rules.
+
+        Sets up comprehensive pattern matching for Japanese entity types
+        including names, places, organizations, and business terminology.
+        """
+        # Japanese person name patterns
         self.person_patterns = [
             r"[一-龯]{1,4}[　\s][一-龯]{1,3}",  # 漢字姓名（スペース区切り）
             r"[一-龯]{2,4}",  # 漢字のみ（姓または名）
@@ -428,7 +466,7 @@ class JapaneseEntityClassifier:
             r"[a-zA-Z]{2,20}\s[a-zA-Z]{2,20}",  # 英語名
         ]
 
-        # 場所名パターン
+        # Japanese place name patterns
         self.place_patterns = [
             r"[一-龯]{2,3}[都道府県]",  # 都道府県
             r"[一-龯]{1,8}[市区町村]",  # 市区町村
@@ -436,7 +474,7 @@ class JapaneseEntityClassifier:
             r"[一-龯]{1,8}[町丁目]",  # 町丁目
         ]
 
-        # 組織名パターン
+        # Japanese organization name patterns
         self.organization_patterns = [
             r"[一-龯ァ-ヴa-zA-Z0-9]+株式会社",  # 株式会社
             r"株式会社[一-龯ァ-ヴa-zA-Z0-9]+",  # 株式会社
@@ -444,7 +482,7 @@ class JapaneseEntityClassifier:
             r"[一-龯ァ-ヴa-zA-Z0-9]+省",  # 省庁
         ]
 
-        # ビジネス用語パターン
+        # Japanese business term patterns
         self.business_patterns = [
             r"[一-龯]{2,6}[主任係長課長部長取締役社長]",  # 役職
             r"[エンジニアマネージャーディレクター]{4,12}",  # カタカナ職種

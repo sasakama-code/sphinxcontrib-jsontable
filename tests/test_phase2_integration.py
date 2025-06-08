@@ -20,17 +20,32 @@ from sphinxcontrib.jsontable.rag.search_facets import SearchFacetGenerator
 
 
 class TestPhase2Integration:
-    """Phase 2全体統合テスト"""
+    """
+    Comprehensive Phase 2 integration test suite.
+
+    Tests the complete integration of advanced metadata generation,
+    search facet generation, and metadata export functionality.
+    """
 
     def setup_method(self):
-        """テスト準備"""
+        """
+        Set up test environment with required components.
+
+        Initializes advanced metadata generator, facet generator,
+        and metadata exporter for integration testing.
+        """
         self.advanced_generator = AdvancedMetadataGenerator()
         self.facet_generator = SearchFacetGenerator()
         self.metadata_exporter = MetadataExporter()
 
     @pytest.fixture
     def japanese_employee_data(self):
-        """日本語従業員データサンプル"""
+        """
+        Japanese employee data sample for testing.
+
+        Returns:
+            List of employee records with Japanese names and business terms.
+        """
         return [
             {
                 "name": "田中太郎",
@@ -76,7 +91,12 @@ class TestPhase2Integration:
 
     @pytest.fixture
     def business_data(self):
-        """ビジネスデータサンプル"""
+        """
+        Business project data sample for testing.
+
+        Returns:
+            List of business project records with Japanese content.
+        """
         return [
             {
                 "product_name": "スマートフォンアプリ開発サービス",
