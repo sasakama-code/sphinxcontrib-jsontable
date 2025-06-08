@@ -19,6 +19,12 @@ A next-generation Sphinx extension that renders JSON data as structured tables w
 - **🚀 [5-Minute Quick Start](docs/v0.3.0_quick_start.md)** - Start using new features immediately
 - **🎓 [Feature Guide](docs/v0.3.0_feature_tutorial.md)** - Complete reference with examples
 
+## Background / Motivation
+
+In recent years, there has been an increasing trend of using documents as data sources for Retrieval Augmented Generation (RAG). However, tabular data within documents often loses its structural relevance during the process of being ingested by RAG systems. This presented a challenge where the original value of the structured data could not be fully leveraged.
+
+Against this backdrop, **sphinxcontrib-jsontable v0.3.0** was developed to directly embed structured data as meaningful tables in Sphinx-generated documents, with advanced RAG capabilities that ensure readability and semantic understanding effectively coexist. The integration with PLaMo-Embedding-1B makes it the world's first Japanese-specialized RAG documentation system.
+
 ## Installation
 
 ```bash
