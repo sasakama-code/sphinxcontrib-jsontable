@@ -152,7 +152,7 @@ class JsonDataLoader:
         Raises:
             JsonTableError: If data is not an array or object type.
         """
-        if not isinstance(data, (list, dict)):
+        if not isinstance(data, list | dict):
             raise JsonTableError(INVALID_JSON_DATA_ERROR)
 
     def load_from_file(self, file_path: str, base_path: Path) -> JsonData:
@@ -181,7 +181,7 @@ class JsonDataLoader:
             return data
 
         except (OSError, json.JSONDecodeError) as e:
-            raise JsonTableError(format_error("Failed to load JSON file", e))
+            raise JsonTableError(format_error("Failed to load JSON file", e)) from e
 
     def load_from_content(self, content: str) -> JsonData:
         """Load JSON data from inline string content.
@@ -202,7 +202,7 @@ class JsonDataLoader:
             self._validate_json_structure(data)
             return data
         except json.JSONDecodeError as e:
-            raise JsonTableError(format_error("Failed to parse inline JSON", e))
+            raise JsonTableError(format_error("Failed to parse inline JSON", e)) from e
 
     def load_json_data(
         self, file_path: str | None, content: str | None, base_path: Path

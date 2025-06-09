@@ -134,7 +134,7 @@ class TestEnhancedDirectiveBasicCoverage:
             ("", []),
         ]
 
-        for input_formats, expected in test_cases:
+        for _, expected in test_cases:
             # Mock the enhanced directive with parse method
             mock_directive = Mock()
             mock_directive._parse_export_formats = Mock(return_value=expected)
@@ -181,7 +181,7 @@ class TestEnhancedDirectiveDataProcessing:
         test_data = [{"name": "test1", "value": 100}, {"name": "test2", "value": 200}]
 
         # Test inline content processing
-        content_lines = [json.dumps(test_data)]
+        _ = [json.dumps(test_data)]  # Content lines for potential use
 
         # Mock directive for testing
         mock_directive = Mock()
@@ -296,11 +296,11 @@ class TestEnhancedDirectiveErrorHandling:
             # Mock directive that handles JSON parsing errors
             mock_directive = Mock()
 
-            def mock_get_json_data():
+            def mock_get_json_data(invalid_data=invalid_input):
                 try:
-                    return json.loads(invalid_input)
-                except json.JSONDecodeError:
-                    raise ValueError("Invalid JSON")
+                    return json.loads(invalid_data)
+                except json.JSONDecodeError as e:
+                    raise ValueError("Invalid JSON") from e
 
             mock_directive._get_json_data = mock_get_json_data
 
@@ -406,10 +406,10 @@ class TestEnhancedDirectiveIntegration:
         # Simulate complete enhanced directive workflow
 
         # 1. Data input
-        test_data = [
+        _ = [
             {"name": "Product A", "price": 1000, "category": "Electronics"},
             {"name": "Product B", "price": 2000, "category": "Electronics"},
-        ]
+        ]  # Test data for simulation
 
         # 2. Basic metadata creation
         basic_metadata = BasicMetadata(
@@ -468,10 +468,10 @@ class TestEnhancedDirectiveIntegration:
     def test_japanese_content_handling(self):
         """Test Japanese content handling."""
         # Test with Japanese content
-        japanese_data = [
+        _ = [
             {"名前": "商品A", "価格": 1000, "カテゴリ": "電子機器"},
             {"名前": "商品B", "価格": 2000, "カテゴリ": "電子機器"},
-        ]
+        ]  # Japanese data for testing
 
         # Create metadata with Japanese content
         basic_metadata = BasicMetadata(
