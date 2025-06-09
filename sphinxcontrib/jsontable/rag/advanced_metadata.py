@@ -16,7 +16,7 @@ from __future__ import annotations
 import re
 import statistics
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 
@@ -43,8 +43,8 @@ class NumericalStats:
     std_dev: float
     min_value: float
     max_value: float
-    quartiles: tuple[float, float, float]
-    outliers: list[float]
+    quartiles: Tuple[float, float, float]
+    outliers: List[float]
     distribution_type: str
     skewness: float
     kurtosis: float
@@ -64,11 +64,11 @@ class CategoricalStats:
     """
 
     unique_count: int
-    value_counts: dict[str, int]
+    value_counts: Dict[str, int]
     entropy: float
     diversity_index: float
-    most_common: list[tuple[str, int]]
-    patterns: list[str]
+    most_common: List[Tuple[str, int]]
+    patterns: List[str]
 
 
 @dataclass
@@ -83,10 +83,10 @@ class TemporalStats:
         trend_direction: Overall trend direction.
     """
 
-    time_range: tuple[str, str]
+    time_range: Tuple[str, str]
     duration: str
     frequency_pattern: str
-    seasonal_indicators: dict[str, Any]
+    seasonal_indicators: Dict[str, Any]
     trend_direction: str
 
 
@@ -104,7 +104,7 @@ class PersonEntity:
     name: str
     confidence: float
     name_type: str  # "japanese_kanji", "katakana", "western"
-    position: tuple[int, int]  # Position in text
+    position: Tuple[int, int]  # Position in text
 
 
 @dataclass
@@ -121,7 +121,7 @@ class PlaceEntity:
     place: str
     confidence: float
     place_type: str  # "prefecture", "city", "district", "station"
-    position: tuple[int, int]
+    position: Tuple[int, int]
 
 
 @dataclass
@@ -138,7 +138,7 @@ class OrganizationEntity:
     organization: str
     confidence: float
     org_type: str  # "company", "department", "government"
-    position: tuple[int, int]
+    position: Tuple[int, int]
 
 
 @dataclass
@@ -155,7 +155,7 @@ class BusinessTermEntity:
     term: str
     confidence: float
     category: str  # "job_title", "industry", "skill"
-    position: tuple[int, int]
+    position: Tuple[int, int]
 
 
 @dataclass
@@ -170,11 +170,11 @@ class EntityClassification:
         confidence_scores: Overall confidence scores by entity type.
     """
 
-    persons: list[PersonEntity] = field(default_factory=list)
-    places: list[PlaceEntity] = field(default_factory=list)
-    organizations: list[OrganizationEntity] = field(default_factory=list)
-    business_terms: list[BusinessTermEntity] = field(default_factory=list)
-    confidence_scores: dict[str, float] = field(default_factory=dict)
+    persons: List[PersonEntity] = field(default_factory=list)
+    places: List[PlaceEntity] = field(default_factory=list)
+    organizations: List[OrganizationEntity] = field(default_factory=list)
+    business_terms: List[BusinessTermEntity] = field(default_factory=list)
+    confidence_scores: Dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -195,7 +195,7 @@ class DataQualityReport:
     validity_score: float
     accuracy_score: float
     overall_score: float
-    detailed_issues: dict[str, list[str]] = field(default_factory=dict)
+    detailed_issues: Dict[str, List[str]] = field(default_factory=dict)
 
 
 @dataclass
@@ -209,10 +209,10 @@ class SearchFacets:
         entities: Entity-based facet configurations.
     """
 
-    categorical: dict[str, Any] = field(default_factory=dict)
-    numerical: dict[str, Any] = field(default_factory=dict)
-    temporal: dict[str, Any] = field(default_factory=dict)
-    entities: dict[str, Any] = field(default_factory=dict)
+    categorical: Dict[str, Any] = field(default_factory=dict)
+    numerical: Dict[str, Any] = field(default_factory=dict)
+    temporal: Dict[str, Any] = field(default_factory=dict)
+    entities: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -226,10 +226,10 @@ class PLaMoFeatures:
         vector_optimization: Vector generation optimization parameters.
     """
 
-    text_segments: list[str]
-    japanese_features: dict[str, Any]
-    embedding_hints: dict[str, Any]
-    vector_optimization: dict[str, Any]
+    text_segments: List[str]
+    japanese_features: Dict[str, Any]
+    embedding_hints: Dict[str, Any]
+    vector_optimization: Dict[str, Any]
 
 
 @dataclass
@@ -246,7 +246,7 @@ class AdvancedMetadata:
     """
 
     basic_metadata: dict
-    statistical_analysis: dict[str, Any]
+    statistical_analysis: Dict[str, Any]
     entity_classification: EntityClassification
     data_quality: DataQualityReport
     search_facets: SearchFacets
@@ -261,7 +261,7 @@ class StatisticalAnalyzer:
     and data quality assessment with Japanese language optimization.
     """
 
-    def analyze_numerical_data(self, data: list[float]) -> NumericalStats:
+    def analyze_numerical_data(self, data: List[float]) -> NumericalStats:
         """Perform comprehensive statistical analysis on numerical data.
 
         Args:
@@ -313,7 +313,7 @@ class StatisticalAnalyzer:
             kurtosis=kurtosis,
         )
 
-    def analyze_categorical_data(self, data: list[str]) -> CategoricalStats:
+    def analyze_categorical_data(self, data: List[str]) -> CategoricalStats:
         """カテゴリデータの詳細分析"""
         if not data:
             return self._empty_categorical_stats()
@@ -351,7 +351,7 @@ class StatisticalAnalyzer:
         )
 
     def _calculate_skewness(
-        self, data: list[float], mean: float, std_dev: float
+        self, data: List[float], mean: float, std_dev: float
     ) -> float:
         """歪度の計算"""
         if std_dev == 0:
@@ -367,7 +367,7 @@ class StatisticalAnalyzer:
             return 0.0
 
     def _calculate_kurtosis(
-        self, data: list[float], mean: float, std_dev: float
+        self, data: List[float], mean: float, std_dev: float
     ) -> float:
         """尖度の計算"""
         if std_dev == 0:
@@ -406,7 +406,7 @@ class StatisticalAnalyzer:
         else:
             return "unknown"
 
-    def _detect_categorical_patterns(self, data: list[str]) -> list[str]:
+    def _detect_categorical_patterns(self, data: List[str]) -> List[str]:
         """
         Detect common patterns in categorical data.
 
@@ -514,7 +514,7 @@ class JapaneseEntityClassifier:
             r"[SE|PM|PL|QA]{2,3}",  # IT職種略語
         ]
 
-    def classify_entities(self, text_data: list[str]) -> EntityClassification:
+    def classify_entities(self, text_data: List[str]) -> EntityClassification:
         """テキストデータからエンティティを分類"""
         classification = EntityClassification()
 
@@ -545,7 +545,7 @@ class JapaneseEntityClassifier:
 
         return classification
 
-    def _extract_persons(self, text: str) -> list[PersonEntity]:
+    def _extract_persons(self, text: str) -> List[PersonEntity]:
         """日本語人名の抽出"""
         persons = []
 
@@ -567,7 +567,7 @@ class JapaneseEntityClassifier:
 
         return persons
 
-    def _extract_places(self, text: str) -> list[PlaceEntity]:
+    def _extract_places(self, text: str) -> List[PlaceEntity]:
         """日本語地名の抽出"""
         places = []
 
@@ -589,7 +589,7 @@ class JapaneseEntityClassifier:
 
         return places
 
-    def _extract_organizations(self, text: str) -> list[OrganizationEntity]:
+    def _extract_organizations(self, text: str) -> List[OrganizationEntity]:
         """組織名の抽出"""
         organizations = []
 
@@ -611,7 +611,7 @@ class JapaneseEntityClassifier:
 
         return organizations
 
-    def _extract_business_terms(self, text: str) -> list[BusinessTermEntity]:
+    def _extract_business_terms(self, text: str) -> List[BusinessTermEntity]:
         """ビジネス用語の抽出"""
         business_terms = []
 
@@ -718,7 +718,7 @@ class JapaneseEntityClassifier:
 
     def _calculate_confidence_scores(
         self, classification: EntityClassification
-    ) -> dict[str, float]:
+    ) -> Dict[str, float]:
         """全体的な信頼度スコアの計算"""
         scores = {}
 
@@ -858,7 +858,7 @@ class DataQualityAssessor:
                 if isinstance(item, dict):
                     # 数値の範囲チェック
                     for key, value in item.items():
-                        if isinstance(value, int | float):
+                        if isinstance(value, Union[int, float]):
                             # 年齢などの合理的な範囲チェック
                             if "age" in key.lower() and not (0 <= value <= 150):
                                 accuracy_indicators.append(0.0)
@@ -885,10 +885,10 @@ class DataQualityAssessor:
 
         # NaNや無限大は無効
         return not (
-            isinstance(item, int | float) and (np.isnan(item) or np.isinf(item))
+            isinstance(item, Union[int, float]) and (np.isnan(item) or np.isinf(item))
         )
 
-    def _collect_detailed_issues(self, data: Any) -> dict[str, list[str]]:
+    def _collect_detailed_issues(self, data: Any) -> Dict[str, List[str]]:
         """詳細な問題点の収集"""
         issues = {"missing_data": [], "format_issues": [], "consistency_issues": []}
 
@@ -962,7 +962,7 @@ class AdvancedMetadataGenerator:
             plamo_features=plamo_features,
         )
 
-    def _perform_statistical_analysis(self, data: Any) -> dict[str, Any]:
+    def _perform_statistical_analysis(self, data: Any) -> Dict[str, Any]:
         """統計分析の実行"""
         analysis = {
             "numerical_fields": {},
@@ -980,9 +980,9 @@ class AdvancedMetadataGenerator:
                 ]
 
                 # 数値フィールドの分析
-                if field_values and isinstance(field_values[0], int | float):
+                if field_values and isinstance(field_values[0], Union[int, float]):
                     numerical_values = [
-                        v for v in field_values if isinstance(v, int | float)
+                        v for v in field_values if isinstance(v, Union[int, float])
                     ]
                     if numerical_values:
                         analysis["numerical_fields"][key] = (
@@ -1068,7 +1068,7 @@ class AdvancedMetadataGenerator:
 
         return facets
 
-    def _generate_optimal_ranges(self, min_val: float, max_val: float) -> list[dict]:
+    def _generate_optimal_ranges(self, min_val: float, max_val: float) -> List[dict]:
         """最適な数値範囲の生成"""
         range_count = min(5, max(2, int((max_val - min_val) / 10)))  # 2-5の範囲
         step = (max_val - min_val) / range_count
@@ -1132,7 +1132,7 @@ class AdvancedMetadataGenerator:
             vector_optimization=vector_optimization,
         )
 
-    def _convert_object_to_japanese_text(self, obj: dict) -> list[str]:
+    def _convert_object_to_japanese_text(self, obj: dict) -> List[str]:
         """オブジェクトを自然な日本語文に変換"""
         segments = []
 
@@ -1150,7 +1150,7 @@ class AdvancedMetadataGenerator:
 
         return segments
 
-    def _calculate_kanji_density(self, text_segments: list[str]) -> float:
+    def _calculate_kanji_density(self, text_segments: List[str]) -> float:
         """漢字密度の計算"""
         if not text_segments:
             return 0.0
@@ -1164,7 +1164,7 @@ class AdvancedMetadataGenerator:
 
         return kanji_chars / total_chars if total_chars > 0 else 0.0
 
-    def _extract_katakana_terms(self, text_segments: list[str]) -> list[str]:
+    def _extract_katakana_terms(self, text_segments: List[str]) -> List[str]:
         """カタカナ用語の抽出"""
         katakana_terms = set()
 
@@ -1218,7 +1218,7 @@ class AdvancedMetadataGenerator:
         return (total_entities * entity_types) / 100.0  # 正規化
 
     def _detect_domain(
-        self, _text_segments: list[str], entity_classification: EntityClassification
+        self, _text_segments: List[str], entity_classification: EntityClassification
     ) -> str:
         """ドメインの検出"""
         # ビジネス関連エンティティが多い場合
@@ -1235,7 +1235,7 @@ class AdvancedMetadataGenerator:
 
         return "general"
 
-    def _assess_formality(self, text_segments: list[str]) -> str:
+    def _assess_formality(self, text_segments: List[str]) -> str:
         """文体の丁寧さレベル評価"""
         formal_count = 0
         total_segments = len(text_segments)
@@ -1256,7 +1256,7 @@ class AdvancedMetadataGenerator:
         else:
             return "casual"
 
-    def _assess_technical_level(self, text_segments: list[str]) -> str:
+    def _assess_technical_level(self, text_segments: List[str]) -> str:
         """技術レベルの評価"""
         technical_terms = [
             "システム",
