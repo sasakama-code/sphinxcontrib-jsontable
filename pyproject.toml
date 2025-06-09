@@ -120,6 +120,14 @@ ignore_errors = true
 module = "sphinxcontrib.*"
 disallow_untyped_defs = false
 warn_return_any = false
+ignore_errors = false
+
+# RAG modules - gradual typing approach
+[[tool.mypy.overrides]]
+module = "sphinxcontrib.jsontable.rag.*"
+disallow_untyped_defs = false
+ignore_errors = true
+warn_return_any = false
 
 # ===== PYTEST CONFIGURATION =====
 [tool.pytest.ini_options]
@@ -214,5 +222,7 @@ skip = true
 
 [dependency-groups]
 dev = [
+    "mypy>=1.16.0",
     "pytest-asyncio>=1.0.0",
+    "types-docutils>=0.21.0.20250604",
 ]
