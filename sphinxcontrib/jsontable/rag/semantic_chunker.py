@@ -20,7 +20,7 @@ import json
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Union
+from typing import Any
 
 from .metadata_extractor import BasicMetadata, JsonData
 
@@ -430,7 +430,7 @@ class SemanticChunker:
             if self.japanese_patterns["numeric_with_unit"].match(value):
                 return value  # 単位付き数値はそのまま
             return value.strip()
-        elif isinstance(value, (int, float)):
+        elif isinstance(value, int | float):
             # 数値の場合、意味的なコンテキストを追加
             semantic_type = metadata.entity_mapping.get(key, "")
             if "monetary" in semantic_type:
@@ -498,7 +498,7 @@ class SemanticChunker:
                     importance += 0.3
 
                 # 金額・数値データは重要
-                if "monetary" in semantic_type and isinstance(value, (int, float)):
+                if "monetary" in semantic_type and isinstance(value, int | float):
                     importance += 0.2
 
         return min(importance, 2.0)  # 最大重み2.0
