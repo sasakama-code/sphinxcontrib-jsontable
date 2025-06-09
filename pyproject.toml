@@ -132,7 +132,6 @@ addopts = [
     "--cov-report=html",
     "--cov-report=xml",
     "--cov-fail-under=80",
-    "--benchmark-skip",              # デフォルトではbenchmarkをスキップ
     "--tb=short",                    # 短いトレースバック
 ]
 testpaths = ["tests"]
