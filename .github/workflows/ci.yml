@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  # Security: Explicit minimal permissions following principle of least privilege
+  contents: read          # Repository access for checkout
+  actions: read           # Cache action access
+  checks: write           # Test result reporting
+  pull-requests: write    # PR comment posting
+
 env:
   # Use consistent Python version across jobs
   PYTHON_VERSION: '3.11'
@@ -59,17 +66,19 @@ jobs:
     - name: Run mypy (type checking)
       run: |
         echo "Running mypy type checking..."
-        mypy . || echo "Mypy check completed with warnings (allowed during transition)"
-      # Allow mypy to fail for now as we're transitioning to strict typing
-      continue-on-error: true
+        mypy sphinxcontrib/jsontable/
 
-    - name: Security check with safety
+    - name: Enhanced security dependency audit
       run: |
-        echo "Running security check..."
-        pip install safety
-        safety check --json || echo "Safety check completed with warnings (allowed during transition)"
-      # Allow safety to fail for now to avoid blocking on dependency issues
-      continue-on-error: true
+        echo "Running enhanced dependency security audit..."
+        pip install safety pip-audit
+        echo "Running pip-audit (PyPA official tool)..."
+        pip-audit --format=json --output=pip-audit-report.json
+        pip-audit --desc
+        echo "Running safety check..."
+        safety check --json --output=safety-report.json
+        safety check --short-report
+        echo "Dependency audit completed successfully"
 
   # Build and Package Test
   build:
@@ -116,6 +125,23 @@ jobs:
         python -c "import sphinxcontrib.jsontable; print('Package installed successfully')"
         python -c "from sphinxcontrib.jsontable import __version__; print(f'Version: {__version__}')"
 
+    - name: Generate SBOM (Software Bill of Materials)
+      run: |
+        echo "Generating Software Bill of Materials..."
+        pip install cyclonedx-bom
+        cyclonedx-py --format json --output-file sbom.json
+        cyclonedx-py --format xml --output-file sbom.xml
+        echo "SBOM generated successfully"
+
+    - name: Upload SBOM artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom-reports
+        path: |
+          sbom.json
+          sbom.xml
+        retention-days: 90
+
   # Test Suite
   test:
     needs: [quality, build]
@@ -125,7 +151,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
 
     # CI環境変数を追加
     env:
@@ -168,7 +194,7 @@ jobs:
       uses: codecov/codecov-action@v5
       with:
         file: ./coverage.xml
-        fail_ci_if_error: false
+        fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
         verbose: true
 
