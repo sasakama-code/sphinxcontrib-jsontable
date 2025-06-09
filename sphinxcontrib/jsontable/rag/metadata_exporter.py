@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from .advanced_metadata import AdvancedMetadata
 from .search_facets import GeneratedFacets
@@ -42,9 +42,9 @@ class MetadataExporter:
         self,
         advanced_metadata: AdvancedMetadata,
         generated_facets: GeneratedFacets,
-        formats: list[str],
-        custom_config: dict | None = None,
-    ) -> dict[str, Any]:
+        formats: List[str],
+        custom_config: Optional[Dict] = None,
+    ) -> Dict[str, Any]:
         """Export metadata in specified formats.
 
         Args:
@@ -646,7 +646,7 @@ class MetadataExporter:
         else:
             return f"{size_bytes / (1024 * 1024):.1f} MB"
 
-    def _extract_keywords(self, metadata: AdvancedMetadata) -> list[str]:
+    def _extract_keywords(self, metadata: AdvancedMetadata) -> List[str]:
         """キーワードの抽出"""
         keywords = ["JSON", "table", "RAG", "日本語"]
 
@@ -666,7 +666,7 @@ class MetadataExporter:
 
         return list(set(keywords))
 
-    def _extract_variables(self, metadata: AdvancedMetadata) -> list[dict]:
+    def _extract_variables(self, metadata: AdvancedMetadata) -> List[dict]:
         """変数の抽出"""
         variables = []
 
@@ -745,7 +745,7 @@ class MetadataExporter:
 
         return boost_config
 
-    def _get_highlightable_fields(self, metadata: AdvancedMetadata) -> list[str]:
+    def _get_highlightable_fields(self, metadata: AdvancedMetadata) -> List[str]:
         """ハイライト対象フィールドの取得"""
         fields = []
 
@@ -793,7 +793,7 @@ class MetadataExporter:
 
         return aggregations
 
-    def _get_suggestion_fields(self, metadata: AdvancedMetadata) -> list[str]:
+    def _get_suggestion_fields(self, metadata: AdvancedMetadata) -> List[str]:
         """サジェスト対象フィールドの取得"""
         suggestion_fields = []
 
@@ -807,7 +807,7 @@ class MetadataExporter:
 
         return suggestion_fields
 
-    def _organize_facets_into_groups(self, facets: GeneratedFacets) -> list[dict]:
+    def _organize_facets_into_groups(self, facets: GeneratedFacets) -> List[dict]:
         """ファセットをグループ化"""
         groups = []
 
@@ -853,7 +853,7 @@ class MetadataExporter:
 
         return groups
 
-    def _apply_custom_transformations(self, data: dict, transformations: list) -> dict:
+    def _apply_custom_transformations(self, data: dict, transformations: List) -> dict:
         """カスタム変換の適用"""
         result = data.copy()
 
