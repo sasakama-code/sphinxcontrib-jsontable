@@ -129,8 +129,8 @@ jobs:
       run: |
         echo "Generating Software Bill of Materials..."
         pip install cyclonedx-bom
-        cyclonedx-py --format json --output-file sbom.json
-        cyclonedx-py --format xml --output-file sbom.xml
+        cyclonedx-py environment --output-format json --outfile sbom.json
+        cyclonedx-py environment --output-format xml --outfile sbom.xml
         echo "SBOM generated successfully"
 
     - name: Upload SBOM artifacts
