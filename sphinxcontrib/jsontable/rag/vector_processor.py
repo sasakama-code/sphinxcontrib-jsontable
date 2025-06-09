@@ -15,18 +15,22 @@ Created: 2025-06-07
 Author: Claude Code Assistant
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import re
 import time
-
-# PLaMo-Embedding-1B related imports (to be adjusted during implementation)
 from contextlib import suppress
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
+if TYPE_CHECKING:
+    # Type-only imports for better mypy compliance
+    pass
 
 with suppress(ImportError):
     # To be updated when actual PLaMo library is integrated
@@ -88,7 +92,7 @@ class JapaneseTextNormalizer:
     - Whitespace standardization
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Full-width to half-width character conversion map
         self.fullwidth_to_halfwidth = str.maketrans(
             "０１２３４５６７８９ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ",  # noqa: RUF001
@@ -96,7 +100,7 @@ class JapaneseTextNormalizer:
         )
 
         # Business term normalization patterns
-        self.business_normalization_patterns = [
+        self.business_normalization_patterns: list[tuple[str, str]] = [
             (r"株式会社|㈱|\(株\)", "株式会社"),
             (r"有限会社|㈲|\(有\)", "有限会社"),
             (r"合同会社|㈿|\(合\)", "合同会社"),
@@ -140,9 +144,9 @@ class BusinessTermEnhancer:
     search relevance and understanding for business documents.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # ビジネス用語カテゴリ
-        self.business_categories = {
+        self.business_categories: dict[str, dict[str, Any]] = {
             "organization": {
                 "patterns": [r"株式会社.*", r"[^\s]*部", r"[^\s]*課", r"[^\s]*チーム"],
                 "context_marker": "[組織]",
@@ -205,7 +209,7 @@ class BusinessTermEnhancer:
             Dictionary containing business terms, categories, and boost scores.
         """
 
-        features = {"business_terms": [], "categories": {}, "boost_score": 1.0}
+        features: dict[str, Any] = {"business_terms": [], "categories": {}, "boost_score": 1.0}
 
         total_boost = 1.0
 
@@ -283,7 +287,7 @@ class PLaMoVectorProcessor:
     pipeline with Japanese text optimization and PLaMo model integration.
     """
 
-    def __init__(self, config: dict[str, Any] | None = None):
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         """Initialize PLaMo vector processor.
 
         Args:
@@ -489,8 +493,9 @@ class PLaMoVectorProcessor:
 
         vector_chunks = []
 
+        # Fix: Remove strict=False from zip - mypy compatibility
         for i, (enhanced_data, embedding) in enumerate(
-            zip(batch, embeddings, strict=False)
+            zip(batch, embeddings)
         ):
             chunk = enhanced_data["original_chunk"]
 
@@ -632,7 +637,7 @@ class PLaMoVectorProcessor:
 
     def _update_processing_stats(
         self, total: int, successful: int, processing_time: float
-    ):
+    ) -> None:
         """Update processing statistics.
 
         Args:
@@ -679,7 +684,7 @@ class PLaMoVectorProcessor:
 
         return stats
 
-    def save_processing_results(self, result: VectorProcessingResult, output_path: str):
+    def save_processing_results(self, result: VectorProcessingResult, output_path: str) -> None:
         """Save vector processing results to disk.
 
         Args:
