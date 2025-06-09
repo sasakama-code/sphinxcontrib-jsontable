@@ -45,6 +45,8 @@ class TestEnhancedDirectiveBasicCoverage:
                 content="Test chunk content",
                 chunk_type="test",
                 metadata={"test": "data"},
+                search_weight=1.0,
+                embedding_hint="test content",
             )
         ]
 
@@ -432,12 +434,16 @@ class TestEnhancedDirectiveIntegration:
                 content="Product A is an electronics item priced at 1000",
                 chunk_type="product_info",
                 metadata={"source_row": 0},
+                search_weight=1.0,
+                embedding_hint="product information",
             ),
             SemanticChunk(
                 chunk_id="chunk_2",
                 content="Product B is an electronics item priced at 2000",
                 chunk_type="product_info",
                 metadata={"source_row": 1},
+                search_weight=1.0,
+                embedding_hint="product information",
             ),
         ]
 

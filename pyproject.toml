@@ -150,6 +150,10 @@ filterwarnings = [
     "ignore::DeprecationWarning",
 ]
 
+# pytest-asyncio configuration
+[tool.pytest_asyncio]
+asyncio_mode = "auto"
+
 # ===== COVERAGE CONFIGURATION =====
 [tool.coverage.run]
 source = ["sphinxcontrib.jsontable"]
@@ -206,3 +210,8 @@ sort = "mean"
 autosave = false
 # Skip benchmarks by default (use --benchmark-only to run)
 skip = true
+
+[dependency-groups]
+dev = [
+    "pytest-asyncio>=1.0.0",
+]

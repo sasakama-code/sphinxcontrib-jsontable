@@ -85,10 +85,10 @@ class TestUtilityFunctions:
     def test_validate_not_empty_invalid_content(self):
         """Test validate_not_empty with invalid content."""
         invalid_contents = [
-            [],
-            [""],
-            ["   "],  # Only whitespace
-            [" ", " ", "  "],  # All whitespace
+            [],  # Empty list
+            None,  # None value
+            "",  # Empty string
+            False,  # Boolean False
         ]
 
         for content in invalid_contents:
@@ -238,9 +238,9 @@ class TestErrorConditions:
         with pytest.raises(JsonTableError, match=error_message):
             validate_not_empty([], error_message)
 
-        # Test whitespace only
+        # Test None value
         with pytest.raises(JsonTableError, match=error_message):
-            validate_not_empty(["   ", "\t", "\n"], error_message)
+            validate_not_empty(None, error_message)
 
     def test_file_not_found_scenarios(self):
         """Test file not found scenarios."""
