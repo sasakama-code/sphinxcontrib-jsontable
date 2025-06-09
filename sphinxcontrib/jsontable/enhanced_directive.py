@@ -19,11 +19,10 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from typing import cast
 from sphinx.util import logging
 
 from .directives import JsonTableDirective
@@ -32,6 +31,9 @@ from .rag.metadata_exporter import MetadataExporter
 from .rag.metadata_extractor import BasicMetadata, RAGMetadataExtractor
 from .rag.search_facets import GeneratedFacets, SearchFacetGenerator
 from .rag.semantic_chunker import SemanticChunk, SemanticChunker
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +74,7 @@ class EnhancedJsonTableDirective(JsonTableDirective):
     """
 
     # Extend base options with RAG-specific options
-    option_spec: ClassVar[dict] = {
+    option_spec: ClassVar[dict[str, Any]] = {
         **JsonTableDirective.option_spec,
         "rag-enabled": directives.flag,
         "semantic-chunks": directives.flag,
@@ -83,7 +85,7 @@ class EnhancedJsonTableDirective(JsonTableDirective):
         "facet-generation": directives.flag,
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize enhanced directive with conditional RAG component setup.
 
         Args:
@@ -93,11 +95,11 @@ class EnhancedJsonTableDirective(JsonTableDirective):
         super().__init__(*args, **kwargs)
 
         # Initialize RAG processing components
-        self.metadata_extractor = RAGMetadataExtractor()
-        self.semantic_chunker = None
-        self.advanced_generator = None
-        self.facet_generator = None
-        self.metadata_exporter = None
+        self.metadata_extractor: RAGMetadataExtractor = RAGMetadataExtractor()
+        self.semantic_chunker: SemanticChunker | None = None
+        self.advanced_generator: AdvancedMetadataGenerator | None = None
+        self.facet_generator: SearchFacetGenerator | None = None
+        self.metadata_exporter: MetadataExporter | None = None
 
         # Initialize components only when RAG is enabled
         if "rag-enabled" in self.options:
@@ -204,7 +206,7 @@ class EnhancedJsonTableDirective(JsonTableDirective):
         basic_metadata = self.metadata_extractor.extract(json_data, options_dict)
 
         # Phase 1: Semantic chunking
-        semantic_chunks = []
+        semantic_chunks: list[SemanticChunk] = []
         if self.semantic_chunker and "semantic-chunks" in self.options:
             semantic_chunks = self.semantic_chunker.process(json_data, basic_metadata)
 
@@ -251,7 +253,6 @@ class EnhancedJsonTableDirective(JsonTableDirective):
             table_node: Docutils table node to annotate with metadata.
             rag_result: Complete RAG processing results to attach.
         """
-        # Add RAG metadata as custom attributes
         # Add RAG metadata as custom attributes using cast for type safety
         element_node = cast(nodes.Element, table_node)
         if not hasattr(element_node, "attributes"):
@@ -268,28 +269,28 @@ class EnhancedJsonTableDirective(JsonTableDirective):
 
         # Semantic chunk count
         if rag_result.semantic_chunks:
-            table_node.attributes["rag_chunk_count"] = len(rag_result.semantic_chunks)
+            element_node.attributes["rag_chunk_count"] = len(rag_result.semantic_chunks)
 
         # Advanced metadata availability
         if rag_result.advanced_metadata:
-            table_node.attributes["rag_advanced_enabled"] = "true"
+            element_node.attributes["rag_advanced_enabled"] = "true"
 
             # Data quality score
             quality = rag_result.advanced_metadata.data_quality
-            table_node.attributes["rag_quality_score"] = f"{quality.overall_score:.2f}"
+            element_node.attributes["rag_quality_score"] = f"{quality.overall_score:.2f}"
 
         # Search facets availability
         if rag_result.generated_facets:
             categorical_count = len(rag_result.generated_facets.categorical_facets)
             numerical_count = len(rag_result.generated_facets.numerical_facets)
-            table_node.attributes["rag_facet_count"] = (
+            element_node.attributes["rag_facet_count"] = (
                 f"{categorical_count + numerical_count}"
             )
 
         # Export data availability
         if rag_result.export_data:
             export_formats = list(rag_result.export_data.keys())
-            table_node.attributes["rag_export_formats"] = ",".join(export_formats)
+            element_node.attributes["rag_export_formats"] = ",".join(export_formats)
 
     def _parse_export_formats(self) -> list[str]:
         """
@@ -359,7 +360,7 @@ class EnhancedJsonTableDirective(JsonTableDirective):
         logger.info("=== End Debug Information ===")
 
 
-def setup(app):
+def setup(app: Sphinx) -> dict[str, Any]:
     """
     Setup function for enhanced JSON table Sphinx extension.
 
