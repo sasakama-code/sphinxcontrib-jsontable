@@ -14,11 +14,13 @@ Created: 2025-06-07
 Author: Claude Code Assistant
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Union
 
 from .metadata_extractor import BasicMetadata, JsonData
 
@@ -53,7 +55,7 @@ class SemanticChunker:
     generating chunks optimized for search and embedding processing.
     """
 
-    def __init__(self, chunk_strategy: str = "adaptive", max_chunk_size: int = 1000):
+    def __init__(self, chunk_strategy: str = "adaptive", max_chunk_size: int = 1000) -> None:
         """Initialize semantic chunker with strategy and size limits.
 
         Args:
@@ -64,7 +66,7 @@ class SemanticChunker:
         self.max_chunk_size = max_chunk_size
         self.japanese_patterns = self._init_japanese_patterns()
 
-    def _init_japanese_patterns(self) -> dict[str, re.Pattern]:
+    def _init_japanese_patterns(self) -> dict[str, re.Pattern[str]]:
         """Initialize Japanese text processing patterns.
 
         Returns:
@@ -428,7 +430,7 @@ class SemanticChunker:
             if self.japanese_patterns["numeric_with_unit"].match(value):
                 return value  # 単位付き数値はそのまま
             return value.strip()
-        elif isinstance(value, int | float):
+        elif isinstance(value, (int, float)):
             # 数値の場合、意味的なコンテキストを追加
             semantic_type = metadata.entity_mapping.get(key, "")
             if "monetary" in semantic_type:
@@ -496,7 +498,7 @@ class SemanticChunker:
                     importance += 0.3
 
                 # 金額・数値データは重要
-                if "monetary" in semantic_type and isinstance(value, int | float):
+                if "monetary" in semantic_type and isinstance(value, (int, float)):
                     importance += 0.2
 
         return min(importance, 2.0)  # 最大重み2.0
@@ -581,7 +583,7 @@ class SemanticChunker:
         self, data: list[dict[str, Any]], category_field: str
     ) -> dict[str, list[dict[str, Any]]]:
         """指定フィールドでデータをグループ化"""
-        groups = {}
+        groups: dict[str, list[dict[str, Any]]] = {}
 
         for item in data:
             if isinstance(item, dict) and category_field in item:
