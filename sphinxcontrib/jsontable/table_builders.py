@@ -13,8 +13,9 @@ Features:
 
 from __future__ import annotations
 
-from docutils import nodes
 from typing import cast
+
+from docutils import nodes
 
 from .table_converters import TableData
 
