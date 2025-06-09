@@ -493,9 +493,9 @@ class PLaMoVectorProcessor:
 
         vector_chunks = []
 
-        # Fix: Remove strict=False from zip - mypy compatibility
+        # Fix: Add strict=True parameter to zip() for B905 compliance
         for i, (enhanced_data, embedding) in enumerate(
-            zip(batch, embeddings)
+            zip(batch, embeddings, strict=True)
         ):
             chunk = enhanced_data["original_chunk"]
 
