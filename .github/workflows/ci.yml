@@ -46,8 +46,8 @@ jobs:
 
     - name: Verify installation
       run: |
-        python -c "import sphinxcontrib.jsontable; print('Package installed successfully')"
-        python -c "from sphinxcontrib.jsontable import __version__; print(f'Version: {__version__}')"
+        uv run python -c "import sphinxcontrib.jsontable; print('Package installed successfully')"
+        uv run python -c "from sphinxcontrib.jsontable import __version__; print(f'Version: {__version__}')"
 
     - name: Run ruff (linting)
       run: |
