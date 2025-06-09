@@ -86,7 +86,7 @@ class MetadataExporter:
                         advanced_metadata, custom_config or {}
                     )
             except Exception as e:
-                exports[f"{format_type}_error"] = str(e)
+                exports[f"{format_type}_error"] = {"error": str(e)}
 
         return exports
 
@@ -185,7 +185,11 @@ class MetadataExporter:
         }
 
         # フィールドマッピングの生成
-        properties = mapping["mappings"]["properties"]
+        mappings_dict = mapping.get("mappings", {})
+        if isinstance(mappings_dict, dict):
+            properties = mappings_dict.get("properties", {})
+        else:
+            properties = {}
 
         # 統計分析フィールドのマッピング
         statistical_analysis = metadata.statistical_analysis
@@ -474,13 +478,13 @@ class MetadataExporter:
         }
 
         if "all" in include_sections or "basic" in include_sections:
-            custom_output["basic_metadata"] = metadata.basic_metadata
+            custom_output["basic_metadata"] = metadata.basic_metadata  # type: ignore[assignment]
 
         if "all" in include_sections or "statistical" in include_sections:
-            custom_output["statistical_analysis"] = metadata.statistical_analysis
+            custom_output["statistical_analysis"] = metadata.statistical_analysis  # type: ignore[assignment]
 
         if "all" in include_sections or "entities" in include_sections:
-            custom_output["entity_classification"] = {
+            custom_output["entity_classification"] = {  # type: ignore[assignment]
                 "persons": [asdict(p) for p in metadata.entity_classification.persons],
                 "places": [asdict(p) for p in metadata.entity_classification.places],
                 "organizations": [
@@ -492,10 +496,10 @@ class MetadataExporter:
             }
 
         if "all" in include_sections or "quality" in include_sections:
-            custom_output["data_quality"] = asdict(metadata.data_quality)
+            custom_output["data_quality"] = asdict(metadata.data_quality)  # type: ignore[assignment]
 
         if "all" in include_sections or "plamo" in include_sections:
-            custom_output["plamo_features"] = asdict(metadata.plamo_features)
+            custom_output["plamo_features"] = asdict(metadata.plamo_features)  # type: ignore[assignment]
 
         # カスタム変換の適用
         if "transformations" in custom_format:
@@ -551,7 +555,7 @@ class MetadataExporter:
 
     def _format_statistical_analysis_for_jsonld(self, analysis: dict) -> dict:
         """統計分析をJSON-LD形式でフォーマット"""
-        formatted = {"@type": "rag:StatisticalAnalysis"}
+        formatted: dict[str, Any] = {"@type": "rag:StatisticalAnalysis"}
 
         if "numerical_fields" in analysis:
             formatted["numericalFields"] = {}
@@ -774,21 +778,21 @@ class MetadataExporter:
             }
 
         # 数値範囲集計
-        for facet in facets.numerical_facets:
-            aggregations[f"{facet.field_name}_range"] = {
+        for numerical_facet in facets.numerical_facets:
+            aggregations[f"{numerical_facet.field_name}_range"] = {
                 "range": {
-                    "field": facet.field_name,
+                    "field": numerical_facet.field_name,
                     "ranges": [
                         {"from": r["from"], "to": r["to"], "key": r["label"]}
-                        for r in facet.ranges
+                        for r in numerical_facet.ranges
                     ],
                 }
             }
 
         # 統計集計
-        for facet in facets.numerical_facets:
-            aggregations[f"{facet.field_name}_stats"] = {
-                "stats": {"field": facet.field_name}
+        for numerical_facet in facets.numerical_facets:
+            aggregations[f"{numerical_facet.field_name}_stats"] = {
+                "stats": {"field": numerical_facet.field_name}
             }
 
         return aggregations

@@ -213,8 +213,10 @@ class EnhancedJsonTableDirective(JsonTableDirective):
         # Phase 2: Advanced metadata generation
         advanced_metadata = None
         if self.advanced_generator and "advanced-metadata" in self.options:
+            from dataclasses import asdict
+
             advanced_metadata = self.advanced_generator.generate_advanced_metadata(
-                json_data, basic_metadata
+                json_data, asdict(basic_metadata)
             )
 
         # Phase 2: Search facet generation

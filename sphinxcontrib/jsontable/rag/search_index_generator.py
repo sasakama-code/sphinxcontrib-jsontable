@@ -447,7 +447,7 @@ class SearchIndexGenerator:
 
         import re
 
-        keyword_index = {}
+        keyword_index: dict[str, list[int]] = {}
 
         for i, chunk in enumerate(vector_chunks):
             content = chunk.original_chunk.content
@@ -475,7 +475,7 @@ class SearchIndexGenerator:
 
         import re
 
-        business_term_index = {}
+        business_term_index: dict[str, list[int]] = {}
 
         # ビジネス用語パターン
         business_patterns = [
@@ -515,7 +515,7 @@ class SearchIndexGenerator:
     ) -> dict[str, list[int]]:
         """セマンティックマッピング構築"""
 
-        semantic_mappings = {}
+        semantic_mappings: dict[str, Any] = {}
 
         # カテゴリ別セマンティックマッピング
         semantic_categories = {
@@ -570,7 +570,7 @@ class SearchIndexGenerator:
     ) -> dict[str, dict[str, list[int]]]:
         """カテゴリファセット構築"""
 
-        categorical_facets = {}
+        categorical_facets: dict[str, dict[str, Any]] = {}
 
         # データ型ファセット
         categorical_facets["data_type"] = {}
@@ -610,7 +610,7 @@ class SearchIndexGenerator:
 
         import re
 
-        numerical_facets = {}
+        numerical_facets: dict[str, dict[str, Any]] = {}
 
         # 金額範囲ファセット
         numerical_facets["amount_range"] = {
@@ -647,7 +647,7 @@ class SearchIndexGenerator:
 
         import re
 
-        temporal_facets = {}
+        temporal_facets: dict[str, dict[str, Any]] = {}
 
         # 年度ファセット
         temporal_facets["fiscal_year"] = {}
@@ -692,7 +692,7 @@ class SearchIndexGenerator:
 
         import re
 
-        entity_facets = {}
+        entity_facets: dict[str, dict[str, Any]] = {}
 
         # 組織エンティティファセット
         entity_facets["organization"] = {}
@@ -816,9 +816,12 @@ class SearchIndexGenerator:
             embeddings = vector_index.fallback_embeddings
 
             # コサイン類似度計算
-            similarities = np.dot(embeddings, query_embedding) / (
-                np.linalg.norm(embeddings, axis=1) * np.linalg.norm(query_embedding)
-            )
+            if embeddings is not None and query_embedding is not None:
+                similarities = np.dot(embeddings, query_embedding) / (
+                    np.linalg.norm(embeddings, axis=1) * np.linalg.norm(query_embedding)
+                )
+            else:
+                similarities = np.array([])
 
             # 上位k件取得
             top_indices = np.argsort(similarities)[::-1][:k]

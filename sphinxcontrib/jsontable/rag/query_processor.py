@@ -456,7 +456,7 @@ class HybridSearchEngine:
         hybrid_config = self.search_index.hybrid_index
 
         # 各検索結果の統合スコア計算
-        unified_results = {}
+        unified_results: dict[str, dict[str, Any]] = {}
 
         # ベクトル検索結果
         for i, result in enumerate(vector_results):
@@ -485,7 +485,10 @@ class HybridSearchEngine:
             )
 
             if content_key in unified_results:
-                unified_results[content_key]["total_score"] += weighted_score
+                current_score = unified_results[content_key]["total_score"]
+                unified_results[content_key]["total_score"] = (
+                    float(current_score) + weighted_score
+                )
                 unified_results[content_key]["semantic_score"] = weighted_score
             else:
                 unified_results[content_key] = {
@@ -506,7 +509,10 @@ class HybridSearchEngine:
             )
 
             if content_key in unified_results:
-                unified_results[content_key]["total_score"] += weighted_score
+                current_score = unified_results[content_key]["total_score"]
+                unified_results[content_key]["total_score"] = (
+                    float(current_score) + weighted_score
+                )
                 unified_results[content_key]["faceted_score"] = weighted_score
             else:
                 unified_results[content_key] = {
@@ -519,14 +525,21 @@ class HybridSearchEngine:
 
         # 統合スコアでソート
         sorted_results = sorted(
-            unified_results.values(), key=lambda x: x["total_score"], reverse=True
+            unified_results.values(),
+            key=lambda x: float(x["total_score"]) if isinstance(x["total_score"], int | float | str) else 0.0,
+            reverse=True,
         )
 
         # SearchResultオブジェクトを更新して返す
         final_results = []
         for item in sorted_results:
-            result = item["result"]
-            result.relevance_score = item["total_score"]
+            result_obj = item["result"]
+            if hasattr(result_obj, "relevance_score"):
+                score_value = item["total_score"]
+                result_obj.relevance_score = float(score_value) if isinstance(score_value, int | float | str) else 0.0
+            result = result_obj
+            if not isinstance(result, SearchResult):
+                continue
             result.search_method = "hybrid"
             result.metadata.update(
                 {

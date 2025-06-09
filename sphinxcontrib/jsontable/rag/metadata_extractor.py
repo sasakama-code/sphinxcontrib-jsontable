@@ -304,8 +304,8 @@ class RAGMetadataExtractor:
         if isinstance(data_list, list) and len(data_list) > 1:
             unique_values = self._get_unique_values(key, data_list)
             if len(unique_values) <= 10 and len(unique_values) > 1:
-                property_info["enum"] = unique_values
-                property_info["x-enum-count"] = len(unique_values)
+                property_info["enum"] = list(unique_values)  # type: ignore[assignment]
+                property_info["x-enum-count"] = str(len(unique_values))
 
         return property_info
 
@@ -617,7 +617,7 @@ class RAGMetadataExtractor:
                 stats["column_count"] = len(data[0].keys())
 
                 # データ型の分布
-                type_counts = Counter()
+                type_counts: Counter[str] = Counter()
                 completeness = {}
 
                 for key in data[0]:

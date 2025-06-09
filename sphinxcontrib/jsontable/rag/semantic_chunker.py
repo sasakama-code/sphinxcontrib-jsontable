@@ -564,7 +564,7 @@ class SemanticChunker:
         self, data: list[dict[str, Any]], metadata: BasicMetadata
     ) -> list[str]:
         """カテゴリカルフィールドを特定"""
-        categorical_fields = []
+        categorical_fields: list[str] = []
 
         if not data:
             return categorical_fields

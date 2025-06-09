@@ -143,4 +143,4 @@ class TableBuilder:
 
             tbody.append(row)
 
-        tgroup.append(tbody)
+        cast(nodes.Element, tgroup).append(tbody)

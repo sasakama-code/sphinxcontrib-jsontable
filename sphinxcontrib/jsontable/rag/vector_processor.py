@@ -191,11 +191,11 @@ class BusinessTermEnhancer:
         for _category, config in self.business_categories.items():
             context_marker = config["context_marker"]
             for pattern in config["patterns"]:
-                enhanced_text = re.sub(
-                    pattern,
-                    lambda m, marker=context_marker: f"{marker}{m.group(0)}",
-                    enhanced_text,
-                )
+
+                def _replacer(m: re.Match[str], marker: str = context_marker) -> str:
+                    return f"{marker}{m.group(0)}"
+
+                enhanced_text = re.sub(pattern, _replacer, enhanced_text)
 
         return enhanced_text
 
@@ -420,19 +420,22 @@ class PLaMoVectorProcessor:
             text = chunk.content
 
             # 1. 日本語正規化
-            normalizer = self.preprocessing_pipeline[0]
-            text = normalizer.normalize(text)
+            if hasattr(self.preprocessing_pipeline[0], "normalize"):
+                text = self.preprocessing_pipeline[0].normalize(text)
 
             # 2. ビジネス用語強化
-            enhancer = self.preprocessing_pipeline[1]
-            text = enhancer.enhance(text)
-            enhanced_data["business_features"] = enhancer.extract_business_features(
-                text
-            )
+            if hasattr(self.preprocessing_pipeline[1], "enhance"):
+                text = self.preprocessing_pipeline[1].enhance(text)
+                if hasattr(self.preprocessing_pipeline[1], "extract_business_features"):
+                    enhanced_data["business_features"] = self.preprocessing_pipeline[
+                        1
+                    ].extract_business_features(text)
 
             # 3. 文脈保持
-            preserver = self.preprocessing_pipeline[2]
-            text = preserver.preserve_hierarchical_context(text, chunk.metadata)
+            if hasattr(self.preprocessing_pipeline[2], "preserve_hierarchical_context"):
+                text = self.preprocessing_pipeline[2].preserve_hierarchical_context(
+                    text, chunk.metadata
+                )
             enhanced_data["context_preserved"] = True
 
             enhanced_data["enhanced_text"] = text
@@ -719,7 +722,7 @@ class PLaMoVectorProcessor:
             )
 
         # 埋め込みベクトル保存
-        np.savez_compressed(embeddings_path, **embeddings_dict)
+        np.savez_compressed(str(embeddings_path), **embeddings_dict)  # type: ignore[arg-type]
 
         # メタデータ保存
         metadata_path = Path(output_path) / "metadata.json"
@@ -767,6 +770,7 @@ class PLaMoVectorProcessor:
                 content=metadata["original_content"],
                 chunk_type="loaded",
                 metadata={},
+                embedding_hint="plamo",
                 search_weight=1.0,
             )
 

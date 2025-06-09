@@ -306,7 +306,7 @@ class StatisticalAnalyzer:
             std_dev=std_dev,
             min_value=min_val,
             max_value=max_val,
-            quartiles=(q1, q2, q3),
+            quartiles=(float(q1), float(q2), float(q3)),
             outliers=outliers,
             distribution_type=distribution_type,
             skewness=skewness,
@@ -813,7 +813,7 @@ class DataQualityAssessor:
                         consistency_score -= 0.2
 
             # フォーマットの一貫性チェック（簡単な例）
-            formats = {}
+            formats: dict[str, int] = {}
             for item in data:
                 if isinstance(item, str):
                     # 日付フォーマットのチェック
@@ -890,7 +890,11 @@ class DataQualityAssessor:
 
     def _collect_detailed_issues(self, data: Any) -> Dict[str, List[str]]:
         """詳細な問題点の収集"""
-        issues = {"missing_data": [], "format_issues": [], "consistency_issues": []}
+        issues: dict[str, list[str]] = {
+            "missing_data": [],
+            "format_issues": [],
+            "consistency_issues": [],
+        }
 
         if isinstance(data, list):
             for i, item in enumerate(data):
@@ -964,7 +968,7 @@ class AdvancedMetadataGenerator:
 
     def _perform_statistical_analysis(self, data: Any) -> Dict[str, Any]:
         """統計分析の実行"""
-        analysis = {
+        analysis: dict[str, Any] = {
             "numerical_fields": {},
             "categorical_fields": {},
             "temporal_fields": {},

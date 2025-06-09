@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -553,7 +553,7 @@ class TableBuilder:
         thead = nodes.thead()
         header_row = self._create_row(header_data)
         thead += header_row
-        table[0] += thead
+        cast(nodes.Element, table[0]).extend(thead)
 
     def _add_body(
         self,
@@ -575,7 +575,7 @@ class TableBuilder:
             padded_row = row_data + [""] * (max_cols - len(row_data))
             tbody += self._create_row(padded_row)
 
-        table[0] += tbody
+        cast(nodes.Element, table[0]).extend(tbody)
 
     def _create_row(self, row_data: list[str]) -> nodes.row:
         """
@@ -673,7 +673,7 @@ class JsonTableDirective(SphinxDirective):
                 Path(self.env.srcdir),
             )
         elif self.content:
-            return self.loader.parse_inline(self.content)
+            return self.loader.parse_inline(list(self.content))
         else:
             raise JsonTableError(NO_JSON_SOURCE_ERROR)
 
