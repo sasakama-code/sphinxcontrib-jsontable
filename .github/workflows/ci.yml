@@ -42,12 +42,18 @@ jobs:
     - name: Install dependencies with UV
       run: |
         uv sync --dev
+        # 明示的に品質チェックツールをインストール
+        uv add --dev ruff>=0.11.11
+        uv add --dev mypy>=1.14.1
         uv add --dev types-docutils
 
     - name: Verify installation
       run: |
         uv run python -c "import sphinxcontrib.jsontable; print('Package installed successfully')"
         uv run python -c "from sphinxcontrib.jsontable import __version__; print(f'Version: {__version__}')"
+        # インストールされたツールの確認
+        uv run ruff --version
+        uv run mypy --version
 
     - name: Run ruff (linting)
       run: |
