@@ -70,6 +70,8 @@ extensions = ['sphinxcontrib.jsontable']
 
 コントリビューションを歓迎します！開発セットアップとガイドラインについては [CONTRIBUTING.md](CONTRIBUTING.md) をご覧ください。
 
-## ライセンス
+## ライセンス・サードパーティコンポーネント
 
-MITライセンス。詳細は [LICENSE](LICENSE) をご覧ください。
+本プロジェクトはMITライセンスの下で公開されています。詳細は [LICENSE](LICENSE) をご覧ください。
+
+PLaMo-Embedding-1Bモデルを含む全サードパーティ依存関係のライセンス情報については [LICENSES.md](LICENSES.md) をご覧ください。全コンポーネントは商用利用承認済みで、詳細なコンプライアンス情報を提供しています。

@@ -70,6 +70,8 @@ extensions = ['sphinxcontrib.jsontable']
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
-## License
+## License & Third-Party Components
 
-MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+For comprehensive information about all third-party dependencies and their licenses, including the PLaMo-Embedding-1B model, see [LICENSES.md](LICENSES.md). All components are approved for commercial use with detailed compliance information.
