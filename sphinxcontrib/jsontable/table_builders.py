@@ -14,6 +14,7 @@ Features:
 from __future__ import annotations
 
 from docutils import nodes
+from typing import cast
 
 from .table_converters import TableData
 
@@ -68,8 +69,8 @@ class TableBuilder:
         entry = nodes.entry()
         entry.append(nodes.paragraph(text="No data available"))
         row.append(entry)
-        tbody.append(row)
-        tgroup.append(tbody)
+        cast(nodes.Element, tbody).append(row)
+        cast(nodes.Element, tgroup).append(tbody)
         table.append(tgroup)
         return table
 
@@ -111,8 +112,8 @@ class TableBuilder:
             entry.append(nodes.paragraph(text=str(cell_content)))
             row.append(entry)
 
-        thead.append(row)
-        tgroup.append(thead)
+        cast(nodes.Element, thead).append(row)
+        cast(nodes.Element, tgroup).append(thead)
 
     def _add_body(
         self, table: nodes.table, body_data: TableData, max_cols: int

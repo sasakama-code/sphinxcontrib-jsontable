@@ -434,7 +434,7 @@ class TableConverter:
         if not objects:
             return []
 
-        ordered_keys = []
+        ordered_keys: list[str] = []
         seen_keys = set()
 
         # Realistic limits for performance and security

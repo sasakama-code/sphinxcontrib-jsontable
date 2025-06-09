@@ -34,19 +34,15 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v4
+    - name: Set up UV
+      uses: astral-sh/setup-uv@v4
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-quality-${{ env.CACHE_VERSION }}-${{ hashFiles('pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-quality-${{ env.CACHE_VERSION }}-
-          ${{ runner.os }}-pip-quality-
+        version: "latest"
 
-    - name: Install dependencies
+    - name: Install dependencies with UV
       run: |
-        python -m pip install --upgrade pip
-        pip install -e .[dev]
+        uv sync --dev
+        uv add --dev types-docutils
 
     - name: Verify installation
       run: |
@@ -56,28 +52,28 @@ jobs:
     - name: Run ruff (linting)
       run: |
         echo "Running ruff linting..."
-        ruff check . --output-format=github
+        uv run ruff check . --output-format=github
 
     - name: Run ruff (formatting)
       run: |
         echo "Running ruff formatting check..."
-        ruff format --check . --diff
+        uv run ruff format --check . --diff
 
     - name: Run mypy (type checking)
       run: |
         echo "Running mypy type checking..."
-        mypy sphinxcontrib/jsontable/ --config-file pyproject.toml || echo "MyPy check completed with warnings - continuing CI"
+        uv run mypy sphinxcontrib/jsontable/ --config-file pyproject.toml
 
     - name: Enhanced security dependency audit
       run: |
         echo "Running enhanced dependency security audit..."
-        pip install safety pip-audit
+        uv add --dev safety pip-audit
         echo "Running pip-audit (PyPA official tool)..."
-        pip-audit --format=json --output=pip-audit-report.json
-        pip-audit --desc
+        uv run pip-audit --format=json --output=pip-audit-report.json
+        uv run pip-audit --desc
         echo "Running safety check..."
-        safety check --json --output=safety-report.json
-        safety check --short-report
+        uv run safety check --json --output=safety-report.json
+        uv run safety check --short-report
         echo "Dependency audit completed successfully"
 
   # Build and Package Test
@@ -94,43 +90,38 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v4
+    - name: Set up UV
+      uses: astral-sh/setup-uv@v4
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-build-${{ env.CACHE_VERSION }}-${{ hashFiles('pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-build-${{ env.CACHE_VERSION }}-
-          ${{ runner.os }}-pip-build-
+        version: "latest"
 
-    - name: Install build dependencies
+    - name: Install build dependencies with UV
       run: |
-        python -m pip install --upgrade pip
-        pip install build twine
+        uv add --dev build twine
 
     - name: Build package
       run: |
         echo "Building package..."
-        python -m build
+        uv build
 
     - name: Check package
       run: |
         echo "Checking package integrity..."
-        python -m twine check dist/*
+        uv run twine check dist/*
 
     - name: Test package installation
       run: |
         echo "Testing package installation..."
-        pip install dist/*.whl
-        python -c "import sphinxcontrib.jsontable; print('Package installed successfully')"
-        python -c "from sphinxcontrib.jsontable import __version__; print(f'Version: {__version__}')"
+        uv add dist/*.whl
+        uv run python -c "import sphinxcontrib.jsontable; print('Package installed successfully')"
+        uv run python -c "from sphinxcontrib.jsontable import __version__; print(f'Version: {__version__}')"
 
     - name: Generate SBOM (Software Bill of Materials)
       run: |
         echo "Generating Software Bill of Materials..."
-        pip install cyclonedx-bom
-        cyclonedx-py environment --output-format json --outfile sbom.json
-        cyclonedx-py environment --output-format xml --outfile sbom.xml
+        uv add --dev cyclonedx-bom
+        uv run cyclonedx-py environment --output-format json --outfile sbom.json
+        uv run cyclonedx-py environment --output-format xml --outfile sbom.xml
         echo "SBOM generated successfully"
 
     - name: Upload SBOM artifacts
@@ -166,34 +157,29 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v4
+    - name: Set up UV
+      uses: astral-sh/setup-uv@v4
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-test-${{ env.CACHE_VERSION }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-test-${{ env.CACHE_VERSION }}-${{ matrix.python-version }}-
-          ${{ runner.os }}-pip-test-${{ env.CACHE_VERSION }}-
+        version: "latest"
 
-    - name: Install dependencies
+    - name: Install dependencies with UV
       run: |
-        python -m pip install --upgrade pip
-        pip install -e .[test]
+        uv sync --dev
 
     - name: Verify test installation
       run: |
-        python -c "import sphinxcontrib.jsontable; print('Package installed successfully')"
-        python -c "import pytest; print('Pytest installed successfully')"
+        uv run python -c "import sphinxcontrib.jsontable; print('Package installed successfully')"
+        uv run python -c "import pytest; print('Pytest installed successfully')"
 
     - name: Run tests
       run: |
-        pytest tests/ --cov=sphinxcontrib.jsontable --cov-report=xml --cov-report=term-missing --cov-fail-under=80 -v -m "not benchmark"
+        uv run pytest tests/ --cov=sphinxcontrib.jsontable --cov-report=xml --cov-report=term-missing --cov-fail-under=80 -v -m "not benchmark"
 
     - name: Upload coverage to Codecov
       if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v5
       with:
-        file: ./coverage.xml
+        files: ./coverage.xml
         fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
         verbose: true
@@ -215,30 +201,25 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v4
+    - name: Set up UV
+      uses: astral-sh/setup-uv@v4
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-perf-${{ env.CACHE_VERSION }}-${{ hashFiles('pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-perf-${{ env.CACHE_VERSION }}-
-          ${{ runner.os }}-pip-perf-
+        version: "latest"
 
-    - name: Install dependencies
+    - name: Install dependencies with UV
       run: |
-        python -m pip install --upgrade pip
-        pip install -e .[test]
+        uv sync --dev
 
     - name: Run benchmark tests
       run: |
-        pytest tests/ -m benchmark --benchmark-enable --benchmark-sort=mean --benchmark-json=benchmark.json -v --cov-fail-under=0
+        uv run pytest tests/ -m benchmark --benchmark-enable --benchmark-sort=mean --benchmark-json=benchmark.json -v --cov-fail-under=0
       continue-on-error: true  # ベンチマークは失敗してもCI全体は通す
 
     - name: Run performance tests (CI-safe)
       env:
         CI: true
       run: |
-        pytest tests/ -m performance -v --override-ini addopts=""
+        uv run pytest tests/ -m performance -v --override-ini addopts=""
 
     - name: Upload benchmark results
       if: always()

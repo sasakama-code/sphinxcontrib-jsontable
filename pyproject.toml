@@ -122,11 +122,11 @@ disallow_untyped_defs = false
 warn_return_any = false
 ignore_errors = false
 
-# RAG modules - gradual typing approach
+# RAG modules - strict typing enforcement
 [[tool.mypy.overrides]]
 module = "sphinxcontrib.jsontable.rag.*"
 disallow_untyped_defs = false
-ignore_errors = true
+ignore_errors = false
 warn_return_any = false
 
 # ===== PYTEST CONFIGURATION =====

@@ -23,6 +23,7 @@ from typing import Any, ClassVar
 
 from docutils import nodes
 from docutils.parsers.rst import directives
+from typing import cast
 from sphinx.util import logging
 
 from .directives import JsonTableDirective
@@ -251,15 +252,17 @@ class EnhancedJsonTableDirective(JsonTableDirective):
             rag_result: Complete RAG processing results to attach.
         """
         # Add RAG metadata as custom attributes
-        if not hasattr(table_node, "attributes"):
-            table_node.attributes = {}
+        # Add RAG metadata as custom attributes using cast for type safety
+        element_node = cast(nodes.Element, table_node)
+        if not hasattr(element_node, "attributes"):
+            element_node.attributes = {}
 
         # Basic metadata
-        table_node.attributes["rag_table_id"] = rag_result.basic_metadata.table_id
-        table_node.attributes["rag_semantic_summary"] = (
+        element_node.attributes["rag_table_id"] = rag_result.basic_metadata.table_id
+        element_node.attributes["rag_semantic_summary"] = (
             rag_result.basic_metadata.semantic_summary
         )
-        table_node.attributes["rag_search_keywords"] = ",".join(
+        element_node.attributes["rag_search_keywords"] = ",".join(
             rag_result.basic_metadata.search_keywords
         )
 

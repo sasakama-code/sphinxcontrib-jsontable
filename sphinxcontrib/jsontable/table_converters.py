@@ -250,7 +250,7 @@ class TableConverter:
         limited_data = data[:limit] if limit is not None else data
 
         # Extract all unique keys across all objects
-        all_keys = set()
+        all_keys: set[str] = set()
         for obj in limited_data:
             if isinstance(obj, dict):
                 all_keys.update(obj.keys())
