@@ -277,7 +277,9 @@ class EnhancedJsonTableDirective(JsonTableDirective):
 
             # Data quality score
             quality = rag_result.advanced_metadata.data_quality
-            element_node.attributes["rag_quality_score"] = f"{quality.overall_score:.2f}"
+            element_node.attributes["rag_quality_score"] = (
+                f"{quality.overall_score:.2f}"
+            )
 
         # Search facets availability
         if rag_result.generated_facets:

@@ -209,7 +209,11 @@ class BusinessTermEnhancer:
             Dictionary containing business terms, categories, and boost scores.
         """
 
-        features: dict[str, Any] = {"business_terms": [], "categories": {}, "boost_score": 1.0}
+        features: dict[str, Any] = {
+            "business_terms": [],
+            "categories": {},
+            "boost_score": 1.0,
+        }
 
         total_boost = 1.0
 
@@ -684,7 +688,9 @@ class PLaMoVectorProcessor:
 
         return stats
 
-    def save_processing_results(self, result: VectorProcessingResult, output_path: str) -> None:
+    def save_processing_results(
+        self, result: VectorProcessingResult, output_path: str
+    ) -> None:
         """Save vector processing results to disk.
 
         Args:

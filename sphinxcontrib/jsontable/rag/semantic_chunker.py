@@ -55,7 +55,9 @@ class SemanticChunker:
     generating chunks optimized for search and embedding processing.
     """
 
-    def __init__(self, chunk_strategy: str = "adaptive", max_chunk_size: int = 1000) -> None:
+    def __init__(
+        self, chunk_strategy: str = "adaptive", max_chunk_size: int = 1000
+    ) -> None:
         """Initialize semantic chunker with strategy and size limits.
 
         Args:
