@@ -6,7 +6,35 @@ We actively support the following versions of `sphinxcontrib-jsontable`:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+| 0.3.x   | :white_check_mark: |
+| 0.2.x   | :white_check_mark: |
+| 0.1.x   | :x:                |
+
+## Security Rules and Best Practices
+
+### Confidential Information Handling
+
+#### ❌ Prohibited: Never include these in code or documentation
+- API keys (OpenAI, PLaMo, etc.)
+- Database connection strings
+- Passwords and authentication secrets
+- Personal or sensitive data
+
+#### ✅ Recommended: Secure management methods
+- Environment variables for API keys
+- Configuration files in .gitignore
+- Example configurations with placeholders only
+
+### Pre-commit Security Checklist
+```bash
+# Check for API keys or secrets
+git diff --cached | grep -i "sk-\|api.*key\|secret\|password"
+```
+
+### RAG Integration Security Notes
+- PLaMo-Embedding-1B: Local model, no API key required
+- OpenAI API: Optional feature, managed via environment variables
+- All examples use placeholders or environment variable references
 
 ## Reporting a Vulnerability
 

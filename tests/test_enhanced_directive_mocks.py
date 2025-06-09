@@ -1,9 +1,10 @@
-"""Enhanced directive coverage improvement tests.
+"""Enhanced directive mock-based functionality tests.
 
-Provides test coverage for enhanced directive functionality that is currently
-untested to improve overall coverage from 54% towards 80% target.
+Provides comprehensive test coverage for enhanced directive functionality using
+mocks to verify proper integration and behavior patterns.
 
 Created: 2025-06-09
+Updated: 2025-06-09 (renamed from test_enhanced_directive_coverage.py)
 """
 
 import json

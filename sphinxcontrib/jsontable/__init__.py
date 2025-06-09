@@ -9,8 +9,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from .directives import DEFAULT_MAX_ROWS, JsonTableDirective
+# Legacy import support for backward compatibility
+from .directives import JsonTableDirective as LegacyJsonTableDirective
 from .enhanced_directive import EnhancedJsonTableDirective
+
+# Import from new modular structure
+from .json_table_directive import JsonTableDirective
+from .table_converters import DEFAULT_MAX_ROWS
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
