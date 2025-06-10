@@ -24,11 +24,11 @@ import re
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, List, Optional, Union
+from typing import Any, Union
 
 logger = logging.getLogger(__name__)
 
-JsonData = Union[dict[str, Any], List[dict[str, Any]], List[Any]]
+JsonData = Union[dict[str, Any], list[dict[str, Any]], list[Any]]
 
 
 @dataclass
@@ -50,9 +50,9 @@ class BasicMetadata:
     table_id: str
     schema: dict[str, Any]
     semantic_summary: str
-    search_keywords: List[str]
+    search_keywords: list[str]
     entity_mapping: dict[str, str]
-    custom_tags: List[str]
+    custom_tags: list[str]
     data_statistics: dict[str, Any]
     embedding_ready_text: str
     generation_timestamp: str
@@ -70,7 +70,7 @@ class RAGMetadataExtractor:
         self.japanese_patterns = self._init_japanese_patterns()
         self.type_inference_patterns = self._init_type_patterns()
 
-    def _init_japanese_patterns(self) -> dict[str, List[str]]:
+    def _init_japanese_patterns(self) -> dict[str, list[str]]:
         """Initialize Japanese language recognition patterns.
 
         Returns:
@@ -279,7 +279,7 @@ class RAGMetadataExtractor:
             }
 
     def _analyze_property(
-        self, key: str, data_list: List[Any], sample_value: Any
+        self, key: str, data_list: list[Any], sample_value: Any
     ) -> dict[str, Any]:
         """プロパティの詳細分析"""
         base_type = self._infer_type(sample_value)
@@ -329,14 +329,14 @@ class RAGMetadataExtractor:
                 return "string"  # 単位付き数値
             else:
                 return "string"
-        elif isinstance(value, (list, tuple)):
+        elif isinstance(value, list | tuple):
             return "array"
         elif isinstance(value, dict):
             return "object"
         else:
             return "string"
 
-    def _infer_semantic_type(self, key: str, value: Any) -> Optional[str]:
+    def _infer_semantic_type(self, key: str, value: Any) -> str | None:
         """意味的な型を推論（日本語特化）"""
         key_lower = key.lower()
 
@@ -417,15 +417,15 @@ class RAGMetadataExtractor:
             return f"{base_type}型のデータ"
 
     def _calculate_numeric_stats(
-        self, key: str, data_list: List[Any]
-    ) -> Optional[dict[str, Any]]:
+        self, key: str, data_list: list[Any]
+    ) -> dict[str, Any] | None:
         """数値プロパティの統計を計算"""
         try:
             values = []
             for item in data_list:
                 if isinstance(item, dict) and key in item:
                     value = item[key]
-                    if isinstance(value, (int, float)) and value is not None:
+                    if isinstance(value, int | float) and value is not None:
                         values.append(value)
 
             if len(values) < 2:
@@ -440,7 +440,7 @@ class RAGMetadataExtractor:
         except Exception:
             return None
 
-    def _get_unique_values(self, key: str, data_list: List[Any]) -> List[Any]:
+    def _get_unique_values(self, key: str, data_list: list[Any]) -> list[Any]:
         """指定されたキーのユニークな値を取得"""
         values = []
         for item in data_list:
@@ -484,7 +484,7 @@ class RAGMetadataExtractor:
         except Exception:
             return "構造化データ"
 
-    def _estimate_entity_type(self, columns: List[str]) -> Optional[str]:
+    def _estimate_entity_type(self, columns: list[str]) -> str | None:
         """カラム名から推定されるエンティティタイプ"""
         column_text = " ".join(columns).lower()
 
@@ -523,7 +523,7 @@ class RAGMetadataExtractor:
 
     def _extract_search_keywords(
         self, data: JsonData, schema: dict[str, Any]
-    ) -> List[str]:
+    ) -> list[str]:
         """検索用キーワードを抽出"""
         keywords = set()
 
@@ -560,7 +560,7 @@ class RAGMetadataExtractor:
 
         return list(keywords)[:50]  # 最大50個のキーワード
 
-    def _extract_text_values(self, data: JsonData) -> List[str]:
+    def _extract_text_values(self, data: JsonData) -> list[str]:
         """データから文字列値を抽出"""
         text_values = []
 
@@ -593,7 +593,7 @@ class RAGMetadataExtractor:
 
         return entity_mapping
 
-    def _parse_custom_tags(self, tags_str: str) -> List[str]:
+    def _parse_custom_tags(self, tags_str: str) -> list[str]:
         """カスタムタグを解析"""
         if not tags_str:
             return []
