@@ -405,9 +405,7 @@ class ExcelRAGMonitor:
         if old_immediate != new_policy.immediate_update and self.monitoring_active:
             if new_policy.immediate_update and self.batch_processor_active:
                 self._stop_batch_processor()
-            elif (
-                not new_policy.immediate_update and not self.batch_processor_active
-            ):
+            elif not new_policy.immediate_update and not self.batch_processor_active:
                 self._start_batch_processor()
 
         logger.info("Update policy configuration updated")

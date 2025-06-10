@@ -293,7 +293,9 @@ class AdvancedExcelConverter:
         pivot_keywords = ["合計", "小計", "Total", "Subtotal", "Grand Total"]
         for row in sample_data:
             for cell in row:
-                if isinstance(cell, str) and any(keyword in cell for keyword in pivot_keywords):
+                if isinstance(cell, str) and any(
+                    keyword in cell for keyword in pivot_keywords
+                ):
                     return True
 
         return False
@@ -320,7 +322,9 @@ class AdvancedExcelConverter:
 
         for row in sheet.iter_rows(max_row=20, values_only=True):
             for cell in row:
-                if isinstance(cell, str) and any(keyword in cell for keyword in financial_keywords):
+                if isinstance(cell, str) and any(
+                    keyword in cell for keyword in financial_keywords
+                ):
                     return True
 
         return False

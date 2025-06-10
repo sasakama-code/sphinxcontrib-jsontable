@@ -16,7 +16,7 @@ from __future__ import annotations
 import re
 import statistics
 from dataclasses import dataclass, field
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 

@@ -24,11 +24,11 @@ import re
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Union
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
-JsonData = Union[dict[str, Any], list[dict[str, Any]], list[Any]]
+JsonData = dict[str, Any] | list[dict[str, Any]] | list[Any]
 
 
 @dataclass
