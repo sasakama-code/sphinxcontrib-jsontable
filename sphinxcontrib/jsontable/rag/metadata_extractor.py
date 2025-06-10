@@ -24,11 +24,11 @@ import re
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
-JsonData = Union[Dict[str, Any], List[Dict[str, Any]], List[Any]]
+JsonData = Union[dict[str, Any], List[dict[str, Any]], List[Any]]
 
 
 @dataclass
@@ -48,12 +48,12 @@ class BasicMetadata:
     """
 
     table_id: str
-    schema: Dict[str, Any]
+    schema: dict[str, Any]
     semantic_summary: str
     search_keywords: List[str]
-    entity_mapping: Dict[str, str]
+    entity_mapping: dict[str, str]
     custom_tags: List[str]
-    data_statistics: Dict[str, Any]
+    data_statistics: dict[str, Any]
     embedding_ready_text: str
     generation_timestamp: str
 
@@ -70,7 +70,7 @@ class RAGMetadataExtractor:
         self.japanese_patterns = self._init_japanese_patterns()
         self.type_inference_patterns = self._init_type_patterns()
 
-    def _init_japanese_patterns(self) -> Dict[str, List[str]]:
+    def _init_japanese_patterns(self) -> dict[str, List[str]]:
         """Initialize Japanese language recognition patterns.
 
         Returns:
@@ -133,7 +133,7 @@ class RAGMetadataExtractor:
             ],
         }
 
-    def _init_type_patterns(self) -> Dict[str, Any]:
+    def _init_type_patterns(self) -> dict[str, Any]:
         """Initialize type inference patterns.
 
         Returns:
@@ -152,7 +152,7 @@ class RAGMetadataExtractor:
             ),
         }
 
-    def extract(self, json_data: JsonData, options: Dict[str, Any]) -> BasicMetadata:
+    def extract(self, json_data: JsonData, options: dict[str, Any]) -> BasicMetadata:
         """Extract basic RAG metadata from JSON data.
 
         Args:
@@ -196,7 +196,7 @@ class RAGMetadataExtractor:
             logger.error(f"Metadata extraction error: {e}")
             raise ValueError(f"Failed to extract metadata: {e}") from e
 
-    def _generate_table_id(self, json_data: JsonData, options: Dict[str, Any]) -> str:
+    def _generate_table_id(self, json_data: JsonData, options: dict[str, Any]) -> str:
         """Generate unique table identifier.
 
         Args:
@@ -215,7 +215,7 @@ class RAGMetadataExtractor:
 
         return f"table_{timestamp}_{data_hash}"
 
-    def _extract_schema(self, data: JsonData) -> Dict[str, Any]:
+    def _extract_schema(self, data: JsonData) -> dict[str, Any]:
         """Generate JSON Schema from data.
 
         Creates structured schema compliant with OpenAPI and JSON-LD
@@ -280,7 +280,7 @@ class RAGMetadataExtractor:
 
     def _analyze_property(
         self, key: str, data_list: List[Any], sample_value: Any
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """プロパティの詳細分析"""
         base_type = self._infer_type(sample_value)
         property_info = {
@@ -418,7 +418,7 @@ class RAGMetadataExtractor:
 
     def _calculate_numeric_stats(
         self, key: str, data_list: List[Any]
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[dict[str, Any]]:
         """数値プロパティの統計を計算"""
         try:
             values = []
@@ -450,7 +450,7 @@ class RAGMetadataExtractor:
                     values.append(value)
         return values[:10]  # 最大10個まで
 
-    def _generate_semantic_summary(self, data: JsonData, schema: Dict[str, Any]) -> str:
+    def _generate_semantic_summary(self, data: JsonData, schema: dict[str, Any]) -> str:
         """セマンティック要約を生成"""
         try:
             if isinstance(data, list):
@@ -522,7 +522,7 @@ class RAGMetadataExtractor:
         return None
 
     def _extract_search_keywords(
-        self, data: JsonData, schema: Dict[str, Any]
+        self, data: JsonData, schema: dict[str, Any]
     ) -> List[str]:
         """検索用キーワードを抽出"""
         keywords = set()
@@ -577,7 +577,7 @@ class RAGMetadataExtractor:
         extract_from_obj(data)
         return text_values
 
-    def _map_entities(self, data: JsonData, schema: Dict[str, Any]) -> Dict[str, str]:
+    def _map_entities(self, data: JsonData, schema: dict[str, Any]) -> dict[str, str]:
         """エンティティマッピングを作成"""
         entity_mapping = {}
 
@@ -602,7 +602,7 @@ class RAGMetadataExtractor:
         tags = re.split(r"[,;]\s*|\s+", tags_str.strip())
         return [tag.strip() for tag in tags if tag.strip()]
 
-    def _calculate_basic_statistics(self, data: JsonData) -> Dict[str, Any]:
+    def _calculate_basic_statistics(self, data: JsonData) -> dict[str, Any]:
         """基本統計情報を計算"""
         stats = {
             "record_count": 0,
@@ -643,7 +643,7 @@ class RAGMetadataExtractor:
 
         return stats
 
-    def _prepare_embedding_text(self, data: JsonData, schema: Dict[str, Any]) -> str:
+    def _prepare_embedding_text(self, data: JsonData, schema: dict[str, Any]) -> str:
         """埋め込み用テキストを準備
 
         PLaMo-Embedding-1B向けに最適化されたテキスト形式を生成
@@ -677,7 +677,7 @@ class RAGMetadataExtractor:
 
         return " | ".join(text_parts)
 
-    def _format_record_for_embedding(self, record: Dict[str, Any]) -> str:
+    def _format_record_for_embedding(self, record: dict[str, Any]) -> str:
         """レコードを埋め込み用テキストにフォーマット"""
         parts = []
         for key, value in record.items():
