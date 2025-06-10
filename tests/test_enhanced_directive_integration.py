@@ -151,8 +151,7 @@ class TestEnhancedJsonTableDirective:
         content = [
             "[",
             '  {"商品名": "iPhone", "価格": 100000, "カテゴリ": "スマートフォン"},',
-            '  {"商品名": "MacBook", "価格": 200000, "カテゴリ": "ノートPC"}'
-            "]",
+            '  {"商品名": "MacBook", "価格": 200000, "カテゴリ": "ノートPC"}]',
         ]
 
         options = {
