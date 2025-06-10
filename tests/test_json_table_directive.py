@@ -652,6 +652,7 @@ class TestJsonTableDirective:
 
             # Assert
             from sphinxcontrib.jsontable.table_converters import DEFAULT_MAX_ROWS
+
             mock_getattr.assert_called_once_with(
                 mock_config, "jsontable_max_rows", DEFAULT_MAX_ROWS
             )
@@ -823,12 +824,8 @@ class TestJsonTableDirective:
             patch(
                 "sphinxcontrib.jsontable.json_table_directive.JsonDataLoader"
             ) as mock_loader_class,
-            patch(
-                "sphinxcontrib.jsontable.json_table_directive.TableConverter"
-            ),
-            patch(
-                "sphinxcontrib.jsontable.json_table_directive.TableBuilder"
-            ),
+            patch("sphinxcontrib.jsontable.json_table_directive.TableConverter"),
+            patch("sphinxcontrib.jsontable.json_table_directive.TableBuilder"),
             patch(
                 "sphinxcontrib.jsontable.json_table_directive.getattr"
             ) as mock_getattr,
@@ -894,15 +891,9 @@ class TestJsonTableDirective:
             patch(
                 "sphinxcontrib.jsontable.json_table_directive.SphinxDirective.__init__"
             ) as mock_super_init,
-            patch(
-                "sphinxcontrib.jsontable.json_table_directive.JsonDataLoader"
-            ),
-            patch(
-                "sphinxcontrib.jsontable.json_table_directive.TableConverter"
-            ),
-            patch(
-                "sphinxcontrib.jsontable.json_table_directive.TableBuilder"
-            ),
+            patch("sphinxcontrib.jsontable.json_table_directive.JsonDataLoader"),
+            patch("sphinxcontrib.jsontable.json_table_directive.TableConverter"),
+            patch("sphinxcontrib.jsontable.json_table_directive.TableBuilder"),
             patch(
                 "sphinxcontrib.jsontable.json_table_directive.getattr"
             ) as mock_getattr,

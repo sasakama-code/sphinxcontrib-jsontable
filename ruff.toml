@@ -11,14 +11,16 @@ exclude = ["__pycache__", ".venv", "build", "dist", ".git"]
 
 [lint]
 select = ["E", "W", "F", "I", "UP", "B", "C4", "PIE", "T20", "RUF", "SIM"]
-ignore = ["E501", "E203", "B008", "PIE800", "T201", "T203", "SIM108", "SIM117", "RUF002", "RUF003"]
+# Japanese business text support: ignore full-width characters and related issues
+ignore = ["E501", "E203", "B008", "PIE800", "T201", "T203", "SIM108", "SIM117", "RUF001", "RUF002", "RUF003"]
 
 [lint.per-file-ignores]
 "__init__.py" = ["F401"]
-"tests/**/*.py" = ["T201", "T203", "B011", "SIM117"]
+"tests/**/*.py" = ["T201", "T203", "B011", "SIM117", "C401"]
 "conf.py" = ["E402"]
 "conftest.py" = ["E402"]
-"examples/**/*.py" = ["T201", "T203", "B008"]
+# Allow module-level imports after sys.path modification in examples/demos
+"examples/**/*.py" = ["T201", "T203", "B008", "E402"]
 
 [lint.isort]
 known-first-party = ["sphinxcontrib.jsontable"]

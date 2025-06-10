@@ -26,15 +26,9 @@ class TestJsonTableDirectiveCoverage:
 
         # Act
         with (
-            patch(
-                "sphinxcontrib.jsontable.json_table_directive.JsonDataLoader"
-            ),
-            patch(
-                "sphinxcontrib.jsontable.json_table_directive.TableConverter"
-            ),
-            patch(
-                "sphinxcontrib.jsontable.json_table_directive.TableBuilder"
-            ),
+            patch("sphinxcontrib.jsontable.json_table_directive.JsonDataLoader"),
+            patch("sphinxcontrib.jsontable.json_table_directive.TableConverter"),
+            patch("sphinxcontrib.jsontable.json_table_directive.TableBuilder"),
         ):
             directive = JsonTableDirective(
                 name="json-table",
@@ -76,9 +70,7 @@ class TestJsonTableDirectiveCoverage:
         # Act
         with (
             patch("sphinxcontrib.jsontable.json_table_directive.JsonDataLoader"),
-            patch(
-                "sphinxcontrib.jsontable.json_table_directive.TableConverter"
-            ),
+            patch("sphinxcontrib.jsontable.json_table_directive.TableConverter"),
             patch("sphinxcontrib.jsontable.json_table_directive.TableBuilder"),
         ):
             directive = JsonTableDirective(

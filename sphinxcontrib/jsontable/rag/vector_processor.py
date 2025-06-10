@@ -95,7 +95,7 @@ class JapaneseTextNormalizer:
     def __init__(self) -> None:
         # Full-width to half-width character conversion map
         self.fullwidth_to_halfwidth = str.maketrans(
-            "０１２３４５６７８９ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ",  # noqa: RUF001
+            "０１２３４５６７８９ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ",
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         )
 

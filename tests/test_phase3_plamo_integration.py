@@ -111,7 +111,7 @@ def semantic_chunks_from_business_data(sample_japanese_business_data):
         chunks.append(chunk)
 
         # 財務情報チャンク
-        financial_content = f"{company_data['会社名']}の財務実績：{company_data['年度']}売上高{company_data['売上高']}、従業員一人当たり売上は優秀な水準を維持。"  # noqa: RUF001
+        financial_content = f"{company_data['会社名']}の財務実績：{company_data['年度']}売上高{company_data['売上高']}、従業員一人当たり売上は優秀な水準を維持。"
 
         financial_chunk = SemanticChunk(
             chunk_id=f"financial_{i}",
@@ -570,7 +570,7 @@ class TestPhase3Integration:
         # Step 1: データからSemanticChunk生成
         chunks = []
         for i, company in enumerate(sample_japanese_business_data):
-            content = f"{company['会社名']}（{company['年度']}）: 売上{company['売上高']}、従業員{company['従業員数']}、事業：{company['主要事業']}"  # noqa: RUF001
+            content = f"{company['会社名']}（{company['年度']}）: 売上{company['売上高']}、従業員{company['従業員数']}、事業：{company['主要事業']}"
 
             chunk = SemanticChunk(
                 chunk_id=f"company_{i}",
@@ -741,7 +741,7 @@ class TestPhase3Integration:
         normalizer = JapaneseTextNormalizer()
         enhancer = BusinessTermEnhancer()
 
-        test_text = "株式会社ＴＥＳＴの2024年度売上高は１００億円"  # noqa: RUF001
+        test_text = "株式会社ＴＥＳＴの2024年度売上高は１００億円"
         normalized = normalizer.normalize(test_text)
         enhanced = enhancer.enhance(normalized)
 

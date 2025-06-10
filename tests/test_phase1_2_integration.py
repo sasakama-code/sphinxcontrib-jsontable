@@ -190,7 +190,7 @@ class TestPhase1And2Integration:
             {
                 "商品名": "MacBook Pro",
                 "価格": 280000,
-                "カテゴリ": "ノートPC",  # noqa: RUF001
+                "カテゴリ": "ノートPC",
                 "販売数": 85,
                 "売上日": "2024-01-16",
                 "地域": "大阪",

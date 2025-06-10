@@ -1,7 +1,7 @@
 """Excel-RAG integration package for sphinxcontrib-jsontable.
 
-This package provides comprehensive Excel file integration with RAG (Retrieval 
-Augmented Generation) systems, enabling 5-minute transformation of Excel data 
+This package provides comprehensive Excel file integration with RAG (Retrieval
+Augmented Generation) systems, enabling 5-minute transformation of Excel data
 into AI-ready documentation and query systems.
 
 Key Features:
@@ -25,57 +25,53 @@ __version__ = "0.3.0"
 
 # Core exports
 from .converter import ExcelRAGConverter, convert_excel_to_rag, query_excel_data
+from .federation import (
+    CrossDepartmentRelationship,
+    DepartmentConfig,
+    ExcelRAGFederation,
+    create_enterprise_federation,
+    setup_cross_department_relationships,
+)
 from .format_detector import AdvancedExcelConverter, ExcelFormatHandler
 from .industry_handlers import (
+    FinancialHandler,
     IndustryHandlerManager,
-    ManufacturingHandler, 
+    ManufacturingHandler,
     RetailHandler,
-    FinancialHandler
-)
-from .sphinx_integration import AutoSphinxIntegration
-from .federation import (
-    ExcelRAGFederation,
-    DepartmentConfig,
-    CrossDepartmentRelationship,
-    create_enterprise_federation,
-    setup_cross_department_relationships
 )
 from .monitoring import (
-    ExcelRAGMonitor,
     ExcelFileChangeEvent,
+    ExcelRAGMonitor,
     UpdatePolicy,
+    monitor_department_files,
     setup_enterprise_monitoring,
-    monitor_department_files
 )
+from .sphinx_integration import AutoSphinxIntegration
 
 __all__ = [
-    # Main conversion classes
-    "ExcelRAGConverter", 
     "AdvancedExcelConverter",
-    "ExcelFormatHandler",
     "AutoSphinxIntegration",
-    
+    "CrossDepartmentRelationship",
+    "DepartmentConfig",
+    "ExcelFileChangeEvent",
+    "ExcelFormatHandler",
+    # Main conversion classes
+    "ExcelRAGConverter",
+    # Enterprise federation
+    "ExcelRAGFederation",
+    # Real-time monitoring
+    "ExcelRAGMonitor",
+    "FinancialHandler",
     # Industry-specific handlers
     "IndustryHandlerManager",
     "ManufacturingHandler",
-    "RetailHandler", 
-    "FinancialHandler",
-    
-    # Enterprise federation
-    "ExcelRAGFederation",
-    "DepartmentConfig",
-    "CrossDepartmentRelationship",
-    
-    # Real-time monitoring
-    "ExcelRAGMonitor",
-    "ExcelFileChangeEvent",
+    "RetailHandler",
     "UpdatePolicy",
-    
     # Convenience functions
     "convert_excel_to_rag",
-    "query_excel_data",
     "create_enterprise_federation",
+    "monitor_department_files",
+    "query_excel_data",
     "setup_cross_department_relationships",
     "setup_enterprise_monitoring",
-    "monitor_department_files",
 ]

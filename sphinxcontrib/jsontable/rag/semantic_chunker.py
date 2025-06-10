@@ -75,8 +75,8 @@ class SemanticChunker:
             Dictionary of compiled regex patterns for Japanese text processing.
         """
         return {
-            "sentence_boundary": re.compile(r"[。！？\.\!\?]+"),  # noqa: RUF001
-            "phrase_boundary": re.compile(r"[、，,]+"),  # noqa: RUF001
+            "sentence_boundary": re.compile(r"[。！？\.\!\?]+"),
+            "phrase_boundary": re.compile(r"[、，,]+"),
             "numeric_with_unit": re.compile(r"\d+(\.\d+)?[円¥%個件人歳年月日時分秒]+"),
             "japanese_name": re.compile(r"[一-龯]{1,4}[　\s]*[一-龯]{1,3}"),
             "organization": re.compile(r"[一-龯]+[会社部課係室局省庁]\b"),
