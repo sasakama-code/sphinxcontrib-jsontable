@@ -308,7 +308,7 @@ class ExcelRAGFederation:
 
         # Collect data from all departments
         all_dept_data = {}
-        overall_metrics = {}
+        overall_metrics: dict[str, Any] = {}
 
         for dept_id, _dept_config in self.departments.items():
             dept_data = self._extract_department_executive_data(dept_id)
@@ -497,7 +497,7 @@ class ExcelRAGFederation:
     def _generate_cross_analysis_metadata(self) -> dict[str, Any]:
         """Generate metadata for cross-departmental analysis."""
         # Analyze common fields across departments
-        common_fields = {}
+        common_fields: dict[str, Any] = {}
 
         for dept_id in self.departments:
             if dept_id in self.federation_index:

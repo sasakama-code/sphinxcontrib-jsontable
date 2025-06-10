@@ -67,7 +67,7 @@ class ExcelRAGConverter:
         self.rag_systems: dict[str, dict[str, Any]] = {}
 
         # Default configuration
-        self.default_config = {
+        self.default_config: dict[str, Any] = {
             "language": "japanese",
             "auto_entity_detection": True,
             "quality_threshold": 0.8,
@@ -138,7 +138,7 @@ class ExcelRAGConverter:
             )
 
             # Step 4: Auto-generate Sphinx documentation if requested
-            sphinx_docs = []
+            sphinx_docs: dict[str, Any] = {}
             if auto_sphinx_docs:
                 sphinx_docs = self._generate_sphinx_documentation(
                     conversion_result, rag_metadata, effective_config
@@ -352,7 +352,7 @@ class ExcelRAGConverter:
         conversion_result: dict[str, Any],
         rag_metadata: dict[str, Any],
         config: dict[str, Any],
-    ) -> list[str]:
+    ) -> dict[str, Any]:
         """Generate Sphinx documentation automatically."""
         return self.sphinx_integration.create_complete_documentation(
             conversion_result, config

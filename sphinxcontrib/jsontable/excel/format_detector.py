@@ -210,7 +210,7 @@ class AdvancedExcelConverter:
         business_domain: str = "general",
     ) -> dict[str, Any]:
         """Extract business entities from Excel structure."""
-        entities = {
+        entities: dict[str, Any] = {
             "items": [],
             "types": set(),
             "confidence": 0.0,
@@ -415,7 +415,7 @@ class AdvancedExcelConverter:
                 format_votes[format_type] += confidence
 
         if format_votes:
-            return max(format_votes, key=format_votes.get)
+            return max(format_votes, key=lambda x: format_votes[x])
 
         return "standard_table"
 
@@ -498,7 +498,7 @@ class AdvancedExcelConverter:
         language: str = "japanese",
     ) -> dict[str, Any]:
         """Extract business entities from converted data."""
-        entities = {
+        entities: dict[str, Any] = {
             "items": [],
             "types": [],
             "confidence": 0.8,
@@ -680,7 +680,7 @@ class AdvancedExcelConverter:
             for i, cell in enumerate(sample_data[0])
         ]
 
-        json_records = []
+        json_records: list[dict[str, Any]] = []
         for row in sample_data[1:]:
             record = {}
             for i, value in enumerate(row):

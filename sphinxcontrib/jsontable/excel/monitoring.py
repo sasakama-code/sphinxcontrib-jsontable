@@ -29,10 +29,14 @@ import time
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+
+if TYPE_CHECKING:
+    from watchdog.observers import Observer
+else:
+    from watchdog.observers import Observer
 
 from .converter import ExcelRAGConverter
 from .federation import ExcelRAGFederation
@@ -169,7 +173,7 @@ class ExcelRAGMonitor:
         self.update_policy = update_policy or UpdatePolicy()
 
         # Monitoring state
-        self.observers: list[Observer] = []
+        self.observers: list[Any] = []
         self.watched_files: dict[str, dict[str, Any]] = {}
         self.watched_directories: dict[str, dict[str, Any]] = {}
         self.change_queue: list[ExcelFileChangeEvent] = []
@@ -180,7 +184,7 @@ class ExcelRAGMonitor:
         self.batch_processor_active = False
 
         # Performance tracking
-        self.performance_stats = {
+        self.performance_stats: dict[str, Any] = {
             "files_monitored": 0,
             "changes_detected": 0,
             "successful_updates": 0,
@@ -334,7 +338,7 @@ class ExcelRAGMonitor:
         """
         logger.info("Force updating all watched Excel files")
 
-        results = {
+        results: dict[str, Any] = {
             "total_files": len(self.watched_files),
             "successful_updates": 0,
             "failed_updates": 0,

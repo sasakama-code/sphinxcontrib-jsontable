@@ -396,7 +396,7 @@ class ManufacturingHandler(IndustryHandlerBase):
 
     def _extract_time_dimension(self, df: pd.DataFrame) -> dict[str, Any]:
         """Extract time-related information from the data."""
-        time_info = {
+        time_info: dict[str, Any] = {
             "has_temporal_data": False,
             "time_columns": [],
             "time_range": None,
@@ -442,7 +442,7 @@ class ManufacturingHandler(IndustryHandlerBase):
         self, df: pd.DataFrame, format_type: str
     ) -> dict[str, Any]:
         """Extract quality-related indicators."""
-        quality_info = {
+        quality_info: dict[str, Any] = {
             "has_quality_metrics": False,
             "quality_columns": [],
             "defect_types": [],
