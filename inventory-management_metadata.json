@@ -1,0 +1,141 @@
+{
+  "table_id": "table_20250610_c62c0a67",
+  "schema": {
+    "type": "array",
+    "title": "データテーブル",
+    "description": "25件のレコードを含むテーブル",
+    "items": {
+      "type": "object",
+      "properties": {
+        "商品コード": {
+          "type": "string",
+          "title": "商品コード",
+          "description": "テキストデータ",
+          "enum": [
+            "P001",
+            "P002",
+            "P003",
+            "P004",
+            "P005"
+          ],
+          "x-enum-count": "5"
+        },
+        "variable": {
+          "type": "string",
+          "title": "variable",
+          "description": "テキストデータ",
+          "enum": [
+            "商品名",
+            "現在在庫",
+            "安全在庫",
+            "仕入先",
+            "単価"
+          ],
+          "x-enum-count": "5"
+        },
+        "value": {
+          "type": "string",
+          "title": "value",
+          "description": "テキストデータ",
+          "enum": [
+            "ノートPC",
+            "タブレット",
+            "スマートフォン",
+            "ヘッドフォン",
+            "キーボード",
+            45,
+            23,
+            78,
+            156,
+            89
+          ],
+          "x-enum-count": "10"
+        }
+      },
+      "required": [
+        "商品コード",
+        "variable",
+        "value"
+      ]
+    }
+  },
+  "semantic_summary": "商品テーブル: 25件、商品コード、variable、valueを含む",
+  "search_keywords": [
+    "商品",
+    "スマートフォン",
+    "variable",
+    "商品データ",
+    "商品コード",
+    "P003",
+    "value",
+    "P001",
+    "商品名",
+    "P002",
+    "ヘッドフォン",
+    "ノートPC",
+    "P004",
+    "P005",
+    "現在在庫",
+    "タブレット",
+    "商品情報",
+    "キーボード"
+  ],
+  "entity_mapping": {
+    "商品コード": "generic_string",
+    "variable": "generic_string",
+    "value": "generic_string"
+  },
+  "custom_tags": [],
+  "data_statistics": {
+    "record_count": 25,
+    "column_count": 3,
+    "data_types": {
+      "string": 25,
+      "integer": 5
+    },
+    "completeness": {
+      "商品コード": 1.0,
+      "variable": 1.0,
+      "value": 1.0
+    }
+  },
+  "embedding_ready_text": "データ種別: データテーブル | 説明: 25件のレコードを含むテーブル | レコード数: 25件 | カラム: 商品コード, variable, value | サンプル1: 商品コード=P001, variable=商品名, value=ノートPC | サンプル2: 商品コード=P002, variable=商品名, value=タブレット",
+  "generation_timestamp": "2025-06-10T17:16:49.732991",
+  "advanced": {
+    "statistics": {
+      "record_count": 25,
+      "field_count": 3,
+      "completeness": 0.95,
+      "consistency": 0.92
+    },
+    "entities": {
+      "items": [],
+      "types": [],
+      "confidence": 0.8,
+      "domain": "manufacturing",
+      "language": "japanese"
+    },
+    "language": "japanese",
+    "format_type": "cross_tab"
+  },
+  "quality_metrics": 1.0,
+  "processing_config": {
+    "language": "japanese",
+    "auto_entity_detection": true,
+    "quality_threshold": 0.9,
+    "max_file_size_mb": 100,
+    "supported_formats": [
+      ".xlsx",
+      ".xls",
+      ".csv"
+    ],
+    "output_formats": [
+      "json",
+      "json-ld",
+      "opensearch"
+    ],
+    "sphinx_auto_generate": true,
+    "domain": "manufacturing",
+    "rag_purpose": "inventory-management"
+  }
+}

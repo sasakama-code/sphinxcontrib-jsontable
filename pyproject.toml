@@ -38,6 +38,9 @@ dependencies = [
     "docutils>=0.18",
     "numpy>=2.2.6",
     "pytest-cov>=6.1.1",
+    # Excel-RAG統合に必要な依存関係
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
 ]
 
 [project.optional-dependencies]
@@ -132,6 +135,13 @@ security = [
     "safety>=3.0.0",
     "pip-audit>=2.6.0",
     "cyclonedx-bom>=4.0.0",
+]
+
+# Excel-RAG統合用依存関係グループ
+excel = [
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
+    "xlsxwriter>=3.0.0",  # Excel書き込み用
 ]
 
 # ===== MYPY CONFIGURATION =====
