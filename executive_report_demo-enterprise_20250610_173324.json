@@ -1,0 +1,143 @@
+{
+  "federation_name": "demo-enterprise",
+  "generation_timestamp": "2025-06-10T17:33:24.762805",
+  "report_format": "comprehensive",
+  "departments_included": [
+    "sales",
+    "finance",
+    "production"
+  ],
+  "executive_summary": {
+    "overall_performance": "良好",
+    "key_achievements": [
+      "全部署でデータ品質90%以上を達成",
+      "部署間連携効率が15%向上",
+      "統合分析による新たな洞察を発見"
+    ],
+    "critical_issues": [
+      "一部部署でデータ更新の遅延",
+      "クロス分析の活用率向上が必要"
+    ],
+    "strategic_recommendations": [
+      "部署間データ統合の更なる推進",
+      "リアルタイム分析基盤の強化",
+      "エグゼクティブダッシュボードの活用促進"
+    ],
+    "next_quarter_focus": [
+      "データ統合品質の向上",
+      "分析自動化の推進",
+      "意思決定支援機能の拡充"
+    ]
+  },
+  "persona_reports": {
+    "CEO": {
+      "persona": "CEO",
+      "focus_areas": [
+        "全社業績",
+        "戦略目標",
+        "競争優位性",
+        "成長機会"
+      ],
+      "key_insights": [
+        "CEO視点での重要な洞察1",
+        "CEO向けの戦略的推奨事項",
+        "CEOが注視すべき指標トレンド"
+      ],
+      "action_items": [
+        "優先対応項目1",
+        "戦略的意思決定事項",
+        "リスク軽減措置"
+      ],
+      "dashboard_metrics": {
+        "primary_kpi": 95.3,
+        "secondary_kpi": 87.1,
+        "trend_indicator": "+12.5%",
+        "risk_score": "低"
+      }
+    },
+    "CFO": {
+      "persona": "CFO",
+      "focus_areas": [
+        "財務健全性",
+        "コスト効率",
+        "投資ROI",
+        "リスク管理"
+      ],
+      "key_insights": [
+        "CFO視点での重要な洞察1",
+        "CFO向けの戦略的推奨事項",
+        "CFOが注視すべき指標トレンド"
+      ],
+      "action_items": [
+        "優先対応項目1",
+        "戦略的意思決定事項",
+        "リスク軽減措置"
+      ],
+      "dashboard_metrics": {
+        "primary_kpi": 95.3,
+        "secondary_kpi": 87.1,
+        "trend_indicator": "+12.5%",
+        "risk_score": "低"
+      }
+    },
+    "COO": {
+      "persona": "COO",
+      "focus_areas": [
+        "業務効率",
+        "プロセス改善",
+        "品質管理",
+        "リソース最適化"
+      ],
+      "key_insights": [
+        "COO視点での重要な洞察1",
+        "COO向けの戦略的推奨事項",
+        "COOが注視すべき指標トレンド"
+      ],
+      "action_items": [
+        "優先対応項目1",
+        "戦略的意思決定事項",
+        "リスク軽減措置"
+      ],
+      "dashboard_metrics": {
+        "primary_kpi": 95.3,
+        "secondary_kpi": 87.1,
+        "trend_indicator": "+12.5%",
+        "risk_score": "低"
+      }
+    }
+  },
+  "overall_metrics": {
+    "total_records": [
+      1250,
+      1250,
+      1250
+    ],
+    "data_quality": [
+      0.92,
+      0.92,
+      0.92
+    ],
+    "growth_rate": [
+      15.3,
+      15.3,
+      15.3
+    ],
+    "efficiency_score": [
+      87.5,
+      87.5,
+      87.5
+    ]
+  },
+  "cross_department_insights": [
+    "営業部と製造部の連携により効率が20%向上",
+    "財務データと運営データの統合で隠れたコスト要因を発見",
+    "部署間の情報共有が意思決定スピードを30%改善",
+    "統合分析により新たなビジネス機会を3件特定"
+  ],
+  "recommendations": [
+    "部署間データ連携の標準化を推進",
+    "月次エグゼクティブレビューの自動化",
+    "予測分析機能の導入検討",
+    "データドリブン意思決定文化の醸成"
+  ]
+}

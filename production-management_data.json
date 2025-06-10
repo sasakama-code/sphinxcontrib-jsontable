@@ -1,0 +1,152 @@
+[
+  {
+    "製品ID": "P001",
+    "variable": "製品名",
+    "value": "商品A"
+  },
+  {
+    "製品ID": "P002",
+    "variable": "製品名",
+    "value": "商品B"
+  },
+  {
+    "製品ID": "P003",
+    "variable": "製品名",
+    "value": "商品C"
+  },
+  {
+    "製品ID": "P004",
+    "variable": "製品名",
+    "value": "商品D"
+  },
+  {
+    "製品ID": "P005",
+    "variable": "製品名",
+    "value": "商品E"
+  },
+  {
+    "製品ID": "P001",
+    "variable": "計画生産数",
+    "value": 1000
+  },
+  {
+    "製品ID": "P002",
+    "variable": "計画生産数",
+    "value": 1500
+  },
+  {
+    "製品ID": "P003",
+    "variable": "計画生産数",
+    "value": 800
+  },
+  {
+    "製品ID": "P004",
+    "variable": "計画生産数",
+    "value": 1200
+  },
+  {
+    "製品ID": "P005",
+    "variable": "計画生産数",
+    "value": 900
+  },
+  {
+    "製品ID": "P001",
+    "variable": "実績生産数",
+    "value": 950
+  },
+  {
+    "製品ID": "P002",
+    "variable": "実績生産数",
+    "value": 1480
+  },
+  {
+    "製品ID": "P003",
+    "variable": "実績生産数",
+    "value": 820
+  },
+  {
+    "製品ID": "P004",
+    "variable": "実績生産数",
+    "value": 1180
+  },
+  {
+    "製品ID": "P005",
+    "variable": "実績生産数",
+    "value": 910
+  },
+  {
+    "製品ID": "P001",
+    "variable": "品質スコア",
+    "value": 98.5
+  },
+  {
+    "製品ID": "P002",
+    "variable": "品質スコア",
+    "value": 97.2
+  },
+  {
+    "製品ID": "P003",
+    "variable": "品質スコア",
+    "value": 99.1
+  },
+  {
+    "製品ID": "P004",
+    "variable": "品質スコア",
+    "value": 96.8
+  },
+  {
+    "製品ID": "P005",
+    "variable": "品質スコア",
+    "value": 98.9
+  },
+  {
+    "製品ID": "P001",
+    "variable": "生産ライン",
+    "value": "Line1"
+  },
+  {
+    "製品ID": "P002",
+    "variable": "生産ライン",
+    "value": "Line2"
+  },
+  {
+    "製品ID": "P003",
+    "variable": "生産ライン",
+    "value": "Line1"
+  },
+  {
+    "製品ID": "P004",
+    "variable": "生産ライン",
+    "value": "Line3"
+  },
+  {
+    "製品ID": "P005",
+    "variable": "生産ライン",
+    "value": "Line2"
+  },
+  {
+    "製品ID": "P001",
+    "variable": "生産日",
+    "value": "2025-06-01"
+  },
+  {
+    "製品ID": "P002",
+    "variable": "生産日",
+    "value": "2025-06-02"
+  },
+  {
+    "製品ID": "P003",
+    "variable": "生産日",
+    "value": "2025-06-03"
+  },
+  {
+    "製品ID": "P004",
+    "variable": "生産日",
+    "value": "2025-06-04"
+  },
+  {
+    "製品ID": "P005",
+    "variable": "生産日",
+    "value": "2025-06-05"
+  }
+]

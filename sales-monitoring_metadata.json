@@ -173,7 +173,7 @@
     }
   },
   "embedding_ready_text": "データ種別: データテーブル | 説明: 5件のレコードを含むテーブル | レコード数: 5件 | カラム: 営業担当, 顧客ID, 顧客名, 売上金額, 地域 | サンプル1: 営業担当=田中太郎, 顧客ID=C001, 顧客名=ABC商事, 売上金額=1500000, 地域=関東 | サンプル2: 営業担当=佐藤花子, 顧客ID=C002, 顧客名=XYZ企業, 売上金額=2300000, 地域=関西",
-  "generation_timestamp": "2025-06-10T17:33:24.732662",
+  "generation_timestamp": "2025-06-10T17:33:29.787192",
   "advanced": {
     "statistics": {
       "record_count": 5,
@@ -216,9 +216,6 @@
       "opensearch"
     ],
     "sphinx_auto_generate": true,
-    "industry_focus": "retail",
-    "access_level": "internal",
-    "department": "sales",
-    "rag_purpose": "sales-analysis"
+    "rag_purpose": "sales-monitoring"
   }
 }

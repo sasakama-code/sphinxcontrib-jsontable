@@ -26,13 +26,56 @@ __version__ = "0.3.0"
 # Core exports
 from .converter import ExcelRAGConverter, convert_excel_to_rag, query_excel_data
 from .format_detector import AdvancedExcelConverter, ExcelFormatHandler
+from .industry_handlers import (
+    IndustryHandlerManager,
+    ManufacturingHandler, 
+    RetailHandler,
+    FinancialHandler
+)
 from .sphinx_integration import AutoSphinxIntegration
+from .federation import (
+    ExcelRAGFederation,
+    DepartmentConfig,
+    CrossDepartmentRelationship,
+    create_enterprise_federation,
+    setup_cross_department_relationships
+)
+from .monitoring import (
+    ExcelRAGMonitor,
+    ExcelFileChangeEvent,
+    UpdatePolicy,
+    setup_enterprise_monitoring,
+    monitor_department_files
+)
 
 __all__ = [
+    # Main conversion classes
     "ExcelRAGConverter", 
     "AdvancedExcelConverter",
     "ExcelFormatHandler",
     "AutoSphinxIntegration",
+    
+    # Industry-specific handlers
+    "IndustryHandlerManager",
+    "ManufacturingHandler",
+    "RetailHandler", 
+    "FinancialHandler",
+    
+    # Enterprise federation
+    "ExcelRAGFederation",
+    "DepartmentConfig",
+    "CrossDepartmentRelationship",
+    
+    # Real-time monitoring
+    "ExcelRAGMonitor",
+    "ExcelFileChangeEvent",
+    "UpdatePolicy",
+    
+    # Convenience functions
     "convert_excel_to_rag",
     "query_excel_data",
+    "create_enterprise_federation",
+    "setup_cross_department_relationships",
+    "setup_enterprise_monitoring",
+    "monitor_department_files",
 ]

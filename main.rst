@@ -1,9 +1,9 @@
 
-在庫管理システム
-========
+Production Monitoring データ分析
+===========================
 
 .. meta::
-   :description: Cross Tab形式データ（25件）、エンティティ0個（0種類）
+   :description: Cross Tab形式データ（30件）、エンティティ0個（0種類）
    :keywords: 
 
 概要
@@ -11,9 +11,9 @@
 
 **データソース**: :file:``
 
-**データ概要**: Cross Tab形式データ（25件）、エンティティ0個（0種類）
+**データ概要**: Cross Tab形式データ（30件）、エンティティ0個（0種類）
 
-**最終更新**: 2025-06-10 17:16
+**最終更新**: 2025-06-10 17:33
 
 **品質スコア**: 1.00/1.0
 
@@ -25,15 +25,15 @@
 
 **カラム構成** (3列):
 
-- ``商品コード``
+- ``製品ID``
 - ``variable``
 - ``value``
 
-**データサイズ**: 25 レコード
+**データサイズ**: 30 レコード
 
-.. enhanced-jsontable:: inventory-management_data.json
+.. enhanced-jsontable:: production-monitoring_data.json
    :rag-metadata: true
-   :rag-purpose: inventory-management
+   :rag-purpose: production-monitoring
    :entity-types: 
    :excel-source: 
    :auto-update: manual
@@ -47,10 +47,10 @@ AI活用ガイド
 このデータセットに対する質問例
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- 在庫切れリスクが高い商品は？
-- 来月の入荷予定で需要をカバーできる？
-- 仕入先別の納期遅延傾向は？
-- ABC分析でA分類商品の回転率は？
+- データの主要傾向は？
+- 注目すべき異常値や外れ値は？
+- 改善が必要な領域は？
+- 今後の予測や推奨事項は？
 
 高度な分析クエリ
 ~~~~~~~~~~~~~~~
@@ -81,7 +81,7 @@ AI活用ガイド
 --------
 
 
-**2025-06-10 17:16**
+**2025-06-10 17:33**
   - Excel-RAG統合による初回自動生成
   - 完全なメタデータ抽出と品質評価
   - AI対応ドキュメント生成完了

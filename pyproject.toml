@@ -41,6 +41,7 @@ dependencies = [
     # Excel-RAG統合に必要な依存関係
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",
+    "watchdog>=6.0.0",
 ]
 
 [project.optional-dependencies]
