@@ -8,7 +8,7 @@ following pytest best practices with single assertions and AAA pattern.
 import pytest
 from docutils import nodes
 
-from sphinxcontrib.jsontable.directives import TableBuilder
+from sphinxcontrib.jsontable.table_builders import TableBuilder
 
 
 class TestTableBuilder:
@@ -418,3 +418,228 @@ class TestTableBuilder:
         # Assert
         entries = [child for child in result.children if isinstance(child, nodes.entry)]
         assert len(entries) == 3
+
+    # Additional tests for missing coverage areas
+
+    def test_build_internal_processing_with_data(self, table_builder):
+        """Test build() method's internal processing with actual data."""
+        # Arrange
+        table_data = [["A", "B"], ["C", "D"], ["E"]]  # Irregular row lengths
+
+        # Act
+        result = table_builder.build(table_data)
+
+        # Assert - verify max_cols calculation and table structure creation
+        tgroup = result[0]
+        assert tgroup["cols"] == 2  # max_cols should be 2
+        assert isinstance(result, nodes.table)
+
+    def test_build_header_processing_branch(self, table_builder):
+        """Test build() method's header processing branch."""
+        # Arrange
+        table_data = [["Header1", "Header2"], ["Data1", "Data2"]]
+
+        # Act
+        result = table_builder.build(table_data, has_header=True)
+
+        # Assert - verify header processing branch
+        tgroup = result[0]
+        thead = next(
+            child for child in tgroup.children if isinstance(child, nodes.thead)
+        )
+        tbody = next(
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        )
+
+        # Verify header is processed and body_data is table_data[1:]
+        assert isinstance(thead, nodes.thead)
+        assert isinstance(tbody, nodes.tbody)
+        assert len(tbody.children) == 1  # Only one body row
+
+    def test_create_empty_table_internal_structure(self, table_builder):
+        """Test _create_empty_table() internal structure creation."""
+        # Act
+        result = table_builder._create_empty_table()
+
+        # Assert - verify internal structure details
+        tgroup = result[0]
+
+        # Should have colspec and tbody as children
+        assert len(tgroup.children) == 2
+
+        # First child should be colspec
+        colspec = tgroup.children[0]
+        assert isinstance(colspec, nodes.colspec)
+        assert colspec["colwidth"] == 1
+
+        # Second child should be tbody
+        tbody = tgroup.children[1]
+        assert isinstance(tbody, nodes.tbody)
+
+        # Check tbody content
+        row = tbody[0]
+        entry = row[0]
+        paragraph = entry[0]
+        assert isinstance(paragraph, nodes.paragraph)
+        assert paragraph.astext() == "No data available"
+
+    def test_create_table_structure_colspec_creation(self, table_builder):
+        """Test _create_table_structure() colspec creation loop."""
+        # Arrange
+        num_cols = 4
+
+        # Act
+        result = table_builder._create_table_structure(num_cols)
+
+        # Assert - verify colspec creation loop
+        tgroup = result[0]
+        colspecs = [
+            child for child in tgroup.children if isinstance(child, nodes.colspec)
+        ]
+
+        assert len(colspecs) == 4
+        for colspec in colspecs:
+            assert isinstance(colspec, nodes.colspec)
+            assert colspec["colwidth"] == 1
+
+    def test_add_header_cell_processing_loop(self, table_builder):
+        """Test _add_header() cell processing loop."""
+        # Arrange
+        table = nodes.table()
+        tgroup = nodes.tgroup(cols=3)
+        table += tgroup
+        header_data = ["Col1", "Col2", "Col3"]
+
+        # Act
+        table_builder._add_header(table, header_data)
+
+        # Assert - verify cell processing loop
+        thead = next(
+            child for child in tgroup.children if isinstance(child, nodes.thead)
+        )
+        row = thead[0]
+        entries = [child for child in row.children if isinstance(child, nodes.entry)]
+
+        assert len(entries) == 3
+        for i, entry in enumerate(entries):
+            paragraph = entry[0]
+            assert isinstance(paragraph, nodes.paragraph)
+            assert paragraph.astext() == header_data[i]
+
+    def test_add_body_row_processing_loop(self, table_builder):
+        """Test _add_body() row processing loop."""
+        # Arrange
+        table = nodes.table()
+        tgroup = nodes.tgroup(cols=3)
+        table += tgroup
+        body_data = [["R1C1", "R1C2"], ["R2C1", "R2C2", "R2C3"]]
+        max_cols = 3
+
+        # Act
+        table_builder._add_body(table, body_data, max_cols)
+
+        # Assert - verify row processing loop and padding
+        tbody = next(
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        )
+        rows = [child for child in tbody.children if isinstance(child, nodes.row)]
+
+        assert len(rows) == 2
+
+        # Check first row (should be padded)
+        first_row_entries = [
+            child for child in rows[0].children if isinstance(child, nodes.entry)
+        ]
+        assert len(first_row_entries) == 3
+        assert first_row_entries[2][0].astext() == ""  # Padded cell
+
+        # Check second row (no padding needed)
+        second_row_entries = [
+            child for child in rows[1].children if isinstance(child, nodes.entry)
+        ]
+        assert len(second_row_entries) == 3
+
+    def test_add_body_cell_processing_loop(self, table_builder):
+        """Test _add_body() cell processing loop."""
+        # Arrange
+        table = nodes.table()
+        tgroup = nodes.tgroup(cols=2)
+        table += tgroup
+        body_data = [["Cell1", "Cell2"]]
+        max_cols = 2
+
+        # Act
+        table_builder._add_body(table, body_data, max_cols)
+
+        # Assert - verify cell processing loop
+        tbody = next(
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        )
+        row = tbody[0]
+        entries = [child for child in row.children if isinstance(child, nodes.entry)]
+
+        assert len(entries) == 2
+        for i, entry in enumerate(entries):
+            paragraph = entry[0]
+            assert isinstance(paragraph, nodes.paragraph)
+            assert paragraph.astext() == body_data[0][i]
+
+    def test_create_row_cell_processing_loop(self, table_builder):
+        """Test _create_row() cell processing loop."""
+        # Arrange
+        row_data = ["Cell1", "Cell2", "Cell3"]
+
+        # Act
+        result = table_builder._create_row(row_data)
+
+        # Assert - verify cell processing loop
+        entries = [child for child in result.children if isinstance(child, nodes.entry)]
+
+        assert len(entries) == 3
+        for i, entry in enumerate(entries):
+            paragraph = entry[0]
+            assert isinstance(paragraph, nodes.paragraph)
+            assert paragraph.astext() == row_data[i]
+
+    def test_build_edge_case_empty_rows(self, table_builder):
+        """Test build() with table containing completely empty rows."""
+        # Arrange
+        table_data = [["A", "B"], [], ["C"]]
+
+        # Act
+        result = table_builder.build(table_data)
+
+        # Assert - verify handling of empty rows
+        tgroup = result[0]
+        tbody = next(
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        )
+        rows = [child for child in tbody.children if isinstance(child, nodes.row)]
+
+        assert len(rows) == 3
+        assert tgroup["cols"] == 2  # max_cols should be 2
+
+    def test_add_body_with_mixed_data_types(self, table_builder):
+        """Test _add_body() with mixed data types converted to strings."""
+        # Arrange
+        table = nodes.table()
+        tgroup = nodes.tgroup(cols=3)
+        table += tgroup
+        body_data = [[123, None, True], ["text", 45.6, False]]
+        max_cols = 3
+
+        # Act
+        table_builder._add_body(table, body_data, max_cols)
+
+        # Assert - verify str() conversion
+        tbody = next(
+            child for child in tgroup.children if isinstance(child, nodes.tbody)
+        )
+        first_row = tbody[0]
+        entries = [
+            child for child in first_row.children if isinstance(child, nodes.entry)
+        ]
+
+        assert entries[0][0].astext() == "123"
+        assert entries[1][0].astext() == "None"
+        assert entries[2][0].astext() == "True"

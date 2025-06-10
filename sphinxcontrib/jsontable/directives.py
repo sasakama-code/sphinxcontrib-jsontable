@@ -553,7 +553,7 @@ class TableBuilder:
         thead = nodes.thead()
         header_row = self._create_row(header_data)
         thead += header_row
-        cast(nodes.Element, table[0]).extend(thead)
+        cast(nodes.Element, table[0]).append(thead)
 
     def _add_body(
         self,
@@ -575,7 +575,7 @@ class TableBuilder:
             padded_row = row_data + [""] * (max_cols - len(row_data))
             tbody += self._create_row(padded_row)
 
-        cast(nodes.Element, table[0]).extend(tbody)
+        cast(nodes.Element, table[0]).append(tbody)
 
     def _create_row(self, row_data: list[str]) -> nodes.row:
         """

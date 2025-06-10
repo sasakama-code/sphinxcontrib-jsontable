@@ -526,7 +526,9 @@ class HybridSearchEngine:
         # 統合スコアでソート
         sorted_results = sorted(
             unified_results.values(),
-            key=lambda x: float(x["total_score"]) if isinstance(x["total_score"], int | float | str) else 0.0,
+            key=lambda x: float(x["total_score"])
+            if isinstance(x["total_score"], int | float | str)
+            else 0.0,
             reverse=True,
         )
 
@@ -536,7 +538,11 @@ class HybridSearchEngine:
             result_obj = item["result"]
             if hasattr(result_obj, "relevance_score"):
                 score_value = item["total_score"]
-                result_obj.relevance_score = float(score_value) if isinstance(score_value, int | float | str) else 0.0
+                result_obj.relevance_score = (
+                    float(score_value)
+                    if isinstance(score_value, int | float | str)
+                    else 0.0
+                )
             result = result_obj
             if not isinstance(result, SearchResult):
                 continue

@@ -144,3 +144,20 @@ class TableBuilder:
             tbody.append(row)
 
         cast(nodes.Element, tgroup).append(tbody)
+
+    def _create_row(self, row_data: list[str]) -> nodes.row:
+        """
+        Create a row node from list of cell values.
+
+        Args:
+            row_data: List of cell values for the row.
+
+        Returns:
+            nodes.row with entry nodes for each cell.
+        """
+        row = nodes.row()
+        for cell_content in row_data:
+            entry = nodes.entry()
+            entry.append(nodes.paragraph(text=str(cell_content)))
+            row.append(entry)
+        return row

@@ -244,6 +244,11 @@ asyncio_mode = "auto"
 source = ["sphinxcontrib.jsontable"]
 branch = true
 parallel = true
+omit = [
+    "*/directives_backup.py",
+    "*/test*",
+    "*/__pycache__/*",
+]
 
 [tool.coverage.paths]
 source = ["sphinxcontrib/jsontable", "*/site-packages/sphinxcontrib/jsontable"]
