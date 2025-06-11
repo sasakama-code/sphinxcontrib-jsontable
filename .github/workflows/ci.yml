@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop, feature/test-optimization-ultrathink ]
+    branches: [ main, develop]
   pull_request:
     branches: [ main ]
   workflow_dispatch:  # Allow manual triggering
