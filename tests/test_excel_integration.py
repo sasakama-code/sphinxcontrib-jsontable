@@ -242,7 +242,7 @@ class TestExcelRAGConverter:
     def test_convert_excel_to_rag_validation_error(self, converter):
         """Test conversion with validation error."""
         non_existent_file = "/non/existent/path/test.xlsx"
-        
+
         with pytest.raises(RuntimeError, match="Conversion failed"):
             converter.convert_excel_to_rag(non_existent_file, "test-purpose")
 
@@ -252,7 +252,7 @@ class TestExcelRAGConverter:
 
         # Mock the RAG extractor to return a proper BasicMetadata object
         from sphinxcontrib.jsontable.rag.metadata_extractor import BasicMetadata
-        
+
         mock_metadata = BasicMetadata(
             table_id="test-table",
             schema={},
@@ -262,9 +262,9 @@ class TestExcelRAGConverter:
             custom_tags={},
             data_statistics={},
             embedding_ready_text="Test text",
-            generation_timestamp="2025-06-10T00:00:00"
+            generation_timestamp="2025-06-10T00:00:00",
         )
-        
+
         converter.rag_extractor.extract = Mock(return_value=mock_metadata)
 
         result = converter._generate_rag_metadata(sample_conversion_result, config)
@@ -877,7 +877,11 @@ class TestExcelRAGIntegration:
 
         except Exception as e:
             # Expected due to missing Excel file or mock configuration issues
-            assert "conversion failed" in str(e).lower() or "assert" in str(e).lower() or "missing" in str(e).lower()
+            assert (
+                "conversion failed" in str(e).lower()
+                or "assert" in str(e).lower()
+                or "missing" in str(e).lower()
+            )
 
 
 # Performance tests
