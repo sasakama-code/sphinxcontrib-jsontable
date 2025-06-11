@@ -1,0 +1,215 @@
+{
+  "table_id": "table_20250610_f02dacdb",
+  "schema": {
+    "type": "array",
+    "title": "データテーブル",
+    "description": "5件のレコードを含むテーブル",
+    "items": {
+      "type": "object",
+      "properties": {
+        "勘定科目": {
+          "type": "string",
+          "title": "勘定科目",
+          "description": "テキストデータ",
+          "enum": [
+            "売上高",
+            "売上原価",
+            "販売費及び一般管理費",
+            "営業利益",
+            "当期純利益"
+          ],
+          "x-enum-count": "5"
+        },
+        "当月実績": {
+          "type": "integer",
+          "title": "当月実績",
+          "description": "数値データ",
+          "minimum": 700000,
+          "maximum": 8600000,
+          "x-average": 3580000.0,
+          "x-count": 5,
+          "enum": [
+            8600000,
+            5500000,
+            2100000,
+            1000000,
+            700000
+          ],
+          "x-enum-count": "5"
+        },
+        "前月実績": {
+          "type": "integer",
+          "title": "前月実績",
+          "description": "数値データ",
+          "minimum": 600000,
+          "maximum": 7800000,
+          "x-average": 3280000.0,
+          "x-count": 5,
+          "enum": [
+            7800000,
+            5200000,
+            1950000,
+            850000,
+            600000
+          ],
+          "x-enum-count": "5"
+        },
+        "予算": {
+          "type": "integer",
+          "title": "予算",
+          "description": "金額・価格データ",
+          "x-semantic-type": "monetary",
+          "minimum": 750000,
+          "maximum": 9000000,
+          "x-average": 3750000.0,
+          "x-count": 5,
+          "enum": [
+            9000000,
+            5800000,
+            2200000,
+            1000000,
+            750000
+          ],
+          "x-enum-count": "5"
+        },
+        "達成率": {
+          "type": "number",
+          "title": "達成率",
+          "description": "数値データ",
+          "minimum": 93.3,
+          "maximum": 100.0,
+          "x-average": 95.84,
+          "x-count": 5,
+          "enum": [
+            95.6,
+            94.8,
+            95.5,
+            100.0,
+            93.3
+          ],
+          "x-enum-count": "5"
+        },
+        "部門": {
+          "type": "string",
+          "title": "部門",
+          "description": "テキストデータ"
+        }
+      },
+      "required": [
+        "勘定科目",
+        "当月実績",
+        "前月実績",
+        "予算",
+        "達成率",
+        "部門"
+      ]
+    }
+  },
+  "semantic_summary": "データテーブル: 5件、勘定科目、当月実績、前月実績など6カラムを含む",
+  "search_keywords": [
+    "販売費及び一般管理費",
+    "前月実績",
+    "当期純利益",
+    "達成率",
+    "売上高",
+    "売上原価",
+    "部門",
+    "当月実績",
+    "予算",
+    "全社",
+    "勘定科目",
+    "営業利益"
+  ],
+  "entity_mapping": {
+    "勘定科目": "generic_string",
+    "当月実績": "generic_integer",
+    "前月実績": "generic_integer",
+    "予算": "monetary",
+    "達成率": "generic_number",
+    "部門": "generic_string"
+  },
+  "custom_tags": [],
+  "data_statistics": {
+    "record_count": 5,
+    "column_count": 6,
+    "data_types": {
+      "string": 10,
+      "integer": 15,
+      "number": 5
+    },
+    "completeness": {
+      "勘定科目": 1.0,
+      "当月実績": 1.0,
+      "前月実績": 1.0,
+      "予算": 1.0,
+      "達成率": 1.0,
+      "部門": 1.0
+    }
+  },
+  "embedding_ready_text": "データ種別: データテーブル | 説明: 5件のレコードを含むテーブル | レコード数: 5件 | カラム: 勘定科目, 当月実績, 前月実績, 予算, 達成率 | サンプル1: 勘定科目=売上高, 当月実績=8600000, 前月実績=7800000, 予算=9000000, 達成率=95.6 | サンプル2: 勘定科目=売上原価, 当月実績=5500000, 前月実績=5200000, 予算=5800000, 達成率=94.8",
+  "generation_timestamp": "2025-06-10T17:33:29.800456",
+  "advanced": {
+    "statistics": {
+      "record_count": 5,
+      "field_count": 6,
+      "completeness": 0.95,
+      "consistency": 0.92
+    },
+    "entities": {
+      "items": [
+        {
+          "text": "全社",
+          "type": "organization",
+          "confidence": 0.9
+        },
+        {
+          "text": "全社",
+          "type": "organization",
+          "confidence": 0.9
+        },
+        {
+          "text": "全社",
+          "type": "organization",
+          "confidence": 0.9
+        },
+        {
+          "text": "全社",
+          "type": "organization",
+          "confidence": 0.9
+        },
+        {
+          "text": "全社",
+          "type": "organization",
+          "confidence": 0.9
+        }
+      ],
+      "types": [
+        "organization"
+      ],
+      "confidence": 0.8,
+      "domain": "general",
+      "language": "japanese"
+    },
+    "language": "japanese",
+    "format_type": "financial_statement"
+  },
+  "quality_metrics": 1.0,
+  "processing_config": {
+    "language": "japanese",
+    "auto_entity_detection": true,
+    "quality_threshold": 0.8,
+    "max_file_size_mb": 100,
+    "supported_formats": [
+      ".xlsx",
+      ".xls",
+      ".csv"
+    ],
+    "output_formats": [
+      "json",
+      "json-ld",
+      "opensearch"
+    ],
+    "sphinx_auto_generate": true,
+    "rag_purpose": "finance-monitoring"
+  }
+}

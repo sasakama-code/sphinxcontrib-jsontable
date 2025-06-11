@@ -1,0 +1,138 @@
+{
+  "table_id": "table_20250610_124379e6",
+  "schema": {
+    "type": "array",
+    "title": "データテーブル",
+    "description": "30件のレコードを含むテーブル",
+    "items": {
+      "type": "object",
+      "properties": {
+        "製品ID": {
+          "type": "string",
+          "title": "製品ID",
+          "description": "テキストデータ",
+          "enum": [
+            "P001",
+            "P002",
+            "P003",
+            "P004",
+            "P005"
+          ],
+          "x-enum-count": "5"
+        },
+        "variable": {
+          "type": "string",
+          "title": "variable",
+          "description": "テキストデータ",
+          "enum": [
+            "製品名",
+            "計画生産数",
+            "実績生産数",
+            "品質スコア",
+            "生産ライン",
+            "生産日"
+          ],
+          "x-enum-count": "6"
+        },
+        "value": {
+          "type": "string",
+          "title": "value",
+          "description": "テキストデータ",
+          "enum": [
+            "商品A",
+            "商品B",
+            "商品C",
+            "商品D",
+            "商品E",
+            1000,
+            1500,
+            800,
+            1200,
+            900
+          ],
+          "x-enum-count": "10"
+        }
+      },
+      "required": [
+        "製品ID",
+        "variable",
+        "value"
+      ]
+    }
+  },
+  "semantic_summary": "データテーブル: 30件、製品ID、variable、valueを含む",
+  "search_keywords": [
+    "variable",
+    "商品A",
+    "製品ID",
+    "P004",
+    "P005",
+    "P002",
+    "P003",
+    "商品B",
+    "P001",
+    "value",
+    "商品C",
+    "商品E",
+    "商品D",
+    "計画生産数",
+    "製品名"
+  ],
+  "entity_mapping": {
+    "製品ID": "generic_string",
+    "variable": "generic_string",
+    "value": "generic_string"
+  },
+  "custom_tags": [],
+  "data_statistics": {
+    "record_count": 30,
+    "column_count": 3,
+    "data_types": {
+      "string": 25,
+      "integer": 5
+    },
+    "completeness": {
+      "製品ID": 1.0,
+      "variable": 1.0,
+      "value": 1.0
+    }
+  },
+  "embedding_ready_text": "データ種別: データテーブル | 説明: 30件のレコードを含むテーブル | レコード数: 30件 | カラム: 製品ID, variable, value | サンプル1: 製品ID=P001, variable=製品名, value=商品A | サンプル2: 製品ID=P002, variable=製品名, value=商品B",
+  "generation_timestamp": "2025-06-10T17:33:29.915070",
+  "advanced": {
+    "statistics": {
+      "record_count": 30,
+      "field_count": 3,
+      "completeness": 0.95,
+      "consistency": 0.92
+    },
+    "entities": {
+      "items": [],
+      "types": [],
+      "confidence": 0.8,
+      "domain": "general",
+      "language": "japanese"
+    },
+    "language": "japanese",
+    "format_type": "cross_tab"
+  },
+  "quality_metrics": 1.0,
+  "processing_config": {
+    "language": "japanese",
+    "auto_entity_detection": true,
+    "quality_threshold": 0.8,
+    "max_file_size_mb": 100,
+    "supported_formats": [
+      ".xlsx",
+      ".xls",
+      ".csv"
+    ],
+    "output_formats": [
+      "json",
+      "json-ld",
+      "opensearch"
+    ],
+    "sphinx_auto_generate": true,
+    "rag_purpose": "production-monitoring"
+  }
+}

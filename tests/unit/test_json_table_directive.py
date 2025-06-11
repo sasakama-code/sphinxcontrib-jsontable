@@ -1,8 +1,15 @@
-"""
-Unit tests for JsonTableDirective class.
+"""Comprehensive unit tests for JsonTableDirective class.
 
-This module provides comprehensive test coverage for all methods of the
-JsonTableDirective class, including normal and error cases.
+Provides exhaustive test coverage for all JsonTableDirective methods including
+initiation, configuration parsing, JSON data processing, and table generation.
+Tests cover both successful operations and error conditions with proper mocking
+for component isolation and reliable test execution.
+
+Test Structure:
+- Initialization and configuration tests
+- JSON data loading and validation tests
+- Table conversion and rendering tests
+- Error handling and edge case validation
 """
 
 from pathlib import Path
@@ -20,11 +27,20 @@ from sphinxcontrib.jsontable.directives import (
 
 
 class TestJsonTableDirective:
-    """Test suite for JsonTableDirective class methods."""
+    """Comprehensive test suite for JsonTableDirective functionality.
+
+    Tests all aspects of JsonTableDirective including initialization,
+    configuration processing, data loading, table generation, and error
+    handling with comprehensive mocking for component isolation.
+    """
 
     @pytest.fixture
     def mock_state(self):
-        """Create a mock state with document and environment."""
+        """Create mock Sphinx state with document and environment configuration.
+
+        Returns:
+            Mock object configured to simulate Sphinx directive state.
+        """
         state = Mock()
         state.document = Mock()
         state.document.settings = Mock()
@@ -34,7 +50,14 @@ class TestJsonTableDirective:
 
     @pytest.fixture
     def directive_instance(self, mock_state):
-        """Create a JsonTableDirective instance with mocked dependencies."""
+        """Create JsonTableDirective instance with fully mocked dependencies.
+
+        Args:
+            mock_state: Mocked Sphinx state fixture.
+
+        Returns:
+            JsonTableDirective instance with mocked loader, converter, and builder.
+        """
         with (
             patch("sphinxcontrib.jsontable.directives.SphinxDirective.__init__"),
             patch(
@@ -474,3 +497,421 @@ class TestJsonTableDirective:
                 "data/test.json",
                 mock_source_dir,
             )
+
+    # Real instance tests to improve coverage of actual implementation
+
+    @patch("builtins.getattr")
+    @patch("sphinxcontrib.jsontable.json_table_directive.TableBuilder")
+    @patch("sphinxcontrib.jsontable.json_table_directive.TableConverter")
+    @patch("sphinxcontrib.jsontable.json_table_directive.JsonDataLoader")
+    def test_real_init_with_default_settings(
+        self, mock_loader_class, mock_converter_class, mock_builder_class, mock_getattr
+    ):
+        """Test real __init__ method with default settings to cover lines 66-76."""
+        # Mock getattr to return DEFAULT_MAX_ROWS
+        from sphinxcontrib.jsontable.table_converters import DEFAULT_MAX_ROWS
+
+        mock_getattr.return_value = DEFAULT_MAX_ROWS
+
+        # Create minimal mock state
+        mock_state = Mock()
+        mock_state_machine = Mock()
+        mock_env = Mock()
+        mock_config = Mock()
+        mock_env.config = mock_config
+
+        # Create instance arguments for real initialization
+        args = (
+            "json-table",
+            [],
+            {},  # no options
+            [],
+            1,
+            0,
+            "block text",
+            mock_state,
+            mock_state_machine,
+        )
+
+        # Patch SphinxDirective.__init__ to set up env
+        with patch(
+            "sphinxcontrib.jsontable.json_table_directive.SphinxDirective.__init__"
+        ) as mock_super_init:
+
+            def setup_env(self, *args, **kwargs):
+                self.env = mock_env
+                self.options = {}
+
+            mock_super_init.side_effect = setup_env
+
+            # Act - create real instance to test lines 66-76
+            directive = JsonTableDirective(*args)
+
+            # Assert initialization
+            mock_loader_class.assert_called_once_with(DEFAULT_ENCODING)
+            mock_converter_class.assert_called_once_with(DEFAULT_MAX_ROWS)
+            mock_builder_class.assert_called_once_with()
+            assert hasattr(directive, "loader")
+            assert hasattr(directive, "converter")
+            assert hasattr(directive, "builder")
+
+    @patch("builtins.getattr")
+    @patch("sphinxcontrib.jsontable.json_table_directive.TableBuilder")
+    @patch("sphinxcontrib.jsontable.json_table_directive.TableConverter")
+    @patch("sphinxcontrib.jsontable.json_table_directive.JsonDataLoader")
+    def test_real_init_with_custom_encoding(
+        self, mock_loader_class, mock_converter_class, mock_builder_class, mock_getattr
+    ):
+        """Test real __init__ method with custom encoding option."""
+        # Mock getattr to return DEFAULT_MAX_ROWS
+        from sphinxcontrib.jsontable.table_converters import DEFAULT_MAX_ROWS
+
+        mock_getattr.return_value = DEFAULT_MAX_ROWS
+
+        # Create minimal mock state
+        mock_state = Mock()
+        mock_state_machine = Mock()
+        mock_env = Mock()
+        mock_config = Mock()
+        mock_env.config = mock_config
+
+        custom_encoding = "latin-1"
+        args = (
+            "json-table",
+            [],
+            {"encoding": custom_encoding},
+            [],
+            1,
+            0,
+            "block text",
+            mock_state,
+            mock_state_machine,
+        )
+
+        # Patch SphinxDirective.__init__ to set up env
+        with patch(
+            "sphinxcontrib.jsontable.json_table_directive.SphinxDirective.__init__"
+        ) as mock_super_init:
+
+            def setup_env(self, *args, **kwargs):
+                self.env = mock_env
+                self.options = {"encoding": custom_encoding}
+
+            mock_super_init.side_effect = setup_env
+
+            # Act
+            JsonTableDirective(*args)
+
+            # Assert
+            mock_loader_class.assert_called_once_with(custom_encoding)
+
+    @patch("builtins.getattr")
+    @patch("sphinxcontrib.jsontable.json_table_directive.TableBuilder")
+    @patch("sphinxcontrib.jsontable.json_table_directive.TableConverter")
+    @patch("sphinxcontrib.jsontable.json_table_directive.JsonDataLoader")
+    def test_real_init_with_custom_max_rows(
+        self, mock_loader_class, mock_converter_class, mock_builder_class, mock_getattr
+    ):
+        """Test real __init__ method with custom max rows config."""
+        # Mock getattr to return custom value
+        custom_max_rows = 500
+        mock_getattr.return_value = custom_max_rows
+
+        # Create minimal mock state
+        mock_state = Mock()
+        mock_state_machine = Mock()
+        mock_env = Mock()
+        mock_config = Mock()
+        mock_env.config = mock_config
+
+        args = (
+            "json-table",
+            [],
+            {},
+            [],
+            1,
+            0,
+            "block text",
+            mock_state,
+            mock_state_machine,
+        )
+
+        # Patch SphinxDirective.__init__ to set up env
+        with patch(
+            "sphinxcontrib.jsontable.json_table_directive.SphinxDirective.__init__"
+        ) as mock_super_init:
+
+            def setup_env(self, *args, **kwargs):
+                self.env = mock_env
+                self.options = {}
+
+            mock_super_init.side_effect = setup_env
+
+            # Act
+            JsonTableDirective(*args)
+
+            # Assert
+            from sphinxcontrib.jsontable.table_converters import DEFAULT_MAX_ROWS
+
+            mock_getattr.assert_called_once_with(
+                mock_config, "jsontable_max_rows", DEFAULT_MAX_ROWS
+            )
+            mock_converter_class.assert_called_once_with(custom_max_rows)
+
+    def test_real_run_success_with_file_and_options(self):
+        """Test real run method execution with file argument and options to cover lines 86-93."""
+        # Create real directive instance
+        mock_state = Mock()
+        mock_state_machine = Mock()
+        mock_env = Mock()
+        mock_env.config = Mock()
+        mock_env.srcdir = "/mock/source"
+
+        args = (
+            "json-table",
+            ["test.json"],
+            {"header": True, "limit": 10},
+            [],
+            1,
+            0,
+            "block text",
+            mock_state,
+            mock_state_machine,
+        )
+
+        with (
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.SphinxDirective.__init__"
+            ) as mock_super_init,
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.JsonDataLoader"
+            ) as mock_loader_class,
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.TableConverter"
+            ) as mock_converter_class,
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.TableBuilder"
+            ) as mock_builder_class,
+            patch("builtins.getattr") as mock_getattr,
+        ):
+            # Setup environment
+            def setup_env(self, *args, **kwargs):
+                self.env = mock_env
+                self.arguments = ["test.json"]
+                self.options = {"header": True, "limit": 10}
+
+            mock_super_init.side_effect = setup_env
+            mock_getattr.return_value = 1000
+
+            # Setup mock instances
+            mock_loader = mock_loader_class.return_value
+            mock_converter = mock_converter_class.return_value
+            mock_builder = mock_builder_class.return_value
+
+            mock_json_data = [{"name": "test", "value": 123}]
+            mock_table_data = [["name", "value"], ["test", "123"]]
+            mock_table_node = Mock()
+
+            mock_loader.load_from_file.return_value = mock_json_data
+            mock_converter.convert.return_value = mock_table_data
+            mock_builder.build.return_value = mock_table_node
+
+            # Act
+            directive = JsonTableDirective(*args)
+            result = directive.run()
+
+            # Assert - covers lines 87-93
+            assert result == [mock_table_node]
+            mock_converter.convert.assert_called_once_with(mock_json_data, True, 10)
+            mock_builder.build.assert_called_once_with(mock_table_data, True)
+
+    def test_real_run_success_with_content(self):
+        """Test real run method execution with inline content to cover load_from_content path."""
+        # Create real directive instance
+        mock_state = Mock()
+        mock_state_machine = Mock()
+        mock_env = Mock()
+        mock_env.config = Mock()
+
+        args = (
+            "json-table",
+            [],
+            {},
+            ['{"name": "test", "value": 123}'],
+            1,
+            0,
+            "block text",
+            mock_state,
+            mock_state_machine,
+        )
+
+        with (
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.SphinxDirective.__init__"
+            ) as mock_super_init,
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.JsonDataLoader"
+            ) as mock_loader_class,
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.TableConverter"
+            ) as mock_converter_class,
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.TableBuilder"
+            ) as mock_builder_class,
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.getattr"
+            ) as mock_getattr,
+        ):
+            # Setup environment
+            def setup_env(self, *args, **kwargs):
+                self.env = mock_env
+                self.arguments = []
+                self.content = ['{"name": "test", "value": 123}']
+                self.options = {}
+
+            mock_super_init.side_effect = setup_env
+            mock_getattr.return_value = 1000
+
+            # Setup mock instances
+            mock_loader = mock_loader_class.return_value
+            mock_converter = mock_converter_class.return_value
+            mock_builder = mock_builder_class.return_value
+
+            mock_json_data = {"name": "test", "value": 123}
+            mock_table_data = [["test", "123"]]
+            mock_table_node = Mock()
+
+            mock_loader.load_from_content.return_value = mock_json_data
+            mock_converter.convert.return_value = mock_table_data
+            mock_builder.build.return_value = mock_table_node
+
+            # Act
+            directive = JsonTableDirective(*args)
+            result = directive.run()
+
+            # Assert - covers lines 115-116
+            assert result == [mock_table_node]
+            mock_loader.load_from_content.assert_called_once_with(
+                '{"name": "test", "value": 123}'
+            )
+
+    @patch("sphinxcontrib.jsontable.json_table_directive.logger")
+    @patch("sphinxcontrib.jsontable.json_table_directive.format_error")
+    def test_real_run_error_handling(self, mock_format_error, mock_logger):
+        """Test real run method error handling to cover lines 95-98."""
+        # Create real directive instance
+        mock_state = Mock()
+        mock_state_machine = Mock()
+        mock_env = Mock()
+        mock_env.config = Mock()
+
+        args = (
+            "json-table",
+            ["nonexistent.json"],
+            {},
+            [],
+            1,
+            0,
+            "block text",
+            mock_state,
+            mock_state_machine,
+        )
+
+        with (
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.SphinxDirective.__init__"
+            ) as mock_super_init,
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.JsonDataLoader"
+            ) as mock_loader_class,
+            patch("sphinxcontrib.jsontable.json_table_directive.TableConverter"),
+            patch("sphinxcontrib.jsontable.json_table_directive.TableBuilder"),
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.getattr"
+            ) as mock_getattr,
+            patch("sphinxcontrib.jsontable.json_table_directive.nodes") as mock_nodes,
+        ):
+            # Setup environment
+            def setup_env(self, *args, **kwargs):
+                self.env = mock_env
+                self.arguments = ["nonexistent.json"]
+                self.options = {}
+
+            mock_super_init.side_effect = setup_env
+            mock_getattr.return_value = 1000
+
+            # Setup mock instances
+            mock_loader = mock_loader_class.return_value
+            test_error = JsonTableError("Test error")
+            mock_loader.load_from_file.side_effect = test_error
+
+            # Setup error node creation
+            mock_error_node = Mock()
+            mock_paragraph_node = Mock()
+            mock_nodes.error.return_value = mock_error_node
+            mock_nodes.paragraph.return_value = mock_paragraph_node
+            mock_error_node.__iadd__ = Mock(return_value=mock_error_node)
+
+            mock_format_error.return_value = "Formatted error message"
+
+            # Act
+            directive = JsonTableDirective(*args)
+            result = directive.run()
+
+            # Assert - covers lines 95-98 and 130-132
+            assert result == [mock_error_node]
+            mock_format_error.assert_called_once_with(
+                "JsonTable directive error", test_error
+            )
+            mock_logger.error.assert_called_once_with("Formatted error message")
+            mock_nodes.error.assert_called_once()
+            mock_nodes.paragraph.assert_called_once_with(text="Formatted error message")
+
+    def test_real_load_json_data_no_source_error(self):
+        """Test real _load_json_data method when no source provided to cover line 118."""
+        # Create real directive instance
+        mock_state = Mock()
+        mock_state_machine = Mock()
+        mock_env = Mock()
+        mock_env.config = Mock()
+
+        args = (
+            "json-table",
+            [],
+            {},
+            [],
+            1,
+            0,
+            "block text",
+            mock_state,
+            mock_state_machine,
+        )
+
+        with (
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.SphinxDirective.__init__"
+            ) as mock_super_init,
+            patch("sphinxcontrib.jsontable.json_table_directive.JsonDataLoader"),
+            patch("sphinxcontrib.jsontable.json_table_directive.TableConverter"),
+            patch("sphinxcontrib.jsontable.json_table_directive.TableBuilder"),
+            patch(
+                "sphinxcontrib.jsontable.json_table_directive.getattr"
+            ) as mock_getattr,
+        ):
+            # Setup environment - no arguments, no content
+            def setup_env(self, *args, **kwargs):
+                self.env = mock_env
+                self.arguments = []
+                self.content = []
+                self.options = {}
+
+            mock_super_init.side_effect = setup_env
+            mock_getattr.return_value = 1000
+
+            # Act
+            directive = JsonTableDirective(*args)
+
+            # Assert - covers line 118
+            with pytest.raises(JsonTableError) as exc_info:
+                directive._load_json_data()
+            assert str(exc_info.value) == NO_JSON_SOURCE_ERROR

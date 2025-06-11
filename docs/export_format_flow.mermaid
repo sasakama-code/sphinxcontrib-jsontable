@@ -1,0 +1,40 @@
+graph TD
+    A[RAGメタデータ] --> B[MetadataExporter]
+    
+    B --> C{エクスポート形式選択}
+    
+    C -->|json-ld| D[JSON-LD Processor]
+    C -->|opensearch| E[OpenSearch Processor]
+    C -->|plamo-ready| F[PLaMo Processor]
+    C -->|custom| G[Custom Processor]
+    
+    D --> D1[セマンティックWeb標準]
+    D1 --> D2[@context設定]
+    D2 --> D3[RDF Triple生成]
+    D3 --> D4[knowledge_graph.jsonld]
+    
+    E --> E1[検索エンジン最適化]
+    E1 --> E2[フィールドマッピング]
+    E2 --> E3[インデックス設定]
+    E3 --> E4[search_mapping.json]
+    
+    F --> F1[日本語AI最適化]
+    F1 --> F2[PLaMo前処理]
+    F2 --> F3[ベクトル化準備]
+    F3 --> F4[plamo_optimized.json]
+    
+    G --> G1[ユーザー定義形式]
+    G1 --> G2[カスタムテンプレート]
+    G2 --> G3[custom_output.json]
+    
+    D4 --> H[知識グラフDB]
+    E4 --> I[Elasticsearch/OpenSearch]
+    F4 --> J[PLaMo-Embedding-1B]
+    G3 --> K[カスタムシステム]
+    
+    style A fill:#e1f5fe
+    style B fill:#fff3e0
+    style D fill:#e8f5e8
+    style E fill:#fff8e1
+    style F fill:#fce4ec
+    style G fill:#f1f8e9

@@ -1,9 +1,16 @@
-"""
-Comprehensive unit tests for JsonDataLoader class.
+"""Comprehensive unit tests for JsonDataLoader class functionality.
 
-This module contains unit tests for all methods of the JsonDataLoader class,
-following pytest best practices with AAA pattern and single assertion per test.
-Tests cover both normal and error scenarios with proper mocking for isolation.
+Provides exhaustive test coverage for JsonDataLoader including encoding validation,
+file path security checks, JSON parsing, and error handling. Tests follow pytest
+best practices with AAA pattern, single assertions, and proper mocking for
+component isolation.
+
+Test Coverage:
+- Initialization with various encoding configurations
+- File path validation and security checks
+- JSON file loading with encoding support
+- Inline content parsing and validation
+- Error handling for invalid inputs and security violations
 """
 
 import json
@@ -21,10 +28,18 @@ from sphinxcontrib.jsontable.directives import (
 
 
 class TestJsonDataLoaderInit:
-    """Test cases for JsonDataLoader.__init__ method."""
+    """Test suite for JsonDataLoader initialization and configuration.
+
+    Tests initialization behavior including encoding validation,
+    fallback mechanisms, and proper component setup.
+    """
 
     def test_init_with_default_encoding(self):
-        """Test initialization with default encoding."""
+        """Verify JsonDataLoader initializes with default UTF-8 encoding.
+
+        Tests that loader correctly uses DEFAULT_ENCODING when no
+        encoding parameter is provided during initialization.
+        """
         # Arrange & Act
         loader = JsonDataLoader()
 
@@ -32,7 +47,11 @@ class TestJsonDataLoaderInit:
         assert loader.encoding == DEFAULT_ENCODING
 
     def test_init_with_valid_custom_encoding(self):
-        """Test initialization with valid custom encoding."""
+        """Verify JsonDataLoader accepts valid custom encoding configuration.
+
+        Tests that loader correctly accepts and uses valid encoding
+        specifications like UTF-16 for file processing operations.
+        """
         # Arrange
         custom_encoding = "utf-16"
 
@@ -44,7 +63,11 @@ class TestJsonDataLoaderInit:
 
     @patch("sphinxcontrib.jsontable.directives.logger")
     def test_init_with_invalid_encoding_falls_back_to_default(self, mock_logger):
-        """Test initialization with invalid encoding falls back to default."""
+        """Verify JsonDataLoader gracefully handles invalid encoding with fallback.
+
+        Tests that loader falls back to DEFAULT_ENCODING when invalid
+        encoding is provided and logs appropriate warning message.
+        """
         # Arrange
         invalid_encoding = "invalid-encoding"
 

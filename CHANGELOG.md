@@ -5,9 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2025-06-06
+## [0.3.0] - 2025-06-08
 
-### Added
+### Added - RAG Integration (Major Release)
+- **🌟 世界初の日本語特化RAG統合機能** - PLaMo-Embedding-1B対応による次世代文書処理
+- **EnhancedJsonTableDirective** - RAG対応の拡張ディレクティブで高度なメタデータ生成
+- **高度メタデータ生成** - 統計分析・日本語エンティティ認識・品質評価の自動化
+- **自動ファセット生成** - カテゴリカル・数値・時系列・エンティティファセットの完全自動化
+- **多形式出力サポート** - JSON-LD、OpenSearch、PLaMo-ready形式での柔軟な出力
+- **PLaMo-Embedding-1B統合** - 日本語AI特化のベクトル処理・セマンティック検索
+- **日本語ビジネス用語認識** - 企業文書に特化した用語解析・正規化機能
+- **セマンティック検索インデックス** - 意味理解ベースの高精度検索システム
+
+### Technical Architecture
+```
+sphinxcontrib/jsontable/
+├── enhanced_directive.py          # RAG対応拡張ディレクティブ
+└── rag/                           # RAG統合モジュール
+    ├── metadata_extractor.py      # メタデータ抽出
+    ├── semantic_chunker.py        # セマンティック分割
+    ├── advanced_metadata.py       # 高度統計分析
+    ├── search_facets.py           # ファセット自動生成
+    ├── metadata_exporter.py       # 多形式出力
+    ├── vector_processor.py        # PLaMoベクトル処理
+    ├── search_index_generator.py  # 検索インデックス
+    └── query_processor.py         # インテリジェントクエリ処理
+```
+
+### Quality Improvements
 - **JSON Key Order Preservation**: Headers now maintain the original key order from JSON objects instead of alphabetical sorting (#27)
 - **Automatic Performance Protection**: Default row limit of 10,000 rows to prevent performance issues with large datasets (#29)
 - **Sphinx Configuration Option**: `jsontable_max_rows` setting in `conf.py` to customize default row limits (#29)
@@ -15,8 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Smart Data Detection**: Automatic estimation of dataset size for intelligent limit application (#29)
 - **User-Friendly Warnings**: Clear messages when automatic limits are applied to large datasets (#29)
 - **Enhanced Security Constraints**: Added limits for maximum keys (1,000), objects (10,000), and key length (255 characters) in header extraction (#27)
-- **Enhanced Documentation**: Comprehensive performance guidelines and best practices in README (#29)
-- **Configuration Examples**: Multiple `conf.py` examples for different environment needs (#29)
 
 ### Changed
 - **Improved Header Extraction**: `_extract_headers()` method now preserves JSON key order while maintaining performance and security (#27)

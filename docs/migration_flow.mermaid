@@ -1,0 +1,23 @@
+graph LR
+    A[既存文書 v0.2.x] --> B{移行方法選択}
+    
+    B -->|段階的移行| C[従来機能継続使用]
+    B -->|一括移行| D[新機能一括導入]
+    
+    C --> C1[jsontable継続]
+    C1 --> C2[重要文書のみenhanced-jsontable]
+    C2 --> C3[徐々に新機能追加]
+    
+    D --> D1[enhanced-jsontable一括置換]
+    D1 --> D2[全機能有効化]
+    D2 --> D3[エクスポート形式設定]
+    
+    C3 --> E[段階的品質向上]
+    D3 --> E
+    
+    E --> F[最終的な高機能文書]
+    
+    style A fill:#ffebee
+    style C fill:#e8f5e8
+    style D fill:#e3f2fd
+    style F fill:#f3e5f5

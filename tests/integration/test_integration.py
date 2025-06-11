@@ -171,7 +171,7 @@ def test_performance_improvement():
     if efficiency_ratio <= 1.0:
         print("   ✅ Performance improvement confirmed")
     else:
-        print("   ℹ️  Limited processing maintains reasonable performance")  # noqa: RUF001
+        print("   ℹ️  Limited processing maintains reasonable performance")
 
 
 def test_sphinx_directive_integration():

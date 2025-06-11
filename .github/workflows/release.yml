@@ -227,6 +227,28 @@ jobs:
         echo "✅ Build completed successfully"
 
     # ===============================
+    # Generate SBOM for Release
+    # ===============================
+    - name: Generate SBOM for release
+      run: |
+        echo "📋 Generating Software Bill of Materials for release..."
+        python -m pip install cyclonedx-bom
+        cyclonedx-py --format json --output-file release-sbom.json
+        cyclonedx-py --format xml --output-file release-sbom.xml
+        echo "✅ Release SBOM generated successfully"
+        echo "📊 SBOM files:"
+        ls -la release-sbom.*
+
+    - name: Upload release SBOM
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-sbom
+        path: |
+          release-sbom.json
+          release-sbom.xml
+        retention-days: 365  # Keep for 1 year for compliance
+
+    # ===============================
     # Basic verification without twine
     # ===============================
     - name: Verify distributions

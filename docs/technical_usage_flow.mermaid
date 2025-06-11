@@ -1,0 +1,23 @@
+graph TD
+    A[技術ドキュメント作成] --> B[APIエンドポイント定義]
+    B --> C[enhanced-jsontable使用]
+    
+    C --> D[technical chunking]
+    C --> E[opensearch export]
+    C --> F[facet generation]
+    
+    D --> G[関数・クラス単位分割]
+    E --> H[検索インデックス生成]
+    F --> I[技術カテゴリファセット]
+    
+    G --> J[コード理解向上]
+    H --> K[開発者検索最適化]
+    I --> L[技術分野別フィルタ]
+    
+    J --> M[開発効率向上]
+    K --> M
+    L --> M
+    
+    style A fill:#e1f5fe
+    style C fill:#fff3e0
+    style M fill:#e8f5e8

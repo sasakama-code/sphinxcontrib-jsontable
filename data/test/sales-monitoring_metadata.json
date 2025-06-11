@@ -1,0 +1,221 @@
+{
+  "table_id": "table_20250610_d31878ff",
+  "schema": {
+    "type": "array",
+    "title": "データテーブル",
+    "description": "5件のレコードを含むテーブル",
+    "items": {
+      "type": "object",
+      "properties": {
+        "営業担当": {
+          "type": "string",
+          "title": "営業担当",
+          "description": "テキストデータ",
+          "enum": [
+            "田中太郎",
+            "佐藤花子",
+            "山田次郎",
+            "鈴木美穂",
+            "高橋健太"
+          ],
+          "x-enum-count": "5"
+        },
+        "顧客ID": {
+          "type": "string",
+          "title": "顧客ID",
+          "description": "テキストデータ",
+          "enum": [
+            "C001",
+            "C002",
+            "C003",
+            "C004",
+            "C005"
+          ],
+          "x-enum-count": "5"
+        },
+        "顧客名": {
+          "type": "string",
+          "title": "顧客名",
+          "description": "テキストデータ",
+          "enum": [
+            "ABC商事",
+            "XYZ企業",
+            "PQR株式会社",
+            "LMN商店",
+            "DEF工業"
+          ],
+          "x-enum-count": "5"
+        },
+        "売上金額": {
+          "type": "integer",
+          "title": "売上金額",
+          "description": "金額・価格データ",
+          "x-semantic-type": "monetary",
+          "minimum": 900000,
+          "maximum": 2300000,
+          "x-average": 1720000.0,
+          "x-count": 5,
+          "enum": [
+            1500000,
+            2300000,
+            1800000,
+            900000,
+            2100000
+          ],
+          "x-enum-count": "5"
+        },
+        "地域": {
+          "type": "string",
+          "title": "地域",
+          "description": "テキストデータ",
+          "enum": [
+            "関東",
+            "関西",
+            "中部",
+            "九州"
+          ],
+          "x-enum-count": "4"
+        },
+        "売上日": {
+          "type": "string",
+          "title": "売上日",
+          "description": "金額・価格データ",
+          "x-semantic-type": "monetary",
+          "enum": [
+            "2025-06-01",
+            "2025-06-02",
+            "2025-06-03",
+            "2025-06-04",
+            "2025-06-05"
+          ],
+          "x-enum-count": "5"
+        },
+        "製品ID": {
+          "type": "string",
+          "title": "製品ID",
+          "description": "テキストデータ",
+          "enum": [
+            "P001",
+            "P002",
+            "P003"
+          ],
+          "x-enum-count": "3"
+        }
+      },
+      "required": [
+        "営業担当",
+        "顧客ID",
+        "顧客名",
+        "売上金額",
+        "地域",
+        "売上日",
+        "製品ID"
+      ]
+    }
+  },
+  "semantic_summary": "売上テーブル: 5件、営業担当、顧客ID、顧客名など7カラムを含む",
+  "search_keywords": [
+    "営業担当",
+    "売上データ",
+    "XYZ企業",
+    "売上日",
+    "売上情報",
+    "売上金額",
+    "田中太郎",
+    "C003",
+    "C002",
+    "C001",
+    "関西",
+    "C004",
+    "売上",
+    "顧客ID",
+    "製品ID",
+    "鈴木美穂",
+    "PQR株式会社",
+    "顧客名",
+    "地域",
+    "佐藤花子",
+    "2025-06-02",
+    "2025-06-03",
+    "2025-06-01",
+    "中部",
+    "P002",
+    "山田次郎",
+    "P001",
+    "関東",
+    "ABC商事"
+  ],
+  "entity_mapping": {
+    "営業担当": "generic_string",
+    "顧客ID": "generic_string",
+    "顧客名": "generic_string",
+    "売上金額": "monetary",
+    "地域": "generic_string",
+    "売上日": "monetary",
+    "製品ID": "generic_string"
+  },
+  "custom_tags": [],
+  "data_statistics": {
+    "record_count": 5,
+    "column_count": 7,
+    "data_types": {
+      "string": 30,
+      "integer": 5
+    },
+    "completeness": {
+      "営業担当": 1.0,
+      "顧客ID": 1.0,
+      "顧客名": 1.0,
+      "売上金額": 1.0,
+      "地域": 1.0,
+      "売上日": 1.0,
+      "製品ID": 1.0
+    }
+  },
+  "embedding_ready_text": "データ種別: データテーブル | 説明: 5件のレコードを含むテーブル | レコード数: 5件 | カラム: 営業担当, 顧客ID, 顧客名, 売上金額, 地域 | サンプル1: 営業担当=田中太郎, 顧客ID=C001, 顧客名=ABC商事, 売上金額=1500000, 地域=関東 | サンプル2: 営業担当=佐藤花子, 顧客ID=C002, 顧客名=XYZ企業, 売上金額=2300000, 地域=関西",
+  "generation_timestamp": "2025-06-10T17:33:29.787192",
+  "advanced": {
+    "statistics": {
+      "record_count": 5,
+      "field_count": 7,
+      "completeness": 0.95,
+      "consistency": 0.92
+    },
+    "entities": {
+      "items": [
+        {
+          "text": "PQR株式会社",
+          "type": "organization",
+          "confidence": 0.9
+        }
+      ],
+      "types": [
+        "organization"
+      ],
+      "confidence": 0.8,
+      "domain": "general",
+      "language": "japanese"
+    },
+    "language": "japanese",
+    "format_type": "financial_statement"
+  },
+  "quality_metrics": 1.0,
+  "processing_config": {
+    "language": "japanese",
+    "auto_entity_detection": true,
+    "quality_threshold": 0.8,
+    "max_file_size_mb": 100,
+    "supported_formats": [
+      ".xlsx",
+      ".xls",
+      ".csv"
+    ],
+    "output_formats": [
+      "json",
+      "json-ld",
+      "opensearch"
+    ],
+    "sphinx_auto_generate": true,
+    "rag_purpose": "sales-monitoring"
+  }
+}

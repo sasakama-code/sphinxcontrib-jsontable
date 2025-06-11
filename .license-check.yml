@@ -1,0 +1,58 @@
+# License Check Configuration
+# Automated license verification for CI/CD pipeline
+
+# Allowed Licenses (Commercial-use friendly)
+allowed_licenses:
+  - "MIT License"
+  - "MIT"
+  - "BSD License"
+  - "BSD"
+  - "BSD-3-Clause"
+  - "Apache License 2.0"
+  - "Apache-2.0"
+  - "Public Domain"
+  - "Python Software Foundation License"
+  - "ISC License"
+  - "ISC"
+
+# Forbidden Licenses (Copyleft restrictions)
+forbidden_licenses:
+  - "GPL-3.0"
+  - "GPL-2.0"
+  - "AGPL-3.0"
+  - "LGPL-3.0"
+  - "MPL-2.0"
+
+# Special Cases (Manual review required)
+review_required:
+  - "LGPL-2.1"  # semgrep uses this - allowed for tools only
+  - "Dual License"
+  - "Multiple Licenses"
+
+# Package Whitelist (Pre-approved packages)
+approved_packages:
+  - name: "PLaMo-Embedding-1B"
+    license: "Apache License 2.0"
+    source: "Preferred Networks"
+    commercial_use: true
+    verified_date: "2025-06-09"
+  
+  - name: "docutils"
+    license: "Public Domain"
+    source: "Python Software Foundation"
+    commercial_use: true
+    verified_date: "2025-06-09"
+    note: "Multiple license options available, using Public Domain"
+
+# License Check Commands
+check_commands:
+  python: "pip-licenses --format=json --output-file=license-report.json"
+  security: "safety check --json --output=safety-licenses.json"
+  sbom: "cyclonedx-py --format json --output-file license-sbom.json"
+
+# CI Integration
+ci_integration:
+  fail_on_forbidden: true
+  fail_on_unknown: false  # Allow unknown licenses with manual review
+  generate_report: true
+  update_licenses_md: true
