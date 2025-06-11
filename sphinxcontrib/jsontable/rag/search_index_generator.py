@@ -11,25 +11,27 @@ import logging
 import warnings
 from typing import Any
 
+from .search_index_generators import (
+    ComprehensiveSearchIndex,
+    JapaneseQueryProcessor,
+)
+
 # Import the new modular implementation
 from .search_index_generators import (
     SearchIndexGenerator as ModularSearchIndexGenerator,
-    JapaneseQueryProcessor,
-    IndexStorageManager,
-    ComprehensiveSearchIndex,
 )
 
 logger = logging.getLogger(__name__)
 
 # Legacy imports for backward compatibility
 __all__ = [
-    "SearchIndexGenerator",
-    "JapaneseQueryProcessor",
-    "VectorIndex",
-    "SemanticSearchIndex",
+    "ComprehensiveSearchIndex",
     "FacetedSearchIndex",
     "HybridSearchIndex",
-    "ComprehensiveSearchIndex",
+    "JapaneseQueryProcessor",
+    "SearchIndexGenerator",
+    "SemanticSearchIndex",
+    "VectorIndex",
 ]
 
 
@@ -133,10 +135,10 @@ class SearchIndexGenerator:
 
 # Re-export data classes for backward compatibility
 from .search_index_generators.base import (
-    VectorIndex,
-    SemanticSearchIndex,
     FacetedSearchIndex,
     HybridSearchIndex,
+    SemanticSearchIndex,
+    VectorIndex,
 )
 
 # Log the compatibility layer usage

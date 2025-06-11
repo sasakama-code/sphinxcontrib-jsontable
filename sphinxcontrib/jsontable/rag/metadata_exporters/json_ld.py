@@ -6,7 +6,6 @@ and support for custom RAG vocabulary extensions.
 
 from __future__ import annotations
 
-from dataclasses import asdict
 from datetime import datetime
 from typing import Any
 

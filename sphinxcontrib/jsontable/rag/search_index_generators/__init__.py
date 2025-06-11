@@ -19,13 +19,13 @@ from .vector_index import VectorIndexGenerator
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "SearchIndexGenerator",
-    "VectorIndexGenerator",
-    "SemanticIndexGenerator",
     "FacetedIndexGenerator",
     "HybridIndexGenerator",
     "IndexStorageManager",
     "JapaneseQueryProcessor",
+    "SearchIndexGenerator",
+    "SemanticIndexGenerator",
+    "VectorIndexGenerator",
 ]
 
 

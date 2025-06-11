@@ -17,16 +17,15 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+import numpy as np
+
+from .categorical_analytics import CategoricalAnalyzer
+
 # Import分割された分析モジュール
-from .numerical_analytics import StatisticalAnalyzer, NumericalStats, TemporalStats
-from .categorical_analytics import CategoricalAnalyzer, CategoricalStats
+from .numerical_analytics import StatisticalAnalyzer
 from .temporal_analytics import (
-    JapaneseEntityClassifier,
     EntityClassification,
-    PersonEntity,
-    PlaceEntity,
-    OrganizationEntity,
-    BusinessTermEntity,
+    JapaneseEntityClassifier,
 )
 
 
@@ -246,7 +245,7 @@ class DataQualityAssessor:
 
         # NaNや無限大は無効
         return not (
-            isinstance(item, int | float) and (np.isnan(item) or np.isinf(item))
+            isinstance(item, int | float) and (np.isnan(item) or np.isinf(item))  # noqa: F821
         )
 
     def _collect_detailed_issues(self, data: Any) -> dict[str, list[str]]:

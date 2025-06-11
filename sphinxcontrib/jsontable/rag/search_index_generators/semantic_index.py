@@ -177,10 +177,7 @@ class SemanticIndexGenerator(BaseIndexGenerator):
             return False
 
         # 単一文字の記号は除外
-        if len(keyword) == 1 and not keyword.isalnum():
-            return False
-
-        return True
+        return not (len(keyword) == 1 and not keyword.isalnum())
 
     def search_by_keywords(
         self,

@@ -24,10 +24,11 @@ from typing import Any
 
 import pandas as pd
 
+from .industry_handlers.financial import FinancialHandler
+
 # Import handlers from modular structure
 from .industry_handlers.manufacturing import ManufacturingHandler
 from .industry_handlers.retail import RetailHandler
-from .industry_handlers.financial import FinancialHandler
 
 logger = logging.getLogger(__name__)
 

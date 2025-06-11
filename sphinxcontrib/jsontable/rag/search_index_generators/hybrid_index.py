@@ -128,13 +128,13 @@ class HybridIndexGenerator(BaseIndexGenerator):
         rank_scores: dict[int, float] = {}
 
         # ベクトル検索のランクスコア
-        for rank, (chunk_id, score) in enumerate(vector_results):
+        for rank, (chunk_id, _score) in enumerate(vector_results):
             rank_scores[chunk_id] = rank_scores.get(chunk_id, 0) + (
                 hybrid_index.vector_weight / (k + rank + 1)
             )
 
         # セマンティック検索のランクスコア
-        for rank, (chunk_id, score) in enumerate(semantic_results):
+        for rank, (chunk_id, _score) in enumerate(semantic_results):
             rank_scores[chunk_id] = rank_scores.get(chunk_id, 0) + (
                 hybrid_index.semantic_weight / (k + rank + 1)
             )

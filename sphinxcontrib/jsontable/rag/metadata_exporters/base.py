@@ -8,8 +8,6 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict
-from datetime import datetime
-from typing import Any
 
 from ..advanced_metadata import AdvancedMetadata
 from ..search_facets import GeneratedFacets
@@ -23,7 +21,6 @@ class BaseMetadataExporter:
 
     def __init__(self):
         """Initialize base metadata exporter."""
-        pass
 
     def _estimate_content_size(self, metadata: AdvancedMetadata) -> str:
         """Estimate content size for metadata.

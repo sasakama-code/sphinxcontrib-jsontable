@@ -29,16 +29,16 @@ from .ui_configs import UIConfigGenerator
 
 # Public API exports for backward compatibility
 __all__ = [
-    # Configuration
-    "FacetConfig",
     # Data classes
     "CategoricalFacet",
-    "NumericalFacet",
-    "TemporalFacet",
     "EntityFacet",
+    # Configuration
+    "FacetConfig",
     "GeneratedFacets",
+    "NumericalFacet",
     # Main generator
     "SearchFacetGenerator",
+    "TemporalFacet",
 ]
 
 

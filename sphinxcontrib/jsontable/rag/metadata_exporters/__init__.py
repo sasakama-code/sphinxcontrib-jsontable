@@ -31,15 +31,15 @@ from .search_config import SearchConfigExporter
 
 # Public API exports for backward compatibility
 __all__ = [
-    "MetadataExporter",
     "BaseMetadataExporter",
-    "JsonLdExporter",
-    "OpenSearchExporter",
+    "CustomExporter",
     "ElasticsearchExporter",
+    "FacetConfigExporter",
+    "JsonLdExporter",
+    "MetadataExporter",
+    "OpenSearchExporter",
     "PlamoReadyExporter",
     "SearchConfigExporter",
-    "FacetConfigExporter",
-    "CustomExporter",
 ]
 
 

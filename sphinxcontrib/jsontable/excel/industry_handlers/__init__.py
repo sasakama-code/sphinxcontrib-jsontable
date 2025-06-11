@@ -21,17 +21,17 @@ Usage:
 """
 
 from .base import IndustryHandlerBase
-from .manufacturing import ManufacturingHandler
-from .retail import RetailHandler
 from .financial import FinancialHandler
 from .manager import IndustryHandlerManager
+from .manufacturing import ManufacturingHandler
+from .retail import RetailHandler
 
 __all__ = [
-    "IndustryHandlerManager",
+    "FinancialHandler",
     "IndustryHandlerBase",
+    "IndustryHandlerManager",
     "ManufacturingHandler",
     "RetailHandler",
-    "FinancialHandler",
 ]
 
 # Version information

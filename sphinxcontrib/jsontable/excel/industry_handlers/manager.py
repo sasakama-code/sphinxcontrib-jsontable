@@ -19,9 +19,9 @@ from typing import Any
 
 import pandas as pd
 
+from .financial import FinancialHandler
 from .manufacturing import ManufacturingHandler
 from .retail import RetailHandler
-from .financial import FinancialHandler
 
 logger = logging.getLogger(__name__)
 

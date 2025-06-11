@@ -11,12 +11,12 @@ from typing import Any
 import numpy as np
 
 __all__ = [
-    "VectorIndex",
-    "SemanticSearchIndex",
+    "BaseIndexGenerator",
+    "ComprehensiveSearchIndex",
     "FacetedSearchIndex",
     "HybridSearchIndex",
-    "ComprehensiveSearchIndex",
-    "BaseIndexGenerator",
+    "SemanticSearchIndex",
+    "VectorIndex",
 ]
 
 

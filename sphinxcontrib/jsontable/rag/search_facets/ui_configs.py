@@ -7,7 +7,6 @@ for all facet types with Japanese localization support.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
 
 from .base import GeneratedFacets
 
