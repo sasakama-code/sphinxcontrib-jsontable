@@ -89,9 +89,10 @@ class TestBasicCoverage:
 
         # Test other loader methods
         import contextlib
+        from pathlib import Path
 
         with contextlib.suppress(JsonTableError, FileNotFoundError):
-            loader.load_from_file("nonexistent.json")
+            loader.load_from_file("nonexistent.json", Path("."))
 
     def test_table_converter_different_formats(self):
         """Test table converter with different data formats."""
