@@ -30,14 +30,14 @@ __all__ = ["VectorIndexGenerator"]
 
 class VectorIndexGenerator(BaseIndexGenerator):
     """Vector search index generator with FAISS integration.
-    
+
     Specialized generator for creating vector-based similarity search indices
     with FAISS optimization and fallback implementations.
     """
 
     def __init__(self, config: dict[str, Any]):
         """Initialize vector index generator.
-        
+
         Args:
             config: Configuration dictionary for vector index generation.
         """
@@ -47,10 +47,10 @@ class VectorIndexGenerator(BaseIndexGenerator):
 
     def generate(self, vector_chunks: list) -> VectorIndex:
         """ベクトルインデックス生成.
-        
+
         Args:
             vector_chunks: ベクトル化されたチャンクのリスト.
-            
+
         Returns:
             生成されたベクトルインデックス.
         """
@@ -76,10 +76,10 @@ class VectorIndexGenerator(BaseIndexGenerator):
 
     def _build_chunk_metadata(self, vector_chunks: list) -> list[dict[str, Any]]:
         """チャンクメタデータ構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
-            
+
         Returns:
             チャンクメタデータのリスト.
         """
@@ -95,7 +95,7 @@ class VectorIndexGenerator(BaseIndexGenerator):
 
     def _build_search_parameters(self) -> dict[str, Any]:
         """検索パラメータ構築.
-        
+
         Returns:
             検索パラメータ辞書.
         """
@@ -110,11 +110,11 @@ class VectorIndexGenerator(BaseIndexGenerator):
         self, vector_index: VectorIndex, embeddings: np.ndarray
     ) -> VectorIndex:
         """FAISS使用によるベクトルインデックス構築.
-        
+
         Args:
             vector_index: ベースとなるベクトルインデックス.
             embeddings: 埋め込みベクトル配列.
-            
+
         Returns:
             FAISS統合されたベクトルインデックス.
         """
@@ -129,7 +129,7 @@ class VectorIndexGenerator(BaseIndexGenerator):
             nlist = min(100, len(embeddings) // 10)  # クラスタ数調整
             quantizer = faiss.IndexFlatIP(dimension)
             index = faiss.IndexIVFFlat(quantizer, dimension, nlist)
-            
+
             # 訓練が必要
             if len(embeddings) >= nlist:
                 index.train(embeddings.astype("float32"))
@@ -148,11 +148,11 @@ class VectorIndexGenerator(BaseIndexGenerator):
         self, vector_index: VectorIndex, embeddings: np.ndarray
     ) -> VectorIndex:
         """フォールバック実装によるベクトルインデックス構築.
-        
+
         Args:
             vector_index: ベースとなるベクトルインデックス.
             embeddings: 埋め込みベクトル配列.
-            
+
         Returns:
             フォールバック実装されたベクトルインデックス.
         """
@@ -168,12 +168,12 @@ class VectorIndexGenerator(BaseIndexGenerator):
         k: int = 10,
     ) -> list[tuple[int, float]]:
         """ベクトル類似検索.
-        
+
         Args:
             query_embedding: クエリベクトル.
             vector_index: 検索対象のベクトルインデックス.
             k: 取得する類似ベクトル数.
-            
+
         Returns:
             (インデックス, スコア)のタプルリスト.
         """
@@ -189,12 +189,12 @@ class VectorIndexGenerator(BaseIndexGenerator):
         k: int,
     ) -> list[tuple[int, float]]:
         """FAISS使用による類似検索.
-        
+
         Args:
             query_embedding: クエリベクトル.
             vector_index: 検索対象のベクトルインデックス.
             k: 取得する類似ベクトル数.
-            
+
         Returns:
             (インデックス, スコア)のタプルリスト.
         """
@@ -217,12 +217,12 @@ class VectorIndexGenerator(BaseIndexGenerator):
         k: int,
     ) -> list[tuple[int, float]]:
         """フォールバック実装による類似検索.
-        
+
         Args:
             query_embedding: クエリベクトル.
             vector_index: 検索対象のベクトルインデックス.
             k: 取得する類似ベクトル数.
-            
+
         Returns:
             (インデックス, スコア)のタプルリスト.
         """
@@ -245,10 +245,10 @@ class VectorIndexGenerator(BaseIndexGenerator):
 
     def get_vector_statistics(self, vector_index: VectorIndex) -> dict[str, Any]:
         """ベクトルインデックス統計情報取得.
-        
+
         Args:
             vector_index: 統計情報を取得するベクトルインデックス.
-            
+
         Returns:
             統計情報辞書.
         """
@@ -274,10 +274,10 @@ class VectorIndexGenerator(BaseIndexGenerator):
 
     def optimize_index(self, vector_index: VectorIndex) -> VectorIndex:
         """ベクトルインデックス最適化.
-        
+
         Args:
             vector_index: 最適化対象のベクトルインデックス.
-            
+
         Returns:
             最適化されたベクトルインデックス.
         """

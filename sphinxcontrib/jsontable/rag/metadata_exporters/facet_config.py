@@ -14,7 +14,7 @@ from .base import BaseMetadataExporter
 
 class FacetConfigExporter(BaseMetadataExporter):
     """Facet configuration exporter.
-    
+
     Exports facet-specific configuration for search interface
     implementation with Japanese UI standards.
     """

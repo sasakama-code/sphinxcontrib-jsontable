@@ -16,14 +16,14 @@ __all__ = ["HybridIndexGenerator"]
 
 class HybridIndexGenerator(BaseIndexGenerator):
     """Hybrid search index generator with score fusion.
-    
+
     Specialized generator for creating hybrid search indices that combine
     multiple search modalities with configurable score fusion algorithms.
     """
 
     def __init__(self, config: dict[str, Any]):
         """Initialize hybrid index generator.
-        
+
         Args:
             config: Configuration dictionary for hybrid index generation.
         """
@@ -32,7 +32,7 @@ class HybridIndexGenerator(BaseIndexGenerator):
 
     def generate(self) -> HybridSearchIndex:
         """ハイブリッド検索インデックス生成.
-        
+
         Returns:
             生成されたハイブリッド検索インデックス.
         """
@@ -43,7 +43,9 @@ class HybridIndexGenerator(BaseIndexGenerator):
             fusion_algorithm=self.hybrid_config.get("fusion_algorithm", "rank_fusion"),
         )
 
-        logger.info(f"Hybrid index generated with {hybrid_index.fusion_algorithm} algorithm")
+        logger.info(
+            f"Hybrid index generated with {hybrid_index.fusion_algorithm} algorithm"
+        )
         return hybrid_index
 
     def fuse_search_results(
@@ -55,33 +57,49 @@ class HybridIndexGenerator(BaseIndexGenerator):
         max_results: int = 10,
     ) -> list[tuple[int, float]]:
         """検索結果の融合処理.
-        
+
         Args:
             vector_results: ベクトル検索結果 (chunk_id, score).
             semantic_results: セマンティック検索結果 (chunk_id, score).
             facet_results: ファセット検索結果 (chunk_id).
             hybrid_index: ハイブリッド検索インデックス.
             max_results: 最大結果数.
-            
+
         Returns:
             融合された検索結果 (chunk_id, fused_score).
         """
         if hybrid_index.fusion_algorithm == "rank_fusion":
             return self._rank_fusion(
-                vector_results, semantic_results, facet_results, hybrid_index, max_results
+                vector_results,
+                semantic_results,
+                facet_results,
+                hybrid_index,
+                max_results,
             )
         elif hybrid_index.fusion_algorithm == "score_fusion":
             return self._score_fusion(
-                vector_results, semantic_results, facet_results, hybrid_index, max_results
+                vector_results,
+                semantic_results,
+                facet_results,
+                hybrid_index,
+                max_results,
             )
         elif hybrid_index.fusion_algorithm == "weighted_sum":
             return self._weighted_sum_fusion(
-                vector_results, semantic_results, facet_results, hybrid_index, max_results
+                vector_results,
+                semantic_results,
+                facet_results,
+                hybrid_index,
+                max_results,
             )
         else:
             # デフォルトはrank_fusion
             return self._rank_fusion(
-                vector_results, semantic_results, facet_results, hybrid_index, max_results
+                vector_results,
+                semantic_results,
+                facet_results,
+                hybrid_index,
+                max_results,
             )
 
     def _rank_fusion(
@@ -93,19 +111,19 @@ class HybridIndexGenerator(BaseIndexGenerator):
         max_results: int,
     ) -> list[tuple[int, float]]:
         """ランク融合アルゴリズム.
-        
+
         Args:
             vector_results: ベクトル検索結果.
             semantic_results: セマンティック検索結果.
             facet_results: ファセット検索結果.
             hybrid_index: ハイブリッド検索インデックス.
             max_results: 最大結果数.
-            
+
         Returns:
             ランク融合された検索結果.
         """
         k = self.hybrid_config.get("rank_fusion_k", 10)
-        
+
         # 各結果のランクを計算
         rank_scores: dict[int, float] = {}
 
@@ -123,12 +141,12 @@ class HybridIndexGenerator(BaseIndexGenerator):
 
         # ファセット検索のブーストスコア
         for chunk_id in facet_results:
-            rank_scores[chunk_id] = rank_scores.get(chunk_id, 0) + hybrid_index.facet_weight
+            rank_scores[chunk_id] = (
+                rank_scores.get(chunk_id, 0) + hybrid_index.facet_weight
+            )
 
         # ランクスコア順でソート
-        sorted_results = sorted(
-            rank_scores.items(), key=lambda x: x[1], reverse=True
-        )
+        sorted_results = sorted(rank_scores.items(), key=lambda x: x[1], reverse=True)
 
         return sorted_results[:max_results]
 
@@ -141,14 +159,14 @@ class HybridIndexGenerator(BaseIndexGenerator):
         max_results: int,
     ) -> list[tuple[int, float]]:
         """スコア融合アルゴリズム.
-        
+
         Args:
             vector_results: ベクトル検索結果.
             semantic_results: セマンティック検索結果.
             facet_results: ファセット検索結果.
             hybrid_index: ハイブリッド検索インデックス.
             max_results: 最大結果数.
-            
+
         Returns:
             スコア融合された検索結果.
         """
@@ -177,12 +195,12 @@ class HybridIndexGenerator(BaseIndexGenerator):
 
         # ファセット検索のブーストスコア
         for chunk_id in facet_results:
-            fused_scores[chunk_id] = fused_scores.get(chunk_id, 0) + hybrid_index.facet_weight
+            fused_scores[chunk_id] = (
+                fused_scores.get(chunk_id, 0) + hybrid_index.facet_weight
+            )
 
         # 融合スコア順でソート
-        sorted_results = sorted(
-            fused_scores.items(), key=lambda x: x[1], reverse=True
-        )
+        sorted_results = sorted(fused_scores.items(), key=lambda x: x[1], reverse=True)
 
         return sorted_results[:max_results]
 
@@ -195,14 +213,14 @@ class HybridIndexGenerator(BaseIndexGenerator):
         max_results: int,
     ) -> list[tuple[int, float]]:
         """重み付き和融合アルゴリズム.
-        
+
         Args:
             vector_results: ベクトル検索結果.
             semantic_results: セマンティック検索結果.
             facet_results: ファセット検索結果.
             hybrid_index: ハイブリッド検索インデックス.
             max_results: 最大結果数.
-            
+
         Returns:
             重み付き和融合された検索結果.
         """
@@ -222,7 +240,9 @@ class HybridIndexGenerator(BaseIndexGenerator):
 
         # ファセット検索のブーストスコア
         for chunk_id in facet_results:
-            weighted_scores[chunk_id] = weighted_scores.get(chunk_id, 0) + hybrid_index.facet_weight
+            weighted_scores[chunk_id] = (
+                weighted_scores.get(chunk_id, 0) + hybrid_index.facet_weight
+            )
 
         # 重み付きスコア順でソート
         sorted_results = sorted(
@@ -237,11 +257,11 @@ class HybridIndexGenerator(BaseIndexGenerator):
         hybrid_index: HybridSearchIndex,
     ) -> HybridSearchIndex:
         """クエリ特徴に基づく適応的重み調整.
-        
+
         Args:
             query_features: クエリの特徴辞書.
             hybrid_index: 調整対象のハイブリッド検索インデックス.
-            
+
         Returns:
             調整されたハイブリッド検索インデックス.
         """
@@ -251,7 +271,7 @@ class HybridIndexGenerator(BaseIndexGenerator):
             hybrid_index.semantic_weight += 0.1
             hybrid_index.vector_weight -= 0.05
             hybrid_index.facet_weight -= 0.05
-        
+
         elif query_features.get("has_numbers", False):
             # 数値を含むクエリの場合、ファセット検索の重みを増加
             hybrid_index.facet_weight += 0.1
@@ -260,11 +280,11 @@ class HybridIndexGenerator(BaseIndexGenerator):
 
         # 重みの正規化
         total_weight = (
-            hybrid_index.vector_weight + 
-            hybrid_index.semantic_weight + 
-            hybrid_index.facet_weight
+            hybrid_index.vector_weight
+            + hybrid_index.semantic_weight
+            + hybrid_index.facet_weight
         )
-        
+
         if total_weight > 0:
             hybrid_index.vector_weight /= total_weight
             hybrid_index.semantic_weight /= total_weight
@@ -278,11 +298,11 @@ class HybridIndexGenerator(BaseIndexGenerator):
         ground_truth: list[int] | None = None,
     ) -> dict[str, float]:
         """融合結果の品質評価.
-        
+
         Args:
             fused_results: 融合された検索結果.
             ground_truth: 正解データ（オプション）.
-            
+
         Returns:
             評価メトリクス辞書.
         """
@@ -294,12 +314,14 @@ class HybridIndexGenerator(BaseIndexGenerator):
 
         if fused_results:
             scores = [score for _, score in fused_results]
-            
+
             # スコア分布の標準偏差
             if len(scores) > 1:
                 mean_score = sum(scores) / len(scores)
-                variance = sum((score - mean_score) ** 2 for score in scores) / len(scores)
-                metrics["score_distribution_std"] = variance ** 0.5
+                variance = sum((score - mean_score) ** 2 for score in scores) / len(
+                    scores
+                )
+                metrics["score_distribution_std"] = variance**0.5
 
             # スコア範囲
             metrics["score_range"] = max(scores) - min(scores)
@@ -307,18 +329,18 @@ class HybridIndexGenerator(BaseIndexGenerator):
         # 正解データがある場合の追加評価
         if ground_truth is not None:
             retrieved_ids = [chunk_id for chunk_id, _ in fused_results]
-            
+
             # 精度 (Precision)
             relevant_retrieved = len(set(retrieved_ids) & set(ground_truth))
             metrics["precision"] = (
                 relevant_retrieved / len(retrieved_ids) if retrieved_ids else 0.0
             )
-            
+
             # 再現率 (Recall)
             metrics["recall"] = (
                 relevant_retrieved / len(ground_truth) if ground_truth else 0.0
             )
-            
+
             # F1スコア
             precision = metrics["precision"]
             recall = metrics["recall"]
@@ -336,11 +358,11 @@ class HybridIndexGenerator(BaseIndexGenerator):
         hybrid_index: HybridSearchIndex,
     ) -> HybridSearchIndex:
         """履歴データに基づく融合パラメータ最適化.
-        
+
         Args:
             historical_queries: 過去のクエリデータ.
             hybrid_index: 最適化対象のハイブリッド検索インデックス.
-            
+
         Returns:
             最適化されたハイブリッド検索インデックス.
         """
@@ -349,12 +371,14 @@ class HybridIndexGenerator(BaseIndexGenerator):
 
         # クエリタイプ別の最適重みを計算
         business_queries = [
-            q for q in historical_queries 
+            q
+            for q in historical_queries
             if q.get("query_features", {}).get("query_type") == "business"
         ]
-        
+
         numerical_queries = [
-            q for q in historical_queries 
+            q
+            for q in historical_queries
             if q.get("query_features", {}).get("has_numbers", False)
         ]
 
@@ -370,11 +394,11 @@ class HybridIndexGenerator(BaseIndexGenerator):
 
         # 重みの正規化
         total_weight = (
-            hybrid_index.vector_weight + 
-            hybrid_index.semantic_weight + 
-            hybrid_index.facet_weight
+            hybrid_index.vector_weight
+            + hybrid_index.semantic_weight
+            + hybrid_index.facet_weight
         )
-        
+
         if total_weight > 0:
             hybrid_index.vector_weight /= total_weight
             hybrid_index.semantic_weight /= total_weight
@@ -383,14 +407,12 @@ class HybridIndexGenerator(BaseIndexGenerator):
         logger.info("Hybrid fusion parameters optimized based on historical data")
         return hybrid_index
 
-    def get_hybrid_statistics(
-        self, hybrid_index: HybridSearchIndex
-    ) -> dict[str, Any]:
+    def get_hybrid_statistics(self, hybrid_index: HybridSearchIndex) -> dict[str, Any]:
         """ハイブリッドインデックス統計情報取得.
-        
+
         Args:
             hybrid_index: 統計情報を取得するハイブリッドインデックス.
-            
+
         Returns:
             統計情報辞書.
         """
@@ -400,9 +422,9 @@ class HybridIndexGenerator(BaseIndexGenerator):
             "facet_weight": hybrid_index.facet_weight,
             "fusion_algorithm": hybrid_index.fusion_algorithm,
             "total_weight": (
-                hybrid_index.vector_weight + 
-                hybrid_index.semantic_weight + 
-                hybrid_index.facet_weight
+                hybrid_index.vector_weight
+                + hybrid_index.semantic_weight
+                + hybrid_index.facet_weight
             ),
             "weight_distribution": {
                 "vector_percentage": round(hybrid_index.vector_weight * 100, 1),

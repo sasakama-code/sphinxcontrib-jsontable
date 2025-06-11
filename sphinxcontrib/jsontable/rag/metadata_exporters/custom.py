@@ -14,7 +14,7 @@ from .base import BaseMetadataExporter
 
 class CustomExporter(BaseMetadataExporter):
     """Custom format metadata exporter.
-    
+
     Exports metadata in user-defined custom formats with
     flexible transformation and field selection capabilities.
     """
@@ -23,7 +23,9 @@ class CustomExporter(BaseMetadataExporter):
         """Initialize custom exporter."""
         super().__init__()
 
-    def export(self, metadata: AdvancedMetadata, config: dict[str, Any]) -> dict[str, Any]:
+    def export(
+        self, metadata: AdvancedMetadata, config: dict[str, Any]
+    ) -> dict[str, Any]:
         """Export custom format based on user configuration.
 
         Args:
@@ -49,13 +51,17 @@ class CustomExporter(BaseMetadataExporter):
             custom_output["statistical_analysis"] = metadata.statistical_analysis
 
         if "all" in include_sections or "entities" in include_sections:
-            custom_output["entity_classification"] = self._format_entities(metadata.entity_classification)
+            custom_output["entity_classification"] = self._format_entities(
+                metadata.entity_classification
+            )
 
         if "all" in include_sections or "quality" in include_sections:
             custom_output["data_quality"] = self._format_quality(metadata.data_quality)
 
         if "all" in include_sections or "plamo" in include_sections:
-            custom_output["plamo_features"] = self._format_plamo(metadata.plamo_features)
+            custom_output["plamo_features"] = self._format_plamo(
+                metadata.plamo_features
+            )
 
         # カスタム変換の適用
         if "transformations" in custom_format:
@@ -68,11 +74,13 @@ class CustomExporter(BaseMetadataExporter):
     def _get_timestamp(self) -> str:
         """Get current timestamp."""
         from datetime import datetime
+
         return datetime.now().isoformat()
 
     def _format_entities(self, entity_classification) -> dict[str, Any]:
         """Format entity classification for custom export."""
         from dataclasses import asdict
+
         return {
             "persons": [asdict(p) for p in entity_classification.persons],
             "places": [asdict(p) for p in entity_classification.places],
@@ -83,9 +91,11 @@ class CustomExporter(BaseMetadataExporter):
     def _format_quality(self, data_quality) -> dict[str, Any]:
         """Format data quality for custom export."""
         from dataclasses import asdict
+
         return asdict(data_quality)
 
     def _format_plamo(self, plamo_features) -> dict[str, Any]:
         """Format PLaMo features for custom export."""
         from dataclasses import asdict
+
         return asdict(plamo_features)

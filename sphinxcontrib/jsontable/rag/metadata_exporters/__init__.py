@@ -6,7 +6,7 @@ internally using specialized exporters for improved maintainability.
 
 Features:
 - JSON-LD format output
-- OpenSearch/Elasticsearch mapping generation  
+- OpenSearch/Elasticsearch mapping generation
 - PLaMo-Embedding-1B specialized format
 - Search engine index configuration
 - Custom format support
@@ -34,7 +34,7 @@ __all__ = [
     "MetadataExporter",
     "BaseMetadataExporter",
     "JsonLdExporter",
-    "OpenSearchExporter", 
+    "OpenSearchExporter",
     "ElasticsearchExporter",
     "PlamoReadyExporter",
     "SearchConfigExporter",
@@ -48,7 +48,7 @@ class MetadataExporter:
 
     Provides comprehensive metadata export capabilities for various search engines
     and embedding systems with Japanese language optimization.
-    
+
     This is a facade that internally coordinates specialized exporters for
     improved maintainability while preserving the original API.
     """
@@ -64,7 +64,7 @@ class MetadataExporter:
             "facet-config",
             "custom",
         ]
-        
+
         # Initialize specialized exporters
         self.json_ld_exporter = JsonLdExporter()
         self.opensearch_exporter = OpenSearchExporter()
@@ -102,17 +102,25 @@ class MetadataExporter:
                 if format_type == "json-ld":
                     exports["json-ld"] = self.json_ld_exporter.export(advanced_metadata)
                 elif format_type == "opensearch":
-                    exports["opensearch"] = self.opensearch_exporter.export(advanced_metadata)
+                    exports["opensearch"] = self.opensearch_exporter.export(
+                        advanced_metadata
+                    )
                 elif format_type == "elasticsearch":
-                    exports["elasticsearch"] = self.elasticsearch_exporter.export(advanced_metadata)
+                    exports["elasticsearch"] = self.elasticsearch_exporter.export(
+                        advanced_metadata
+                    )
                 elif format_type == "plamo-ready":
-                    exports["plamo-ready"] = self.plamo_ready_exporter.export(advanced_metadata)
+                    exports["plamo-ready"] = self.plamo_ready_exporter.export(
+                        advanced_metadata
+                    )
                 elif format_type == "search-config":
                     exports["search-config"] = self.search_config_exporter.export(
                         advanced_metadata, generated_facets
                     )
                 elif format_type == "facet-config":
-                    exports["facet-config"] = self.facet_config_exporter.export(generated_facets)
+                    exports["facet-config"] = self.facet_config_exporter.export(
+                        generated_facets
+                    )
                 elif format_type == "custom":
                     exports["custom"] = self.custom_exporter.export(
                         advanced_metadata, custom_config or {}
@@ -139,7 +147,9 @@ class MetadataExporter:
         """Legacy method for PLaMo-ready export."""
         return self.plamo_ready_exporter.export(metadata)
 
-    def _export_search_config(self, metadata: AdvancedMetadata, facets: GeneratedFacets) -> dict:
+    def _export_search_config(
+        self, metadata: AdvancedMetadata, facets: GeneratedFacets
+    ) -> dict:
         """Legacy method for search config export."""
         return self.search_config_exporter.export(metadata, facets)
 

@@ -6,14 +6,14 @@ for better modularity and maintainability.
 
 Key Features:
 - Centralized industry detection and routing
-- Modular handler architecture  
+- Modular handler architecture
 - Unified interface for all industry formats
 - Japanese business document structure understanding
 - Automated metadata enrichment for domain analysis
 
 Supported Industries:
 - 製造業 (Manufacturing): 生産管理、品質管理、設備管理
-- 小売業 (Retail): 販売実績、在庫管理、顧客分析  
+- 小売業 (Retail): 販売実績、在庫管理、顧客分析
 - 金融業 (Financial): リスク管理、財務分析、コンプライアンス
 """
 

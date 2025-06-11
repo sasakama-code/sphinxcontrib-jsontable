@@ -196,33 +196,41 @@ class ManufacturingHandler(IndustryHandlerBase):
         queries = []
 
         if format_type == "production_plan":
-            queries.extend([
-                "生産計画の進捗率はどの程度ですか？",
-                "最も生産性の高い製造ラインはどれですか？",
-                "計画と実績の差異が大きい製品はありますか？",
-                "工場別の生産効率を比較してください",
-            ])
+            queries.extend(
+                [
+                    "生産計画の進捗率はどの程度ですか？",
+                    "最も生産性の高い製造ラインはどれですか？",
+                    "計画と実績の差異が大きい製品はありますか？",
+                    "工場別の生産効率を比較してください",
+                ]
+            )
         elif format_type == "quality_control":
-            queries.extend([
-                "品質検査の合格率はどのくらいですか？",
-                "最も多い不良原因は何ですか？",
-                "品質指標の改善傾向はありますか？",
-                "検査項目別の不合格率を分析してください",
-            ])
+            queries.extend(
+                [
+                    "品質検査の合格率はどのくらいですか？",
+                    "最も多い不良原因は何ですか？",
+                    "品質指標の改善傾向はありますか？",
+                    "検査項目別の不合格率を分析してください",
+                ]
+            )
         elif format_type == "equipment_mgmt":
-            queries.extend([
-                "設備の稼働率はどの程度ですか？",
-                "メンテナンス頻度が高い設備はどれですか？",
-                "故障による生産への影響を分析してください",
-                "設備の更新計画を立てるためのデータを提供してください",
-            ])
+            queries.extend(
+                [
+                    "設備の稼働率はどの程度ですか？",
+                    "メンテナンス頻度が高い設備はどれですか？",
+                    "故障による生産への影響を分析してください",
+                    "設備の更新計画を立てるためのデータを提供してください",
+                ]
+            )
 
         # Add general manufacturing queries
-        queries.extend([
-            "製造コストの削減ポイントはどこですか？",
-            "品質向上のための改善提案を生成してください",
-            "生産効率を向上させる方法を提案してください",
-        ])
+        queries.extend(
+            [
+                "製造コストの削減ポイントはどこですか？",
+                "品質向上のための改善提案を生成してください",
+                "生産効率を向上させる方法を提案してください",
+            ]
+        )
 
         return queries
 
@@ -230,21 +238,63 @@ class ManufacturingHandler(IndustryHandlerBase):
         """Load manufacturing-specific domain keywords."""
         return {
             "production": [
-                "生産", "製造", "組立", "加工", "工程", "ライン", "工場",
-                "設備", "機械", "生産性", "効率", "歩留", "サイクル時間"
+                "生産",
+                "製造",
+                "組立",
+                "加工",
+                "工程",
+                "ライン",
+                "工場",
+                "設備",
+                "機械",
+                "生産性",
+                "効率",
+                "歩留",
+                "サイクル時間",
             ],
             "quality": [
-                "品質", "検査", "測定", "規格", "公差", "不良", "欠陥",
-                "合格", "不合格", "QC", "品質管理", "改善", "是正"
+                "品質",
+                "検査",
+                "測定",
+                "規格",
+                "公差",
+                "不良",
+                "欠陥",
+                "合格",
+                "不合格",
+                "QC",
+                "品質管理",
+                "改善",
+                "是正",
             ],
             "inventory": [
-                "在庫", "部品", "材料", "資材", "入庫", "出庫", "発注",
-                "納期", "調達", "供給", "需要", "安全在庫"
+                "在庫",
+                "部品",
+                "材料",
+                "資材",
+                "入庫",
+                "出庫",
+                "発注",
+                "納期",
+                "調達",
+                "供給",
+                "需要",
+                "安全在庫",
             ],
             "maintenance": [
-                "保守", "点検", "整備", "故障", "修理", "交換", "予防",
-                "定期", "緊急", "稼働率", "MTTR", "MTBF"
-            ]
+                "保守",
+                "点検",
+                "整備",
+                "故障",
+                "修理",
+                "交換",
+                "予防",
+                "定期",
+                "緊急",
+                "稼働率",
+                "MTTR",
+                "MTBF",
+            ],
         }
 
     def _get_analysis_focus(self, format_type: str) -> str:
@@ -258,27 +308,31 @@ class ManufacturingHandler(IndustryHandlerBase):
         }
         return focus_map.get(format_type, "製造業データの総合分析")
 
-    def _extract_key_metrics(self, df: pd.DataFrame, format_type: str) -> dict[str, Any]:
+    def _extract_key_metrics(
+        self, df: pd.DataFrame, format_type: str
+    ) -> dict[str, Any]:
         """Extract key manufacturing metrics from data."""
         metrics = {}
-        
+
         if format_type == "production_plan":
             # Look for production-related metrics
             for col in df.columns:
                 col_lower = str(col).lower()
-                if any(term in col_lower for term in ["数量", "quantity", "実績", "計画"]):
+                if any(
+                    term in col_lower for term in ["数量", "quantity", "実績", "計画"]
+                ):
                     try:
-                        numeric_data = pd.to_numeric(df[col], errors='coerce')
+                        numeric_data = pd.to_numeric(df[col], errors="coerce")
                         if not numeric_data.isna().all():
                             metrics[col] = {
                                 "sum": float(numeric_data.sum()),
                                 "mean": float(numeric_data.mean()),
                                 "max": float(numeric_data.max()),
-                                "min": float(numeric_data.min())
+                                "min": float(numeric_data.min()),
                             }
                     except (ValueError, TypeError):
                         continue
-        
+
         return metrics
 
     def _extract_time_dimension(self, df: pd.DataFrame) -> dict[str, Any]:
@@ -288,13 +342,15 @@ class ManufacturingHandler(IndustryHandlerBase):
             "time_columns": [],
             "time_range": None,
         }
-        
+
         for col in df.columns:
             col_lower = str(col).lower()
-            if any(term in col_lower for term in ["日", "date", "time", "予定", "実績"]):
+            if any(
+                term in col_lower for term in ["日", "date", "time", "予定", "実績"]
+            ):
                 time_info["time_columns"].append(col)
                 time_info["has_time_data"] = True
-        
+
         return time_info
 
     def _extract_production_entities(self, df: pd.DataFrame) -> dict[str, Any]:
@@ -304,7 +360,7 @@ class ManufacturingHandler(IndustryHandlerBase):
             "lines": [],
             "facilities": [],
         }
-        
+
         for col in df.columns:
             col_lower = str(col).lower()
             if any(term in col_lower for term in ["製品", "product", "商品"]):
@@ -313,24 +369,29 @@ class ManufacturingHandler(IndustryHandlerBase):
                 entities["lines"] = df[col].dropna().unique().tolist()[:10]
             elif any(term in col_lower for term in ["工場", "facility", "設備"]):
                 entities["facilities"] = df[col].dropna().unique().tolist()[:10]
-        
+
         return entities
 
-    def _extract_quality_indicators(self, df: pd.DataFrame, format_type: str) -> dict[str, Any]:
+    def _extract_quality_indicators(
+        self, df: pd.DataFrame, format_type: str
+    ) -> dict[str, Any]:
         """Extract quality-related indicators from data."""
         quality_info = {
             "has_quality_data": False,
             "quality_metrics": [],
             "defect_types": [],
         }
-        
+
         if format_type == "quality_control":
             for col in df.columns:
                 col_lower = str(col).lower()
-                if any(term in col_lower for term in ["品質", "quality", "合格", "不合格", "欠陥"]):
+                if any(
+                    term in col_lower
+                    for term in ["品質", "quality", "合格", "不合格", "欠陥"]
+                ):
                     quality_info["quality_metrics"].append(col)
                     quality_info["has_quality_data"] = True
-        
+
         return quality_info
 
     def _standardize_dates(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -347,19 +408,19 @@ class ManufacturingHandler(IndustryHandlerBase):
         """Add production-specific enrichments."""
         # Add production efficiency calculations
         enriched_df = df.copy()
-        enriched_df['_manufacturing_timestamp'] = datetime.now().isoformat()
+        enriched_df["_manufacturing_timestamp"] = datetime.now().isoformat()
         return enriched_df
 
     def _enrich_quality_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add quality-specific enrichments."""
         # Add quality analysis enrichments
         enriched_df = df.copy()
-        enriched_df['_quality_analysis_timestamp'] = datetime.now().isoformat()
+        enriched_df["_quality_analysis_timestamp"] = datetime.now().isoformat()
         return enriched_df
 
     def _enrich_equipment_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add equipment-specific enrichments."""
         # Add equipment analysis enrichments
         enriched_df = df.copy()
-        enriched_df['_equipment_analysis_timestamp'] = datetime.now().isoformat()
+        enriched_df["_equipment_analysis_timestamp"] = datetime.now().isoformat()
         return enriched_df

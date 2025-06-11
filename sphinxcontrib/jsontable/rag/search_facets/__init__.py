@@ -6,7 +6,7 @@ internally using specialized modules for improved maintainability.
 
 Features:
 - Categorical facet automatic generation
-- Numerical range facet optimization  
+- Numerical range facet optimization
 - Temporal facet support
 - Japanese entity facets
 - UI integration metadata generation
@@ -33,7 +33,7 @@ __all__ = [
     "FacetConfig",
     # Data classes
     "CategoricalFacet",
-    "NumericalFacet", 
+    "NumericalFacet",
     "TemporalFacet",
     "EntityFacet",
     "GeneratedFacets",
@@ -47,7 +47,7 @@ class SearchFacetGenerator:
 
     Generates various types of search facets from statistical analysis and
     entity classification data, optimized for Japanese content and business data.
-    
+
     This is a facade that internally coordinates specialized generators for
     improved maintainability while preserving the original API.
     """
@@ -59,7 +59,7 @@ class SearchFacetGenerator:
             config: Optional facet generation configuration.
         """
         self.config = config or FacetConfig()
-        
+
         # Initialize specialized generators
         self.categorical_generator = CategoricalFacetGenerator(self.config)
         self.numerical_generator = NumericalFacetGenerator(self.config)
@@ -79,8 +79,10 @@ class SearchFacetGenerator:
         facets = GeneratedFacets()
 
         # カテゴリカルファセット生成
-        facets.categorical_facets = self.categorical_generator.generate_categorical_facets(
-            advanced_metadata.statistical_analysis
+        facets.categorical_facets = (
+            self.categorical_generator.generate_categorical_facets(
+                advanced_metadata.statistical_analysis
+            )
         )
 
         # 数値ファセット生成
@@ -100,11 +102,15 @@ class SearchFacetGenerator:
             )
 
         # 生成メタデータ
-        facets.generation_metadata = self.ui_generator.create_generation_metadata(facets)
+        facets.generation_metadata = self.ui_generator.create_generation_metadata(
+            facets
+        )
 
         return facets
 
-    def generate_search_interface_config(self, facets: GeneratedFacets) -> dict[str, Any]:
+    def generate_search_interface_config(
+        self, facets: GeneratedFacets
+    ) -> dict[str, Any]:
         """Generate complete search interface configuration.
 
         Args:
@@ -116,19 +122,29 @@ class SearchFacetGenerator:
         return self.ui_generator.generate_search_interface_config(facets)
 
     # Legacy method aliases for backward compatibility
-    def _generate_categorical_facets(self, statistical_analysis: dict) -> list[CategoricalFacet]:
+    def _generate_categorical_facets(
+        self, statistical_analysis: dict
+    ) -> list[CategoricalFacet]:
         """Legacy method for categorical facet generation."""
-        return self.categorical_generator.generate_categorical_facets(statistical_analysis)
+        return self.categorical_generator.generate_categorical_facets(
+            statistical_analysis
+        )
 
-    def _generate_numerical_facets(self, statistical_analysis: dict) -> list[NumericalFacet]:
+    def _generate_numerical_facets(
+        self, statistical_analysis: dict
+    ) -> list[NumericalFacet]:
         """Legacy method for numerical facet generation."""
         return self.numerical_generator.generate_numerical_facets(statistical_analysis)
 
-    def _generate_temporal_facets(self, statistical_analysis: dict) -> list[TemporalFacet]:
+    def _generate_temporal_facets(
+        self, statistical_analysis: dict
+    ) -> list[TemporalFacet]:
         """Legacy method for temporal facet generation."""
         return self.temporal_generator.generate_temporal_facets(statistical_analysis)
 
-    def _generate_entity_facets(self, entity_classification: EntityClassification) -> list[EntityFacet]:
+    def _generate_entity_facets(
+        self, entity_classification: EntityClassification
+    ) -> list[EntityFacet]:
         """Legacy method for entity facet generation."""
         return self.entity_generator.generate_entity_facets(entity_classification)
 

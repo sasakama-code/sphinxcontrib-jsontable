@@ -12,7 +12,7 @@ import numpy as np
 
 __all__ = [
     "VectorIndex",
-    "SemanticSearchIndex", 
+    "SemanticSearchIndex",
     "FacetedSearchIndex",
     "HybridSearchIndex",
     "ComprehensiveSearchIndex",
@@ -120,43 +120,43 @@ class ComprehensiveSearchIndex:
 
 class BaseIndexGenerator:
     """Base class for all index generators.
-    
+
     Provides common functionality and configuration management
     shared across all specialized index generators.
     """
 
     def __init__(self, config: dict[str, Any]):
         """Initialize base index generator.
-        
+
         Args:
             config: Configuration dictionary for index generation.
         """
         self.config = config
-        
+
     def validate_input(self, vector_chunks: list) -> bool:
         """Validate input vector chunks.
-        
+
         Args:
             vector_chunks: List of vector chunks to validate.
-            
+
         Returns:
             True if input is valid, False otherwise.
         """
         if not vector_chunks:
             return False
-            
+
         if not isinstance(vector_chunks, list):
             return False
-            
+
         # Check if all chunks have required attributes
         for chunk in vector_chunks:
-            if not hasattr(chunk, 'embedding'):
+            if not hasattr(chunk, "embedding"):
                 return False
-            if not hasattr(chunk, 'original_chunk'):
+            if not hasattr(chunk, "original_chunk"):
                 return False
-                
+
         return True
-        
+
     def get_default_config(self) -> dict[str, Any]:
         """Get default configuration for search index generation.
 

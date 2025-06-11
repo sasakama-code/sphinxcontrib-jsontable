@@ -16,7 +16,7 @@ from .base import BaseMetadataExporter
 
 class SearchConfigExporter(BaseMetadataExporter):
     """Search configuration exporter.
-    
+
     Exports comprehensive search engine configuration including facets,
     boost settings, aggregations, and Japanese language support.
     """
@@ -25,7 +25,9 @@ class SearchConfigExporter(BaseMetadataExporter):
         """Initialize search config exporter."""
         super().__init__()
 
-    def export(self, metadata: AdvancedMetadata, facets: GeneratedFacets) -> dict[str, Any]:
+    def export(
+        self, metadata: AdvancedMetadata, facets: GeneratedFacets
+    ) -> dict[str, Any]:
         """Export search engine configuration.
 
         Args:

@@ -107,17 +107,26 @@ class FinancialHandler(IndustryHandlerBase):
 
         # Financial analysis indicators
         financial_indicators = ["売上", "利益", "資産", "負債", "ROE", "ROA", "EBITDA"]
-        if sum(1 for indicator in financial_indicators if indicator in header_text) >= 3:
+        if (
+            sum(1 for indicator in financial_indicators if indicator in header_text)
+            >= 3
+        ):
             return "financial_analysis"
 
         # Compliance indicators
         compliance_indicators = ["監査", "規制", "法令", "内部統制", "コンプライアンス"]
-        if sum(1 for indicator in compliance_indicators if indicator in header_text) >= 2:
+        if (
+            sum(1 for indicator in compliance_indicators if indicator in header_text)
+            >= 2
+        ):
             return "compliance"
 
         # Investment indicators
         investment_indicators = ["投資", "運用", "ポートフォリオ", "資産", "収益率"]
-        if sum(1 for indicator in investment_indicators if indicator in header_text) >= 2:
+        if (
+            sum(1 for indicator in investment_indicators if indicator in header_text)
+            >= 2
+        ):
             return "investment"
 
         # Cash management indicators
@@ -208,14 +217,16 @@ class FinancialHandler(IndustryHandlerBase):
         }
 
         result_queries = queries.get(format_type, [])
-        
+
         # Add general financial queries
-        result_queries.extend([
-            "金融業界のトレンドと将来展望は？",
-            "デジタル化による業務効率化の効果は？",
-            "金融規制の変化への対応戦略は？",
-            "持続可能な金融事業のための提案は？",
-        ])
+        result_queries.extend(
+            [
+                "金融業界のトレンドと将来展望は？",
+                "デジタル化による業務効率化の効果は？",
+                "金融規制の変化への対応戦略は？",
+                "持続可能な金融事業のための提案は？",
+            ]
+        )
 
         return result_queries
 
@@ -230,21 +241,23 @@ class FinancialHandler(IndustryHandlerBase):
         }
         return focus_map.get(format_type, "金融データの総合分析")
 
-    def _extract_financial_metrics(self, df: pd.DataFrame, format_type: str) -> dict[str, Any]:
+    def _extract_financial_metrics(
+        self, df: pd.DataFrame, format_type: str
+    ) -> dict[str, Any]:
         """Extract key financial metrics from data."""
         metrics = {}
-        
+
         # Look for financial metrics based on format type
         financial_terms = {
             "monetary": ["金額", "amount", "value", "円", "dollar", "yen"],
             "percentage": ["率", "ratio", "percent", "%"],
             "performance": ["収益", "利益", "損失", "ROE", "ROA", "EBITDA"],
         }
-        
+
         for col in df.columns:
             col_lower = str(col).lower()
             try:
-                numeric_data = pd.to_numeric(df[col], errors='coerce')
+                numeric_data = pd.to_numeric(df[col], errors="coerce")
                 if not numeric_data.isna().all():
                     # Determine metric type
                     metric_type = "other"
@@ -252,41 +265,49 @@ class FinancialHandler(IndustryHandlerBase):
                         if any(term in col_lower for term in terms):
                             metric_type = term_type
                             break
-                    
+
                     metrics[col] = {
                         "type": metric_type,
                         "total": float(numeric_data.sum()),
                         "average": float(numeric_data.mean()),
                         "max": float(numeric_data.max()),
                         "min": float(numeric_data.min()),
-                        "std_dev": float(numeric_data.std())
+                        "std_dev": float(numeric_data.std()),
                     }
             except (ValueError, TypeError):
                 continue
-        
+
         return metrics
 
     def _extract_risk_factors(self, df: pd.DataFrame) -> list[str]:
         """Extract risk factors from financial data."""
         risk_factors = []
-        risk_terms = ["信用リスク", "市場リスク", "流動性リスク", "オペレーショナルリスク", "金利リスク"]
-        
+        risk_terms = [
+            "信用リスク",
+            "市場リスク",
+            "流動性リスク",
+            "オペレーショナルリスク",
+            "金利リスク",
+        ]
+
         for col in df.columns:
             col_str = str(col)
             for term in risk_terms:
                 if term in col_str:
                     risk_factors.append(term)
-        
+
         return list(set(risk_factors))
 
-    def _extract_regulatory_context(self, df: pd.DataFrame, format_type: str) -> dict[str, Any]:
+    def _extract_regulatory_context(
+        self, df: pd.DataFrame, format_type: str
+    ) -> dict[str, Any]:
         """Extract regulatory context from financial data."""
         regulatory_info = {
             "applicable_regulations": [],
             "reporting_requirements": [],
             "compliance_status": "unknown",
         }
-        
+
         if format_type == "compliance":
             # Look for regulatory indicators in column names
             regulatory_terms = ["バーゼル", "IFRS", "JGAAP", "金融庁", "監査"]
@@ -295,7 +316,7 @@ class FinancialHandler(IndustryHandlerBase):
                 for term in regulatory_terms:
                     if term in col_str:
                         regulatory_info["applicable_regulations"].append(term)
-        
+
         return regulatory_info
 
     def _extract_time_horizons(self, df: pd.DataFrame) -> dict[str, Any]:
@@ -305,13 +326,15 @@ class FinancialHandler(IndustryHandlerBase):
             "time_columns": [],
             "analysis_period": None,
         }
-        
+
         for col in df.columns:
             col_lower = str(col).lower()
-            if any(term in col_lower for term in ["日", "月", "年", "期", "date", "time"]):
+            if any(
+                term in col_lower for term in ["日", "月", "年", "期", "date", "time"]
+            ):
                 time_info["time_columns"].append(col)
                 time_info["has_time_series"] = True
-        
+
         return time_info
 
     def _standardize_financial_values(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -322,32 +345,65 @@ class FinancialHandler(IndustryHandlerBase):
     def _enrich_financial_analysis(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add financial analysis enrichments."""
         enriched_df = df.copy()
-        enriched_df['_financial_analysis_timestamp'] = datetime.now().isoformat()
+        enriched_df["_financial_analysis_timestamp"] = datetime.now().isoformat()
         return enriched_df
 
     def _enrich_risk_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add risk analysis enrichments."""
         enriched_df = df.copy()
-        enriched_df['_risk_analysis_timestamp'] = datetime.now().isoformat()
+        enriched_df["_risk_analysis_timestamp"] = datetime.now().isoformat()
         return enriched_df
 
     def _load_domain_keywords(self) -> dict[str, list[str]]:
         """Load financial-specific domain keywords."""
         return {
             "risk": [
-                "リスク", "VaR", "信用リスク", "市場リスク", "流動性リスク",
-                "オペレーショナルリスク", "格付", "デフォルト", "損失", "exposure"
+                "リスク",
+                "VaR",
+                "信用リスク",
+                "市場リスク",
+                "流動性リスク",
+                "オペレーショナルリスク",
+                "格付",
+                "デフォルト",
+                "損失",
+                "exposure",
             ],
             "financial_metrics": [
-                "ROE", "ROA", "EBITDA", "PER", "PBR", "自己資本比率",
-                "流動比率", "負債比率", "売上高", "営業利益", "純利益"
+                "ROE",
+                "ROA",
+                "EBITDA",
+                "PER",
+                "PBR",
+                "自己資本比率",
+                "流動比率",
+                "負債比率",
+                "売上高",
+                "営業利益",
+                "純利益",
             ],
             "investment": [
-                "投資", "運用", "ポートフォリオ", "資産配分", "分散投資",
-                "リターン", "ベンチマーク", "アクティブ", "パッシブ", "ESG"
+                "投資",
+                "運用",
+                "ポートフォリオ",
+                "資産配分",
+                "分散投資",
+                "リターン",
+                "ベンチマーク",
+                "アクティブ",
+                "パッシブ",
+                "ESG",
             ],
             "compliance": [
-                "コンプライアンス", "規制", "法令", "監査", "内部統制",
-                "金融庁", "バーゼル", "IFRS", "報告", "開示"
-            ]
+                "コンプライアンス",
+                "規制",
+                "法令",
+                "監査",
+                "内部統制",
+                "金融庁",
+                "バーゼル",
+                "IFRS",
+                "報告",
+                "開示",
+            ],
         }

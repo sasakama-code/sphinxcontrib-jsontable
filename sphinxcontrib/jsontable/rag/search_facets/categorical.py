@@ -37,7 +37,7 @@ class CategoricalFacet:
 
 class CategoricalFacetGenerator:
     """Generator for categorical search facets.
-    
+
     Handles creation of categorical facets from statistical analysis data
     with Japanese language optimization and business data enhancement.
     """

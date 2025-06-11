@@ -16,7 +16,7 @@ from .base import BaseMetadataExporter
 
 class JsonLdExporter(BaseMetadataExporter):
     """JSON-LD format metadata exporter.
-    
+
     Exports metadata in JSON-LD format with schema.org compliance
     and custom RAG vocabulary for enhanced semantic interoperability.
     """
@@ -271,7 +271,9 @@ class JsonLdExporter(BaseMetadataExporter):
             "embeddingHints": features.embedding_hints,
             "vectorOptimization": features.vector_optimization,
             "textSegments": len(features.text_segments),
-            "optimizationLevel": features.embedding_hints.get("technical_level", "standard"),
+            "optimizationLevel": features.embedding_hints.get(
+                "technical_level", "standard"
+            ),
         }
 
     def _extract_variables(self, metadata: AdvancedMetadata) -> list[dict]:

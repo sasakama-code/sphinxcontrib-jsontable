@@ -14,7 +14,7 @@ from .base import GeneratedFacets
 
 class UIConfigGenerator:
     """Generator for facet UI configurations.
-    
+
     Handles creation of user interface configurations for all facet types
     with responsive design, accessibility, and Japanese localization.
     """

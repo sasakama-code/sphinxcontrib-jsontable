@@ -17,7 +17,7 @@ from ..search_facets import GeneratedFacets
 
 class BaseMetadataExporter:
     """Base class for all metadata exporters.
-    
+
     Provides common functionality and utilities used by format-specific exporters.
     """
 

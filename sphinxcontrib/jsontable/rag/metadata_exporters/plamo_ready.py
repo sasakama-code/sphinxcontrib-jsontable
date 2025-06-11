@@ -15,7 +15,7 @@ from .base import BaseMetadataExporter
 
 class PlamoReadyExporter(BaseMetadataExporter):
     """PLaMo-Embedding-1B optimized format exporter.
-    
+
     Exports metadata in a format optimized for PLaMo-Embedding-1B processing
     with enhanced Japanese language features and embedding preparation.
     """
@@ -41,8 +41,12 @@ class PlamoReadyExporter(BaseMetadataExporter):
             "text_segments": plamo_features.text_segments,
             "japanese_features": plamo_features.japanese_features,
             "embedding_hints": plamo_features.embedding_hints,
-            "entity_enhancement": self._create_entity_enhancement(metadata.entity_classification),
-            "quality_metrics": self._create_quality_metrics(metadata.data_quality, plamo_features),
+            "entity_enhancement": self._create_entity_enhancement(
+                metadata.entity_classification
+            ),
+            "quality_metrics": self._create_quality_metrics(
+                metadata.data_quality, plamo_features
+            ),
             "optimization_config": self._create_optimization_config(plamo_features),
         }
 
@@ -140,19 +144,33 @@ class PlamoReadyExporter(BaseMetadataExporter):
         return {
             "overall_score": data_quality.overall_score,
             "text_quality_indicators": {
-                "formality_level": plamo_features.embedding_hints.get("formality_level"),
-                "technical_level": plamo_features.embedding_hints.get("technical_level"),
+                "formality_level": plamo_features.embedding_hints.get(
+                    "formality_level"
+                ),
+                "technical_level": plamo_features.embedding_hints.get(
+                    "technical_level"
+                ),
                 "domain": plamo_features.embedding_hints.get("domain"),
                 "language_consistency": data_quality.consistency_score,
             },
             "japanese_quality": {
-                "kanji_density": plamo_features.japanese_features.get("kanji_ratio", 0.0),
-                "vocabulary_richness": plamo_features.japanese_features.get("vocabulary_richness", 0.0),
-                "business_term_density": len(plamo_features.embedding_hints.get("business_terms", [])),
+                "kanji_density": plamo_features.japanese_features.get(
+                    "kanji_ratio", 0.0
+                ),
+                "vocabulary_richness": plamo_features.japanese_features.get(
+                    "vocabulary_richness", 0.0
+                ),
+                "business_term_density": len(
+                    plamo_features.embedding_hints.get("business_terms", [])
+                ),
             },
             "embedding_quality_prediction": {
-                "expected_similarity_accuracy": min(0.95, data_quality.overall_score * 1.1),
-                "domain_coherence": plamo_features.embedding_hints.get("domain_coherence", 0.8),
+                "expected_similarity_accuracy": min(
+                    0.95, data_quality.overall_score * 1.1
+                ),
+                "domain_coherence": plamo_features.embedding_hints.get(
+                    "domain_coherence", 0.8
+                ),
                 "japanese_processing_confidence": 0.9,  # PLaMo特化
             },
         }

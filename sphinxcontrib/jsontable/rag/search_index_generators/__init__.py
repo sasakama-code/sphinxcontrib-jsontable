@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "SearchIndexGenerator",
     "VectorIndexGenerator",
-    "SemanticIndexGenerator", 
+    "SemanticIndexGenerator",
     "FacetedIndexGenerator",
     "HybridIndexGenerator",
     "IndexStorageManager",
@@ -31,7 +31,7 @@ __all__ = [
 
 class SearchIndexGenerator:
     """Unified search index generation facade.
-    
+
     Orchestrates the creation of vector, semantic, faceted, and hybrid search
     indices with Japanese language optimization. Provides complete backward
     compatibility with the original API while leveraging modular architecture.
@@ -44,13 +44,13 @@ class SearchIndexGenerator:
             config: Optional configuration dictionary for index parameters.
         """
         self.config = config or self._get_default_config()
-        
+
         # Initialize specialized generators
         self.vector_generator = VectorIndexGenerator(self.config)
         self.semantic_generator = SemanticIndexGenerator(self.config)
         self.faceted_generator = FacetedIndexGenerator(self.config)
         self.hybrid_generator = HybridIndexGenerator(self.config)
-        
+
         # Initialize utilities
         self.storage_manager = IndexStorageManager()
         self.japanese_processor = JapaneseQueryProcessor()
@@ -139,11 +139,11 @@ class SearchIndexGenerator:
         basic_metadata: Any = None,
     ) -> ComprehensiveSearchIndex:
         """包括的検索インデックス生成 - 完全後方互換API.
-        
+
         Args:
             vector_chunks: ベクトル化されたチャンクのリスト.
             basic_metadata: 基本メタデータ（オプション）.
-            
+
         Returns:
             包括的検索インデックス.
         """
@@ -194,12 +194,12 @@ class SearchIndexGenerator:
         k: int = 10,
     ) -> list[tuple[int, float]]:
         """ベクトル類似検索 - 完全後方互換API.
-        
+
         Args:
             query_embedding: クエリベクトル.
             search_index: 包括的検索インデックス.
             k: 取得する類似ベクトル数.
-            
+
         Returns:
             (インデックス, スコア)のタプルリスト.
         """
@@ -214,7 +214,7 @@ class SearchIndexGenerator:
         self, search_index: ComprehensiveSearchIndex, output_path: str
     ) -> None:
         """検索インデックス保存 - 完全後方互換API.
-        
+
         Args:
             search_index: 保存対象の包括的検索インデックス.
             output_path: 出力先パス.
@@ -224,10 +224,10 @@ class SearchIndexGenerator:
     @classmethod
     def load_search_index(cls, input_path: str) -> ComprehensiveSearchIndex:
         """検索インデックス読み込み - 完全後方互換API.
-        
+
         Args:
             input_path: 入力パス.
-            
+
         Returns:
             読み込まれた包括的検索インデックス.
         """
@@ -243,14 +243,14 @@ class SearchIndexGenerator:
         filters: dict[str, Any] | None = None,
     ) -> list[tuple[int, float]]:
         """統合クエリ検索機能（新機能）.
-        
+
         Args:
             query: 検索クエリ.
             search_index: 包括的検索インデックス.
             search_mode: 検索モード ("vector", "semantic", "faceted", "hybrid").
             max_results: 最大結果数.
             filters: ファセットフィルタ（オプション）.
-            
+
         Returns:
             検索結果のリスト.
         """
@@ -258,7 +258,7 @@ class SearchIndexGenerator:
             # ベクトル検索のみ（クエリベクトル化が必要）
             logger.warning("Vector-only search requires query embedding")
             return []
-            
+
         elif search_mode == "semantic":
             # セマンティック検索のみ
             if search_index.semantic_index:
@@ -266,7 +266,7 @@ class SearchIndexGenerator:
                     query, search_index.semantic_index, max_results
                 )
             return []
-            
+
         elif search_mode == "faceted":
             # ファセット検索のみ
             if search_index.facet_index and filters:
@@ -275,13 +275,13 @@ class SearchIndexGenerator:
                 )
                 return [(chunk_id, 1.0) for chunk_id in facet_results[:max_results]]
             return []
-            
+
         elif search_mode == "hybrid":
             # ハイブリッド検索
             return self._perform_hybrid_search(
                 query, search_index, max_results, filters
             )
-            
+
         else:
             raise ValueError(f"Unknown search mode: {search_mode}")
 
@@ -293,13 +293,13 @@ class SearchIndexGenerator:
         filters: dict[str, Any] | None,
     ) -> list[tuple[int, float]]:
         """ハイブリッド検索の実行.
-        
+
         Args:
             query: 検索クエリ.
             search_index: 包括的検索インデックス.
             max_results: 最大結果数.
             filters: ファセットフィルタ.
-            
+
         Returns:
             ハイブリッド検索結果.
         """
@@ -337,10 +337,10 @@ class SearchIndexGenerator:
         self, search_index: ComprehensiveSearchIndex
     ) -> dict[str, Any]:
         """包括的統計情報取得（新機能）.
-        
+
         Args:
             search_index: 統計情報を取得する包括的インデックス.
-            
+
         Returns:
             統計情報辞書.
         """
@@ -357,8 +357,10 @@ class SearchIndexGenerator:
             )
 
         if search_index.semantic_index:
-            stats["semantic_statistics"] = self.semantic_generator.get_semantic_statistics(
-                search_index.semantic_index
+            stats["semantic_statistics"] = (
+                self.semantic_generator.get_semantic_statistics(
+                    search_index.semantic_index
+                )
             )
 
         if search_index.facet_index:
@@ -377,10 +379,10 @@ class SearchIndexGenerator:
         self, search_index: ComprehensiveSearchIndex
     ) -> ComprehensiveSearchIndex:
         """インデックス最適化（新機能）.
-        
+
         Args:
             search_index: 最適化対象のインデックス.
-            
+
         Returns:
             最適化されたインデックス.
         """
@@ -391,8 +393,10 @@ class SearchIndexGenerator:
             )
 
         if search_index.semantic_index:
-            search_index.semantic_index = self.semantic_generator.optimize_semantic_index(
-                search_index.semantic_index
+            search_index.semantic_index = (
+                self.semantic_generator.optimize_semantic_index(
+                    search_index.semantic_index
+                )
             )
 
         logger.info("Comprehensive search index optimized")
