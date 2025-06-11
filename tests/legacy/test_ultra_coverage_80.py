@@ -1,20 +1,24 @@
 """Ultra coverage tests designed to reach 80% coverage target."""
 
-import pytest
-import tempfile
 import json
+import tempfile
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch
-from typing import Any
+from unittest.mock import Mock
+
+import pytest
 
 # Import all modules for maximum coverage
 import sphinxcontrib.jsontable
-from sphinxcontrib.jsontable import __version__
-from sphinxcontrib.jsontable.directives import JsonTableDirective, JsonDataLoader, TableConverter, TableBuilder
-from sphinxcontrib.jsontable.json_table_directive import JsonTableDirective as SimpleJsonTableDirective
 from sphinxcontrib.jsontable.data_loaders import JsonTableError, is_safe_path
-from sphinxcontrib.jsontable.table_converters import TableConverter as SecondaryConverter
-from sphinxcontrib.jsontable.table_builders import TableBuilder as SecondaryBuilder
+from sphinxcontrib.jsontable.directives import (
+    JsonDataLoader,
+    JsonTableDirective,
+    TableBuilder,
+    TableConverter,
+)
+from sphinxcontrib.jsontable.json_table_directive import (
+    JsonTableDirective as SimpleJsonTableDirective,
+)
 
 
 class TestUltraCoverage80:
@@ -23,34 +27,34 @@ class TestUltraCoverage80:
     def test_package_initialization(self):
         """Test package level imports and initialization."""
         # Test version import
-        assert hasattr(sphinxcontrib.jsontable, '__version__')
-        version = getattr(sphinxcontrib.jsontable, '__version__')
+        assert hasattr(sphinxcontrib.jsontable, "__version__")
+        version = sphinxcontrib.jsontable.__version__
         assert version is not None
-        
+
         # Test package level setup
         assert sphinxcontrib.jsontable is not None
 
     def test_all_json_data_loader_methods(self):
         """Test all JsonDataLoader methods comprehensively."""
         loader = JsonDataLoader()
-        
+
         # Test load_from_content with all edge cases
         valid_json_cases = [
             '{"name": "Alice", "age": 25, "city": "NYC"}',
-            '[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]',
+            "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
             '{"nested": {"deep": {"very_deep": "value"}}}',
-            '[]',
-            '{}',
-            'null',
-            'true',
-            'false',
-            '42',
+            "[]",
+            "{}",
+            "null",
+            "true",
+            "false",
+            "42",
             '"string value"',
-            '3.14159',
+            "3.14159",
             '{"unicode": "テスト", "emoji": "🎉"}',
             '[{"a": 1}, {"b": 2}, {"c": 3}]',
         ]
-        
+
         for json_str in valid_json_cases:
             result = loader.load_from_content(json_str)
             assert result is not None
@@ -64,12 +68,14 @@ class TestUltraCoverage80:
             {},
             {"numbers": [1, 2, 3], "strings": ["a", "b", "c"]},
         ]
-        
-        for i, data in enumerate(test_data_sets):
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+
+        for _i, data in enumerate(test_data_sets):
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".json", delete=False
+            ) as f:
                 json.dump(data, f, ensure_ascii=False)
                 temp_path = f.name
-            
+
             try:
                 result = loader.load_from_file(temp_path)
                 assert result == data
@@ -81,11 +87,11 @@ class TestUltraCoverage80:
             '{"invalid": json}',
             '{missing_quotes: "value"}',
             '{"incomplete":',
-            '[1, 2, 3,]',
+            "[1, 2, 3,]",
             '{"key": undefined}',
             '{key: "value"}',  # Missing quotes on key
         ]
-        
+
         for invalid_json in invalid_json_cases:
             with pytest.raises(JsonTableError):
                 loader.load_from_content(invalid_json)
@@ -93,7 +99,7 @@ class TestUltraCoverage80:
     def test_all_table_converter_paths(self):
         """Test all TableConverter code paths."""
         converter = TableConverter()
-        
+
         # Test convert method with all supported types
         test_cases = [
             # Array of objects (most common)
@@ -113,7 +119,7 @@ class TestUltraCoverage80:
             # Array with null values
             ([{"a": 1, "b": None}, {"a": None, "b": 2}], 2),
         ]
-        
+
         for data, expected_rows in test_cases:
             result = converter.convert(data)
             assert len(result) == expected_rows
@@ -126,12 +132,12 @@ class TestUltraCoverage80:
             True,
             False,
             None,
-            set([1, 2, 3]),
+            {1, 2, 3},
             frozenset([1, 2, 3]),
             complex(1, 2),
             lambda x: x,
         ]
-        
+
         for invalid_type in invalid_types:
             with pytest.raises(JsonTableError):
                 converter.convert(invalid_type)
@@ -139,7 +145,7 @@ class TestUltraCoverage80:
     def test_all_table_builder_paths(self):
         """Test all TableBuilder code paths."""
         builder = TableBuilder()
-        
+
         # Test build method with various configurations
         test_cases = [
             # Standard cases
@@ -157,7 +163,7 @@ class TestUltraCoverage80:
             # Unicode
             ([["名前", "年齢"], ["田中", 25]], True),
         ]
-        
+
         for table_data, has_header in test_cases:
             result = builder.build(table_data, has_header=has_header)
             assert result is not None
@@ -170,17 +176,17 @@ class TestUltraCoverage80:
         mock_state_machine.reporter = Mock()
         mock_document = Mock()
         mock_state.document = mock_document
-        
+
         # Test with file argument
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             test_data = [
                 {"name": "Alice", "age": 25, "department": "Engineering"},
                 {"name": "Bob", "age": 30, "department": "Sales"},
-                {"name": "Charlie", "age": 35, "department": "Marketing"}
+                {"name": "Charlie", "age": 35, "department": "Marketing"},
             ]
             json.dump(test_data, f)
             temp_path = f.name
-        
+
         try:
             # Test various option combinations
             option_combinations = [
@@ -189,7 +195,7 @@ class TestUltraCoverage80:
                 {"limit": 2},
                 {"header": True, "limit": 1},
             ]
-            
+
             for options in option_combinations:
                 directive = JsonTableDirective(
                     name="json-table",
@@ -200,24 +206,24 @@ class TestUltraCoverage80:
                     content_offset=0,
                     block_text="",
                     state=mock_state,
-                    state_machine=mock_state_machine
+                    state_machine=mock_state_machine,
                 )
-                
+
                 assert directive.name == "json-table"
                 assert len(directive.arguments) == 1
-                
+
         finally:
             Path(temp_path).unlink()
 
         # Test with inline content
         inline_content_cases = [
             ['{"name": "Alice", "age": 25}'],
-            ['[1, 2, 3, 4, 5]'],
+            ["[1, 2, 3, 4, 5]"],
             ['{"complex": {"nested": "data"}}'],
-            ['[]'],
-            ['{}'],
+            ["[]"],
+            ["{}"],
         ]
-        
+
         for content in inline_content_cases:
             directive = JsonTableDirective(
                 name="json-table",
@@ -228,9 +234,9 @@ class TestUltraCoverage80:
                 content_offset=0,
                 block_text="",
                 state=mock_state,
-                state_machine=mock_state_machine
+                state_machine=mock_state_machine,
             )
-            
+
             assert directive.name == "json-table"
             assert len(directive.content) == 1
 
@@ -249,10 +255,10 @@ class TestUltraCoverage80:
             "ファイル名.json",  # Unicode filename
             "file.with.dots.json",
         ]
-        
+
         for path in safe_paths:
             assert is_safe_path(path), f"Should be safe: {path}"
-        
+
         # Unsafe paths - should return False
         unsafe_paths = [
             "../parent.json",
@@ -268,7 +274,7 @@ class TestUltraCoverage80:
             "${VARIABLE}/file.json",
             "%USERPROFILE%/file.json",
         ]
-        
+
         for path in unsafe_paths:
             assert not is_safe_path(path), f"Should be unsafe: {path}"
 
@@ -277,17 +283,17 @@ class TestUltraCoverage80:
         mock_state = Mock()
         mock_state_machine = Mock()
         mock_state_machine.reporter = Mock()
-        
+
         # Test with various content types
         content_cases = [
             ['{"name": "test"}'],
-            ['[1, 2, 3]'],
+            ["[1, 2, 3]"],
             ['{"complex": {"data": [1, 2, 3]}}'],
-            ['null'],
-            ['true'],
+            ["null"],
+            ["true"],
             ['"string"'],
         ]
-        
+
         for content in content_cases:
             directive = SimpleJsonTableDirective(
                 name="json-table",
@@ -298,9 +304,9 @@ class TestUltraCoverage80:
                 content_offset=0,
                 block_text="",
                 state=mock_state,
-                state_machine=mock_state_machine
+                state_machine=mock_state_machine,
             )
-            
+
             assert directive.name == "json-table"
             assert len(directive.content) == 1
 
@@ -309,9 +315,9 @@ class TestUltraCoverage80:
         loader = JsonDataLoader()
         converter = TableConverter()
         builder = TableBuilder()
-        
+
         # Complex real-world-like data
-        complex_json = '''
+        complex_json = """
         {
             "employees": [
                 {"id": 1, "name": "Alice Johnson", "department": "Engineering", "salary": 75000, "active": true},
@@ -319,20 +325,20 @@ class TestUltraCoverage80:
                 {"id": 3, "name": "Charlie Brown", "department": "Marketing", "salary": 58000, "active": false}
             ]
         }
-        '''
-        
+        """
+
         # Full pipeline test
         data = loader.load_from_content(complex_json)
         assert "employees" in data
-        
+
         employees = data["employees"]
         table_data = converter.convert(employees)
         assert len(table_data) == 3
-        
+
         # Test both header and non-header builds
         table_with_header = builder.build(table_data, has_header=True)
         assert table_with_header is not None
-        
+
         table_without_header = builder.build(table_data, has_header=False)
         assert table_without_header is not None
 
@@ -340,39 +346,39 @@ class TestUltraCoverage80:
         """Test all error scenarios comprehensively."""
         loader = JsonDataLoader()
         converter = TableConverter()
-        
+
         # File not found errors
         with pytest.raises((JsonTableError, FileNotFoundError)):
             loader.load_from_file("definitely_not_existing_file.json")
-        
+
         with pytest.raises((JsonTableError, FileNotFoundError)):
             loader.load_from_file("/path/that/does/not/exist.json")
-        
+
         # JSON parsing errors
         malformed_json_cases = [
-            '{',
-            '}',
+            "{",
+            "}",
             '{"key":}',
             '{"key": value}',
-            '[1, 2, 3,]',
+            "[1, 2, 3,]",
             '{"incomplete"',
-            'not json at all',
+            "not json at all",
             '{"key": "value"} extra text',
         ]
-        
+
         for bad_json in malformed_json_cases:
             with pytest.raises(JsonTableError):
                 loader.load_from_content(bad_json)
-        
+
         # Type conversion errors
         bad_types = [
             object(),
             type,
-            bytes(b'binary'),
-            bytearray(b'mutable binary'),
-            memoryview(b'memory'),
+            b"binary",
+            bytearray(b"mutable binary"),
+            memoryview(b"memory"),
         ]
-        
+
         for bad_type in bad_types:
             with pytest.raises(JsonTableError):
                 converter.convert(bad_type)
@@ -381,30 +387,32 @@ class TestUltraCoverage80:
         """Test Unicode and encoding handling."""
         loader = JsonDataLoader()
         converter = TableConverter()
-        
+
         # Unicode test data
         unicode_data = {
             "japanese": "こんにちは世界",
-            "chinese": "你好世界", 
+            "chinese": "你好世界",
             "arabic": "مرحبا بالعالم",
             "emoji": "🌍🎉🚀",
-            "mixed": "Hello 世界 🌍"
+            "mixed": "Hello 世界 🌍",
         }
-        
+
         # Test as JSON string
         unicode_json = json.dumps(unicode_data, ensure_ascii=False)
         result = loader.load_from_content(unicode_json)
         assert result == unicode_data
-        
+
         # Test conversion
         table_data = converter.convert([unicode_data])
         assert len(table_data) == 1
-        
+
         # Test with file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False, encoding="utf-8"
+        ) as f:
             json.dump(unicode_data, f, ensure_ascii=False)
             temp_path = f.name
-        
+
         try:
             result = loader.load_from_file(temp_path)
             assert result == unicode_data
@@ -415,17 +423,17 @@ class TestUltraCoverage80:
         """Test handling of large datasets."""
         converter = TableConverter()
         builder = TableBuilder()
-        
+
         # Generate large dataset
         large_data = [
             {"id": i, "name": f"User_{i}", "value": i * 1.5, "active": i % 2 == 0}
             for i in range(100)
         ]
-        
+
         # Test conversion
         table_data = converter.convert(large_data)
         assert len(table_data) == 100
-        
+
         # Test table building
         table = builder.build(table_data[:10])  # First 10 rows
         assert table is not None
@@ -435,7 +443,7 @@ class TestUltraCoverage80:
         loader = JsonDataLoader()
         converter = TableConverter()
         builder = TableBuilder()
-        
+
         edge_cases = [
             # Empty structures
             {},
@@ -443,28 +451,21 @@ class TestUltraCoverage80:
             [{}],
             {"empty_array": []},
             {"empty_object": {}},
-            
             # Null and boolean values
             {"null_value": None, "true_value": True, "false_value": False},
             [None, True, False],
-            
             # Numeric edge cases
             {"zero": 0, "negative": -1, "float": 3.14159, "large": 1e10},
-            
             # String edge cases
             {"empty_string": "", "whitespace": "   ", "special_chars": "!@#$%^&*()"},
         ]
-        
+
         for edge_case in edge_cases:
             # Test through full pipeline
             json_str = json.dumps(edge_case)
             data = loader.load_from_content(json_str)
-            
-            if isinstance(data, list) and data:
-                table_data = converter.convert(data)
-                table = builder.build(table_data)
-                assert table is not None
-            elif isinstance(data, dict):
+
+            if (isinstance(data, list) and data) or isinstance(data, dict):
                 table_data = converter.convert(data)
                 table = builder.build(table_data)
                 assert table is not None
