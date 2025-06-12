@@ -15,6 +15,13 @@ from docutils.parsers.rst import directives
 from sphinx.util import logging
 from sphinx.util.docutils import SphinxDirective
 
+# Excel対応のインポート
+try:
+    from .excel_data_loader import ExcelDataLoader
+    EXCEL_SUPPORT = True
+except ImportError:
+    EXCEL_SUPPORT = False
+
 logger = logging.getLogger(__name__)
 
 JsonData = list[Any] | dict[str, Any]
@@ -617,6 +624,11 @@ class JsonTableDirective(SphinxDirective):
         )
 
         self.loader = JsonDataLoader(encoding)
+        # Excel対応のローダーを初期化
+        if EXCEL_SUPPORT:
+            self.excel_loader = ExcelDataLoader(str(self.env.srcdir))
+        else:
+            self.excel_loader = None
         self.converter = TableConverter(default_max_rows)
         self.builder = TableBuilder()
 
@@ -645,6 +657,7 @@ class JsonTableDirective(SphinxDirective):
     def _load_json_data(self) -> JsonData:
         """
         Determine JSON source: file (argument) or inline content.
+        Supports both JSON and Excel files.
 
         Returns:
             Parsed JSON data (object or list).
@@ -653,10 +666,42 @@ class JsonTableDirective(SphinxDirective):
             JsonTableError: If no JSON source provided.
         """
         if self.arguments:
-            return self.loader.load_from_file(
-                self.arguments[0],
-                Path(self.env.srcdir),
-            )
+            file_path = self.arguments[0]
+            file_ext = Path(file_path).suffix.lower()
+
+            # Excel形式の判定と処理
+            if file_ext in {'.xlsx', '.xls'}:
+                if not EXCEL_SUPPORT:
+                    raise JsonTableError(
+                        "Excel support not available. Install with: pip install 'sphinxcontrib-jsontable[excel]'"
+                    )
+                if not self.excel_loader:
+                    raise JsonTableError("Excel loader not initialized")
+
+                # Excelファイルを読み込み
+                excel_data = self.excel_loader.load_from_excel(file_path)
+
+                # Excel形式からJSON形式に変換
+                if excel_data['has_header']:
+                    # ヘッダーがある場合: オブジェクトの配列形式
+                    headers = excel_data['headers']
+                    json_data = []
+                    for row in excel_data['data']:
+                        row_obj = {}
+                        for i, value in enumerate(row):
+                            if i < len(headers):
+                                row_obj[str(headers[i])] = value
+                        json_data.append(row_obj)
+                    return json_data
+                else:
+                    # ヘッダーなし: 2D配列形式
+                    return excel_data['data']
+            else:
+                # 従来のJSON処理
+                return self.loader.load_from_file(
+                    file_path,
+                    Path(self.env.srcdir),
+                )
         elif self.content:
             return self.loader.parse_inline(self.content)
         else:
