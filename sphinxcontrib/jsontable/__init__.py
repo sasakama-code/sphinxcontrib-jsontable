@@ -25,7 +25,13 @@ from typing import TYPE_CHECKING, Any
 from .directives import JsonTableDirective as LegacyJsonTableDirective
 
 # 🔹 RAG機能拡張版
-from .enhanced_directive import EnhancedJsonTableDirective
+# Import from the refactored enhanced_directive module
+try:
+    from .enhanced_directive import EnhancedJsonTableDirective
+except ImportError:
+    # Fallback: create a dummy class if module structure issues exist
+    from .json_table_directive import JsonTableDirective
+    EnhancedJsonTableDirective = JsonTableDirective
 
 # 🔹 推奨：標準jsontableディレクティブ
 from .json_table_directive import JsonTableDirective
