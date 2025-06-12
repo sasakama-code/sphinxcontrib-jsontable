@@ -8,7 +8,7 @@ import logging
 import time
 from typing import Any
 
-from .base import ComprehensiveSearchIndex
+from .base import ComprehensiveSearchIndex, FacetedSearchIndex
 from .faceted_index import FacetedIndexGenerator
 from .hybrid_index import HybridIndexGenerator
 from .japanese_processor import JapaneseQueryProcessor
@@ -19,7 +19,9 @@ from .vector_index import VectorIndexGenerator
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "ComprehensiveSearchIndex",
     "FacetedIndexGenerator",
+    "FacetedSearchIndex",
     "HybridIndexGenerator",
     "IndexStorageManager",
     "JapaneseQueryProcessor",

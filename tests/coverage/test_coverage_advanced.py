@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from sphinxcontrib.jsontable.enhanced_directive import EnhancedJsonTableDirective
+from sphinxcontrib.jsontable import EnhancedJsonTableDirective
 from sphinxcontrib.jsontable.rag.advanced_metadata import AdvancedMetadataGenerator
 from sphinxcontrib.jsontable.rag.metadata_extractor import (
     BasicMetadata,

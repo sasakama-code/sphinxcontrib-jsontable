@@ -13,12 +13,20 @@ from typing import Any
 
 from .search_index_generators import (
     ComprehensiveSearchIndex,
+    FacetedSearchIndex,
     JapaneseQueryProcessor,
 )
 
 # Import the new modular implementation
 from .search_index_generators import (
     SearchIndexGenerator as ModularSearchIndexGenerator,
+)
+
+# Import additional index types from base module
+from .search_index_generators.base import (
+    HybridSearchIndex,
+    SemanticSearchIndex,
+    VectorIndex,
 )
 
 logger = logging.getLogger(__name__)
@@ -132,14 +140,6 @@ class SearchIndexGenerator:
         """Legacy method - redirected to modular implementation."""
         return self._generator.hybrid_generator.generate()
 
-
-# Re-export data classes for backward compatibility
-from .search_index_generators.base import (
-    FacetedSearchIndex,
-    HybridSearchIndex,
-    SemanticSearchIndex,
-    VectorIndex,
-)
 
 # Log the compatibility layer usage
 logger.info("Using legacy search_index_generator compatibility layer")

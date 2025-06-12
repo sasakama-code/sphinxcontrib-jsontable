@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from sphinxcontrib.jsontable.directives import (
+from sphinxcontrib.jsontable.data_loaders import (
     JsonTableError,
     ensure_file_exists,
     is_safe_path,

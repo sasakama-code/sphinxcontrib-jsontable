@@ -6,10 +6,8 @@ This module tests the core functionality of the enhanced directive
 including RAG metadata extraction and semantic chunking.
 """
 
-from sphinxcontrib.jsontable.enhanced_directive import (
-    RAGMetadataExtractor,
-    SemanticChunker,
-)
+from sphinxcontrib.jsontable.rag.metadata_extractor import RAGMetadataExtractor
+from sphinxcontrib.jsontable.rag.semantic_chunker import SemanticChunker
 
 
 def test_rag_metadata_extractor():
