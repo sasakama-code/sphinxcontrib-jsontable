@@ -17,9 +17,7 @@ Author: Claude Code Assistant
 
 from __future__ import annotations
 
-import json
 import logging
-from collections import Counter
 from typing import Any
 
 from .japanese_patterns import JapanesePatternManager
@@ -31,14 +29,14 @@ JsonData = dict[str, Any] | list[dict[str, Any]] | list[Any]
 
 class SchemaGenerator:
     """Advanced JSON Schema generation with business intelligence features.
-    
+
     Generates OpenAPI-compliant schemas with semantic annotations
     and statistical analysis for RAG processing optimization.
     """
 
     def __init__(self, japanese_patterns: JapanesePatternManager) -> None:
         """Initialize schema generator with Japanese pattern support.
-        
+
         Args:
             japanese_patterns: Japanese language pattern manager instance
         """
@@ -78,7 +76,7 @@ class SchemaGenerator:
                                     "types": set(),
                                     "null_count": 0,
                                 }
-                            
+
                             if value is None:
                                 all_properties[key]["null_count"] += 1
                             else:
@@ -87,10 +85,10 @@ class SchemaGenerator:
 
                 properties = {}
                 required = []
-                
+
                 for key, info in all_properties.items():
                     prop_schema = self._analyze_property(key, info["values"])
-                    
+
                     # Add nullability information
                     if info["null_count"] > 0:
                         if info["null_count"] < len(data):
@@ -103,7 +101,7 @@ class SchemaGenerator:
                     else:
                         # No null values - mark as required
                         required.append(key)
-                    
+
                     properties[key] = prop_schema
 
                 item_schema = {
@@ -113,10 +111,12 @@ class SchemaGenerator:
                     "x-rag-metadata": {
                         "record_count": len(data),
                         "property_count": len(properties),
-                        "completeness_score": self._calculate_completeness_score(all_properties, len(data)),
+                        "completeness_score": self._calculate_completeness_score(
+                            all_properties, len(data)
+                        ),
                     },
                 }
-                
+
                 if required:
                     item_schema["required"] = required
 
@@ -133,9 +133,9 @@ class SchemaGenerator:
 
             # Handle array of primitives
             else:
-                value_types = set(type(item).__name__ for item in data)
+                value_types = {type(item).__name__ for item in data}
                 if len(value_types) == 1:
-                    item_type = list(value_types)[0].lower()
+                    item_type = next(iter(value_types)).lower()
                     if item_type == "str":
                         item_type = "string"
                     elif item_type == "int" or item_type == "float":
@@ -157,7 +157,7 @@ class SchemaGenerator:
         elif isinstance(data, dict):
             properties = {}
             required = []
-            
+
             for key, value in data.items():
                 if value is not None:
                     required.append(key)
@@ -176,10 +176,10 @@ class SchemaGenerator:
                     "business_context": self._detect_business_context(properties),
                 },
             }
-            
+
             if required:
                 schema["required"] = required
-                
+
             return schema
 
         else:
@@ -189,7 +189,7 @@ class SchemaGenerator:
                 value_type = "string"
             elif value_type in ["int", "float"]:
                 value_type = "number"
-                
+
             return {
                 "type": value_type,
                 "description": f"Single {value_type} value",
@@ -218,11 +218,11 @@ class SchemaGenerator:
             return {"type": "null", "description": f"Property: {key}"}
 
         # Determine basic type
-        value_types = set(type(v).__name__ for v in non_null_values)
-        
+        value_types = {type(v).__name__ for v in non_null_values}
+
         if len(value_types) == 1:
-            python_type = list(value_types)[0]
-            
+            python_type = next(iter(value_types))
+
             if python_type == "str":
                 return self._analyze_string_property(key, non_null_values)
             elif python_type in ["int", "float"]:
@@ -245,7 +245,7 @@ class SchemaGenerator:
                     "description": f"Object property: {key}",
                     "x-semantic-type": "nested_object",
                 }
-        
+
         # Mixed types - default to string with conversion info
         return {
             "type": "string",
@@ -256,11 +256,11 @@ class SchemaGenerator:
 
     def _analyze_string_property(self, key: str, values: list[str]) -> dict[str, Any]:
         """Analyze string property for semantic type and patterns.
-        
+
         Args:
             key: Property name
             values: List of string values
-            
+
         Returns:
             String property schema with semantic annotations
         """
@@ -268,36 +268,41 @@ class SchemaGenerator:
             "type": "string",
             "description": self._generate_property_description(key, values),
         }
-        
+
         # Basic statistics
         lengths = [len(str(v)) for v in values]
         if lengths:
             property_schema["minLength"] = min(lengths)
             property_schema["maxLength"] = max(lengths)
-            
+
         # Semantic type detection using Japanese patterns
         semantic_type = self.japanese_patterns.get_entity_type_for_field(key)
         if semantic_type:
             property_schema["x-entity-type"] = semantic_type
-            
+
         # Pattern analysis for sample values
         sample_values = values[:10]  # Analyze up to 10 samples
         pattern_analysis = {}
-        
+
         for value in sample_values:
             if isinstance(value, str):
-                detected_type, description = self.japanese_patterns.infer_semantic_type(value)
+                detected_type, description = self.japanese_patterns.infer_semantic_type(
+                    value
+                )
                 if detected_type:
                     if detected_type not in pattern_analysis:
-                        pattern_analysis[detected_type] = {"count": 0, "description": description}
+                        pattern_analysis[detected_type] = {
+                            "count": 0,
+                            "description": description,
+                        }
                     pattern_analysis[detected_type]["count"] += 1
-        
+
         if pattern_analysis:
             # Use the most common pattern
             most_common = max(pattern_analysis.items(), key=lambda x: x[1]["count"])
             property_schema["x-semantic-type"] = most_common[0]
             property_schema["x-pattern-description"] = most_common[1]["description"]
-        
+
         # Unique value analysis
         unique_values = list(set(values))
         if len(unique_values) <= 10:
@@ -306,27 +311,29 @@ class SchemaGenerator:
         elif len(unique_values) < len(values) * 0.5:
             property_schema["x-is-categorical"] = True
             property_schema["x-unique-count"] = len(unique_values)
-        
+
         return property_schema
 
-    def _analyze_numeric_property(self, key: str, values: list[float | int]) -> dict[str, Any]:
+    def _analyze_numeric_property(
+        self, key: str, values: list[float | int]
+    ) -> dict[str, Any]:
         """Analyze numeric property for statistical information.
-        
+
         Args:
             key: Property name
             values: List of numeric values
-            
+
         Returns:
             Numeric property schema with statistical metadata
         """
-        numeric_values = [float(v) for v in values if isinstance(v, (int, float))]
-        
+        numeric_values = [float(v) for v in values if isinstance(v, int | float)]
+
         if not numeric_values:
             return {"type": "number", "description": f"Numeric property: {key}"}
-        
+
         # Calculate statistics
         stats = self._calculate_numeric_stats(numeric_values)
-        
+
         property_schema = {
             "type": "number",
             "description": self._generate_property_description(key, values),
@@ -334,11 +341,11 @@ class SchemaGenerator:
             "maximum": stats["max"],
             "x-statistics": stats,
         }
-        
+
         # Detect if it's likely an integer
         if all(float(v).is_integer() for v in numeric_values):
             property_schema["type"] = "integer"
-        
+
         # Entity type detection
         entity_type = self.japanese_patterns.get_entity_type_for_field(key)
         if entity_type == "amount":
@@ -348,46 +355,46 @@ class SchemaGenerator:
             property_schema["x-semantic-type"] = "identifier"
         elif "count" in key.lower() or "数" in key:
             property_schema["x-semantic-type"] = "count"
-        
+
         return property_schema
 
     def _calculate_numeric_stats(self, values: list[float]) -> dict[str, Any]:
         """Calculate comprehensive numeric statistics.
-        
+
         Args:
             values: List of numeric values
-            
+
         Returns:
             Dictionary containing statistical measures
         """
         if not values:
             return {}
-        
+
         sorted_values = sorted(values)
         n = len(values)
-        
+
         # Basic statistics
         min_val = min(values)
         max_val = max(values)
         total = sum(values)
         mean = total / n
-        
+
         # Median calculation
         if n % 2 == 0:
-            median = (sorted_values[n//2 - 1] + sorted_values[n//2]) / 2
+            median = (sorted_values[n // 2 - 1] + sorted_values[n // 2]) / 2
         else:
-            median = sorted_values[n//2]
-        
+            median = sorted_values[n // 2]
+
         # Variance and standard deviation
         variance = sum((x - mean) ** 2 for x in values) / n
-        std_dev = variance ** 0.5
-        
+        std_dev = variance**0.5
+
         # Quartiles
         q1_idx = n // 4
         q3_idx = 3 * n // 4
         q1 = sorted_values[q1_idx] if q1_idx < n else sorted_values[-1]
         q3 = sorted_values[q3_idx] if q3_idx < n else sorted_values[-1]
-        
+
         return {
             "count": n,
             "min": min_val,
@@ -404,11 +411,11 @@ class SchemaGenerator:
 
     def _get_unique_values(self, values: list[Any], limit: int = 100) -> list[Any]:
         """Get unique values from a list with optional limit.
-        
+
         Args:
             values: Input values list
             limit: Maximum number of unique values to return
-            
+
         Returns:
             List of unique values (limited)
         """
@@ -417,17 +424,17 @@ class SchemaGenerator:
 
     def _generate_property_description(self, key: str, values: list[Any]) -> str:
         """Generate human-readable description for a property.
-        
+
         Args:
             key: Property name
             values: Sample values
-            
+
         Returns:
             Human-readable property description
         """
         # Basic entity type description
         entity_type = self.japanese_patterns.get_entity_type_for_field(key)
-        
+
         if entity_type == "name":
             return f"名前情報: {key}"
         elif entity_type == "organization":
@@ -446,38 +453,40 @@ class SchemaGenerator:
             else:
                 return f"データ項目: {key}"
 
-    def _calculate_completeness_score(self, properties: dict[str, dict], total_records: int) -> float:
+    def _calculate_completeness_score(
+        self, properties: dict[str, dict], total_records: int
+    ) -> float:
         """Calculate data completeness score.
-        
+
         Args:
             properties: Property analysis results
             total_records: Total number of records
-            
+
         Returns:
             Completeness score between 0 and 1
         """
         if not properties or total_records == 0:
             return 0.0
-        
+
         total_cells = len(properties) * total_records
         filled_cells = sum(
             len(prop_info["values"]) for prop_info in properties.values()
         )
-        
+
         return round(filled_cells / total_cells, 4)
 
     def _detect_business_context(self, properties: dict[str, dict]) -> str:
         """Detect business context from property names.
-        
+
         Args:
             properties: Schema properties
-            
+
         Returns:
             Detected business context string
         """
         property_names = list(properties.keys())
         name_text = " ".join(property_names).lower()
-        
+
         contexts = {
             "sales": ["売上", "sales", "revenue", "顧客", "customer", "営業"],
             "hr": ["社員", "employee", "給与", "salary", "人事", "hr"],
@@ -485,9 +494,9 @@ class SchemaGenerator:
             "inventory": ["在庫", "inventory", "商品", "product", "stock"],
             "project": ["プロジェクト", "project", "タスク", "task", "進捗"],
         }
-        
+
         for context, keywords in contexts.items():
             if any(keyword in name_text for keyword in keywords):
                 return context
-        
+
         return "general"

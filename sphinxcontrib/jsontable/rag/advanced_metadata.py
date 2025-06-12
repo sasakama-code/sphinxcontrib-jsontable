@@ -245,7 +245,7 @@ class DataQualityAssessor:
 
         # NaNや無限大は無効
         return not (
-            isinstance(item, int | float) and (np.isnan(item) or np.isinf(item))  # noqa: F821
+            isinstance(item, int | float) and (np.isnan(item) or np.isinf(item))
         )
 
     def _collect_detailed_issues(self, data: Any) -> dict[str, list[str]]:

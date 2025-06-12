@@ -9,7 +9,7 @@ complete backward compatibility.
 
 Architecture:
 - JapanesePatternManager: Japanese language processing
-- SchemaGenerator: JSON Schema generation and analysis  
+- SchemaGenerator: JSON Schema generation and analysis
 - RAGMetadataExtractor: Main API (backward compatible)
 
 Created: 2025-06-12 (modularized from metadata_extractor.py)
@@ -92,7 +92,7 @@ class RAGMetadataExtractor:
         # Initialize modular components
         self.japanese_patterns = JapanesePatternManager()
         self.schema_generator = SchemaGenerator(self.japanese_patterns)
-        
+
         # Legacy compatibility attributes
         self.japanese_patterns_dict = self.japanese_patterns.entity_patterns
         self.type_inference_patterns = self.japanese_patterns.type_patterns
@@ -162,11 +162,11 @@ class RAGMetadataExtractor:
 
     def _generate_semantic_summary(self, data: JsonData, schema: dict[str, Any]) -> str:
         """Generate semantic summary of the data.
-        
+
         Args:
             data: Input JSON data
             schema: Generated schema
-            
+
         Returns:
             Human-readable semantic summary
         """
@@ -174,62 +174,66 @@ class RAGMetadataExtractor:
             record_count = len(data)
             if record_count == 0:
                 return "空のデータセット"
-            
+
             # Analyze business context from schema
-            business_context = schema.get("x-rag-metadata", {}).get("business_context", "general")
+            business_context = schema.get("x-rag-metadata", {}).get(
+                "business_context", "general"
+            )
             context_descriptions = {
                 "sales": "営業・販売",
-                "hr": "人事・労務", 
+                "hr": "人事・労務",
                 "finance": "財務・会計",
                 "inventory": "在庫・商品",
                 "project": "プロジェクト管理",
-                "general": "一般"
+                "general": "一般",
             }
-            
+
             context_desc = context_descriptions.get(business_context, "一般")
-            
+
             if isinstance(data[0], dict):
                 column_count = len(data[0].keys()) if data else 0
                 return f"{context_desc}関連の{record_count}件のレコード（{column_count}項目）を含むデータテーブル"
             else:
                 return f"{context_desc}関連の{record_count}件の値を含むデータリスト"
-                
+
         elif isinstance(data, dict):
             item_count = len(data.keys())
             return f"{item_count}項目を含む単一データレコード"
         else:
             return "単一データ値"
 
-    def _extract_search_keywords(self, data: JsonData, schema: dict[str, Any]) -> list[str]:
+    def _extract_search_keywords(
+        self, data: JsonData, schema: dict[str, Any]
+    ) -> list[str]:
         """Extract search keywords from data and schema.
-        
+
         Args:
             data: Input JSON data
             schema: Generated schema
-            
+
         Returns:
             List of search keywords
         """
         keywords = set()
-        
+
         # Extract from schema properties
         if isinstance(data, list) and data and isinstance(data[0], dict):
             properties = schema.get("items", {}).get("properties", {})
-            
+
             # Add property names as keywords
             for prop_name, prop_info in properties.items():
                 keywords.add(prop_name.lower())
-                
+
                 # Add entity types as keywords
                 entity_type = prop_info.get("x-entity-type")
                 if entity_type:
                     keywords.add(entity_type)
-                
+
                 # Add semantic types as keywords
                 semantic_type = prop_info.get("x-semantic-type")
                 if semantic_type:
                     keywords.add(semantic_type)
-        
+
         # Extract business terms from sample data
         sample_texts = []
         if isinstance(data, list) and data:
@@ -242,34 +246,34 @@ class RAGMetadataExtractor:
             for value in data.values():
                 if isinstance(value, str) and len(value.strip()) > 0:
                     sample_texts.append(value)
-        
+
         # Extract Japanese business terms
         for text in sample_texts:
             business_terms = self.japanese_patterns.extract_business_terms(text)
             keywords.update(business_terms)
-        
+
         # Business context keywords
         business_context = schema.get("x-rag-metadata", {}).get("business_context")
         if business_context:
             keywords.add(business_context)
-        
-        return sorted(list(keywords))
+
+        return sorted(keywords)
 
     def _map_entities(self, data: JsonData, schema: dict[str, Any]) -> dict[str, str]:
         """Map field names to detected entity types.
-        
+
         Args:
             data: Input JSON data
             schema: Generated schema
-            
+
         Returns:
             Dictionary mapping field names to entity types
         """
         entity_mapping = {}
-        
+
         if isinstance(data, list) and data and isinstance(data[0], dict):
             properties = schema.get("items", {}).get("properties", {})
-            
+
             for field_name, prop_info in properties.items():
                 entity_type = prop_info.get("x-entity-type")
                 if entity_type:
@@ -279,65 +283,69 @@ class RAGMetadataExtractor:
                     semantic_type = prop_info.get("x-semantic-type")
                     if semantic_type:
                         entity_mapping[field_name] = semantic_type
-        
+
         elif isinstance(data, dict):
-            for field_name in data.keys():
-                entity_type = self.japanese_patterns.get_entity_type_for_field(field_name)
+            for field_name in data:
+                entity_type = self.japanese_patterns.get_entity_type_for_field(
+                    field_name
+                )
                 if entity_type:
                     entity_mapping[field_name] = entity_type
-        
+
         return entity_mapping
 
     def _parse_custom_tags(self, tags_str: str) -> list[str]:
         """Parse custom tags from comma-separated string.
-        
+
         Args:
             tags_str: Comma-separated tags string
-            
+
         Returns:
             List of parsed tags
         """
         if not tags_str or not isinstance(tags_str, str):
             return []
-        
+
         tags = [tag.strip() for tag in tags_str.split(",")]
         return [tag for tag in tags if tag]  # Remove empty strings
 
     def _calculate_basic_statistics(self, data: JsonData) -> dict[str, Any]:
         """Calculate basic statistics about the data.
-        
+
         Args:
             data: Input JSON data
-            
+
         Returns:
             Dictionary containing basic statistics
         """
         stats = {}
-        
+
         if isinstance(data, list):
             stats["record_count"] = len(data)
             stats["data_type"] = "array"
-            
+
             if data and isinstance(data[0], dict):
                 stats["column_count"] = len(data[0].keys()) if data else 0
                 stats["item_type"] = "object"
-                
+
                 # Calculate completeness
                 if data:
                     total_cells = len(data) * len(data[0].keys())
                     filled_cells = 0
-                    
+
                     for item in data:
                         if isinstance(item, dict):
                             for value in item.values():
                                 if value is not None and value != "":
                                     filled_cells += 1
-                    
-                    stats["completeness"] = round(filled_cells / total_cells, 4) if total_cells > 0 else 0
+
+                    stats["completeness"] = (
+                        round(filled_cells / total_cells, 4) if total_cells > 0 else 0
+                    )
             else:
                 stats["item_type"] = "primitive"
                 stats["completeness"] = 1.0
-                
+
         elif isinstance(data, dict):
             stats["record_count"] = 1
             stats["column_count"] = len(data.keys())
@@ -348,54 +356,58 @@ class RAGMetadataExtractor:
             stats["column_count"] = 1
             stats["data_type"] = "primitive"
             stats["completeness"] = 1.0
-        
+
         return stats
 
     def _prepare_embedding_text(self, data: JsonData, schema: dict[str, Any]) -> str:
         """Prepare text optimized for PLaMo-Embedding-1B.
-        
+
         Args:
             data: Input JSON data
             schema: Generated schema
-            
+
         Returns:
             Text optimized for embedding generation
         """
         text_parts = []
-        
+
         # Add business context
-        business_context = schema.get("x-rag-metadata", {}).get("business_context", "general")
+        business_context = schema.get("x-rag-metadata", {}).get(
+            "business_context", "general"
+        )
         if business_context != "general":
             text_parts.append(f"ビジネス分野: {business_context}")
-        
+
         # Add data summary
         if isinstance(data, list) and data:
             text_parts.append(f"データ件数: {len(data)}件")
-            
+
             if isinstance(data[0], dict):
                 # Add field descriptions
                 properties = schema.get("items", {}).get("properties", {})
                 field_descriptions = []
-                
+
                 for field_name, prop_info in properties.items():
                     desc = prop_info.get("description", field_name)
                     field_descriptions.append(f"{field_name}({desc})")
-                
+
                 if field_descriptions:
                     text_parts.append("データ項目: " + ", ".join(field_descriptions))
-                
+
                 # Add sample values for context
                 sample_values = []
                 for item in data[:3]:  # Use first 3 items for sample
                     if isinstance(item, dict):
                         for key, value in item.items():
-                            if isinstance(value, str) and self.japanese_patterns.is_japanese_text(value):
+                            if isinstance(
+                                value, str
+                            ) and self.japanese_patterns.is_japanese_text(value):
                                 sample_values.append(f"{key}: {value}")
                                 break  # One sample per record
-                
+
                 if sample_values:
                     text_parts.append("サンプル: " + "; ".join(sample_values))
-        
+
         return " | ".join(text_parts)
 
     # Legacy compatibility methods (delegating to modular components)
@@ -404,7 +416,7 @@ class RAGMetadataExtractor:
         return self.japanese_patterns.entity_patterns
 
     def _init_type_patterns(self) -> dict[str, Any]:
-        """Legacy compatibility method.""" 
+        """Legacy compatibility method."""
         return self.japanese_patterns.type_patterns
 
     def _extract_schema(self, data: JsonData) -> dict[str, Any]:
@@ -415,7 +427,7 @@ class RAGMetadataExtractor:
 # Public API exports (maintaining backward compatibility)
 __all__ = [
     "BasicMetadata",
-    "RAGMetadataExtractor", 
     "JapanesePatternManager",
+    "RAGMetadataExtractor",
     "SchemaGenerator",
 ]

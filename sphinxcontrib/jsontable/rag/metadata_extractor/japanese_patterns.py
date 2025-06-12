@@ -1,6 +1,6 @@
 """Japanese Language Processing Module for RAG Metadata Extraction.
 
-This module provides Japanese-specific entity recognition patterns and 
+This module provides Japanese-specific entity recognition patterns and
 language processing capabilities optimized for Japanese business documents.
 
 Features:
@@ -21,7 +21,7 @@ from typing import Any
 
 class JapanesePatternManager:
     """Manages Japanese language recognition patterns for entity detection.
-    
+
     This class encapsulates all Japanese-specific pattern matching logic
     for accurate entity recognition in Japanese business data.
     """
@@ -186,9 +186,7 @@ class JapanesePatternManager:
                 "semantic_type": "contact_info",
             },
             "phone_jp": {
-                "pattern": re.compile(
-                    r"^(\+81|0)[0-9\-\(\)\s]{8,15}$"
-                ),
+                "pattern": re.compile(r"^(\+81|0)[0-9\-\(\)\s]{8,15}$"),
                 "description": "電話番号（日本）",
                 "semantic_type": "contact_info",
             },
@@ -205,7 +203,9 @@ class JapanesePatternManager:
                 "semantic_type": "web_reference",
             },
             "japanese_name": {
-                "pattern": re.compile(r"^[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\s]+$"),
+                "pattern": re.compile(
+                    r"^[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\s]+$"
+                ),
                 "description": "日本語氏名",
                 "semantic_type": "person_name",
             },
@@ -237,109 +237,143 @@ class JapanesePatternManager:
 
     def get_entity_type_for_field(self, field_name: str) -> str | None:
         """Get the most likely entity type for a given field name.
-        
+
         Args:
             field_name: The field name to analyze
-            
+
         Returns:
             The detected entity type or None if no match found
         """
         field_lower = field_name.lower()
-        
+
         for entity_type, indicators in self.entity_patterns.items():
             for indicator in indicators:
                 if indicator.lower() in field_lower:
                     return entity_type.replace("_indicators", "")
-        
+
         return None
 
     def infer_semantic_type(self, value: str) -> tuple[str | None, str | None]:
         """Infer semantic type from a string value using Japanese patterns.
-        
+
         Args:
             value: The string value to analyze
-            
+
         Returns:
             Tuple of (semantic_type, description) or (None, None) if no match
         """
         if not isinstance(value, str):
             return None, None
-            
+
         value = value.strip()
         if not value:
             return None, None
-            
-        for type_name, type_info in self.type_patterns.items():
+
+        for _type_name, type_info in self.type_patterns.items():
             if type_info["pattern"].match(value):
                 return type_info["semantic_type"], type_info["description"]
-                
+
         return None, None
 
     def is_japanese_text(self, text: str) -> bool:
         """Check if text contains Japanese characters.
-        
+
         Args:
             text: Text to analyze
-            
+
         Returns:
             True if text contains Japanese characters
         """
         if not isinstance(text, str):
             return False
-            
+
         # Check for Hiragana, Katakana, or Kanji
-        japanese_pattern = re.compile(r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]')
+        japanese_pattern = re.compile(r"[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]")
         return bool(japanese_pattern.search(text))
 
     def extract_business_terms(self, text: str) -> list[str]:
         """Extract Japanese business terminology from text.
-        
+
         Args:
             text: Text to analyze
-            
+
         Returns:
             List of detected business terms
         """
         if not isinstance(text, str) or not text.strip():
             return []
-            
+
         business_terms = [
-            "売上", "利益", "損失", "予算", "コスト", "ROI", "KPI",
-            "営業", "マーケティング", "販売", "購買", "調達",
-            "製造", "品質", "保証", "検査", "監査",
-            "人事", "労務", "給与", "賞与", "福利厚生",
-            "経理", "財務", "会計", "税務", "資金",
-            "企画", "戦略", "計画", "目標", "成果",
-            "顧客", "クライアント", "取引先", "パートナー", "競合",
-            "契約", "合意", "承認", "決裁", "稟議",
+            "売上",
+            "利益",
+            "損失",
+            "予算",
+            "コスト",
+            "ROI",
+            "KPI",
+            "営業",
+            "マーケティング",
+            "販売",
+            "購買",
+            "調達",
+            "製造",
+            "品質",
+            "保証",
+            "検査",
+            "監査",
+            "人事",
+            "労務",
+            "給与",
+            "賞与",
+            "福利厚生",
+            "経理",
+            "財務",
+            "会計",
+            "税務",
+            "資金",
+            "企画",
+            "戦略",
+            "計画",
+            "目標",
+            "成果",
+            "顧客",
+            "クライアント",
+            "取引先",
+            "パートナー",
+            "競合",
+            "契約",
+            "合意",
+            "承認",
+            "決裁",
+            "稟議",
         ]
-        
+
         detected_terms = []
         text_lower = text.lower()
-        
+
         for term in business_terms:
             if term in text or term.lower() in text_lower:
                 detected_terms.append(term)
-                
+
         return list(set(detected_terms))  # Remove duplicates
 
     def normalize_company_name(self, company_name: str) -> str:
         """Normalize Japanese company name format.
-        
+
         Args:
             company_name: Raw company name
-            
+
         Returns:
             Normalized company name
         """
         if not isinstance(company_name, str):
             return company_name
-            
+
         # Normalize common company suffixes
         normalized = company_name
         replacements = {
             "㈱": "株式会社",
-            "㈲": "有限会社", 
+            "㈲": "有限会社",
             "(株)": "株式会社",
             "(有)": "有限会社",
             "Co.": "株式会社",
@@ -347,8 +381,8 @@ class JapanesePatternManager:
             "Inc.": "株式会社",
             "Ltd.": "株式会社",
         }
-        
+
         for old, new in replacements.items():
             normalized = normalized.replace(old, new)
-            
+
         return normalized.strip()

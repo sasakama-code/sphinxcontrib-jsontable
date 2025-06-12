@@ -26,12 +26,8 @@ logger = logging.getLogger(__name__)
 # Legacy imports for backward compatibility
 __all__ = [
     "ComprehensiveSearchIndex",
-    "FacetedSearchIndex",
-    "HybridSearchIndex",
     "JapaneseQueryProcessor",
     "SearchIndexGenerator",
-    "SemanticSearchIndex",
-    "VectorIndex",
 ]
 
 
@@ -133,13 +129,6 @@ class SearchIndexGenerator:
         return self._generator.hybrid_generator.generate()
 
 
-# Re-export data classes for backward compatibility
-from .search_index_generators.base import (
-    FacetedSearchIndex,
-    HybridSearchIndex,
-    SemanticSearchIndex,
-    VectorIndex,
-)
 
 # Log the compatibility layer usage
 logger.info("Using legacy search_index_generator compatibility layer")
