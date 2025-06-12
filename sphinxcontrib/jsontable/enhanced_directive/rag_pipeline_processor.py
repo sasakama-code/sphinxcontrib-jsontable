@@ -14,12 +14,12 @@ from typing import TYPE_CHECKING, Any, cast
 
 from docutils import nodes
 
-from .rag_processing_result import RAGProcessingResult
 from ..rag.advanced_metadata import AdvancedMetadataGenerator
 from ..rag.metadata_exporter import MetadataExporter
 from ..rag.metadata_extractor import RAGMetadataExtractor
 from ..rag.search_facets import SearchFacetGenerator
 from ..rag.semantic_chunker import SemanticChunk, SemanticChunker
+from .rag_processing_result import RAGProcessingResult
 
 if TYPE_CHECKING:
     from sphinx.environment import BuildEnvironment
@@ -31,7 +31,7 @@ __all__ = ["RAGPipelineProcessor"]
 
 class RAGPipelineProcessor:
     """RAG processing pipeline executor.
-    
+
     Handles the complete execution of the RAG processing pipeline including
     all phases of metadata extraction, chunking, and export generation.
     """
@@ -45,7 +45,7 @@ class RAGPipelineProcessor:
         metadata_exporter: MetadataExporter | None = None,
     ):
         """Initialize RAG pipeline processor.
-        
+
         Args:
             metadata_extractor: Basic metadata extractor.
             semantic_chunker: Optional semantic chunker.
@@ -60,10 +60,10 @@ class RAGPipelineProcessor:
         self.metadata_exporter = metadata_exporter
 
     def process_rag_pipeline(
-        self, 
-        json_data: Any, 
+        self,
+        json_data: Any,
         options: dict[str, Any],
-        export_formats: list[str] | None = None
+        export_formats: list[str] | None = None,
     ) -> RAGProcessingResult:
         """Execute the complete RAG processing pipeline.
 
@@ -93,16 +93,17 @@ class RAGPipelineProcessor:
 
         # Phase 2: Search facet generation
         generated_facets = None
-        if (
-            self.facet_generator
-            and advanced_metadata
-            and "facet-generation" in options
-        ):
+        if self.facet_generator and advanced_metadata and "facet-generation" in options:
             generated_facets = self.facet_generator.generate_facets(advanced_metadata)
 
         # Phase 2: Metadata export
         export_data = None
-        if self.metadata_exporter and advanced_metadata and generated_facets and export_formats:
+        if (
+            self.metadata_exporter
+            and advanced_metadata
+            and generated_facets
+            and export_formats
+        ):
             export_data = self.metadata_exporter.export_metadata(
                 advanced_metadata, generated_facets, export_formats
             )
@@ -148,7 +149,9 @@ class RAGPipelineProcessor:
             )
 
         # Semantic chunks information
-        element_node.attributes["rag_chunk_count"] = str(len(rag_result.semantic_chunks))
+        element_node.attributes["rag_chunk_count"] = str(
+            len(rag_result.semantic_chunks)
+        )
 
         # Export information
         if rag_result.export_data:
@@ -196,7 +199,9 @@ class RAGPipelineProcessor:
         if rag_result.generated_facets:
             debug_info["generated_facets"] = {
                 "facet_count": len(rag_result.generated_facets.facets),
-                "facet_types": [facet.facet_type for facet in rag_result.generated_facets.facets],
+                "facet_types": [
+                    facet.facet_type for facet in rag_result.generated_facets.facets
+                ],
             }
 
         if rag_result.export_data:

@@ -23,10 +23,7 @@ from sphinx.util.docutils import SphinxDirective
 # Import from the proper modular implementation
 from .data_loaders import (
     DEFAULT_ENCODING,
-    EMPTY_CONTENT_ERROR,
-    INVALID_JSON_DATA_ERROR,
     NO_JSON_SOURCE_ERROR,
-    JsonData,
     JsonDataLoader,
     JsonTableError,
     format_error,
@@ -49,10 +46,10 @@ warnings.warn(
 class JsonTableDirective(SphinxDirective):
     """
     Legacy JSON table directive (DEPRECATED).
-    
+
     ⚠️  This implementation is deprecated. Use the new JsonTableDirective from
         json_table_directive module instead.
-    
+
     This class is maintained only for backward compatibility and will be removed
     in a future version. New projects should use the recommended implementation.
     """
@@ -85,7 +82,7 @@ class JsonTableDirective(SphinxDirective):
 
             # Load JSON data
             loader = JsonDataLoader(encoding)
-            
+
             if self.arguments:
                 # File-based JSON
                 source_path = self.arguments[0]
@@ -99,10 +96,10 @@ class JsonTableDirective(SphinxDirective):
             # Convert and build table
             converter = TableConverter()
             table_data = converter.convert(json_data, include_header)
-            
+
             # Apply row limit if specified
             if row_limit > 0:
-                table_data = table_data[:row_limit + (1 if include_header else 0)]
+                table_data = table_data[: row_limit + (1 if include_header else 0)]
 
             builder = TableBuilder()
             return [builder.build(table_data, include_header)]

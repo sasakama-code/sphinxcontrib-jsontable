@@ -25,8 +25,8 @@ from unittest.mock import Mock
 import pytest
 from docutils.statemachine import StringList
 
-from sphinxcontrib.jsontable.enhanced_directive import (
-    EnhancedJsonTableDirective,
+from sphinxcontrib.jsontable import EnhancedJsonTableDirective
+from sphinxcontrib.jsontable.enhanced_directive.rag_processing_result import (
     RAGProcessingResult,
 )
 

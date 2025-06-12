@@ -17,16 +17,16 @@ from .search_index_generators import (
     JapaneseQueryProcessor,
 )
 
+# Import the new modular implementation
+from .search_index_generators import (
+    SearchIndexGenerator as ModularSearchIndexGenerator,
+)
+
 # Import additional index types from base module
 from .search_index_generators.base import (
     HybridSearchIndex,
     SemanticSearchIndex,
     VectorIndex,
-)
-
-# Import the new modular implementation
-from .search_index_generators import (
-    SearchIndexGenerator as ModularSearchIndexGenerator,
 )
 
 logger = logging.getLogger(__name__)
@@ -139,7 +139,6 @@ class SearchIndexGenerator:
     def _build_hybrid_index(self):
         """Legacy method - redirected to modular implementation."""
         return self._generator.hybrid_generator.generate()
-
 
 
 # Log the compatibility layer usage

@@ -248,9 +248,7 @@ class EnhancedVectorProcessor:
 
         return vector_chunks
 
-    async def _process_single_chunk(
-        self, chunk: SemanticChunk
-    ) -> VectorChunk | None:
+    async def _process_single_chunk(self, chunk: SemanticChunk) -> VectorChunk | None:
         """Process a single semantic chunk into vector chunk."""
         # Prepare text for embedding
         text = self._prepare_text_for_embedding(chunk)

@@ -31,6 +31,7 @@ try:
 except ImportError:
     # Fallback: create a dummy class if module structure issues exist
     from .json_table_directive import JsonTableDirective
+
     EnhancedJsonTableDirective = JsonTableDirective
 
 # 🔹 推奨：標準jsontableディレクティブ

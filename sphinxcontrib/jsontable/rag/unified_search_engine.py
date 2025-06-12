@@ -177,9 +177,7 @@ class UnifiedSearchEngine:
         if progress_callback:
             progress_callback(1.0, "Indexing complete")
 
-    async def search(
-        self, query: str | SearchQuery, **kwargs
-    ) -> list[SearchResult]:
+    async def search(self, query: str | SearchQuery, **kwargs) -> list[SearchResult]:
         """Execute unified search query.
 
         Args:

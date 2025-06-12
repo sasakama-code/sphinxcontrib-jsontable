@@ -39,7 +39,7 @@ class RAGProcessingResult:
 
     def has_advanced_features(self) -> bool:
         """Check if advanced RAG features are available.
-        
+
         Returns:
             True if advanced metadata or facets are generated.
         """
@@ -47,7 +47,7 @@ class RAGProcessingResult:
 
     def get_export_formats(self) -> list[str]:
         """Get list of available export formats.
-        
+
         Returns:
             List of format names if export data is available, empty list otherwise.
         """
@@ -57,7 +57,7 @@ class RAGProcessingResult:
 
     def get_chunk_count(self) -> int:
         """Get total number of semantic chunks.
-        
+
         Returns:
             Number of semantic chunks generated.
         """

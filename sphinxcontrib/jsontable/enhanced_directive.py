@@ -25,11 +25,9 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.util import logging
 
-from .directives import JsonTableDirective
-from .enhanced_directive import (
+from sphinxcontrib.jsontable.directives import JsonTableDirective
+from sphinxcontrib.jsontable.enhanced_directive.options_manager import (
     EnhancedDirectiveOptionsManager,
-    RAGPipelineProcessor,
-    RAGProcessingResult,
 )
 
 if TYPE_CHECKING:
@@ -76,7 +74,7 @@ class EnhancedJsonTableDirective(JsonTableDirective):
             **kwargs: Keyword arguments passed to parent JsonTableDirective.
         """
         super().__init__(*args, **kwargs)
-        
+
         # Initialize options manager for RAG components
         self.options_manager = EnhancedDirectiveOptionsManager(
             dict(self.options), self.env
@@ -107,7 +105,7 @@ class EnhancedJsonTableDirective(JsonTableDirective):
                 rag_result = rag_processor.process_rag_pipeline(
                     json_data,
                     dict(self.options),
-                    self.options_manager.get_export_formats()
+                    self.options_manager.get_export_formats(),
                 )
 
                 # Attach RAG metadata to table nodes
@@ -127,10 +125,10 @@ class EnhancedJsonTableDirective(JsonTableDirective):
 
     def _get_json_data(self) -> dict[str, Any] | list[Any]:
         """Get JSON data from file or inline content.
-        
+
         Returns:
             Parsed JSON data from file or inline content.
-            
+
         Raises:
             ValueError: If no JSON data source is provided.
         """
@@ -139,7 +137,7 @@ class EnhancedJsonTableDirective(JsonTableDirective):
             file_path = Path(self.env.srcdir) / self.arguments[0]
             if not self.options_manager.is_safe_path(file_path):
                 raise ValueError(f"Unsafe file path: {self.arguments[0]}")
-            
+
             with file_path.open(encoding="utf-8") as f:
                 return json.load(f)
         elif self.content:
@@ -151,19 +149,19 @@ class EnhancedJsonTableDirective(JsonTableDirective):
 
 def setup(app: Sphinx) -> dict[str, Any]:
     """Setup function for Sphinx extension registration.
-    
+
     Args:
         app: Sphinx application instance.
-        
+
     Returns:
         Extension metadata dictionary.
     """
     # Register the enhanced directive
     app.add_directive("enhanced-jsontable", EnhancedJsonTableDirective)
-    
+
     # Add configuration values for RAG features
     app.add_config_value("rag_debug_mode", False, "env", [bool])
-    
+
     return {
         "version": "0.3.0",
         "parallel_read_safe": True,
