@@ -12,6 +12,35 @@ Transform your Excel files into intelligent, searchable documentation in **5 min
 ❌ **Before**: Scattered Excel files, manual data analysis, time-consuming reporting  
 ✅ **After**: AI-powered insights from Excel data in 5 minutes  
 
+## 🔧 Directive Usage Guide
+
+### 🔹 JsonTableDirective (推奨): Standard JSON Tables
+軽量・高速・安定な標準機能
+```rst
+.. jsontable:: data.json
+   :header:
+   :maxrows: 100
+```
+
+### 🔹 EnhancedJsonTableDirective (RAG機能): AI-Powered Tables
+RAG統合・メタデータ生成・セマンティック処理付き
+```rst
+.. enhanced-jsontable:: data.json
+   :rag-metadata: true
+   :export-format: json-ld,opensearch
+   :entity-recognition: japanese
+```
+
+### ⚠️ Migration Guide for Legacy Users
+```python
+# ❌ 非推奨（移行期間のみサポート）
+from sphinxcontrib.jsontable import LegacyJsonTableDirective
+
+# ✅ 推奨：新しい明確な構造
+from sphinxcontrib.jsontable import JsonTableDirective          # 標準機能
+from sphinxcontrib.jsontable import EnhancedJsonTableDirective   # RAG機能
+```
+
 ## 🚀 Excel → AI in 3 Steps
 
 ### Step 1: Point to Your Excel File
