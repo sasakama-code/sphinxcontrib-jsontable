@@ -19,7 +19,7 @@ class JapaneseQueryProcessor:
 
     def __init__(self):
         """Initialize Japanese query processor with dictionaries."""
-        
+
         # 日本語クエリ拡張辞書
         self.synonym_dict = {
             "会社": ["企業", "法人", "組織", "株式会社"],
@@ -41,10 +41,10 @@ class JapaneseQueryProcessor:
 
     def expand_query(self, query: str) -> list[str]:
         """クエリ拡張処理.
-        
+
         Args:
             query: 入力クエリ文字列.
-            
+
         Returns:
             拡張されたクエリのリスト.
         """
@@ -66,10 +66,10 @@ class JapaneseQueryProcessor:
 
     def extract_japanese_features(self, query: str) -> dict[str, Any]:
         """日本語クエリ特徴抽出.
-        
+
         Args:
             query: 分析対象のクエリ文字列.
-            
+
         Returns:
             クエリの特徴を含む辞書.
         """
@@ -106,10 +106,10 @@ class JapaneseQueryProcessor:
 
     def extract_keywords(self, content: str) -> list[str]:
         """コンテンツから日本語キーワードを抽出.
-        
+
         Args:
             content: 抽出対象のコンテンツ.
-            
+
         Returns:
             抽出されたキーワードのリスト.
         """
@@ -126,10 +126,10 @@ class JapaneseQueryProcessor:
 
     def extract_business_terms(self, content: str) -> list[str]:
         """ビジネス用語抽出.
-        
+
         Args:
             content: 抽出対象のコンテンツ.
-            
+
         Returns:
             抽出されたビジネス用語のリスト.
         """
@@ -162,11 +162,11 @@ class JapaneseQueryProcessor:
 
     def categorize_business_content(self, content: str, category: str) -> bool:
         """ビジネスコンテンツ分類.
-        
+
         Args:
             content: 分類対象のコンテンツ.
             category: 分類カテゴリ.
-            
+
         Returns:
             指定カテゴリに該当する場合True.
         """
@@ -199,10 +199,10 @@ class JapaneseQueryProcessor:
 
     def parse_japanese_amount(self, amount_str: str) -> int:
         """日本語金額パース.
-        
+
         Args:
             amount_str: 日本語金額文字列.
-            
+
         Returns:
             パースされた金額（整数）.
         """

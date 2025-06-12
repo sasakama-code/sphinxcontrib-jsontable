@@ -39,8 +39,8 @@ class NumericalFacet:
 
 class NumericalFacetGenerator:
     """Generator for numerical search facets.
-    
-    Handles creation of numerical facets with optimized ranges based on 
+
+    Handles creation of numerical facets with optimized ranges based on
     statistical distribution and Japanese number formatting.
     """
 

@@ -17,19 +17,16 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+import numpy as np
+
+from .categorical_analytics import CategoricalAnalyzer
+
 # Import分割された分析モジュール
-from .numerical_analytics import StatisticalAnalyzer, NumericalStats, TemporalStats
-from .categorical_analytics import CategoricalAnalyzer, CategoricalStats
+from .numerical_analytics import StatisticalAnalyzer
 from .temporal_analytics import (
-    JapaneseEntityClassifier,
     EntityClassification,
-    PersonEntity,
-    PlaceEntity,
-    OrganizationEntity,
-    BusinessTermEntity,
+    JapaneseEntityClassifier,
 )
-
-
 
 
 @dataclass
@@ -106,8 +103,6 @@ class AdvancedMetadata:
     data_quality: DataQualityReport
     search_facets: SearchFacets
     plamo_features: PLaMoFeatures
-
-
 
 
 class DataQualityAssessor:

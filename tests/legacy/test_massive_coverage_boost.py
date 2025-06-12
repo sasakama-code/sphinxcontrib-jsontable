@@ -7,19 +7,18 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from sphinxcontrib.jsontable.data_loaders import JsonTableError
-
 # Import all main modules to test
-from sphinxcontrib.jsontable.directives import (
+from sphinxcontrib.jsontable.data_loaders import (
     JsonDataLoader,
-    JsonTableDirective,
-    TableBuilder,
-    TableConverter,
+    JsonTableError,
     is_safe_path,
 )
+from sphinxcontrib.jsontable.directives import JsonTableDirective
 from sphinxcontrib.jsontable.json_table_directive import (
     JsonTableDirective as SimpleDirective,
 )
+from sphinxcontrib.jsontable.table_builders import TableBuilder
+from sphinxcontrib.jsontable.table_converters import TableConverter
 
 
 class TestMassiveCoverageBoost:

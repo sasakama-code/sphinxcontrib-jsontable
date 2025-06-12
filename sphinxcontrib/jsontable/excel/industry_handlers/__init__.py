@@ -14,24 +14,24 @@ Key Components:
 
 Usage:
     from sphinxcontrib.jsontable.excel.industry_handlers import IndustryHandlerManager
-    
+
     manager = IndustryHandlerManager()
     industry, format_type = manager.detect_industry_and_format(df, sheet_name)
     result = manager.process_industry_data(df, industry, format_type)
 """
 
 from .base import IndustryHandlerBase
-from .manufacturing import ManufacturingHandler
-from .retail import RetailHandler
 from .financial import FinancialHandler
 from .manager import IndustryHandlerManager
+from .manufacturing import ManufacturingHandler
+from .retail import RetailHandler
 
 __all__ = [
-    "IndustryHandlerManager",
-    "IndustryHandlerBase",
-    "ManufacturingHandler", 
-    "RetailHandler",
     "FinancialHandler",
+    "IndustryHandlerBase",
+    "IndustryHandlerManager",
+    "ManufacturingHandler",
+    "RetailHandler",
 ]
 
 # Version information

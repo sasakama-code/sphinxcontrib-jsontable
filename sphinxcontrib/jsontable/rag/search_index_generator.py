@@ -1,6 +1,6 @@
 """Legacy search index generator - backwards compatibility layer.
 
-This file provides complete backward compatibility for the original 
+This file provides complete backward compatibility for the original
 search_index_generator.py API while redirecting to the new modular architecture.
 
 All existing functionality is preserved while leveraging the improved
@@ -11,31 +11,41 @@ import logging
 import warnings
 from typing import Any
 
+from .search_index_generators import (
+    ComprehensiveSearchIndex,
+    FacetedSearchIndex,
+    JapaneseQueryProcessor,
+)
+
 # Import the new modular implementation
 from .search_index_generators import (
     SearchIndexGenerator as ModularSearchIndexGenerator,
-    JapaneseQueryProcessor,
-    IndexStorageManager,
-    ComprehensiveSearchIndex,
+)
+
+# Import additional index types from base module
+from .search_index_generators.base import (
+    HybridSearchIndex,
+    SemanticSearchIndex,
+    VectorIndex,
 )
 
 logger = logging.getLogger(__name__)
 
 # Legacy imports for backward compatibility
 __all__ = [
-    "SearchIndexGenerator", 
-    "JapaneseQueryProcessor",
-    "VectorIndex",
-    "SemanticSearchIndex", 
+    "ComprehensiveSearchIndex",
     "FacetedSearchIndex",
     "HybridSearchIndex",
-    "ComprehensiveSearchIndex",
+    "JapaneseQueryProcessor",
+    "SearchIndexGenerator",
+    "SemanticSearchIndex",
+    "VectorIndex",
 ]
 
 
 class SearchIndexGenerator:
     """Legacy SearchIndexGenerator with complete backward compatibility.
-    
+
     This class provides a compatibility layer that redirects all calls to
     the new modular architecture while maintaining the exact same API.
     """
@@ -52,12 +62,12 @@ class SearchIndexGenerator:
             "Consider migrating to the new modular architecture in "
             "search_index_generators/ for better performance and maintainability.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
 
         # Delegate to the new modular implementation
         self._generator = ModularSearchIndexGenerator(config)
-        
+
         # Expose internal components for backward compatibility
         self.config = self._generator.config
         self.japanese_processor = self._generator.japanese_processor
@@ -68,7 +78,7 @@ class SearchIndexGenerator:
         return self._generator._get_default_config()
 
     def _setup_vector_strategy(self) -> dict[str, Any]:
-        """Setup vector strategy - legacy method.""" 
+        """Setup vector strategy - legacy method."""
         return self._generator._setup_vector_strategy()
 
     def _setup_semantic_strategy(self) -> dict[str, Any]:
@@ -89,7 +99,9 @@ class SearchIndexGenerator:
         basic_metadata: Any = None,
     ) -> ComprehensiveSearchIndex:
         """Generate comprehensive search index - legacy API."""
-        return self._generator.generate_comprehensive_index(vector_chunks, basic_metadata)
+        return self._generator.generate_comprehensive_index(
+            vector_chunks, basic_metadata
+        )
 
     def search_similar_vectors(
         self,
@@ -128,14 +140,6 @@ class SearchIndexGenerator:
         """Legacy method - redirected to modular implementation."""
         return self._generator.hybrid_generator.generate()
 
-
-# Re-export data classes for backward compatibility
-from .search_index_generators.base import (
-    VectorIndex,
-    SemanticSearchIndex,
-    FacetedSearchIndex, 
-    HybridSearchIndex,
-)
 
 # Log the compatibility layer usage
 logger.info("Using legacy search_index_generator compatibility layer")

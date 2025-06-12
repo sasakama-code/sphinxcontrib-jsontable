@@ -14,7 +14,7 @@ from .base import BaseMetadataExporter
 
 class OpenSearchExporter(BaseMetadataExporter):
     """OpenSearch format metadata exporter.
-    
+
     Generates OpenSearch index configuration with Japanese analysis support
     and optimized field mappings for RAG-enhanced search functionality.
     """
@@ -100,11 +100,15 @@ class OpenSearchExporter(BaseMetadataExporter):
         statistical_analysis = metadata.statistical_analysis
 
         # 数値フィールド
-        for field_name, stats in statistical_analysis.get("numerical_fields", {}).items():
+        for field_name, stats in statistical_analysis.get(
+            "numerical_fields", {}
+        ).items():
             properties[field_name] = self._create_numerical_mapping(field_name, stats)
 
         # カテゴリフィールド
-        for field_name, stats in statistical_analysis.get("categorical_fields", {}).items():
+        for field_name, stats in statistical_analysis.get(
+            "categorical_fields", {}
+        ).items():
             properties[field_name] = self._create_categorical_mapping(field_name, stats)
 
         # エンティティフィールド
@@ -147,12 +151,17 @@ class OpenSearchExporter(BaseMetadataExporter):
         mapping["fields"]["range"] = {"type": range_type}
 
         # 通貨フィールドの特別処理
-        if any(keyword in field_name.lower() for keyword in ["price", "salary", "cost", "金額", "給与"]):
+        if any(
+            keyword in field_name.lower()
+            for keyword in ["price", "salary", "cost", "金額", "給与"]
+        ):
             mapping["meta"] = {"unit": "円", "format": "currency"}
 
         return mapping
 
-    def _create_categorical_mapping(self, field_name: str, stats: dict) -> dict[str, Any]:
+    def _create_categorical_mapping(
+        self, field_name: str, stats: dict
+    ) -> dict[str, Any]:
         """Create mapping for categorical fields.
 
         Args:
@@ -164,7 +173,9 @@ class OpenSearchExporter(BaseMetadataExporter):
         """
         # 日本語テキストの検出
         sample_values = list(stats.get("value_counts", {}).keys())[:5]
-        has_japanese = any(self._contains_japanese(str(value)) for value in sample_values)
+        has_japanese = any(
+            self._contains_japanese(str(value)) for value in sample_values
+        )
 
         mapping = {
             "type": "text",
@@ -176,7 +187,10 @@ class OpenSearchExporter(BaseMetadataExporter):
         }
 
         # ビジネス用語フィールドの特別処理
-        if any(keyword in field_name.lower() for keyword in ["company", "organization", "dept", "会社", "部署"]):
+        if any(
+            keyword in field_name.lower()
+            for keyword in ["company", "organization", "dept", "会社", "部署"]
+        ):
             mapping["analyzer"] = "business_analyzer"
             mapping["fields"]["suggest"] = {
                 "type": "completion",
@@ -208,7 +222,7 @@ class OpenSearchExporter(BaseMetadataExporter):
 
         if entity_classification.places:
             mappings["detected_places"] = {
-                "type": "nested", 
+                "type": "nested",
                 "properties": {
                     "place": {"type": "text", "analyzer": "japanese_analyzer"},
                     "confidence": {"type": "float"},

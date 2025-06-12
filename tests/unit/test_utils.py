@@ -13,14 +13,14 @@ import pytest
 
 # Import the functions and classes to be tested
 from sphinxcontrib.jsontable import setup
-from sphinxcontrib.jsontable.directives import (
+from sphinxcontrib.jsontable.data_loaders import (
     JsonTableError,
     ensure_file_exists,
     format_error,
     is_safe_path,
-    safe_str,
     validate_not_empty,
 )
+from sphinxcontrib.jsontable.table_converters import safe_str
 
 
 class TestJsonTableError:

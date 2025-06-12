@@ -18,14 +18,14 @@ __all__ = ["FacetedIndexGenerator"]
 
 class FacetedIndexGenerator(BaseIndexGenerator):
     """Faceted search index generator.
-    
+
     Specialized generator for creating faceted search indices supporting
     categorical, numerical, temporal, and entity-based filtering.
     """
 
     def __init__(self, config: dict[str, Any]):
         """Initialize faceted index generator.
-        
+
         Args:
             config: Configuration dictionary for faceted index generation.
         """
@@ -37,11 +37,11 @@ class FacetedIndexGenerator(BaseIndexGenerator):
         self, vector_chunks: list, basic_metadata: Any = None
     ) -> FacetedSearchIndex:
         """ファセット検索インデックス生成.
-        
+
         Args:
             vector_chunks: ベクトル化されたチャンクのリスト.
             basic_metadata: 基本メタデータ（オプション）.
-            
+
         Returns:
             生成されたファセット検索インデックス.
         """
@@ -76,11 +76,11 @@ class FacetedIndexGenerator(BaseIndexGenerator):
         self, vector_chunks: list, basic_metadata: Any
     ) -> dict[str, dict[str, list[int]]]:
         """カテゴリファセット構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
             basic_metadata: 基本メタデータ.
-            
+
         Returns:
             カテゴリファセット辞書.
         """
@@ -122,14 +122,12 @@ class FacetedIndexGenerator(BaseIndexGenerator):
 
         return categorical_facets
 
-    def _build_language_type_facets(
-        self, vector_chunks: list
-    ) -> dict[str, list[int]]:
+    def _build_language_type_facets(self, vector_chunks: list) -> dict[str, list[int]]:
         """言語タイプファセット構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
-            
+
         Returns:
             言語タイプファセット辞書.
         """
@@ -161,11 +159,11 @@ class FacetedIndexGenerator(BaseIndexGenerator):
         self, vector_chunks: list, basic_metadata: Any
     ) -> dict[str, dict[str, list[int]]]:
         """数値ファセット構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
             basic_metadata: 基本メタデータ.
-            
+
         Returns:
             数値ファセット辞書.
         """
@@ -224,10 +222,10 @@ class FacetedIndexGenerator(BaseIndexGenerator):
         self, vector_chunks: list
     ) -> dict[str, dict[str, list[int]]]:
         """時間ファセット構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
-            
+
         Returns:
             時間ファセット辞書.
         """
@@ -272,14 +270,12 @@ class FacetedIndexGenerator(BaseIndexGenerator):
 
         return temporal_facets
 
-    def _build_time_period_facets(
-        self, vector_chunks: list
-    ) -> dict[str, list[int]]:
+    def _build_time_period_facets(self, vector_chunks: list) -> dict[str, list[int]]:
         """時期ファセット構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
-            
+
         Returns:
             時期ファセット辞書.
         """
@@ -310,10 +306,10 @@ class FacetedIndexGenerator(BaseIndexGenerator):
         self, vector_chunks: list
     ) -> dict[str, dict[str, list[int]]]:
         """エンティティファセット構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
-            
+
         Returns:
             エンティティファセット辞書.
         """
@@ -353,14 +349,12 @@ class FacetedIndexGenerator(BaseIndexGenerator):
 
         return entity_facets
 
-    def _build_department_facets(
-        self, vector_chunks: list
-    ) -> dict[str, list[int]]:
+    def _build_department_facets(self, vector_chunks: list) -> dict[str, list[int]]:
         """部門ファセット構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
-            
+
         Returns:
             部門ファセット辞書.
         """
@@ -392,11 +386,11 @@ class FacetedIndexGenerator(BaseIndexGenerator):
         filters: dict[str, Any],
     ) -> list[int]:
         """ファセットによるフィルタリング.
-        
+
         Args:
             facet_index: ファセット検索インデックス.
             filters: フィルタ条件辞書.
-            
+
         Returns:
             フィルタ条件に合致するチャンクインデックスのリスト.
         """
@@ -444,9 +438,7 @@ class FacetedIndexGenerator(BaseIndexGenerator):
 
         return list(result_indices)
 
-    def _filter_categorical(
-        self, categorical_facets: dict, filters: dict
-    ) -> set[int]:
+    def _filter_categorical(self, categorical_facets: dict, filters: dict) -> set[int]:
         """カテゴリファセットフィルタリング."""
         result_indices = set()
 
@@ -460,9 +452,7 @@ class FacetedIndexGenerator(BaseIndexGenerator):
 
         return result_indices
 
-    def _filter_numerical(
-        self, numerical_facets: dict, filters: dict
-    ) -> set[int]:
+    def _filter_numerical(self, numerical_facets: dict, filters: dict) -> set[int]:
         """数値ファセットフィルタリング."""
         result_indices = set()
 
@@ -476,9 +466,7 @@ class FacetedIndexGenerator(BaseIndexGenerator):
 
         return result_indices
 
-    def _filter_temporal(
-        self, temporal_facets: dict, filters: dict
-    ) -> set[int]:
+    def _filter_temporal(self, temporal_facets: dict, filters: dict) -> set[int]:
         """時間ファセットフィルタリング."""
         result_indices = set()
 
@@ -492,9 +480,7 @@ class FacetedIndexGenerator(BaseIndexGenerator):
 
         return result_indices
 
-    def _filter_entity(
-        self, entity_facets: dict, filters: dict
-    ) -> set[int]:
+    def _filter_entity(self, entity_facets: dict, filters: dict) -> set[int]:
         """エンティティファセットフィルタリング."""
         result_indices = set()
 
@@ -508,14 +494,12 @@ class FacetedIndexGenerator(BaseIndexGenerator):
 
         return result_indices
 
-    def get_facet_statistics(
-        self, facet_index: FacetedSearchIndex
-    ) -> dict[str, Any]:
+    def get_facet_statistics(self, facet_index: FacetedSearchIndex) -> dict[str, Any]:
         """ファセットインデックス統計情報取得.
-        
+
         Args:
             facet_index: 統計情報を取得するファセットインデックス.
-            
+
         Returns:
             統計情報辞書.
         """

@@ -57,6 +57,24 @@ class BasicMetadata:
     embedding_ready_text: str
     generation_timestamp: str
 
+    @property
+    def record_count(self) -> int:
+        """レコード数取得（後方互換性）。
+
+        Returns:
+            データのレコード数
+        """
+        return self.data_statistics.get("record_count", 0)
+
+    @property
+    def column_count(self) -> int:
+        """カラム数取得。
+
+        Returns:
+            データのカラム数
+        """
+        return self.data_statistics.get("column_count", 0)
+
 
 class RAGMetadataExtractor:
     """Extract RAG metadata from JSON table data.

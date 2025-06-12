@@ -34,7 +34,7 @@ __all__ = ["IndexStorageManager"]
 
 class IndexStorageManager:
     """Index storage and persistence manager.
-    
+
     Handles saving and loading of comprehensive search indices with support
     for multiple formats and fallback implementations.
     """
@@ -47,7 +47,7 @@ class IndexStorageManager:
         self, search_index: ComprehensiveSearchIndex, output_path: str
     ) -> None:
         """検索インデックス保存.
-        
+
         Args:
             search_index: 保存対象の包括的検索インデックス.
             output_path: 出力先パス.
@@ -84,10 +84,10 @@ class IndexStorageManager:
 
     def load_search_index(self, input_path: str) -> ComprehensiveSearchIndex:
         """検索インデックス読み込み.
-        
+
         Args:
             input_path: 入力パス.
-            
+
         Returns:
             読み込まれた包括的検索インデックス.
         """
@@ -119,10 +119,10 @@ class IndexStorageManager:
         self, search_index: ComprehensiveSearchIndex
     ) -> dict[str, Any]:
         """インデックスデータのシリアライゼーション.
-        
+
         Args:
             search_index: シリアライズ対象のインデックス.
-            
+
         Returns:
             シリアライズされたデータ辞書.
         """
@@ -140,7 +140,9 @@ class IndexStorageManager:
             "hybrid_index": self._serialize_hybrid_index(search_index.hybrid_index),
         }
 
-    def _serialize_vector_index(self, vector_index: VectorIndex | None) -> dict[str, Any]:
+    def _serialize_vector_index(
+        self, vector_index: VectorIndex | None
+    ) -> dict[str, Any]:
         """ベクトルインデックスのシリアライゼーション."""
         if vector_index is None:
             return {}
@@ -194,12 +196,14 @@ class IndexStorageManager:
             "fusion_algorithm": hybrid_index.fusion_algorithm,
         }
 
-    def _deserialize_index_data(self, index_data: dict[str, Any]) -> ComprehensiveSearchIndex:
+    def _deserialize_index_data(
+        self, index_data: dict[str, Any]
+    ) -> ComprehensiveSearchIndex:
         """インデックスデータのデシリアライゼーション.
-        
+
         Args:
             index_data: デシリアライズ対象のデータ辞書.
-            
+
         Returns:
             復元された包括的検索インデックス.
         """

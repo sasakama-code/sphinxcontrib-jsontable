@@ -17,14 +17,14 @@ __all__ = ["SemanticIndexGenerator"]
 
 class SemanticIndexGenerator(BaseIndexGenerator):
     """Semantic search index generator with Japanese optimization.
-    
+
     Specialized generator for creating keyword-based semantic search indices
     with Japanese language processing and business term recognition.
     """
 
     def __init__(self, config: dict[str, Any]):
         """Initialize semantic index generator.
-        
+
         Args:
             config: Configuration dictionary for semantic index generation.
         """
@@ -34,10 +34,10 @@ class SemanticIndexGenerator(BaseIndexGenerator):
 
     def generate(self, vector_chunks: list) -> SemanticSearchIndex:
         """セマンティック検索インデックス生成.
-        
+
         Args:
             vector_chunks: ベクトル化されたチャンクのリスト.
-            
+
         Returns:
             生成されたセマンティック検索インデックス.
         """
@@ -74,10 +74,10 @@ class SemanticIndexGenerator(BaseIndexGenerator):
         self, vector_chunks: list
     ) -> dict[str, list[int]]:
         """日本語キーワードインデックス構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
-            
+
         Returns:
             キーワードからチャンクインデックスへのマッピング.
         """
@@ -105,14 +105,12 @@ class SemanticIndexGenerator(BaseIndexGenerator):
 
         return keyword_index
 
-    def _build_business_term_index(
-        self, vector_chunks: list
-    ) -> dict[str, list[int]]:
+    def _build_business_term_index(self, vector_chunks: list) -> dict[str, list[int]]:
         """ビジネス用語インデックス構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
-            
+
         Returns:
             ビジネス用語からチャンクインデックスへのマッピング.
         """
@@ -131,14 +129,12 @@ class SemanticIndexGenerator(BaseIndexGenerator):
 
         return business_term_index
 
-    def _build_semantic_mappings(
-        self, vector_chunks: list
-    ) -> dict[str, list[int]]:
+    def _build_semantic_mappings(self, vector_chunks: list) -> dict[str, list[int]]:
         """セマンティックマッピング構築.
-        
+
         Args:
             vector_chunks: ベクトルチャンクのリスト.
-            
+
         Returns:
             セマンティックカテゴリからチャンクインデックスへのマッピング.
         """
@@ -165,10 +161,10 @@ class SemanticIndexGenerator(BaseIndexGenerator):
 
     def _is_valid_keyword(self, keyword: str) -> bool:
         """キーワードの有効性チェック.
-        
+
         Args:
             keyword: チェック対象のキーワード.
-            
+
         Returns:
             有効な場合True.
         """
@@ -181,10 +177,7 @@ class SemanticIndexGenerator(BaseIndexGenerator):
             return False
 
         # 単一文字の記号は除外
-        if len(keyword) == 1 and not keyword.isalnum():
-            return False
-
-        return True
+        return not (len(keyword) == 1 and not keyword.isalnum())
 
     def search_by_keywords(
         self,
@@ -193,12 +186,12 @@ class SemanticIndexGenerator(BaseIndexGenerator):
         max_results: int = 10,
     ) -> list[tuple[int, float]]:
         """キーワードによるセマンティック検索.
-        
+
         Args:
             query: 検索クエリ.
             semantic_index: セマンティック検索インデックス.
             max_results: 最大結果数.
-            
+
         Returns:
             (チャンクインデックス, スコア)のタプルリスト.
         """
@@ -214,15 +207,21 @@ class SemanticIndexGenerator(BaseIndexGenerator):
                 if keyword in semantic_index.japanese_keyword_index:
                     chunk_indices = semantic_index.japanese_keyword_index[keyword]
                     for chunk_idx in chunk_indices:
-                        candidate_scores[chunk_idx] = candidate_scores.get(chunk_idx, 0) + 1.0
+                        candidate_scores[chunk_idx] = (
+                            candidate_scores.get(chunk_idx, 0) + 1.0
+                        )
 
             # ビジネス用語検索
-            business_terms = self.japanese_processor.extract_business_terms(expanded_query)
+            business_terms = self.japanese_processor.extract_business_terms(
+                expanded_query
+            )
             for term in business_terms:
                 if term in semantic_index.business_term_index:
                     chunk_indices = semantic_index.business_term_index[term]
                     for chunk_idx in chunk_indices:
-                        candidate_scores[chunk_idx] = candidate_scores.get(chunk_idx, 0) + 2.0  # ビジネス用語は高重み
+                        candidate_scores[chunk_idx] = (
+                            candidate_scores.get(chunk_idx, 0) + 2.0
+                        )  # ビジネス用語は高重み
 
         # スコア正規化
         if candidate_scores:
@@ -244,12 +243,12 @@ class SemanticIndexGenerator(BaseIndexGenerator):
         max_results: int = 10,
     ) -> list[int]:
         """セマンティックカテゴリによる検索.
-        
+
         Args:
             category: 検索カテゴリ.
             semantic_index: セマンティック検索インデックス.
             max_results: 最大結果数.
-            
+
         Returns:
             該当するチャンクインデックスのリスト.
         """
@@ -263,10 +262,10 @@ class SemanticIndexGenerator(BaseIndexGenerator):
         self, semantic_index: SemanticSearchIndex
     ) -> dict[str, Any]:
         """セマンティックインデックス統計情報取得.
-        
+
         Args:
             semantic_index: 統計情報を取得するセマンティックインデックス.
-            
+
         Returns:
             統計情報辞書.
         """
@@ -276,11 +275,17 @@ class SemanticIndexGenerator(BaseIndexGenerator):
             "business_terms_count": len(semantic_index.business_term_index),
             "semantic_categories": list(semantic_index.semantic_mappings.keys()),
             "avg_keywords_per_chunk": (
-                sum(len(indices) for indices in semantic_index.japanese_keyword_index.values())
+                sum(
+                    len(indices)
+                    for indices in semantic_index.japanese_keyword_index.values()
+                )
                 / max(len(semantic_index.japanese_keyword_index), 1)
             ),
             "avg_business_terms_per_chunk": (
-                sum(len(indices) for indices in semantic_index.business_term_index.values())
+                sum(
+                    len(indices)
+                    for indices in semantic_index.business_term_index.values()
+                )
                 / max(len(semantic_index.business_term_index), 1)
             ),
         }
@@ -289,27 +294,27 @@ class SemanticIndexGenerator(BaseIndexGenerator):
         self, semantic_index: SemanticSearchIndex
     ) -> SemanticSearchIndex:
         """セマンティックインデックス最適化.
-        
+
         Args:
             semantic_index: 最適化対象のセマンティックインデックス.
-            
+
         Returns:
             最適化されたセマンティックインデックス.
         """
         # 低頻度キーワードの除去
         min_frequency = self.semantic_config.get("min_term_frequency", 2)
-        
+
         optimized_keyword_index = {
             keyword: indices
             for keyword, indices in semantic_index.japanese_keyword_index.items()
             if len(indices) >= min_frequency
         }
-        
+
         semantic_index.japanese_keyword_index = optimized_keyword_index
 
         # 最大特徴数制限
         max_features = self.semantic_config.get("max_features", 10000)
-        
+
         if len(semantic_index.japanese_keyword_index) > max_features:
             # 頻度順でソートして上位のみ保持
             sorted_keywords = sorted(
@@ -317,7 +322,7 @@ class SemanticIndexGenerator(BaseIndexGenerator):
                 key=lambda x: len(x[1]),
                 reverse=True,
             )
-            
+
             semantic_index.japanese_keyword_index = dict(sorted_keywords[:max_features])
 
         logger.info("Semantic index optimized")

@@ -7,14 +7,13 @@ for all facet types with Japanese localization support.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
 
 from .base import GeneratedFacets
 
 
 class UIConfigGenerator:
     """Generator for facet UI configurations.
-    
+
     Handles creation of user interface configurations for all facet types
     with responsive design, accessibility, and Japanese localization.
     """

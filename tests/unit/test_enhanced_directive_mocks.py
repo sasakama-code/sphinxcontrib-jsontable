@@ -8,13 +8,18 @@ Updated: 2025-06-09 (renamed from test_enhanced_directive_coverage.py)
 """
 
 import json
+
+# Import directly from the main enhanced_directive.py file
+import sys
 from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 
-from sphinxcontrib.jsontable.enhanced_directive import (
-    EnhancedJsonTableDirective,
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from sphinxcontrib.jsontable import EnhancedJsonTableDirective
+from sphinxcontrib.jsontable.enhanced_directive.rag_processing_result import (
     RAGProcessingResult,
 )
 from sphinxcontrib.jsontable.rag.metadata_extractor import BasicMetadata

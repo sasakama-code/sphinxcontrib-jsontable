@@ -52,7 +52,7 @@ class GeneratedFacets:
 
 def get_japanese_field_names() -> dict[str, str]:
     """Get Japanese field name mappings.
-    
+
     Returns:
         Dictionary mapping English field names to Japanese equivalents.
     """
@@ -129,6 +129,4 @@ def filter_by_frequency(value_counts: dict, threshold: int) -> dict:
     Returns:
         Filtered dictionary containing only values meeting threshold.
     """
-    return {
-        value: count for value, count in value_counts.items() if count >= threshold
-    }
+    return {value: count for value, count in value_counts.items() if count >= threshold}

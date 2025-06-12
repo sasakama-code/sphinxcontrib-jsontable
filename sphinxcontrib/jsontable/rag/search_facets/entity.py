@@ -34,7 +34,7 @@ class EntityFacet:
 
 class EntityFacetGenerator:
     """Generator for entity-based search facets.
-    
+
     Handles creation of entity facets from entity classification results
     with confidence filtering and Japanese entity processing.
     """

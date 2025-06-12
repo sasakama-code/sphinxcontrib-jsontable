@@ -14,7 +14,7 @@ from .opensearch import OpenSearchExporter
 
 class ElasticsearchExporter(OpenSearchExporter):
     """Elasticsearch format metadata exporter.
-    
+
     Extends OpenSearch exporter with Elasticsearch-specific features
     including dense vector support and Elasticsearch-optimized analyzers.
     """
@@ -34,10 +34,10 @@ class ElasticsearchExporter(OpenSearchExporter):
         """
         # OpenSearchとほぼ同じだが、Elasticsearch特有の調整を適用
         opensearch_mapping = super().export(metadata)
-        
+
         # Elasticsearch特有の調整
         elasticsearch_mapping = self._adapt_for_elasticsearch(opensearch_mapping)
-        
+
         return elasticsearch_mapping
 
     def _adapt_for_elasticsearch(self, mapping: dict[str, Any]) -> dict[str, Any]:
@@ -51,7 +51,9 @@ class ElasticsearchExporter(OpenSearchExporter):
         """
         # Elasticsearchのanalyzer名調整
         if "settings" in mapping and "index" in mapping["settings"]:
-            settings = mapping["settings"]["index"].get("analysis", {}).get("analyzer", {})
+            settings = (
+                mapping["settings"]["index"].get("analysis", {}).get("analyzer", {})
+            )
             if "japanese_analyzer" in settings:
                 settings["japanese_analyzer"]["tokenizer"] = "kuromoji_tokenizer"
 

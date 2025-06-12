@@ -41,7 +41,7 @@ class TemporalFacet:
 
 class TemporalFacetGenerator:
     """Generator for temporal search facets.
-    
+
     Handles creation of temporal facets with Japanese date parsing,
     intelligent date range generation, and temporal pattern detection.
     """

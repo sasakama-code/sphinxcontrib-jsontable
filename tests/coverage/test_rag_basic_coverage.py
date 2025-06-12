@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock
 
-from sphinxcontrib.jsontable.enhanced_directive import EnhancedJsonTableDirective
+from sphinxcontrib.jsontable import EnhancedJsonTableDirective
 from sphinxcontrib.jsontable.rag.advanced_metadata import AdvancedMetadataGenerator
 
 # Import RAG modules

@@ -107,7 +107,10 @@ class RetailHandler(IndustryHandlerBase):
 
         # Inventory indicators
         inventory_indicators = ["在庫", "stock", "商品", "入庫", "出庫", "発注"]
-        if sum(1 for indicator in inventory_indicators if indicator in header_text) >= 3:
+        if (
+            sum(1 for indicator in inventory_indicators if indicator in header_text)
+            >= 3
+        ):
             return "inventory"
 
         # Customer analysis indicators
@@ -122,7 +125,10 @@ class RetailHandler(IndustryHandlerBase):
 
         # Marketing indicators
         marketing_indicators = ["広告", "marketing", "キャンペーン", "集客", "効果"]
-        if sum(1 for indicator in marketing_indicators if indicator in header_text) >= 3:
+        if (
+            sum(1 for indicator in marketing_indicators if indicator in header_text)
+            >= 3
+        ):
             return "marketing"
 
         return None
@@ -210,14 +216,16 @@ class RetailHandler(IndustryHandlerBase):
         }
 
         result_queries = queries.get(format_type, [])
-        
+
         # Add general retail queries
-        result_queries.extend([
-            "小売業界のトレンドと市場機会は？",
-            "デジタル化による顧客体験向上は？",
-            "持続可能な小売事業のための提案は？",
-            "競合分析と差別化戦略は？",
-        ])
+        result_queries.extend(
+            [
+                "小売業界のトレンドと市場機会は？",
+                "デジタル化による顧客体験向上は？",
+                "持続可能な小売事業のための提案は？",
+                "競合分析と差別化戦略は？",
+            ]
+        )
 
         return result_queries
 
@@ -232,24 +240,29 @@ class RetailHandler(IndustryHandlerBase):
         }
         return focus_map.get(format_type, "小売業データの総合分析")
 
-    def _extract_retail_metrics(self, df: pd.DataFrame, format_type: str) -> dict[str, Any]:
+    def _extract_retail_metrics(
+        self, df: pd.DataFrame, format_type: str
+    ) -> dict[str, Any]:
         """Extract key retail metrics from data."""
         metrics = {}
-        
+
         # Look for monetary columns
         for col in df.columns:
             col_lower = str(col).lower()
-            if any(term in col_lower for term in ["売上", "金額", "価格", "revenue", "sales"]):
+            if any(
+                term in col_lower
+                for term in ["売上", "金額", "価格", "revenue", "sales"]
+            ):
                 with contextlib.suppress(Exception):
-                    numeric_data = pd.to_numeric(df[col], errors='coerce')
+                    numeric_data = pd.to_numeric(df[col], errors="coerce")
                     if not numeric_data.isna().all():
                         metrics[col] = {
                             "total": float(numeric_data.sum()),
                             "average": float(numeric_data.mean()),
                             "max": float(numeric_data.max()),
-                            "min": float(numeric_data.min())
+                            "min": float(numeric_data.min()),
                         }
-        
+
         return metrics
 
     def _extract_product_categories(self, df: pd.DataFrame) -> list[str]:
@@ -257,7 +270,9 @@ class RetailHandler(IndustryHandlerBase):
         categories = []
         for col in df.columns:
             col_lower = str(col).lower()
-            if any(term in col_lower for term in ["カテゴリ", "category", "分類", "商品群"]):
+            if any(
+                term in col_lower for term in ["カテゴリ", "category", "分類", "商品群"]
+            ):
                 categories = df[col].dropna().unique().tolist()[:20]
                 break
         return categories
@@ -267,7 +282,10 @@ class RetailHandler(IndustryHandlerBase):
         channels = []
         for col in df.columns:
             col_lower = str(col).lower()
-            if any(term in col_lower for term in ["チャネル", "channel", "販売経路", "店舗"]):
+            if any(
+                term in col_lower
+                for term in ["チャネル", "channel", "販売経路", "店舗"]
+            ):
                 channels = df[col].dropna().unique().tolist()[:10]
                 break
         return channels
@@ -279,16 +297,19 @@ class RetailHandler(IndustryHandlerBase):
             "stores": [],
             "has_location_data": False,
         }
-        
+
         for col in df.columns:
             col_lower = str(col).lower()
-            if any(term in col_lower for term in ["地域", "region", "都道府県", "prefecture"]):
+            if any(
+                term in col_lower
+                for term in ["地域", "region", "都道府県", "prefecture"]
+            ):
                 geo_info["regions"] = df[col].dropna().unique().tolist()[:20]
                 geo_info["has_location_data"] = True
             elif any(term in col_lower for term in ["店舗", "store", "支店"]):
                 geo_info["stores"] = df[col].dropna().unique().tolist()[:50]
                 geo_info["has_location_data"] = True
-        
+
         return geo_info
 
     def _extract_time_dimension(self, df: pd.DataFrame) -> dict[str, Any]:
@@ -298,14 +319,16 @@ class RetailHandler(IndustryHandlerBase):
             "time_columns": [],
             "seasonality_potential": False,
         }
-        
+
         for col in df.columns:
             col_lower = str(col).lower()
-            if any(term in col_lower for term in ["日", "月", "年", "date", "time", "期間"]):
+            if any(
+                term in col_lower for term in ["日", "月", "年", "date", "time", "期間"]
+            ):
                 time_info["time_columns"].append(col)
                 time_info["has_time_data"] = True
                 time_info["seasonality_potential"] = True
-        
+
         return time_info
 
     def _standardize_monetary_values(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -321,32 +344,71 @@ class RetailHandler(IndustryHandlerBase):
     def _enrich_sales_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add sales-specific enrichments."""
         enriched_df = df.copy()
-        enriched_df['_retail_sales_timestamp'] = datetime.now().isoformat()
+        enriched_df["_retail_sales_timestamp"] = datetime.now().isoformat()
         return enriched_df
 
     def _enrich_customer_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add customer-specific enrichments."""
         enriched_df = df.copy()
-        enriched_df['_customer_analysis_timestamp'] = datetime.now().isoformat()
+        enriched_df["_customer_analysis_timestamp"] = datetime.now().isoformat()
         return enriched_df
 
     def _load_domain_keywords(self) -> dict[str, list[str]]:
         """Load retail-specific domain keywords."""
         return {
             "sales": [
-                "売上", "販売", "収益", "売上高", "粗利", "利益率",
-                "客単価", "購買", "レジ", "決済", "割引", "セール"
+                "売上",
+                "販売",
+                "収益",
+                "売上高",
+                "粗利",
+                "利益率",
+                "客単価",
+                "購買",
+                "レジ",
+                "決済",
+                "割引",
+                "セール",
             ],
             "inventory": [
-                "在庫", "商品", "SKU", "発注", "入荷", "出荷",
-                "棚卸", "回転率", "欠品", "廃棄", "ロス", "補充"
+                "在庫",
+                "商品",
+                "SKU",
+                "発注",
+                "入荷",
+                "出荷",
+                "棚卸",
+                "回転率",
+                "欠品",
+                "廃棄",
+                "ロス",
+                "補充",
             ],
             "customer": [
-                "顧客", "会員", "来店", "購入", "リピート", "ロイヤル",
-                "セグメント", "年齢", "性別", "属性", "行動", "嗜好"
+                "顧客",
+                "会員",
+                "来店",
+                "購入",
+                "リピート",
+                "ロイヤル",
+                "セグメント",
+                "年齢",
+                "性別",
+                "属性",
+                "行動",
+                "嗜好",
             ],
             "marketing": [
-                "広告", "宣伝", "キャンペーン", "プロモーション", "集客",
-                "認知", "ブランド", "チラシ", "DM", "メール", "SNS"
-            ]
+                "広告",
+                "宣伝",
+                "キャンペーン",
+                "プロモーション",
+                "集客",
+                "認知",
+                "ブランド",
+                "チラシ",
+                "DM",
+                "メール",
+                "SNS",
+            ],
         }
