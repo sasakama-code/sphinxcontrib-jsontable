@@ -13,7 +13,15 @@ from typing import Any
 
 from .search_index_generators import (
     ComprehensiveSearchIndex,
+    FacetedSearchIndex,
     JapaneseQueryProcessor,
+)
+
+# Import additional index types from base module
+from .search_index_generators.base import (
+    HybridSearchIndex,
+    SemanticSearchIndex,
+    VectorIndex,
 )
 
 # Import the new modular implementation
@@ -26,8 +34,12 @@ logger = logging.getLogger(__name__)
 # Legacy imports for backward compatibility
 __all__ = [
     "ComprehensiveSearchIndex",
+    "FacetedSearchIndex",
+    "HybridSearchIndex",
     "JapaneseQueryProcessor",
     "SearchIndexGenerator",
+    "SemanticSearchIndex",
+    "VectorIndex",
 ]
 
 

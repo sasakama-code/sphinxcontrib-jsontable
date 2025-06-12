@@ -10,13 +10,10 @@ import pytest
 from sphinxcontrib.jsontable.data_loaders import JsonTableError
 
 # Import all main modules to test
-from sphinxcontrib.jsontable.directives import (
-    JsonDataLoader,
-    JsonTableDirective,
-    TableBuilder,
-    TableConverter,
-    is_safe_path,
-)
+from sphinxcontrib.jsontable.data_loaders import JsonDataLoader, is_safe_path
+from sphinxcontrib.jsontable.directives import JsonTableDirective
+from sphinxcontrib.jsontable.table_builders import TableBuilder
+from sphinxcontrib.jsontable.table_converters import TableConverter
 from sphinxcontrib.jsontable.json_table_directive import (
     JsonTableDirective as SimpleDirective,
 )
