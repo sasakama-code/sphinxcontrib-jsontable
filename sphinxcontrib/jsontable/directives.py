@@ -609,6 +609,8 @@ class JsonTableDirective(SphinxDirective):
         "header": directives.flag,
         "encoding": directives.unchanged,
         "limit": directives.nonnegative_int,  # Accept 0 or positive integers
+        "sheet": directives.unchanged,
+        "sheet-index": directives.nonnegative_int,
     }
 
     def __init__(self, *args, **kwargs):
@@ -678,8 +680,20 @@ class JsonTableDirective(SphinxDirective):
                 if not self.excel_loader:
                     raise JsonTableError("Excel loader not initialized")
 
+                # Sheet指定オプションの処理
+                sheet_name = self.options.get("sheet")
+                sheet_index = self.options.get("sheet-index")
+
                 # Excelファイルを読み込み
-                excel_data = self.excel_loader.load_from_excel(file_path)
+                if sheet_name:
+                    # sheet名が指定されている場合
+                    excel_data = self.excel_loader.load_from_excel(file_path, sheet_name=sheet_name)
+                elif sheet_index is not None:
+                    # sheet-indexが指定されている場合
+                    excel_data = self.excel_loader.load_from_excel_by_index(file_path, sheet_index=sheet_index)
+                else:
+                    # デフォルト（最初のシート）
+                    excel_data = self.excel_loader.load_from_excel(file_path)
 
                 # Excel形式からJSON形式に変換
                 if excel_data['has_header']:

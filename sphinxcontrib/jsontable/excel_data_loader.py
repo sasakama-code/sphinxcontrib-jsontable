@@ -117,6 +117,56 @@ class ExcelDataLoader:
         except Exception as e:
             raise ValueError(f"Failed to detect sheets in {file_path}: {e!s}")
 
+    def get_sheet_name_by_index(self, file_path: str, sheet_index: int) -> str:
+        """シートインデックスからシート名を取得。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_index: シートインデックス（0ベース）
+
+        Returns:
+            str: 指定されたインデックスのシート名
+
+        Raises:
+            ValueError: インデックスが範囲外の場合
+        """
+        if sheet_index < 0:
+            raise ValueError("Sheet index must be non-negative")
+
+        try:
+            excel_file = pd.ExcelFile(file_path)
+            sheet_names = excel_file.sheet_names
+
+            if sheet_index >= len(sheet_names):
+                raise ValueError(f"Sheet index {sheet_index} is out of range. Available sheets: {len(sheet_names)}")
+
+            return sheet_names[sheet_index]
+
+        except Exception as e:
+            raise ValueError(f"Failed to get sheet name by index {sheet_index} in {file_path}: {e!s}")
+
+    def load_from_excel_by_index(self, file_path: str,
+                                sheet_index: int,
+                                header_row: int | None = None) -> dict[str, Any]:
+        """シートインデックスを指定してExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_index: シートインデックス（0ベース）
+            header_row: ヘッダー行番号（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ
+
+        Raises:
+            ValueError: インデックスが無効な場合
+        """
+        # インデックスからシート名を取得
+        sheet_name = self.get_sheet_name_by_index(file_path, sheet_index)
+
+        # 既存のメソッドを利用して読み込み
+        return self.load_from_excel(file_path, sheet_name=sheet_name, header_row=header_row)
+
     def header_detection(self, df: pd.DataFrame) -> bool:
         """ヘッダー行の自動検出。
 
