@@ -705,3 +705,203 @@ class ExcelDataLoader:
             'rows': len(range_data),
             'columns': len(range_data[0]) if range_data else 0
         }
+
+    def load_from_excel_with_header_row(self, file_path: str,
+                                       header_row: int,
+                                       sheet_name: str | None = None) -> dict[str, Any]:
+        """指定されたヘッダー行でExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            header_row: ヘッダー行番号（0ベース）
+            sheet_name: 読み込むシート名（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ（ヘッダー行情報付き）
+
+        Raises:
+            ValueError: 無効なヘッダー行指定の場合
+            TypeError: header_rowが整数でない場合
+        """
+        # 事前検証
+        self._validate_header_row(header_row)
+        
+        try:
+            # Excel読み込み（明示的なheader_row指定）
+            excel_data = self.load_from_excel(file_path, sheet_name, header_row)
+            
+            # データ範囲内でのヘッダー行チェック
+            self._validate_header_row_against_data(header_row, excel_data, file_path)
+            
+            # ヘッダー行情報を追加
+            excel_data['header_row'] = header_row
+            
+            # ヘッダー名の正規化（必要に応じて）
+            if excel_data['has_header'] and excel_data['headers']:
+                excel_data['headers'] = self._normalize_header_names(excel_data['headers'])
+            
+            return excel_data
+            
+        except Exception as e:
+            if isinstance(e, (ValueError, TypeError)):
+                raise
+            raise ValueError(f"Failed to load Excel with header row {header_row}: {e}") from e
+
+    def load_from_excel_with_header_row_and_range(self, file_path: str,
+                                                 header_row: int,
+                                                 range_spec: str,
+                                                 sheet_name: str | None = None) -> dict[str, Any]:
+        """ヘッダー行指定と範囲指定の組み合わせでExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            header_row: ヘッダー行番号（0ベース）
+            range_spec: 範囲指定（例: "A1:C3", "B2"）
+            sheet_name: 読み込むシート名（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ
+
+        Raises:
+            ValueError: 無効なヘッダー行または範囲指定の場合
+            RangeSpecificationError: 無効な範囲指定の場合
+            TypeError: header_rowが整数でない場合
+        """
+        # 事前検証
+        self._validate_header_row(header_row)
+        
+        try:
+            # 範囲指定付きで読み込み（header_rowも考慮）
+            excel_data = self.load_from_excel_with_range(file_path, range_spec, sheet_name, header_row)
+            
+            # ヘッダー行と範囲の整合性チェック
+            self._validate_header_row_and_range_compatibility(header_row, range_spec, excel_data)
+            
+            # ヘッダー行情報を追加
+            excel_data['header_row'] = header_row
+            
+            # ヘッダー名の正規化（必要に応じて）
+            if excel_data['has_header'] and excel_data['headers']:
+                excel_data['headers'] = self._normalize_header_names(excel_data['headers'])
+            
+            return excel_data
+            
+        except (RangeSpecificationError, ValueError, TypeError):
+            raise
+        except Exception as e:
+            raise ValueError(
+                f"Failed to load Excel with header row {header_row} and range {range_spec}: {e}"
+            ) from e
+
+    def _validate_header_row_and_range_compatibility(self, header_row: int, 
+                                                   range_spec: str,
+                                                   excel_data: dict[str, Any]) -> None:
+        """ヘッダー行と範囲指定の整合性をチェック。
+
+        Args:
+            header_row: ヘッダー行番号（0ベース）
+            range_spec: 範囲指定文字列
+            excel_data: 読み込まれたExcelデータ
+
+        Raises:
+            ValueError: ヘッダー行と範囲が整合していない場合
+        """
+        # 範囲情報を解析
+        try:
+            range_info = self._parse_range_specification(range_spec)
+        except RangeSpecificationError as e:
+            raise ValueError(f"Invalid range specification for header row validation: {e}") from e
+        
+        # ヘッダー行が範囲内にあるかチェック
+        if not (range_info['start_row'] <= header_row <= range_info['end_row']):
+            raise ValueError(
+                f"Header row {header_row} is outside the specified range {range_spec}. "
+                f"Range rows: {range_info['start_row']}-{range_info['end_row']}"
+            )
+        
+        # データが実際に存在するかチェック
+        if not excel_data['data']:
+            raise ValueError(
+                f"No data available for header row {header_row} in range {range_spec}"
+            )
+
+    def _validate_header_row(self, header_row: int | None) -> None:
+        """ヘッダー行の妥当性を検証。
+
+        Args:
+            header_row: ヘッダー行番号（None=自動検出モード）
+
+        Raises:
+            TypeError: header_rowが整数でない場合
+            ValueError: 無効なヘッダー行番号の場合
+        """
+        if header_row is None:
+            return  # 自動検出モード
+        
+        if not isinstance(header_row, int):
+            raise TypeError(f"Header row must be an integer, got {type(header_row).__name__}")
+        
+        if header_row < 0:
+            raise ValueError(f"Header row must be non-negative, got {header_row}")
+        
+        # Excel の最大行数チェック
+        if header_row >= MAX_EXCEL_ROWS:
+            raise ValueError(f"Header row {header_row} exceeds Excel maximum ({MAX_EXCEL_ROWS})")
+
+    def _validate_header_row_against_data(self, header_row: int, 
+                                        excel_data: dict[str, Any], 
+                                        file_path: str) -> None:
+        """ヘッダー行がデータ範囲内にあるかチェック。
+
+        Args:
+            header_row: ヘッダー行番号（0ベース）
+            excel_data: 読み込まれたExcelデータ
+            file_path: Excelファイルパス（エラーメッセージ用）
+
+        Raises:
+            ValueError: ヘッダー行がデータ範囲外の場合
+        """
+        data_rows = len(excel_data['data'])
+        
+        if data_rows == 0:
+            raise ValueError(
+                f"Cannot use header row {header_row} on empty data in {file_path}"
+            )
+        
+        if header_row >= data_rows:
+            raise ValueError(
+                f"Header row {header_row} is out of range. "
+                f"Data has {data_rows} rows (0-{data_rows-1}). File: {file_path}"
+            )
+
+    def _normalize_header_names(self, headers: list[str]) -> list[str]:
+        """ヘッダー名の正規化処理。
+
+        Args:
+            headers: 元のヘッダー名リスト
+
+        Returns:
+            list[str]: 正規化されたヘッダー名リスト
+        """
+        normalized = []
+        seen = set()
+        
+        for i, header in enumerate(headers):
+            # 基本的な正規化
+            normalized_header = str(header).strip() if header else ""
+            
+            # 空のヘッダーに対するデフォルト名
+            if not normalized_header:
+                normalized_header = f"Column{i+1}"
+            
+            # 重複回避
+            original = normalized_header
+            counter = 1
+            while normalized_header in seen:
+                normalized_header = f"{original}_{counter}"
+                counter += 1
+            
+            seen.add(normalized_header)
+            normalized.append(normalized_header)
+        
+        return normalized
