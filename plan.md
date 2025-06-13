@@ -82,17 +82,17 @@
 
 ## ✅ **詳細タスクリスト**
 
-## **Phase 1: 基本Excel対応**
+## **Phase 1: 基本Excel対応** ✅ **完了**
 
 ### **Task 1.1: 依存関係設定**
 **目標**: Excel処理に必要なライブラリを追加
 
 **ToDo**:
-- [ ] pyproject.tomlに依存関係追加
-  - [ ] pandas>=2.0.0を追加
-  - [ ] openpyxl>=3.1.0を追加
-  - [ ] xlsxwriter>=3.0.0を追加（将来の書き込み機能用）
-- [ ] 開発環境での依存関係インストール確認
+- [x] pyproject.tomlに依存関係追加
+  - [x] pandas>=2.0.0を追加
+  - [x] openpyxl>=3.1.0を追加
+  - [x] xlsxwriter>=3.0.0を追加（将来の書き込み機能用）
+- [x] 開発環境での依存関係インストール確認
 - [ ] CI環境での依存関係テスト
 
 **成果物**:
@@ -103,19 +103,19 @@
 **目標**: Excel読み込み専用モジュール作成
 
 **ToDo**:
-- [ ] sphinxcontrib/jsontable/excel_data_loader.py作成
-  - [ ] ExcelDataLoaderクラス実装
-  - [ ] load_from_excel()メソッド実装
-  - [ ] basic_sheet_detection()メソッド実装
-  - [ ] header_detection()メソッド実装
-  - [ ] data_type_conversion()メソッド実装
-- [ ] エラーハンドリング実装
-  - [ ] ファイル存在チェック
-  - [ ] Excel形式検証
-  - [ ] 読み込みエラー処理
-- [ ] セキュリティ機能実装
-  - [ ] パストラバーサル対策
-  - [ ] ファイルサイズ制限
+- [x] sphinxcontrib/jsontable/excel_data_loader.py作成
+  - [x] ExcelDataLoaderクラス実装
+  - [x] load_from_excel()メソッド実装
+  - [x] basic_sheet_detection()メソッド実装
+  - [x] header_detection()メソッド実装
+  - [x] data_type_conversion()メソッド実装
+- [x] エラーハンドリング実装
+  - [x] ファイル存在チェック
+  - [x] Excel形式検証
+  - [x] 読み込みエラー処理
+- [x] セキュリティ機能実装
+  - [x] パストラバーサル対策
+  - [x] ファイルサイズ制限
 
 **成果物**:
 - sphinxcontrib/jsontable/excel_data_loader.py
@@ -125,15 +125,15 @@
 **目標**: 既存ディレクティブにExcel対応を追加
 
 **ToDo**:
-- [ ] directives.py修正
-  - [ ] Excel file detection logic追加
-  - [ ] ExcelDataLoader統合
-  - [ ] 条件分岐実装（Excel vs JSON）
-  - [ ] 既存JSON処理の完全保持
-- [ ] 新規オプション追加
-  - [ ] 基本オプション定義
-  - [ ] オプション検証ロジック
-- [ ] エラーメッセージ日本語対応
+- [x] directives.py修正
+  - [x] Excel file detection logic追加
+  - [x] ExcelDataLoader統合
+  - [x] 条件分岐実装（Excel vs JSON）
+  - [x] 既存JSON処理の完全保持
+- [x] 新規オプション追加
+  - [x] 基本オプション定義
+  - [x] オプション検証ロジック
+- [x] エラーメッセージ日本語対応
 
 **成果物**:
 - 拡張されたJsonTableDirective
@@ -143,17 +143,17 @@
 **目標**: Phase1機能の単体テスト作成
 
 **ToDo**:
-- [ ] tests/excel/test_excel_data_loader.py作成
-  - [ ] 基本読み込みテスト
-  - [ ] エラーハンドリングテスト
-  - [ ] セキュリティテスト
-- [ ] tests/test_excel_integration.py作成
-  - [ ] Excel→JSON変換テスト
-  - [ ] ディレクティブ統合テスト
-  - [ ] 後方互換性テスト
-- [ ] テストデータ準備
-  - [ ] 基本Excel サンプル作成
-  - [ ] 異常系Excelファイル作成
+- [x] tests/excel/test_excel_data_loader.py作成
+  - [x] 基本読み込みテスト
+  - [x] エラーハンドリングテスト
+  - [x] セキュリティテスト
+- [x] tests/test_excel_integration.py作成
+  - [x] Excel→JSON変換テスト
+  - [x] ディレクティブ統合テスト
+  - [x] 後方互換性テスト
+- [x] テストデータ準備
+  - [x] 基本Excel サンプル作成
+  - [x] 異常系Excelファイル作成
 
 **成果物**:
 - Excel関連単体テスト
