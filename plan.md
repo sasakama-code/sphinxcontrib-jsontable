@@ -197,21 +197,21 @@
 - Range specification機能（完了）
 - 範囲指定テスト（完了）
 
-### **Task 2.3: Header Row Configuration実装**
+### **Task 2.3: Header Row Configuration実装** ✅ **完了**
 **目標**: ヘッダー行の柔軟な指定
 
 **ToDo**:
-- [ ] `:header-row:` オプション実装
-  - [ ] 行番号指定機能
-  - [ ] 複数行ヘッダー対応準備
-- [ ] ヘッダー処理ロジック
-  - [ ] 指定行からのヘッダー取得
-  - [ ] ヘッダー名の正規化
-- [ ] テスト実装
+- [x] `:header-row:` オプション実装
+  - [x] 行番号指定機能
+  - [x] 複数行ヘッダー対応準備
+- [x] ヘッダー処理ロジック
+  - [x] 指定行からのヘッダー取得
+  - [x] ヘッダー名の正規化
+- [x] テスト実装
 
 **成果物**:
-- Header row configuration機能
-- ヘッダー処理テスト
+- Header row configuration機能（完了）
+- ヘッダー処理テスト（完了）
 
 ### **Task 2.4: Skip Rows実装**
 **目標**: 不要行のスキップ機能
