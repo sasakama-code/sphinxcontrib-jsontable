@@ -602,10 +602,12 @@ class JsonTableDirective(SphinxDirective):
         limit: Positive integer to limit the number of rows, or 0 for unlimited.
         sheet: Excel sheet name to read from (Excel files only).
         sheet-index: Excel sheet index to read from (0-based, Excel files only).
+        range: Cell range specification for Excel files (e.g., "A1:C10", "B2").
 
     Excel-specific Options:
         - sheet: Specify the Excel sheet by name (e.g., "営業データ", "Sheet1")
         - sheet-index: Specify the Excel sheet by index (0-based, e.g., 0, 1, 2)
+        - range: Specify cell range in A1:C10 format (e.g., "A1:D5", "B2:F10")
         - Priority: If both sheet and sheet-index are provided, sheet name takes precedence
         - Default: If neither is provided, the first sheet (index 0) is used
 
@@ -617,6 +619,10 @@ class JsonTableDirective(SphinxDirective):
         .. jsontable:: data.xlsx
            :header:
            :sheet-index: 1
+
+        .. jsontable:: data.xlsx
+           :header:
+           :range: A1:D10
     """
 
     has_content = True
@@ -628,6 +634,7 @@ class JsonTableDirective(SphinxDirective):
         "limit": directives.nonnegative_int,  # Accept 0 or positive integers
         "sheet": directives.unchanged,
         "sheet-index": directives.nonnegative_int,
+        "range": directives.unchanged,
     }
 
     def __init__(self, *args, **kwargs):
@@ -697,20 +704,39 @@ class JsonTableDirective(SphinxDirective):
                 if not self.excel_loader:
                     raise JsonTableError("Excel loader not initialized")
 
-                # Sheet指定オプションの処理
+                # オプションの取得
                 sheet_name = self.options.get("sheet")
                 sheet_index = self.options.get("sheet-index")
+                range_spec = self.options.get("range")
 
                 # Excelファイルを読み込み
-                if sheet_name:
-                    # sheet名が指定されている場合
-                    excel_data = self.excel_loader.load_from_excel(file_path, sheet_name=sheet_name)
-                elif sheet_index is not None:
-                    # sheet-indexが指定されている場合
-                    excel_data = self.excel_loader.load_from_excel_by_index(file_path, sheet_index=sheet_index)
+                if range_spec:
+                    # 範囲指定がある場合
+                    if sheet_name:
+                        excel_data = self.excel_loader.load_from_excel_with_range(
+                            file_path, range_spec, sheet_name=sheet_name
+                        )
+                    elif sheet_index is not None:
+                        # sheet-indexと範囲の組み合わせ
+                        # まずsheet名を取得してから範囲指定読み込み
+                        sheet_name_resolved = self.excel_loader.get_sheet_name_by_index(file_path, sheet_index)
+                        excel_data = self.excel_loader.load_from_excel_with_range(
+                            file_path, range_spec, sheet_name=sheet_name_resolved
+                        )
+                    else:
+                        # デフォルトシートで範囲指定
+                        excel_data = self.excel_loader.load_from_excel_with_range(file_path, range_spec)
                 else:
-                    # デフォルト（最初のシート）
-                    excel_data = self.excel_loader.load_from_excel(file_path)
+                    # 従来の処理（範囲指定なし）
+                    if sheet_name:
+                        # sheet名が指定されている場合
+                        excel_data = self.excel_loader.load_from_excel(file_path, sheet_name=sheet_name)
+                    elif sheet_index is not None:
+                        # sheet-indexが指定されている場合
+                        excel_data = self.excel_loader.load_from_excel_by_index(file_path, sheet_index=sheet_index)
+                    else:
+                        # デフォルト（最初のシート）
+                        excel_data = self.excel_loader.load_from_excel(file_path)
 
                 # Excel形式からJSON形式に変換
                 if excel_data['has_header']:

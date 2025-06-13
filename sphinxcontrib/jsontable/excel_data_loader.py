@@ -16,6 +16,21 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import re
+
+
+class RangeSpecificationError(ValueError):
+    """範囲指定に関するエラー."""
+    
+    def __init__(self, message: str, invalid_spec: str | None = None):
+        super().__init__(message)
+        self.invalid_spec = invalid_spec
+
+
+# 定数定義
+CELL_ADDRESS_PATTERN = r'^([A-Z]+)([1-9]\d*)$'
+MAX_EXCEL_ROWS = 1048576  # Excel最大行数
+MAX_EXCEL_COLS = 16384    # Excel最大列数
 
 
 class ExcelDataLoader:
@@ -342,3 +357,351 @@ class ExcelDataLoader:
             raise
         except Exception as e:
             raise Exception(f"Unexpected error loading Excel file {file_path}: {e!s}") from e
+
+    def _parse_range_specification(self, range_spec: str) -> dict[str, Any]:
+        """範囲指定文字列（A1:C3形式）をパースして範囲情報を取得。
+
+        Args:
+            range_spec: 範囲指定文字列（例: "A1:C3", "B2"）
+
+        Returns:
+            dict: 解析された範囲情報
+                - start_row: 開始行（0ベース）
+                - end_row: 終了行（0ベース、含む）
+                - start_col: 開始列（0ベース）
+                - end_col: 終了列（0ベース、含む）
+
+        Raises:
+            TypeError: range_specが文字列でない場合
+            RangeSpecificationError: 無効な範囲形式の場合
+        """
+        # 入力検証の強化
+        if not isinstance(range_spec, str):
+            raise TypeError(f"Range specification must be a string, got {type(range_spec).__name__}")
+        
+        range_spec_clean = range_spec.strip()
+        if not range_spec_clean:
+            raise RangeSpecificationError("Range specification cannot be empty", range_spec)
+
+        range_spec_upper = range_spec_clean.upper()
+        
+        # 範囲形式の解析
+        try:
+            start_cell, end_cell = self._split_range_specification(range_spec_upper)
+        except RangeSpecificationError:
+            raise
+        except Exception as e:
+            raise RangeSpecificationError(
+                f"Failed to parse range specification: {e}", 
+                range_spec_upper
+            ) from e
+
+        # セルアドレスを行・列インデックスに変換
+        try:
+            start_row, start_col = self._parse_cell_address(start_cell.strip())
+            end_row, end_col = self._parse_cell_address(end_cell.strip())
+        except RangeSpecificationError:
+            raise
+        except Exception as e:
+            raise RangeSpecificationError(
+                f"Failed to parse cell addresses in range: {e}",
+                range_spec_upper
+            ) from e
+
+        # 範囲の妥当性チェック
+        self._validate_range_bounds(start_row, start_col, end_row, end_col, range_spec_upper)
+
+        return {
+            'start_row': start_row,
+            'end_row': end_row,
+            'start_col': start_col,
+            'end_col': end_col,
+            'original_spec': range_spec_upper
+        }
+
+    def _split_range_specification(self, range_spec: str) -> tuple[str, str]:
+        """範囲指定文字列を開始セルと終了セルに分割。
+
+        Args:
+            range_spec: 大文字化された範囲指定文字列
+
+        Returns:
+            tuple: (開始セル, 終了セル)
+
+        Raises:
+            RangeSpecificationError: 無効な範囲形式の場合
+        """
+        if ':' in range_spec:
+            # 範囲形式 (A1:C3)
+            parts = range_spec.split(':')
+            if len(parts) != 2:
+                raise RangeSpecificationError(
+                    f"Invalid range format. Expected 'A1:C3', got '{range_spec}'",
+                    range_spec
+                )
+            return parts[0], parts[1]
+        else:
+            # 単一セル形式 (A1)
+            return range_spec, range_spec
+
+    def _validate_range_bounds(self, start_row: int, start_col: int, 
+                              end_row: int, end_col: int, range_spec: str) -> None:
+        """範囲の境界値を検証。
+
+        Args:
+            start_row: 開始行（0ベース）
+            start_col: 開始列（0ベース）
+            end_row: 終了行（0ベース）
+            end_col: 終了列（0ベース）
+            range_spec: 元の範囲指定文字列
+
+        Raises:
+            RangeSpecificationError: 無効な範囲の場合
+        """
+        # 開始位置が終了位置より後にある場合
+        if start_row > end_row or start_col > end_col:
+            raise RangeSpecificationError(
+                f"Invalid range: start cell must be before or equal to end cell. "
+                f"Start: ({start_row+1}, {chr(65+start_col)}), "
+                f"End: ({end_row+1}, {chr(65+end_col)})",
+                range_spec
+            )
+        
+        # Excel の最大値を超えている場合
+        if end_row >= MAX_EXCEL_ROWS:
+            raise RangeSpecificationError(
+                f"Row {end_row+1} exceeds Excel maximum ({MAX_EXCEL_ROWS})",
+                range_spec
+            )
+        
+        if end_col >= MAX_EXCEL_COLS:
+            raise RangeSpecificationError(
+                f"Column {chr(65+end_col) if end_col < 26 else 'beyond Z'} exceeds Excel maximum",
+                range_spec
+            )
+
+    def _parse_cell_address(self, cell_address: str) -> tuple[int, int]:
+        """セルアドレス（A1形式）を行・列インデックスに変換。
+
+        Args:
+            cell_address: セルアドレス（例: "A1", "AB123"）
+
+        Returns:
+            tuple: (行インデックス（0ベース）, 列インデックス（0ベース）)
+
+        Raises:
+            RangeSpecificationError: 無効なセルアドレスの場合
+        """
+        # 入力検証
+        if not cell_address or not isinstance(cell_address, str):
+            raise RangeSpecificationError(
+                f"Cell address must be a non-empty string, got: {cell_address}",
+                cell_address
+            )
+        
+        # セルアドレスのパターンマッチング
+        match = re.match(CELL_ADDRESS_PATTERN, cell_address.strip())
+        
+        if not match:
+            raise RangeSpecificationError(
+                f"Invalid cell address format. Expected format: 'A1', 'AB123', etc. Got: '{cell_address}'",
+                cell_address
+            )
+
+        col_letters, row_str = match.groups()
+        
+        try:
+            # 行番号の変換（1ベース→0ベース）
+            row_index = int(row_str) - 1
+            
+            # 行番号の範囲チェック
+            if row_index >= MAX_EXCEL_ROWS:
+                raise RangeSpecificationError(
+                    f"Row number {row_str} exceeds Excel maximum ({MAX_EXCEL_ROWS})",
+                    cell_address
+                )
+            
+            # 列番号の変換（A=0, B=1, ..., Z=25, AA=26, ...）
+            col_index = self._convert_column_letters_to_index(col_letters)
+            
+            # 列番号の範囲チェック
+            if col_index >= MAX_EXCEL_COLS:
+                raise RangeSpecificationError(
+                    f"Column '{col_letters}' exceeds Excel maximum",
+                    cell_address
+                )
+            
+            return row_index, col_index
+            
+        except ValueError as e:
+            if isinstance(e, RangeSpecificationError):
+                raise
+            raise RangeSpecificationError(
+                f"Failed to parse cell address '{cell_address}': {e}",
+                cell_address
+            ) from e
+
+    def _convert_column_letters_to_index(self, col_letters: str) -> int:
+        """列文字（A, B, ..., AA, AB, ...）を0ベースのインデックスに変換。
+
+        Args:
+            col_letters: 列文字（例: "A", "AB", "ABC"）
+
+        Returns:
+            int: 0ベースの列インデックス（A=0, B=1, ..., Z=25, AA=26, ...）
+
+        Raises:
+            RangeSpecificationError: 無効な列文字の場合
+        """
+        if not col_letters or not col_letters.isalpha():
+            raise RangeSpecificationError(
+                f"Invalid column letters: '{col_letters}'",
+                col_letters
+            )
+        
+        col_index = 0
+        for char in col_letters:
+            if not 'A' <= char <= 'Z':
+                raise RangeSpecificationError(
+                    f"Invalid character in column: '{char}'",
+                    col_letters
+                )
+            col_index = col_index * 26 + (ord(char) - ord('A') + 1)
+        
+        return col_index - 1  # 0ベースに変換
+
+    def load_from_excel_with_range(self, file_path: str,
+                                  range_spec: str,
+                                  sheet_name: str | None = None,
+                                  header_row: int | None = None) -> dict[str, Any]:
+        """指定された範囲でExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            range_spec: 範囲指定（例: "A1:C3", "B2"）
+            sheet_name: 読み込むシート名（None=自動検出）
+            header_row: ヘッダー行番号（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ（範囲情報付き）
+
+        Raises:
+            RangeSpecificationError: 無効な範囲指定の場合
+            ValueError: ファイル読み込みエラーまたは範囲外アクセス
+        """
+        # 範囲情報を解析
+        try:
+            range_info = self._parse_range_specification(range_spec)
+        except RangeSpecificationError:
+            raise
+        except Exception as e:
+            raise RangeSpecificationError(
+                f"Unexpected error parsing range specification: {e}",
+                range_spec
+            ) from e
+        
+        # Excel全体を読み込み
+        try:
+            excel_data = self.load_from_excel(file_path, sheet_name, header_row)
+        except Exception as e:
+            raise ValueError(f"Failed to load Excel file for range extraction: {e}") from e
+        
+        # データサイズの検証
+        data_rows = len(excel_data['data'])
+        data_cols = len(excel_data['data'][0]) if excel_data['data'] else 0
+        
+        # 範囲外アクセスのチェック
+        self._validate_range_against_data(range_info, data_rows, data_cols, range_spec)
+        
+        # 指定範囲のデータを効率的に抽出
+        range_data = self._extract_range_data(excel_data['data'], range_info)
+        
+        # 結果を構築
+        return self._build_range_result(range_data, excel_data, range_spec)
+
+    def _validate_range_against_data(self, range_info: dict[str, Any], 
+                                   data_rows: int, data_cols: int, 
+                                   range_spec: str) -> None:
+        """指定範囲がデータサイズ内に収まっているかチェック。
+
+        Args:
+            range_info: 解析済み範囲情報
+            data_rows: データの行数
+            data_cols: データの列数
+            range_spec: 元の範囲指定文字列
+
+        Raises:
+            RangeSpecificationError: 範囲がデータサイズを超えている場合
+        """
+        if data_rows == 0 or data_cols == 0:
+            raise RangeSpecificationError(
+                f"Cannot apply range to empty data. Data size: {data_rows}x{data_cols}",
+                range_spec
+            )
+        
+        # 範囲の終了位置がデータサイズを超えているかチェック
+        if range_info['end_row'] >= data_rows:
+            raise RangeSpecificationError(
+                f"Range row {range_info['end_row']+1} exceeds data rows ({data_rows}). "
+                f"Data size: {data_rows}x{data_cols}",
+                range_spec
+            )
+        
+        if range_info['end_col'] >= data_cols:
+            raise RangeSpecificationError(
+                f"Range column {range_info['end_col']+1} exceeds data columns ({data_cols}). "
+                f"Data size: {data_rows}x{data_cols}",
+                range_spec
+            )
+
+    def _extract_range_data(self, full_data: list[list[str]], 
+                           range_info: dict[str, Any]) -> list[list[str]]:
+        """データから指定範囲を効率的に抽出。
+
+        Args:
+            full_data: 全体のデータ
+            range_info: 範囲情報
+
+        Returns:
+            list[list[str]]: 抽出されたデータ
+        """
+        range_data = []
+        
+        for row_idx in range(range_info['start_row'], range_info['end_row'] + 1):
+            row = []
+            source_row = full_data[row_idx]
+            
+            for col_idx in range(range_info['start_col'], range_info['end_col'] + 1):
+                # 範囲チェックは既に済んでいるので、安全にアクセス可能
+                if col_idx < len(source_row):
+                    row.append(source_row[col_idx])
+                else:
+                    row.append('')  # 空セルの処理
+            
+            range_data.append(row)
+        
+        return range_data
+
+    def _build_range_result(self, range_data: list[list[str]], 
+                          excel_data: dict[str, Any], 
+                          range_spec: str) -> dict[str, Any]:
+        """範囲抽出結果を構築。
+
+        Args:
+            range_data: 抽出されたデータ
+            excel_data: 元のExcelデータ情報
+            range_spec: 範囲指定文字列
+
+        Returns:
+            dict[str, Any]: 構築された結果
+        """
+        return {
+            'data': range_data,
+            'has_header': excel_data['has_header'],
+            'headers': excel_data['headers'],
+            'sheet_name': excel_data['sheet_name'],
+            'file_path': excel_data['file_path'],
+            'range': range_spec,
+            'rows': len(range_data),
+            'columns': len(range_data[0]) if range_data else 0
+        }
