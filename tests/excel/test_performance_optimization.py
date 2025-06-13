@@ -2,7 +2,7 @@
 
 Task 4.1: 大容量Excel対応とパフォーマンス最適化のテスト
 - ストリーミング読み込み
-- メモリ使用量制限  
+- メモリ使用量制限
 - 処理時間制限
 - キャッシュ最適化
 - ベンチマークテスト実装
@@ -13,7 +13,6 @@ import shutil
 import tempfile
 import time
 import tracemalloc
-from typing import Any
 
 import pytest
 from openpyxl import Workbook
@@ -77,9 +76,7 @@ class TestPerformanceOptimization:
         excel_path = self.create_large_excel(rows=5000)  # 5000行の大容量ファイル
 
         # ストリーミング読み込みの実行
-        result = self.loader.load_from_excel_with_streaming(
-            excel_path, chunk_size=1000
-        )
+        result = self.loader.load_from_excel_with_streaming(excel_path, chunk_size=1000)
 
         # ストリーミング処理の確認
         assert result["streaming"] == True
@@ -159,9 +156,7 @@ class TestPerformanceOptimization:
         max_cache_entries = 5
 
         result = self.loader.load_from_excel_with_cache_strategy(
-            excel_path,
-            strategy=cache_strategy,
-            max_entries=max_cache_entries
+            excel_path, strategy=cache_strategy, max_entries=max_cache_entries
         )
 
         # キャッシュ戦略の確認
@@ -193,7 +188,7 @@ class TestPerformanceOptimization:
                 "rows": size,
                 "elapsed_time": elapsed_time,
                 "peak_memory_mb": peak / 1024 / 1024,
-                "rows_per_second": size / elapsed_time if elapsed_time > 0 else 0
+                "rows_per_second": size / elapsed_time if elapsed_time > 0 else 0,
             }
             benchmark_results.append(benchmark_result)
 
@@ -260,7 +255,7 @@ class TestPerformanceOptimization:
         # 並行処理の確認
         assert len(errors) == 0, f"Concurrent processing errors: {errors}"
         assert len(results) == 5
-        
+
         # すべての結果が同一であることを確認
         first_result = results[0]
         for result in results[1:]:
@@ -273,9 +268,7 @@ class TestPerformanceOptimization:
 
         # ストリーミング + キャッシュ
         result = self.loader.load_from_excel_with_streaming_cache(
-            excel_path,
-            chunk_size=500,
-            enable_cache=True
+            excel_path, chunk_size=500, enable_cache=True
         )
 
         # 組み合わせ機能の確認

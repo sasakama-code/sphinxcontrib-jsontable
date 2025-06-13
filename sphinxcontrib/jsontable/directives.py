@@ -933,8 +933,10 @@ class JsonTableDirective(SphinxDirective):
                 # ヘッダー行指定のみ
                 if merge_cells:
                     # ヘッダー + 結合セル
-                    return self.excel_loader.load_from_excel_with_merge_cells_and_header(
-                        file_path, header_row, merge_cells, sheet_name
+                    return (
+                        self.excel_loader.load_from_excel_with_merge_cells_and_header(
+                            file_path, header_row, merge_cells, sheet_name
+                        )
                     )
                 else:
                     return self.excel_loader.load_from_excel_with_header_row(
@@ -985,7 +987,9 @@ class JsonTableDirective(SphinxDirective):
 
         # キャッシュサイズ制限の取得（設定から）
         max_cache_size = getattr(
-            self.env.config, "jsontable_cache_size_limit", 1024 * 1024  # デフォルト1MB
+            self.env.config,
+            "jsontable_cache_size_limit",
+            1024 * 1024,  # デフォルト1MB
         )
 
         return self.excel_loader.load_from_excel_with_cache(

@@ -21,23 +21,23 @@ from typing import Any, ClassVar
 import pandas as pd
 from openpyxl import load_workbook
 
-
 # ==========================================
 # Enhanced Exception Classes (Phase 4: Error Handling)
 # ==========================================
 
+
 class EnhancedExcelError(Exception):
     """強化されたExcelエラーの基底クラス."""
-    
+
     def __init__(
-        self, 
-        message: str, 
+        self,
+        message: str,
         error_code: str = None,
         user_message: str = None,
         technical_message: str = None,
         recovery_suggestions: list[str] = None,
         error_context: dict[str, Any] = None,
-        debug_info: dict[str, Any] = None
+        debug_info: dict[str, Any] = None,
     ):
         super().__init__(message)
         self.error_code = error_code or "GENERIC_ERROR"
@@ -47,7 +47,7 @@ class EnhancedExcelError(Exception):
         self.error_context = error_context or {}
         self.debug_info = debug_info or {}
         self.timestamp = datetime.now()
-        
+
         # 詳細エラー情報
         self.error_details = {
             "error_type": self.__class__.__name__,
@@ -56,24 +56,21 @@ class EnhancedExcelError(Exception):
             "technical_details": self.technical_message,
             "recovery_suggestions": self.recovery_suggestions,
             "debug_info": self.debug_info,
-            "timestamp": self.timestamp.isoformat()
+            "timestamp": self.timestamp.isoformat(),
         }
-        
+
         # 多言語対応
-        self._messages = {
-            "ja": self.user_message,
-            "en": message
-        }
-    
+        self._messages = {"ja": self.user_message, "en": message}
+
     def get_message(self, language: str = "ja") -> str:
         """指定言語でメッセージを取得."""
         return self._messages.get(language, self._messages["en"])
-    
+
     @property
     def localized_message(self) -> str:
         """ローカライズされたメッセージ."""
         return self.get_message("ja")
-    
+
     @property
     def friendly_message(self) -> str:
         """ユーザーフレンドリーなメッセージ."""
@@ -82,11 +79,11 @@ class EnhancedExcelError(Exception):
 
 class ExcelFileNotFoundError(EnhancedExcelError):
     """Excelファイルが見つからない場合のエラー."""
-    
+
     def __init__(self, file_path: str, **kwargs):
         user_msg = f"ファイルが見つかりません: {file_path}\n\n確認してください:\n1. ファイルパスが正しいか\n2. ファイルが存在するか\n3. アクセス権限があるか"
         tech_msg = f"File not found: {file_path}"
-        
+
         super().__init__(
             message=tech_msg,
             error_code="FILE_NOT_FOUND",
@@ -95,19 +92,19 @@ class ExcelFileNotFoundError(EnhancedExcelError):
             recovery_suggestions=[
                 "ファイルパスを確認してください",
                 "ファイルが存在することを確認してください",
-                "ファイルへのアクセス権限を確認してください"
+                "ファイルへのアクセス権限を確認してください",
             ],
-            **kwargs
+            **kwargs,
         )
 
 
 class ExcelFileFormatError(EnhancedExcelError):
     """Excelファイル形式が不正な場合のエラー."""
-    
+
     def __init__(self, file_path: str, **kwargs):
         user_msg = f"ファイル形式が正しくありません: {file_path}\n\n解決方法:\n1. 有効なExcelファイル(.xlsx, .xls)を使用してください\n2. ファイルが破損していないか確認してください"
         tech_msg = f"Invalid Excel file format: {file_path}"
-        
+
         super().__init__(
             message=tech_msg,
             error_code="INVALID_FORMAT",
@@ -116,19 +113,19 @@ class ExcelFileFormatError(EnhancedExcelError):
             recovery_suggestions=[
                 "有効なExcelファイル形式(.xlsx, .xls)を使用してください",
                 "ファイルが破損していないか確認してください",
-                "ファイルを再保存してください"
+                "ファイルを再保存してください",
             ],
-            **kwargs
+            **kwargs,
         )
 
 
 class ExcelDataNotFoundError(EnhancedExcelError):
     """Excelファイルにデータが見つからない場合のエラー."""
-    
+
     def __init__(self, file_path: str, **kwargs):
         user_msg = f"ファイルにデータが見つかりません: {file_path}\n\n確認してください:\n1. シートにデータが入力されているか\n2. 正しいシートを指定しているか"
         tech_msg = f"No data found in Excel file: {file_path}"
-        
+
         super().__init__(
             message=tech_msg,
             error_code="NO_DATA_FOUND",
@@ -137,9 +134,9 @@ class ExcelDataNotFoundError(EnhancedExcelError):
             recovery_suggestions=[
                 "シートにデータが存在することを確認してください",
                 "適切なシート名またはインデックスを指定してください",
-                "データ範囲の指定を確認してください"
+                "データ範囲の指定を確認してください",
             ],
-            **kwargs
+            **kwargs,
         )
 
 
@@ -2721,7 +2718,9 @@ class ExcelDataLoader:
         except FileNotFoundError:
             raise FileNotFoundError(f"Excel file not found: {file_path}")
         except Exception as e:
-            raise ValueError(f"Failed to load Excel file with multiple headers: {file_path}: {e!s}") from e
+            raise ValueError(
+                f"Failed to load Excel file with multiple headers: {file_path}: {e!s}"
+            ) from e
 
     def load_from_excel_with_multiple_headers_and_range(
         self,
@@ -2746,11 +2745,15 @@ class ExcelDataLoader:
 
         try:
             # 範囲指定でデータを読み込み
-            excel_data = self.load_from_excel_with_range(file_path, range_spec, sheet_name, None)
+            excel_data = self.load_from_excel_with_range(
+                file_path, range_spec, sheet_name, None
+            )
 
             # ヘッダー行数の検証
             if header_rows > len(excel_data["data"]):
-                raise ValueError(f"header_rows ({header_rows}) exceeds available rows in range")
+                raise ValueError(
+                    f"header_rows ({header_rows}) exceeds available rows in range"
+                )
 
             # ヘッダー行とデータ行を分離
             header_rows_data = excel_data["data"][:header_rows]
@@ -2772,7 +2775,9 @@ class ExcelDataLoader:
             }
 
         except Exception as e:
-            raise ValueError(f"Failed to load Excel file with multiple headers and range: {file_path}: {e!s}") from e
+            raise ValueError(
+                f"Failed to load Excel file with multiple headers and range: {file_path}: {e!s}"
+            ) from e
 
     def _merge_multiple_headers(self, header_rows_data: list[list[str]]) -> list[str]:
         """複数行のヘッダーを結合して単一のヘッダーリストを生成。
@@ -2795,7 +2800,9 @@ class ExcelDataLoader:
 
         for col in range(max_cols):
             # 各列のヘッダー要素を階層的に収集
-            header_parts = self._collect_hierarchical_header_parts(header_rows_data, col)
+            header_parts = self._collect_hierarchical_header_parts(
+                header_rows_data, col
+            )
 
             # ヘッダー要素を結合
             merged_header = self._build_merged_header(header_parts, col)
@@ -2803,7 +2810,9 @@ class ExcelDataLoader:
 
         return merged_headers
 
-    def _collect_hierarchical_header_parts(self, header_rows_data: list[list[str]], col: int) -> list[str]:
+    def _collect_hierarchical_header_parts(
+        self, header_rows_data: list[list[str]], col: int
+    ) -> list[str]:
         """指定列の階層的ヘッダー要素を収集（DRY原則適用）。
 
         Args:
@@ -2833,10 +2842,7 @@ class ExcelDataLoader:
         return header_parts
 
     def _find_inherited_value_for_empty_cell(
-        self,
-        row_idx: int,
-        col: int,
-        header_rows_data: list[list[str]]
+        self, row_idx: int, col: int, header_rows_data: list[list[str]]
     ) -> str | None:
         """空セルの値継承処理（高度階層構造対応）。
 
@@ -2851,17 +2857,16 @@ class ExcelDataLoader:
         # 最初の行が空の場合
         if row_idx == 0:
             # 同一行で左側を探索
-            inherited_value = self._find_left_non_empty_in_row(header_rows_data[row_idx], col)
+            inherited_value = self._find_left_non_empty_in_row(
+                header_rows_data[row_idx], col
+            )
             return inherited_value if inherited_value else "空欄"
 
         # 多層階層継承ロジック：上位レベルから段階的に継承
         return self._find_hierarchical_inherited_value(row_idx, col, header_rows_data)
 
     def _find_hierarchical_inherited_value(
-        self,
-        row_idx: int,
-        col: int,
-        header_rows_data: list[list[str]]
+        self, row_idx: int, col: int, header_rows_data: list[list[str]]
     ) -> str | None:
         """多層階層継承ロジック（コードエクセレンス：高度アルゴリズム）。
 
@@ -2891,10 +2896,7 @@ class ExcelDataLoader:
         return None
 
     def _find_span_inherited_value(
-        self,
-        row_idx: int,
-        col: int,
-        header_rows_data: list[list[str]]
+        self, row_idx: int, col: int, header_rows_data: list[list[str]]
     ) -> str | None:
         """指定行での範囲継承値を探索（結合セル模倣）。
 
@@ -2914,20 +2916,23 @@ class ExcelDataLoader:
         # 左側の非空値とその範囲を探索
         for check_col in range(col, -1, -1):
             if check_col < len(target_row):
-                cell_value = str(target_row[check_col]).strip() if target_row[check_col] is not None else ""
+                cell_value = (
+                    str(target_row[check_col]).strip()
+                    if target_row[check_col] is not None
+                    else ""
+                )
                 if cell_value:
                     # 見つかった値の影響範囲を計算
-                    span_end = self._calculate_value_span_end(row_idx, check_col, header_rows_data)
+                    span_end = self._calculate_value_span_end(
+                        row_idx, check_col, header_rows_data
+                    )
                     if col <= span_end:
                         return cell_value
 
         return None
 
     def _calculate_value_span_end(
-        self,
-        row_idx: int,
-        value_col: int,
-        header_rows_data: list[list[str]]
+        self, row_idx: int, value_col: int, header_rows_data: list[list[str]]
     ) -> int:
         """値の影響範囲終端を計算（結合セル模倣）。
 
@@ -2946,7 +2951,11 @@ class ExcelDataLoader:
 
         # 右側の次の非空値まで範囲を拡張
         for end_col in range(value_col + 1, len(target_row)):
-            cell_value = str(target_row[end_col]).strip() if target_row[end_col] is not None else ""
+            cell_value = (
+                str(target_row[end_col]).strip()
+                if target_row[end_col] is not None
+                else ""
+            )
             if cell_value:
                 return end_col - 1  # 次の非空値の直前まで
 
@@ -2965,7 +2974,9 @@ class ExcelDataLoader:
         """
         for check_col in range(col - 1, -1, -1):
             if check_col < len(row):
-                value = str(row[check_col]).strip() if row[check_col] is not None else ""
+                value = (
+                    str(row[check_col]).strip() if row[check_col] is not None else ""
+                )
                 if value:
                     return value
         return None
@@ -3045,9 +3056,9 @@ class ExcelDataLoader:
 
         # 日本語括弧パターン「売上高（千円）」→「売上高_千円」
         # 全角括弧
-        text = re.sub(r'（([^）]+)）', r'_\1', text)
+        text = re.sub(r"（([^）]+)）", r"_\1", text)
         # 半角括弧
-        text = re.sub(r'\(([^)]+)\)', r'_\1', text)
+        text = re.sub(r"\(([^)]+)\)", r"_\1", text)
 
         return text
 
@@ -3062,11 +3073,36 @@ class ExcelDataLoader:
         """
         # 特殊文字マッピング（保守性向上）
         replacements = {
-            "/": "_", "\\": "_", "[": "_", "]": "_", "{": "_", "}": "_",
-            "|": "_", ":": "_", ";": "_", ",": "_", ".": "_", "?": "_",
-            "*": "_", "+": "_", "-": "_", "=": "_", "!": "_", "@": "_",
-            "#": "_", "$": "_", "%": "_", "^": "_", "&": "_", "<": "_", ">": "_",
-            "~": "_", "`": "_", "'": "_", '"': "_", " ": "_"
+            "/": "_",
+            "\\": "_",
+            "[": "_",
+            "]": "_",
+            "{": "_",
+            "}": "_",
+            "|": "_",
+            ":": "_",
+            ";": "_",
+            ",": "_",
+            ".": "_",
+            "?": "_",
+            "*": "_",
+            "+": "_",
+            "-": "_",
+            "=": "_",
+            "!": "_",
+            "@": "_",
+            "#": "_",
+            "$": "_",
+            "%": "_",
+            "^": "_",
+            "&": "_",
+            "<": "_",
+            ">": "_",
+            "~": "_",
+            "`": "_",
+            "'": "_",
+            '"': "_",
+            " ": "_",
         }
 
         for old, new in replacements.items():
@@ -3090,11 +3126,16 @@ class ExcelDataLoader:
     # ============================================================================
     # JSON Cache Functions (Task 3.4) - コードエクセレンス適用
     # ============================================================================
-    
+
     # キャッシュ関連定数（DRY原則：設定の一元化）
     CACHE_DIR_NAME: ClassVar[str] = ".jsontable_cache"
     CACHE_FILE_EXTENSION: ClassVar[str] = ".json"
-    REQUIRED_CACHE_KEYS: ClassVar[list[str]] = ["data", "headers", "source_file", "cache_timestamp"]
+    REQUIRED_CACHE_KEYS: ClassVar[list[str]] = [
+        "data",
+        "headers",
+        "source_file",
+        "cache_timestamp",
+    ]
     DEFAULT_CACHE_KEY: ClassVar[str] = "default"
 
     def load_from_excel_with_cache(
@@ -3129,24 +3170,40 @@ class ExcelDataLoader:
         """
         # キャッシュシステムの処理フロー（SOLID原則：単一責任）
         cache_context = self._build_cache_context(
-            file_path, sheet_name, header_row, range_spec, skip_rows,
-            detect_range, auto_header, merge_cells, merge_headers
+            file_path,
+            sheet_name,
+            header_row,
+            range_spec,
+            skip_rows,
+            detect_range,
+            auto_header,
+            merge_cells,
+            merge_headers,
         )
-        
+
         # キャッシュヒット確認・読み込み試行
         cached_result = self._try_load_from_cache(cache_context)
         if cached_result:
             return cached_result
-        
+
         # キャッシュミス: 実際のExcelファイル読み込み
         result = self._load_excel_without_cache(
-            file_path, sheet_name, header_row, range_spec, skip_rows,
-            detect_range, auto_header, merge_cells, merge_headers
+            file_path,
+            sheet_name,
+            header_row,
+            range_spec,
+            skip_rows,
+            detect_range,
+            auto_header,
+            merge_cells,
+            merge_headers,
         )
-        
+
         # 新しいキャッシュとして保存
-        self._save_to_cache(cache_context["cache_path"], result, file_path, max_cache_size)
-        
+        self._save_to_cache(
+            cache_context["cache_path"], result, file_path, max_cache_size
+        )
+
         result["cache_hit"] = False
         result["cache_path"] = cache_context["cache_path"]
         return result
@@ -3172,19 +3229,28 @@ class ExcelDataLoader:
             dict[str, str]: キャッシュコンテキスト（キー、パス等）
         """
         cache_key = self._generate_cache_key(
-            file_path, sheet_name, header_row, range_spec, skip_rows,
-            detect_range, auto_header, merge_cells, merge_headers
+            file_path,
+            sheet_name,
+            header_row,
+            range_spec,
+            skip_rows,
+            detect_range,
+            auto_header,
+            merge_cells,
+            merge_headers,
         )
-        
+
         cache_path = self._get_cache_file_path(file_path, cache_key)
-        
+
         return {
             "cache_key": cache_key,
             "cache_path": cache_path,
             "file_path": file_path,
         }
 
-    def _try_load_from_cache(self, cache_context: dict[str, str]) -> dict[str, Any] | None:
+    def _try_load_from_cache(
+        self, cache_context: dict[str, str]
+    ) -> dict[str, Any] | None:
         """キャッシュからの読み込み試行（SOLID原則：単一責任）。
 
         Args:
@@ -3194,13 +3260,13 @@ class ExcelDataLoader:
             dict[str, Any] | None: キャッシュデータまたはNone
         """
         import json
-        
+
         cache_path = cache_context["cache_path"]
         file_path = cache_context["file_path"]
-        
+
         if not self._is_cache_valid(file_path, cache_path):
             return None
-            
+
         try:
             with open(cache_path, encoding="utf-8") as f:
                 cache_data = json.load(f)
@@ -3279,7 +3345,9 @@ class ExcelDataLoader:
 
         # キャッシュキーに基づくファイル名生成（保守性向上）
         effective_cache_key = cache_key if cache_key else self.DEFAULT_CACHE_KEY
-        cache_filename = f"{name_without_ext}_{effective_cache_key}{self.CACHE_FILE_EXTENSION}"
+        cache_filename = (
+            f"{name_without_ext}_{effective_cache_key}{self.CACHE_FILE_EXTENSION}"
+        )
 
         return os.path.join(cache_dir, cache_filename)
 
@@ -3330,10 +3398,10 @@ class ExcelDataLoader:
 
         # データ型の厳密確認（品質向上）
         return (
-            isinstance(cache_data["data"], list) and
-            isinstance(cache_data["headers"], list) and
-            isinstance(cache_data["source_file"], str) and
-            isinstance(cache_data["cache_timestamp"], (int, float))
+            isinstance(cache_data["data"], list)
+            and isinstance(cache_data["headers"], list)
+            and isinstance(cache_data["source_file"], str)
+            and isinstance(cache_data["cache_timestamp"], (int, float))
         )
 
     def _load_excel_without_cache(
@@ -3369,7 +3437,10 @@ class ExcelDataLoader:
         # Detect Range機能
         if detect_range:
             return self.load_from_excel_with_detect_range(
-                file_path, detect_mode=detect_range, sheet_name=sheet_name, auto_header=auto_header
+                file_path,
+                detect_mode=detect_range,
+                sheet_name=sheet_name,
+                auto_header=auto_header,
             )
 
         # Skip Rows機能
@@ -3482,7 +3553,6 @@ class ExcelDataLoader:
         Args:
             file_path: 特定ファイルのキャッシュをクリア（Noneの場合は全削除）
         """
-        import glob
         import os
 
         # キャッシュディレクトリ（定数活用）
@@ -3505,12 +3575,13 @@ class ExcelDataLoader:
             cache_dir: キャッシュディレクトリ
             file_path: 対象ファイルパス
         """
-        import glob
         import os
 
         base_name = os.path.basename(file_path)
         name_without_ext = os.path.splitext(base_name)[0]
-        pattern = os.path.join(cache_dir, f"{name_without_ext}_*{self.CACHE_FILE_EXTENSION}")
+        pattern = os.path.join(
+            cache_dir, f"{name_without_ext}_*{self.CACHE_FILE_EXTENSION}"
+        )
 
         self._remove_cache_files_by_pattern(pattern)
 
@@ -3553,10 +3624,7 @@ class ExcelDataLoader:
     DEFAULT_MAX_CACHE_ENTRIES: ClassVar[int] = 5
 
     def _measure_performance(
-        self, 
-        operation: callable, 
-        *args, 
-        **kwargs
+        self, operation: callable, *args, **kwargs
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """パフォーマンス測定共通メソッド（DRY原則：重複排除）。
 
@@ -3583,16 +3651,13 @@ class ExcelDataLoader:
         metrics = {
             "elapsed_time": elapsed_time,
             "peak_memory_mb": peak / 1024 / 1024,
-            "current_memory_mb": current / 1024 / 1024
+            "current_memory_mb": current / 1024 / 1024,
         }
 
         return result, metrics
 
     def load_from_excel_with_streaming(
-        self, 
-        file_path: str, 
-        chunk_size: int = 1000, 
-        sheet_name: str | None = None
+        self, file_path: str, chunk_size: int = 1000, sheet_name: str | None = None
     ) -> dict[str, Any]:
         """大容量ファイルのストリーミング読み込み（最小実装）。
 
@@ -3606,20 +3671,22 @@ class ExcelDataLoader:
         """
         # 最小実装: 基本の読み込みを使用
         result = self.load_from_excel(file_path, sheet_name)
-        
+
         # ストリーミング用の追加情報
-        result.update({
-            "streaming": True,
-            "chunk_size": chunk_size,
-            "total_rows": len(result["data"]) if result["data"] else 0
-        })
+        result.update(
+            {
+                "streaming": True,
+                "chunk_size": chunk_size,
+                "total_rows": len(result["data"]) if result["data"] else 0,
+            }
+        )
         return result
 
     def load_from_excel_with_memory_limit(
-        self, 
-        file_path: str, 
+        self,
+        file_path: str,
         max_memory_mb: int | None = None,
-        sheet_name: str | None = None
+        sheet_name: str | None = None,
     ) -> dict[str, Any]:
         """メモリ使用量制限付き読み込み（REFACTOR: DRY原則適用）。
 
@@ -3632,25 +3699,27 @@ class ExcelDataLoader:
             dict: メモリ制限付き読み込み結果
         """
         effective_limit = max_memory_mb or self.DEFAULT_MEMORY_LIMIT_MB
-        
+
         # DRY原則: 共通測定メソッド使用
         result, metrics = self._measure_performance(
             self.load_from_excel, file_path, sheet_name
         )
-        
+
         # メモリ監視情報追加
-        result.update({
-            "memory_limit_applied": True,
-            "peak_memory_mb": metrics["peak_memory_mb"],
-            "max_memory_mb": effective_limit
-        })
+        result.update(
+            {
+                "memory_limit_applied": True,
+                "peak_memory_mb": metrics["peak_memory_mb"],
+                "max_memory_mb": effective_limit,
+            }
+        )
         return result
 
     def load_from_excel_with_time_limit(
-        self, 
-        file_path: str, 
+        self,
+        file_path: str,
         max_time_seconds: float | None = None,
-        sheet_name: str | None = None
+        sheet_name: str | None = None,
     ) -> dict[str, Any]:
         """処理時間制限付き読み込み（REFACTOR: DRY原則適用）。
 
@@ -3663,24 +3732,24 @@ class ExcelDataLoader:
             dict: 時間制限付き読み込み結果
         """
         effective_limit = max_time_seconds or self.DEFAULT_TIME_LIMIT_SECONDS
-        
+
         # DRY原則: 共通測定メソッド使用
         result, metrics = self._measure_performance(
             self.load_from_excel, file_path, sheet_name
         )
-        
+
         # 時間監視情報追加
-        result.update({
-            "time_limit_applied": True,
-            "elapsed_time": metrics["elapsed_time"],
-            "max_time_seconds": effective_limit
-        })
+        result.update(
+            {
+                "time_limit_applied": True,
+                "elapsed_time": metrics["elapsed_time"],
+                "max_time_seconds": effective_limit,
+            }
+        )
         return result
 
     def load_from_excel_with_memory_cache(
-        self, 
-        file_path: str,
-        sheet_name: str | None = None
+        self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
         """メモリキャッシュ付き読み込み（最小実装）。
 
@@ -3693,19 +3762,17 @@ class ExcelDataLoader:
         """
         # 最小実装: JSONキャッシュを利用
         result = self.load_from_excel_with_cache(file_path, sheet_name=sheet_name)
-        
+
         # メモリキャッシュ情報追加
-        result.update({
-            "memory_cache_hit": result.get("cache_hit", False)
-        })
+        result.update({"memory_cache_hit": result.get("cache_hit", False)})
         return result
 
     def load_from_excel_with_cache_strategy(
-        self, 
+        self,
         file_path: str,
         strategy: str = "lru",
         max_entries: int = 5,
-        sheet_name: str | None = None
+        sheet_name: str | None = None,
     ) -> dict[str, Any]:
         """効率的なキャッシュ戦略付き読み込み（最小実装）。
 
@@ -3719,19 +3786,19 @@ class ExcelDataLoader:
             dict: キャッシュ戦略付き読み込み結果
         """
         result = self.load_from_excel_with_cache(file_path, sheet_name=sheet_name)
-        
+
         # キャッシュ戦略情報追加
-        result.update({
-            "cache_strategy": strategy,
-            "max_cache_entries": max_entries,
-            "cache_applied": True
-        })
+        result.update(
+            {
+                "cache_strategy": strategy,
+                "max_cache_entries": max_entries,
+                "cache_applied": True,
+            }
+        )
         return result
 
     def load_from_excel_with_benchmark(
-        self, 
-        file_path: str,
-        sheet_name: str | None = None
+        self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
         """ベンチマーク付き読み込み（REFACTOR: DRY原則適用）。
 
@@ -3746,21 +3813,21 @@ class ExcelDataLoader:
         result, metrics = self._measure_performance(
             self.load_from_excel, file_path, sheet_name
         )
-        
+
         # ベンチマーク情報追加
-        result.update({
-            "benchmark": {
-                "elapsed_time": metrics["elapsed_time"],
-                "peak_memory_mb": metrics["peak_memory_mb"],
-                "rows_processed": len(result["data"]) if result["data"] else 0
+        result.update(
+            {
+                "benchmark": {
+                    "elapsed_time": metrics["elapsed_time"],
+                    "peak_memory_mb": metrics["peak_memory_mb"],
+                    "rows_processed": len(result["data"]) if result["data"] else 0,
+                }
             }
-        })
+        )
         return result
 
     def measure_baseline_performance(
-        self, 
-        file_path: str,
-        sheet_name: str | None = None
+        self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
         """ベースライン性能測定（REFACTOR: DRY原則適用）。
 
@@ -3775,16 +3842,14 @@ class ExcelDataLoader:
         _, metrics = self._measure_performance(
             self.load_from_excel, file_path, sheet_name
         )
-        
+
         return {
             "baseline_time": metrics["elapsed_time"],
-            "baseline_memory_mb": metrics["peak_memory_mb"]
+            "baseline_memory_mb": metrics["peak_memory_mb"],
         }
 
     def load_from_excel_with_regression_check(
-        self, 
-        file_path: str,
-        sheet_name: str | None = None
+        self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
         """性能回帰チェック付き読み込み（最小実装）。
 
@@ -3796,17 +3861,13 @@ class ExcelDataLoader:
             dict: 回帰チェック付き読み込み結果
         """
         result = self.load_from_excel_with_benchmark(file_path, sheet_name)
-        
+
         # 回帰チェック情報追加
-        result.update({
-            "regression_check": True
-        })
+        result.update({"regression_check": True})
         return result
 
     def load_from_excel_with_concurrent_optimization(
-        self, 
-        file_path: str,
-        sheet_name: str | None = None
+        self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
         """並行処理最適化付き読み込み（最小実装）。
 
@@ -3818,19 +3879,17 @@ class ExcelDataLoader:
             dict: 並行処理最適化付き読み込み結果
         """
         result = self.load_from_excel(file_path, sheet_name)
-        
+
         # 並行処理最適化情報追加
-        result.update({
-            "concurrent_optimization": True
-        })
+        result.update({"concurrent_optimization": True})
         return result
 
     def load_from_excel_with_streaming_cache(
-        self, 
+        self,
         file_path: str,
         chunk_size: int = 500,
         enable_cache: bool = True,
-        sheet_name: str | None = None
+        sheet_name: str | None = None,
     ) -> dict[str, Any]:
         """ストリーミング処理とキャッシュの組み合わせ（最小実装）。
 
@@ -3847,14 +3906,16 @@ class ExcelDataLoader:
             result = self.load_from_excel_with_cache(file_path, sheet_name=sheet_name)
         else:
             result = self.load_from_excel(file_path, sheet_name)
-        
+
         # ストリーミング+キャッシュ情報追加
-        result.update({
-            "streaming": True,
-            "chunk_size": chunk_size,
-            "cache_enabled": enable_cache,
-            "performance_optimized": True
-        })
+        result.update(
+            {
+                "streaming": True,
+                "chunk_size": chunk_size,
+                "cache_enabled": enable_cache,
+                "performance_optimized": True,
+            }
+        )
         return result
 
     # ==========================================
@@ -3864,10 +3925,21 @@ class ExcelDataLoader:
     # Error Handling Constants (DRY原則: 設定一元化)
     DEFAULT_DEBUG_LEVEL: ClassVar[str] = "basic"
     DEFAULT_LANGUAGE: ClassVar[str] = "ja"
-    DEFAULT_FALLBACK_STRATEGIES: ClassVar[list[str]] = ["text_mode", "csv_mode", "empty_result"]
-    DEFAULT_DEGRADATION_MODES: ClassVar[list[str]] = ["ignore_merges", "default_nulls", "simple_headers"]
+    DEFAULT_FALLBACK_STRATEGIES: ClassVar[list[str]] = [
+        "text_mode",
+        "csv_mode",
+        "empty_result",
+    ]
+    DEFAULT_DEGRADATION_MODES: ClassVar[list[str]] = [
+        "ignore_merges",
+        "default_nulls",
+        "simple_headers",
+    ]
     DEFAULT_RECOVERY_STRATEGIES: ClassVar[list[str]] = [
-        "skip_empty_rows", "normalize_headers", "validate_data_types", "fill_missing_values"
+        "skip_empty_rows",
+        "normalize_headers",
+        "validate_data_types",
+        "fill_missing_values",
     ]
 
     def _handle_enhanced_error(
@@ -3875,7 +3947,7 @@ class ExcelDataLoader:
         file_path: str,
         error: Exception,
         context: dict[str, Any] = None,
-        debug_info: dict[str, Any] = None
+        debug_info: dict[str, Any] = None,
     ) -> EnhancedExcelError:
         """強化エラーハンドリング共通メソッド（DRY原則：重複排除）。
 
@@ -3888,30 +3960,17 @@ class ExcelDataLoader:
         Returns:
             EnhancedExcelError: 適切な強化エラー
         """
-        if isinstance(error, FileNotFoundError):
+        if isinstance(error, FileNotFoundError) or not os.path.exists(file_path):
             return ExcelFileNotFoundError(
-                file_path, 
-                error_context=context, 
-                debug_info=debug_info
-            )
-        elif not os.path.exists(file_path):
-            return ExcelFileNotFoundError(
-                file_path, 
-                error_context=context, 
-                debug_info=debug_info
+                file_path, error_context=context, debug_info=debug_info
             )
         else:
             return ExcelFileFormatError(
-                file_path, 
-                error_context=context, 
-                debug_info=debug_info
+                file_path, error_context=context, debug_info=debug_info
             )
 
     def _create_operation_context(
-        self,
-        operation_name: str,
-        file_path: str,
-        **kwargs
+        self, operation_name: str, file_path: str, **kwargs
     ) -> dict[str, Any]:
         """操作文脈作成共通メソッド（DRY原則：文脈情報統一）。
 
@@ -3927,16 +3986,13 @@ class ExcelDataLoader:
             "operation_name": operation_name,
             "file_path": file_path,
             "timestamp": datetime.now().isoformat(),
-            "operation_stack": [operation_name]
+            "operation_stack": [operation_name],
         }
         context.update(kwargs)
         return context
 
     def load_from_excel_with_detailed_errors(
-        self,
-        file_path: str,
-        enable_debug: bool = True,
-        sheet_name: str | None = None
+        self, file_path: str, enable_debug: bool = True, sheet_name: str | None = None
     ) -> dict[str, Any]:
         """詳細エラーメッセージ付き読み込み（REFACTOR: DRY原則適用）。
 
@@ -3957,16 +4013,12 @@ class ExcelDataLoader:
             # DRY原則: 共通エラーハンドリング使用
             debug_info = {"enable_debug": enable_debug, "original_error": str(e)}
             context = self._create_operation_context(
-                "load_from_excel_with_detailed_errors", 
-                file_path, 
-                sheet_name=sheet_name
+                "load_from_excel_with_detailed_errors", file_path, sheet_name=sheet_name
             )
             raise self._handle_enhanced_error(file_path, e, context, debug_info)
 
     def load_from_excel_with_user_friendly_errors(
-        self,
-        file_path: str,
-        sheet_name: str | None = None
+        self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
         """ユーザーフレンドリーなエラー説明付き読み込み（REFACTOR: DRY原則適用）。
 
@@ -3985,9 +4037,9 @@ class ExcelDataLoader:
         except Exception as e:
             # DRY原則: 共通エラーハンドリング使用
             context = self._create_operation_context(
-                "load_from_excel_with_user_friendly_errors", 
-                file_path, 
-                sheet_name=sheet_name
+                "load_from_excel_with_user_friendly_errors",
+                file_path,
+                sheet_name=sheet_name,
             )
             raise self._handle_enhanced_error(file_path, e, context)
 
@@ -3995,7 +4047,7 @@ class ExcelDataLoader:
         self,
         file_path: str,
         debug_level: str | None = None,
-        sheet_name: str | None = None
+        sheet_name: str | None = None,
     ) -> dict[str, Any]:
         """デバッグ情報付き読み込み（REFACTOR: DRY原則適用）。
 
@@ -4011,7 +4063,7 @@ class ExcelDataLoader:
             EnhancedExcelError: デバッグ情報付きの例外
         """
         effective_level = debug_level or self.DEFAULT_DEBUG_LEVEL
-        
+
         try:
             return self.load_from_excel(file_path, sheet_name)
         except Exception as e:
@@ -4019,18 +4071,24 @@ class ExcelDataLoader:
             debug_info = {
                 "operation_context": "load_from_excel",
                 "file_analysis": {
-                    "size_bytes": os.path.getsize(file_path) if os.path.exists(file_path) else 0,
-                    "format_detected": "xlsx"
+                    "size_bytes": os.path.getsize(file_path)
+                    if os.path.exists(file_path)
+                    else 0,
+                    "format_detected": "xlsx",
                 },
-                "processing_steps": ["file_validation", "format_detection", "data_extraction"],
-                "performance_metrics": {"debug_level": effective_level}
+                "processing_steps": [
+                    "file_validation",
+                    "format_detection",
+                    "data_extraction",
+                ],
+                "performance_metrics": {"debug_level": effective_level},
             }
-            
+
             context = self._create_operation_context(
-                "load_from_excel_with_debug_info", 
-                file_path, 
+                "load_from_excel_with_debug_info",
+                file_path,
                 sheet_name=sheet_name,
-                debug_level=effective_level
+                debug_level=effective_level,
             )
             raise self._handle_enhanced_error(file_path, e, context, debug_info)
 
@@ -4039,7 +4097,7 @@ class ExcelDataLoader:
         file_path: str,
         allow_partial_failure: bool = True,
         recovery_strategy: str = "skip_invalid_rows",
-        sheet_name: str | None = None
+        sheet_name: str | None = None,
     ) -> dict[str, Any]:
         """部分的失敗を許容する読み込み（最小実装）。
 
@@ -4053,24 +4111,26 @@ class ExcelDataLoader:
             dict: 部分回復結果
         """
         result = self.load_from_excel(file_path, sheet_name)
-        
+
         # 部分回復情報を模擬
-        result.update({
-            "partial_recovery_applied": True,
-            "valid_rows_count": len(result["data"]) - 1 if result["data"] else 0,
-            "invalid_rows_count": 1,  # 模擬的に1行無効
-            "recovery_details": {
-                "skipped_rows": [3],
-                "error_reasons": ["Invalid numeric value"]
+        result.update(
+            {
+                "partial_recovery_applied": True,
+                "valid_rows_count": len(result["data"]) - 1 if result["data"] else 0,
+                "invalid_rows_count": 1,  # 模擬的に1行無効
+                "recovery_details": {
+                    "skipped_rows": [3],
+                    "error_reasons": ["Invalid numeric value"],
+                },
             }
-        })
+        )
         return result
 
     def load_from_excel_with_fallback(
         self,
         file_path: str,
         fallback_strategies: list[str] = None,
-        sheet_name: str | None = None
+        sheet_name: str | None = None,
     ) -> dict[str, Any]:
         """フォールバック機能付き読み込み（REFACTOR: DRY原則適用）。
 
@@ -4083,7 +4143,7 @@ class ExcelDataLoader:
             dict: フォールバック結果
         """
         strategies = fallback_strategies or self.DEFAULT_FALLBACK_STRATEGIES
-        
+
         try:
             return self.load_from_excel(file_path, sheet_name)
         except Exception:
@@ -4095,14 +4155,14 @@ class ExcelDataLoader:
                 "fallback_data": [],
                 "data": [],
                 "headers": [],
-                "has_header": False
+                "has_header": False,
             }
 
     def load_from_excel_with_graceful_degradation(
         self,
         file_path: str,
         degradation_modes: list[str] = None,
-        sheet_name: str | None = None
+        sheet_name: str | None = None,
     ) -> dict[str, Any]:
         """グレースフル劣化付き読み込み（最小実装）。
 
@@ -4114,21 +4174,25 @@ class ExcelDataLoader:
         Returns:
             dict: 劣化処理結果
         """
-        modes = degradation_modes or ["ignore_merges", "default_nulls", "simple_headers"]
+        modes = degradation_modes or [
+            "ignore_merges",
+            "default_nulls",
+            "simple_headers",
+        ]
         result = self.load_from_excel(file_path, sheet_name)
-        
+
         # 劣化処理情報追加
-        result.update({
-            "degradation_applied": True,
-            "applied_modes": modes[:2],  # 最初の2つを適用
-            "data_quality": "degraded_but_usable"
-        })
+        result.update(
+            {
+                "degradation_applied": True,
+                "applied_modes": modes[:2],  # 最初の2つを適用
+                "data_quality": "degraded_but_usable",
+            }
+        )
         return result
 
     def load_from_excel_with_enhanced_exceptions(
-        self,
-        file_path: str,
-        sheet_name: str | None = None
+        self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
         """強化された例外階層付き読み込み（最小実装）。
 
@@ -4144,7 +4208,7 @@ class ExcelDataLoader:
         """
         if not os.path.exists(file_path):
             raise ExcelFileNotFoundError(file_path)
-            
+
         try:
             result = self.load_from_excel(file_path, sheet_name)
             # 空データの場合は専用エラー
@@ -4161,7 +4225,7 @@ class ExcelDataLoader:
         self,
         file_path: str,
         sheet_name: str | None = None,
-        operation_id: str | None = None
+        operation_id: str | None = None,
     ) -> dict[str, Any]:
         """エラー文脈保持付き読み込み（最小実装）。
 
@@ -4181,9 +4245,9 @@ class ExcelDataLoader:
             "sheet_name": sheet_name,
             "operation_id": operation_id,
             "timestamp": datetime.now().isoformat(),
-            "operation_stack": ["load_from_excel_with_context_preservation"]
+            "operation_stack": ["load_from_excel_with_context_preservation"],
         }
-        
+
         try:
             return self.load_from_excel(file_path, sheet_name)
         except FileNotFoundError:
@@ -4192,10 +4256,7 @@ class ExcelDataLoader:
             raise ExcelFileFormatError(file_path, error_context=context)
 
     def load_from_excel_with_multilingual_errors(
-        self,
-        file_path: str,
-        language: str = "ja",
-        sheet_name: str | None = None
+        self, file_path: str, language: str = "ja", sheet_name: str | None = None
     ) -> dict[str, Any]:
         """多言語エラーメッセージ付き読み込み（最小実装）。
 
@@ -4221,7 +4282,7 @@ class ExcelDataLoader:
         self,
         file_path: str,
         strategies: list[str] = None,
-        sheet_name: str | None = None
+        sheet_name: str | None = None,
     ) -> dict[str, Any]:
         """エラー回復戦略付き読み込み（最小実装）。
 
@@ -4237,18 +4298,20 @@ class ExcelDataLoader:
             "skip_empty_rows",
             "normalize_headers",
             "validate_data_types",
-            "fill_missing_values"
+            "fill_missing_values",
         ]
         applied_strategies = strategies or default_strategies
-        
+
         result = self.load_from_excel(file_path, sheet_name)
-        
+
         # 回復戦略適用情報追加
-        result.update({
-            "recovery_applied": True,
-            "applied_strategies": applied_strategies,
-            "recovery_summary": {
-                "empty_rows_skipped": 1  # 模擬的に1行スキップ
+        result.update(
+            {
+                "recovery_applied": True,
+                "applied_strategies": applied_strategies,
+                "recovery_summary": {
+                    "empty_rows_skipped": 1  # 模擬的に1行スキップ
+                },
             }
-        })
+        )
         return result

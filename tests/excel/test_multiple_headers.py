@@ -321,9 +321,7 @@ class TestMultipleHeaders:
 
         # 0
         with pytest.raises(ValueError, match="header_rows must be positive"):
-            self.loader.load_from_excel_with_multiple_headers(
-                excel_path, header_rows=0
-            )
+            self.loader.load_from_excel_with_multiple_headers(excel_path, header_rows=0)
 
         # 過大な値
         with pytest.raises(ValueError, match="header_rows exceeds available rows"):

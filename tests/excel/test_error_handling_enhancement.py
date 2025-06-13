@@ -12,7 +12,6 @@ Task 4.2: 包括的エラーハンドリング強化のテスト
 import os
 import shutil
 import tempfile
-from typing import Any
 
 import pytest
 from openpyxl import Workbook
@@ -46,11 +45,11 @@ class TestErrorHandlingEnhancement:
             str: 作成されたファイルのパス
         """
         file_path = os.path.join(self.temp_dir, "corrupted.xlsx")
-        
+
         # 不正なファイル内容を書き込み
         with open(file_path, "w") as f:
             f.write("This is not a valid Excel file content")
-        
+
         return file_path
 
     def create_empty_excel(self) -> str:
@@ -60,7 +59,7 @@ class TestErrorHandlingEnhancement:
             str: 作成されたファイルのパス
         """
         file_path = os.path.join(self.temp_dir, "empty.xlsx")
-        
+
         wb = Workbook()
         ws = wb.active
         # 何もデータを入れずに保存
@@ -99,9 +98,9 @@ class TestErrorHandlingEnhancement:
         assert "確認してください" in friendly_error
         # "解決方法"ではなく、実際のメッセージ内容を確認
         assert "ファイルパスが正しいか" in friendly_error
-        
+
         # 技術的詳細も含まれていることを確認
-        assert hasattr(exc_info.value, 'error_code')
+        assert hasattr(exc_info.value, "error_code")
         assert exc_info.value.error_code == "FILE_NOT_FOUND"
 
     def test_debug_information_provision(self):
@@ -128,24 +127,22 @@ class TestErrorHandlingEnhancement:
         file_path = os.path.join(self.temp_dir, "partial_corrupt.xlsx")
         wb = Workbook()
         ws = wb.active
-        
+
         # 正常なデータ
         ws["A1"] = "商品名"
         ws["B1"] = "価格"
         ws["A2"] = "商品A"
         ws["B2"] = "1000"
-        
+
         # 不正なデータ（無効な数値）
         ws["A3"] = "商品B"
         ws["B3"] = "invalid_price"
-        
+
         wb.save(file_path)
 
         # 部分的失敗を許容する読み込み
         result = self.loader.load_from_excel_with_partial_recovery(
-            file_path, 
-            allow_partial_failure=True,
-            recovery_strategy="skip_invalid_rows"
+            file_path, allow_partial_failure=True, recovery_strategy="skip_invalid_rows"
         )
 
         # 部分回復の確認
@@ -162,7 +159,7 @@ class TestErrorHandlingEnhancement:
         # フォールバック機能付きで読み込み
         result = self.loader.load_from_excel_with_fallback(
             corrupted_path,
-            fallback_strategies=["text_mode", "csv_mode", "empty_result"]
+            fallback_strategies=["text_mode", "csv_mode", "empty_result"],
         )
 
         # フォールバック適用の確認
@@ -176,19 +173,19 @@ class TestErrorHandlingEnhancement:
         file_path = os.path.join(self.temp_dir, "degradation_test.xlsx")
         wb = Workbook()
         ws = wb.active
-        
+
         # 複雑な結合セルと不正データの混在
         ws.merge_cells("A1:B1")
         ws["A1"] = "結合ヘッダー"
         ws["A2"] = "正常データ"
         ws["B2"] = None  # NULL値
-        
+
         wb.save(file_path)
 
         # グレースフル劣化付きで読み込み
         result = self.loader.load_from_excel_with_graceful_degradation(
             file_path,
-            degradation_modes=["ignore_merges", "default_nulls", "simple_headers"]
+            degradation_modes=["ignore_merges", "default_nulls", "simple_headers"],
         )
 
         # 劣化処理の確認
@@ -201,7 +198,10 @@ class TestErrorHandlingEnhancement:
         """強化された例外階層テスト（未実装なので失敗する）."""
         # 各種エラーケースをテスト
         test_cases = [
-            (os.path.join(self.temp_dir, "non_existent.xlsx"), "ExcelFileNotFoundError"),
+            (
+                os.path.join(self.temp_dir, "non_existent.xlsx"),
+                "ExcelFileNotFoundError",
+            ),
             (self.create_corrupted_excel(), "ExcelFileFormatError"),
             # 空のExcelファイルもフォーマットエラーとして扱われる
             (self.create_empty_excel(), "ExcelFileFormatError"),
@@ -214,10 +214,10 @@ class TestErrorHandlingEnhancement:
             # 例外階層の確認
             exception = exc_info.value
             assert exception.__class__.__name__ == expected_error_type
-            assert hasattr(exception, 'error_code')
-            assert hasattr(exception, 'user_message')
-            assert hasattr(exception, 'technical_message')
-            assert hasattr(exception, 'recovery_suggestions')
+            assert hasattr(exception, "error_code")
+            assert hasattr(exception, "user_message")
+            assert hasattr(exception, "technical_message")
+            assert hasattr(exception, "recovery_suggestions")
 
     def test_error_context_preservation(self):
         """エラー文脈保持機能テスト（未実装なので失敗する）."""
@@ -228,7 +228,7 @@ class TestErrorHandlingEnhancement:
             self.loader.load_from_excel_with_context_preservation(
                 file_path=corrupted_path,
                 sheet_name="TestSheet",
-                operation_id="test_op_001"
+                operation_id="test_op_001",
             )
 
         # 文脈情報の確認
@@ -266,14 +266,14 @@ class TestErrorHandlingEnhancement:
         file_path = os.path.join(self.temp_dir, "multi_problem.xlsx")
         wb = Workbook()
         ws = wb.active
-        
+
         # 問題1: 空の行
         ws["A1"] = "ヘッダー1"
         ws["B1"] = "ヘッダー2"
         # 2行目は空
         ws["A3"] = "データ1"
         ws["B3"] = "データ2"
-        
+
         wb.save(file_path)
 
         # 複数回復戦略で読み込み
@@ -283,8 +283,8 @@ class TestErrorHandlingEnhancement:
                 "skip_empty_rows",
                 "normalize_headers",
                 "validate_data_types",
-                "fill_missing_values"
-            ]
+                "fill_missing_values",
+            ],
         )
 
         # 回復戦略適用の確認

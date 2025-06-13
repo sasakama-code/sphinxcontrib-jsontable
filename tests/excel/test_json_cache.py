@@ -151,19 +151,13 @@ class TestJSONCache:
         excel_path = self.create_test_excel()
 
         # ヘッダー行指定でキャッシュ
-        result1 = self.loader.load_from_excel_with_cache(
-            excel_path, header_row=0
-        )
+        result1 = self.loader.load_from_excel_with_cache(excel_path, header_row=0)
 
         # 同じオプションでキャッシュヒット
-        result2 = self.loader.load_from_excel_with_cache(
-            excel_path, header_row=0
-        )
+        result2 = self.loader.load_from_excel_with_cache(excel_path, header_row=0)
 
         # 異なるオプションで別キャッシュ
-        result3 = self.loader.load_from_excel_with_cache(
-            excel_path, header_row=None
-        )
+        result3 = self.loader.load_from_excel_with_cache(excel_path, header_row=None)
 
         assert result2["cache_hit"] == True
         assert result3["cache_hit"] == False  # 別オプションなのでキャッシュミス
@@ -191,19 +185,13 @@ class TestJSONCache:
         excel_path = self.create_test_excel()
 
         # 範囲指定でキャッシュ
-        result1 = self.loader.load_from_excel_with_cache(
-            excel_path, range_spec="A1:B3"
-        )
+        result1 = self.loader.load_from_excel_with_cache(excel_path, range_spec="A1:B3")
 
         # 同じ範囲指定でキャッシュヒット
-        result2 = self.loader.load_from_excel_with_cache(
-            excel_path, range_spec="A1:B3"
-        )
+        result2 = self.loader.load_from_excel_with_cache(excel_path, range_spec="A1:B3")
 
         # 異なる範囲指定で別キャッシュ
-        result3 = self.loader.load_from_excel_with_cache(
-            excel_path, range_spec="A1:C3"
-        )
+        result3 = self.loader.load_from_excel_with_cache(excel_path, range_spec="A1:C3")
 
         assert result2["cache_hit"] == True
         assert result3["cache_hit"] == False
@@ -288,8 +276,8 @@ class TestJSONCache:
 
         # 大量のデータを作成
         for i in range(1000):
-            ws[f"A{i+1}"] = f"データ{i}"
-            ws[f"B{i+1}"] = f"値{i}"
+            ws[f"A{i + 1}"] = f"データ{i}"
+            ws[f"B{i + 1}"] = f"値{i}"
 
         wb.save(file_path)
 
@@ -303,7 +291,9 @@ class TestJSONCache:
         if os.path.exists(cache_path):
             cache_size = os.path.getsize(cache_path)
             # キャッシュサイズが制限を大幅に超えていないことを確認
-            assert cache_size < max_cache_size * 2, f"Cache size {cache_size} exceeds limit"
+            assert cache_size < max_cache_size * 2, (
+                f"Cache size {cache_size} exceeds limit"
+            )
 
 
 if __name__ == "__main__":
