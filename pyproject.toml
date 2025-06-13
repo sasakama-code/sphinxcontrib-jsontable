@@ -68,6 +68,8 @@ test = [
     "pytest-cov>=5.0.0",
     "pytest-mock>=3.10.0",
     "pytest-benchmark>=5.1.0",
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
 ]
 all = ["sphinxcontrib-jsontable[excel,dev,docs,test]"]
 
@@ -210,3 +212,9 @@ sort = "mean"
 autosave = false
 # Skip benchmarks by default (use --benchmark-only to run)
 skip = true
+
+[dependency-groups]
+test = [
+    "openpyxl>=3.1.0",
+    "pandas>=2.0.0",
+]
