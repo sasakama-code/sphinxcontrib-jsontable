@@ -2965,8 +2965,14 @@ class ExcelDataLoader:
         return text
 
     # ============================================================================
-    # JSON Cache Functions (Task 3.4)
+    # JSON Cache Functions (Task 3.4) - コードエクセレンス適用
     # ============================================================================
+    
+    # キャッシュ関連定数（DRY原則：設定の一元化）
+    CACHE_DIR_NAME: ClassVar[str] = ".jsontable_cache"
+    CACHE_FILE_EXTENSION: ClassVar[str] = ".json"
+    REQUIRED_CACHE_KEYS: ClassVar[list[str]] = ["data", "headers", "source_file", "cache_timestamp"]
+    DEFAULT_CACHE_KEY: ClassVar[str] = "default"
 
     def load_from_excel_with_cache(
         self,
@@ -2981,7 +2987,7 @@ class ExcelDataLoader:
         merge_headers: str | None = None,
         max_cache_size: int | None = None,
     ) -> dict[str, Any]:
-        """キャッシュを使用してExcelファイルを読み込み。
+        """キャッシュを使用してExcelファイルを読み込み（コードエクセレンス：高品質実装）。
 
         Args:
             file_path: Excelファイルパス
@@ -2998,46 +3004,94 @@ class ExcelDataLoader:
         Returns:
             dict[str, Any]: 読み込み結果（cache_hitフラグ付き）
         """
-        import json
-
-        # キャッシュキーを生成（全オプションを含む）
-        cache_key = self._generate_cache_key(
+        # キャッシュシステムの処理フロー（SOLID原則：単一責任）
+        cache_context = self._build_cache_context(
             file_path, sheet_name, header_row, range_spec, skip_rows,
             detect_range, auto_header, merge_cells, merge_headers
         )
-
-        # キャッシュファイルパスを取得
-        cache_path = self._get_cache_file_path(file_path, cache_key)
-
-        # キャッシュの有効性をチェック
-        if self._is_cache_valid(file_path, cache_path):
-            try:
-                # キャッシュから読み込み
-                with open(cache_path, encoding="utf-8") as f:
-                    cache_data = json.load(f)
-
-                # キャッシュデータの整合性確認
-                if self._validate_cache_data(cache_data):
-                    cache_data["cache_hit"] = True
-                    cache_data["cache_path"] = cache_path  # テスト用にキャッシュパスを追加
-                    return cache_data
-
-            except (json.JSONDecodeError, KeyError, FileNotFoundError):
-                # キャッシュが破損している場合は無視して再作成
-                pass
-
-        # キャッシュミス: 実際にExcelファイルを読み込み
+        
+        # キャッシュヒット確認・読み込み試行
+        cached_result = self._try_load_from_cache(cache_context)
+        if cached_result:
+            return cached_result
+        
+        # キャッシュミス: 実際のExcelファイル読み込み
         result = self._load_excel_without_cache(
             file_path, sheet_name, header_row, range_spec, skip_rows,
             detect_range, auto_header, merge_cells, merge_headers
         )
-
-        # キャッシュに保存
-        self._save_to_cache(cache_path, result, file_path, max_cache_size)
-
+        
+        # 新しいキャッシュとして保存
+        self._save_to_cache(cache_context["cache_path"], result, file_path, max_cache_size)
+        
         result["cache_hit"] = False
-        result["cache_path"] = cache_path  # テスト用にキャッシュパスを追加
+        result["cache_path"] = cache_context["cache_path"]
         return result
+
+    def _build_cache_context(
+        self,
+        file_path: str,
+        sheet_name: str | None,
+        header_row: int | None,
+        range_spec: str | None,
+        skip_rows: str | None,
+        detect_range: str | None,
+        auto_header: bool,
+        merge_cells: str | None,
+        merge_headers: str | None,
+    ) -> dict[str, str]:
+        """キャッシュコンテキストを構築（DRY原則：情報の一元化）。
+
+        Args:
+            全オプションパラメータ
+
+        Returns:
+            dict[str, str]: キャッシュコンテキスト（キー、パス等）
+        """
+        cache_key = self._generate_cache_key(
+            file_path, sheet_name, header_row, range_spec, skip_rows,
+            detect_range, auto_header, merge_cells, merge_headers
+        )
+        
+        cache_path = self._get_cache_file_path(file_path, cache_key)
+        
+        return {
+            "cache_key": cache_key,
+            "cache_path": cache_path,
+            "file_path": file_path,
+        }
+
+    def _try_load_from_cache(self, cache_context: dict[str, str]) -> dict[str, Any] | None:
+        """キャッシュからの読み込み試行（SOLID原則：単一責任）。
+
+        Args:
+            cache_context: キャッシュコンテキスト
+
+        Returns:
+            dict[str, Any] | None: キャッシュデータまたはNone
+        """
+        import json
+        
+        cache_path = cache_context["cache_path"]
+        file_path = cache_context["file_path"]
+        
+        if not self._is_cache_valid(file_path, cache_path):
+            return None
+            
+        try:
+            with open(cache_path, encoding="utf-8") as f:
+                cache_data = json.load(f)
+
+            if self._validate_cache_data(cache_data):
+                cache_data["cache_hit"] = True
+                cache_data["cache_path"] = cache_path
+                return cache_data
+
+        except (json.JSONDecodeError, KeyError, FileNotFoundError, UnicodeDecodeError):
+            # キャッシュが破損・アクセス不可の場合は無視
+            pass
+
+        return None
 
     def _generate_cache_key(
         self,
@@ -3081,7 +3135,7 @@ class ExcelDataLoader:
         return hashlib.md5(options_str.encode("utf-8")).hexdigest()
 
     def _get_cache_file_path(self, file_path: str, cache_key: str | None = None) -> str:
-        """キャッシュファイルのパスを生成。
+        """キャッシュファイルのパスを生成（DRY原則：定数活用）。
 
         Args:
             file_path: 元のExcelファイルパス
@@ -3092,18 +3146,17 @@ class ExcelDataLoader:
         """
         import os
 
-        # キャッシュディレクトリを決定
-        cache_dir = os.path.join(str(self.base_path), ".jsontable_cache")
+        # キャッシュディレクトリを決定（定数活用）
+        cache_dir = os.path.join(str(self.base_path), self.CACHE_DIR_NAME)
         os.makedirs(cache_dir, exist_ok=True)
 
         # ファイル名からキャッシュファイル名を生成
         base_name = os.path.basename(file_path)
         name_without_ext = os.path.splitext(base_name)[0]
 
-        if cache_key:
-            cache_filename = f"{name_without_ext}_{cache_key}.json"
-        else:
-            cache_filename = f"{name_without_ext}_default.json"
+        # キャッシュキーに基づくファイル名生成（保守性向上）
+        effective_cache_key = cache_key if cache_key else self.DEFAULT_CACHE_KEY
+        cache_filename = f"{name_without_ext}_{effective_cache_key}{self.CACHE_FILE_EXTENSION}"
 
         return os.path.join(cache_dir, cache_filename)
 
@@ -3139,7 +3192,7 @@ class ExcelDataLoader:
             return False
 
     def _validate_cache_data(self, cache_data: dict) -> bool:
-        """キャッシュデータの整合性を検証。
+        """キャッシュデータの整合性を検証（DRY原則：定数活用）。
 
         Args:
             cache_data: キャッシュデータ
@@ -3147,21 +3200,18 @@ class ExcelDataLoader:
         Returns:
             bool: データが有効な場合True
         """
-        required_keys = ["data", "headers", "source_file", "cache_timestamp"]
-
-        # 必須キーの存在確認
-        for key in required_keys:
+        # 必須キーの存在確認（定数活用）
+        for key in self.REQUIRED_CACHE_KEYS:
             if key not in cache_data:
                 return False
 
-        # データ型の確認
-        if not isinstance(cache_data["data"], list):
-            return False
-
-        if not isinstance(cache_data["headers"], list):
-            return False
-
-        return True
+        # データ型の厳密確認（品質向上）
+        return (
+            isinstance(cache_data["data"], list) and
+            isinstance(cache_data["headers"], list) and
+            isinstance(cache_data["source_file"], str) and
+            isinstance(cache_data["cache_timestamp"], (int, float))
+        )
 
     def _load_excel_without_cache(
         self,
@@ -3304,7 +3354,7 @@ class ExcelDataLoader:
             pass
 
     def clear_cache(self, file_path: str | None = None) -> None:
-        """キャッシュをクリア。
+        """キャッシュをクリア（DRY原則：定数活用、エラーハンドリング強化）。
 
         Args:
             file_path: 特定ファイルのキャッシュをクリア（Noneの場合は全削除）
@@ -3312,27 +3362,58 @@ class ExcelDataLoader:
         import glob
         import os
 
-        cache_dir = os.path.join(str(self.base_path), ".jsontable_cache")
+        # キャッシュディレクトリ（定数活用）
+        cache_dir = os.path.join(str(self.base_path), self.CACHE_DIR_NAME)
 
         if not os.path.exists(cache_dir):
             return
 
         if file_path:
             # 特定ファイルのキャッシュのみ削除
-            base_name = os.path.basename(file_path)
-            name_without_ext = os.path.splitext(base_name)[0]
-            pattern = os.path.join(cache_dir, f"{name_without_ext}_*.json")
-
-            for cache_file in glob.glob(pattern):
-                try:
-                    os.remove(cache_file)
-                except OSError:
-                    pass
+            self._clear_specific_file_cache(cache_dir, file_path)
         else:
             # 全キャッシュを削除
-            pattern = os.path.join(cache_dir, "*.json")
-            for cache_file in glob.glob(pattern):
-                try:
-                    os.remove(cache_file)
-                except OSError:
-                    pass
+            self._clear_all_cache(cache_dir)
+
+    def _clear_specific_file_cache(self, cache_dir: str, file_path: str) -> None:
+        """特定ファイルのキャッシュ削除（SOLID原則：単一責任）。
+
+        Args:
+            cache_dir: キャッシュディレクトリ
+            file_path: 対象ファイルパス
+        """
+        import glob
+        import os
+
+        base_name = os.path.basename(file_path)
+        name_without_ext = os.path.splitext(base_name)[0]
+        pattern = os.path.join(cache_dir, f"{name_without_ext}_*{self.CACHE_FILE_EXTENSION}")
+
+        self._remove_cache_files_by_pattern(pattern)
+
+    def _clear_all_cache(self, cache_dir: str) -> None:
+        """全キャッシュ削除（SOLID原則：単一責任）。
+
+        Args:
+            cache_dir: キャッシュディレクトリ
+        """
+        import os
+
+        pattern = os.path.join(cache_dir, f"*{self.CACHE_FILE_EXTENSION}")
+        self._remove_cache_files_by_pattern(pattern)
+
+    def _remove_cache_files_by_pattern(self, pattern: str) -> None:
+        """パターンに基づくキャッシュファイル削除（DRY原則：共通処理化）。
+
+        Args:
+            pattern: ファイルパターン
+        """
+        import glob
+        import os
+
+        for cache_file in glob.glob(pattern):
+            try:
+                os.remove(cache_file)
+            except OSError:
+                # ファイル削除失敗は無視（並行アクセス等の可能性）
+                pass
