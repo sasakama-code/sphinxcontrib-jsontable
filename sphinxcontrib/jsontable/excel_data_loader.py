@@ -117,6 +117,34 @@ class ExcelDataLoader:
         except Exception as e:
             raise ValueError(f"Failed to detect sheets in {file_path}: {e!s}")
 
+    def _validate_sheet_name(self, file_path: str, sheet_name: str) -> None:
+        """指定されたシート名の存在を検証。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_name: 検証するシート名
+
+        Raises:
+            ValueError: シートが存在しない場合
+        """
+        try:
+            excel_file = pd.ExcelFile(file_path)
+            sheet_names = excel_file.sheet_names
+
+            if sheet_name not in sheet_names:
+                available_sheets = ', '.join(f"'{name}'" for name in sheet_names)
+                raise ValueError(
+                    f"Sheet '{sheet_name}' not found in Excel file. "
+                    f"Available sheets: {available_sheets}"
+                )
+
+        except pd.errors.EmptyDataError:
+            raise ValueError(f"Excel file {file_path} is empty or corrupted")
+        except Exception as e:
+            if isinstance(e, ValueError):
+                raise  # Re-raise our custom ValueError without wrapping
+            raise ValueError(f"Failed to validate sheet '{sheet_name}' in {file_path}: {e!s}") from e
+
     def get_sheet_name_by_index(self, file_path: str, sheet_index: int) -> str:
         """シートインデックスからシート名を取得。
 
@@ -128,22 +156,34 @@ class ExcelDataLoader:
             str: 指定されたインデックスのシート名
 
         Raises:
-            ValueError: インデックスが範囲外の場合
+            ValueError: インデックスが範囲外または不正な場合
         """
+        # 入力検証の強化
+        if not isinstance(sheet_index, int):
+            raise ValueError(f"Sheet index must be an integer, got {type(sheet_index).__name__}")
+        
         if sheet_index < 0:
-            raise ValueError("Sheet index must be non-negative")
+            raise ValueError(f"Sheet index must be non-negative, got {sheet_index}")
 
         try:
             excel_file = pd.ExcelFile(file_path)
             sheet_names = excel_file.sheet_names
 
             if sheet_index >= len(sheet_names):
-                raise ValueError(f"Sheet index {sheet_index} is out of range. Available sheets: {len(sheet_names)}")
+                available_sheets = ', '.join(f"'{name}'" for name in sheet_names)
+                raise ValueError(
+                    f"Sheet index {sheet_index} is out of range. "
+                    f"Available sheets (0-{len(sheet_names)-1}): {available_sheets}"
+                )
 
             return sheet_names[sheet_index]
 
+        except pd.errors.EmptyDataError:
+            raise ValueError(f"Excel file {file_path} is empty or corrupted")
         except Exception as e:
-            raise ValueError(f"Failed to get sheet name by index {sheet_index} in {file_path}: {e!s}")
+            if isinstance(e, ValueError):
+                raise  # Re-raise our custom ValueError without wrapping
+            raise ValueError(f"Failed to access sheet index {sheet_index} in {file_path}: {e!s}") from e
 
     def load_from_excel_by_index(self, file_path: str,
                                 sheet_index: int,
@@ -247,9 +287,12 @@ class ExcelDataLoader:
         self.validate_excel_file(file_path)
 
         try:
-            # シート名の決定
+            # シート名の決定と検証
             if sheet_name is None:
                 sheet_name = self.basic_sheet_detection(file_path)
+            else:
+                # 指定されたシート名の存在確認
+                self._validate_sheet_name(file_path, sheet_name)
 
             # Excelファイル読み込み
             if header_row is not None:
@@ -291,8 +334,11 @@ class ExcelDataLoader:
             return result
 
         except pd.errors.EmptyDataError:
-            raise ValueError(f"Empty Excel file: {file_path}")
+            raise ValueError(f"Empty Excel file: {file_path}") from None
         except pd.errors.ParserError as e:
-            raise ValueError(f"Failed to parse Excel file {file_path}: {e!s}")
+            raise ValueError(f"Failed to parse Excel file {file_path}: {e!s}") from e
+        except ValueError:
+            # Re-raise our custom ValueErrors without wrapping
+            raise
         except Exception as e:
-            raise Exception(f"Unexpected error loading Excel file {file_path}: {e!s}")
+            raise Exception(f"Unexpected error loading Excel file {file_path}: {e!s}") from e

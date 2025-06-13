@@ -600,6 +600,23 @@ class JsonTableDirective(SphinxDirective):
         header: Flag to include the first row of JSON objects as table header.
         encoding: Character encoding for JSON file reading.
         limit: Positive integer to limit the number of rows, or 0 for unlimited.
+        sheet: Excel sheet name to read from (Excel files only).
+        sheet-index: Excel sheet index to read from (0-based, Excel files only).
+
+    Excel-specific Options:
+        - sheet: Specify the Excel sheet by name (e.g., "営業データ", "Sheet1")
+        - sheet-index: Specify the Excel sheet by index (0-based, e.g., 0, 1, 2)
+        - Priority: If both sheet and sheet-index are provided, sheet name takes precedence
+        - Default: If neither is provided, the first sheet (index 0) is used
+
+    Examples:
+        .. jsontable:: data.xlsx
+           :header:
+           :sheet: 営業データ
+
+        .. jsontable:: data.xlsx
+           :header:
+           :sheet-index: 1
     """
 
     has_content = True
