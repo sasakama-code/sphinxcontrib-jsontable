@@ -717,6 +717,9 @@ class JsonTableDirective(SphinxDirective):
 
             # Excel形式の判定と処理
             if file_ext in {".xlsx", ".xls"}:
+                # Excelファイルの場合、ソースディレクトリからの絶対パスに変換
+                if not Path(file_path).is_absolute():
+                    file_path = str(Path(self.env.srcdir) / file_path)
                 if not EXCEL_SUPPORT:
                     raise JsonTableError(
                         "Excel support not available. Install with: pip install 'sphinxcontrib-jsontable[excel]'"
