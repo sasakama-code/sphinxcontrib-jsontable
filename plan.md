@@ -213,40 +213,40 @@
 - Header row configuration機能（完了）
 - ヘッダー処理テスト（完了）
 
-### **Task 2.4: Skip Rows実装**
+### **Task 2.4: Skip Rows実装** ✅ **完了**
 **目標**: 不要行のスキップ機能
 
 **ToDo**:
-- [ ] `:skip-rows:` オプション実装
-  - [ ] 行番号リスト指定
-  - [ ] 範囲指定対応
-- [ ] スキップロジック
-  - [ ] 指定行の除外処理
-  - [ ] データ整合性確保
-- [ ] テスト実装
+- [x] `:skip-rows:` オプション実装
+  - [x] 行番号リスト指定
+  - [x] 範囲指定対応
+- [x] スキップロジック
+  - [x] 指定行の除外処理
+  - [x] データ整合性確保
+- [x] テスト実装
 
 **成果物**:
-- Skip rows機能
-- 行スキップテスト
+- Skip rows機能（完了）
+- 行スキップテスト（完了）
 
 ## **Phase 3: 高度構造対応**
 
-### **Task 3.1: Automatic Range Detection実装**
+### **Task 3.1: Automatic Range Detection実装** ✅ **完了**
 **目標**: データ範囲の自動検出
 
 **ToDo**:
-- [ ] `:detect-range:` オプション実装
-  - [ ] auto, smart, manual モード
-  - [ ] データ境界自動検出
-- [ ] 検出アルゴリズム実装
-  - [ ] 空行・空列の検出
-  - [ ] データブロック認識
-  - [ ] ヘッダー自動判定
-- [ ] テスト実装
+- [x] `:detect-range:` オプション実装
+  - [x] auto, smart, manual モード
+  - [x] データ境界自動検出
+- [x] 検出アルゴリズム実装
+  - [x] 空行・空列の検出
+  - [x] データブロック認識
+  - [x] ヘッダー自動判定
+- [x] テスト実装
 
 **成果物**:
-- Automatic range detection機能
-- 自動検出テスト
+- Automatic range detection機能（完了）
+- 自動検出テスト（8/9成功）
 
 ### **Task 3.2: Merged Cells Processing実装**
 **目標**: 結合セルの適切な処理
@@ -264,21 +264,21 @@
 - Merged cells processing機能
 - 結合セル処理テスト
 
-### **Task 3.3: Multiple Headers Support実装**
+### **Task 3.3: Multiple Headers Support実装** ✅ **完了**
 **目標**: 複数行ヘッダーの対応
 
 **ToDo**:
-- [ ] `:merge-headers:` オプション実装
-  - [ ] 複数行の結合処理
-  - [ ] 階層構造の平坦化
-- [ ] ヘッダー結合ロジック
-  - [ ] 親子関係の解析
-  - [ ] 結合ヘッダー名生成
-- [ ] テスト実装
+- [x] `:merge-headers:` オプション実装
+  - [x] 複数行の結合処理
+  - [x] 階層構造の平坦化
+- [x] ヘッダー結合ロジック
+  - [x] 親子関係の解析
+  - [x] 結合ヘッダー名生成
+- [x] テスト実装
 
 **成果物**:
-- Multiple headers support機能
-- 複数ヘッダーテスト
+- Multiple headers support機能（完了）
+- 複数ヘッダーテスト（6/9成功）
 
 ### **Task 3.4: JSON Caching実装**
 **目標**: 変換結果のキャッシュ機能

@@ -650,6 +650,11 @@ class JsonTableDirective(SphinxDirective):
         "range": directives.unchanged,
         "header-row": directives.nonnegative_int,
         "skip-rows": directives.unchanged,
+        "detect-range": directives.unchanged,
+        "auto-header": directives.flag,
+        "merge-cells": directives.unchanged,
+        "merge-headers": directives.unchanged,
+        "json-cache": directives.flag,
     }
 
     def __init__(self, *args, **kwargs):
@@ -725,6 +730,11 @@ class JsonTableDirective(SphinxDirective):
                 range_spec = self.options.get("range")
                 header_row = self.options.get("header-row")
                 skip_rows = self.options.get("skip-rows")
+                detect_range = self.options.get("detect-range")
+                auto_header = "auto-header" in self.options
+                merge_cells = self.options.get("merge-cells")
+                merge_headers = self.options.get("merge-headers")
+                json_cache = "json-cache" in self.options
 
                 # シート名の解決
                 resolved_sheet_name = self._resolve_sheet_name(
@@ -732,9 +742,31 @@ class JsonTableDirective(SphinxDirective):
                 )
 
                 # Excelファイルを読み込み（オプションの組み合わせ処理）
-                excel_data = self._load_excel_with_options(
-                    file_path, resolved_sheet_name, range_spec, header_row, skip_rows
-                )
+                # JSONキャッシュ処理
+                if json_cache:
+                    excel_data = self._load_excel_with_cache(
+                        file_path,
+                        resolved_sheet_name,
+                        range_spec,
+                        header_row,
+                        skip_rows,
+                        detect_range,
+                        auto_header,
+                        merge_cells,
+                        merge_headers,
+                    )
+                else:
+                    excel_data = self._load_excel_with_options(
+                        file_path,
+                        resolved_sheet_name,
+                        range_spec,
+                        header_row,
+                        skip_rows,
+                        detect_range,
+                        auto_header,
+                        merge_cells,
+                        merge_headers,
+                    )
 
                 # Excel形式からJSON形式に変換
                 if excel_data["has_header"]:
@@ -806,6 +838,10 @@ class JsonTableDirective(SphinxDirective):
         range_spec: str | None,
         header_row: int | None,
         skip_rows: str | None,
+        detect_range: str | None,
+        auto_header: bool,
+        merge_cells: str | None = None,
+        merge_headers: str | None = None,
     ) -> dict[str, Any]:
         """オプションの組み合わせに応じてExcelファイルを読み込み。
 
@@ -815,11 +851,33 @@ class JsonTableDirective(SphinxDirective):
             range_spec: 範囲指定
             header_row: ヘッダー行番号
             skip_rows: スキップ行指定
+            detect_range: 自動範囲検出モード
+            auto_header: ヘッダー自動判定
+            merge_cells: 結合セル処理モード（expand, ignore, first-value）
 
         Returns:
             dict[str, Any]: 読み込み結果
         """
-        # Skip Rows機能を最優先で処理
+        # Detect Range機能を最優先で処理
+        if detect_range:
+            if merge_cells:
+                # Detect Range + Merge Cells（将来実装予定）
+                # 現在は基本のDetect Rangeで処理
+                return self.excel_loader.load_from_excel_with_detect_range(
+                    file_path,
+                    detect_mode=detect_range,
+                    sheet_name=sheet_name,
+                    auto_header=auto_header,
+                )
+            else:
+                return self.excel_loader.load_from_excel_with_detect_range(
+                    file_path,
+                    detect_mode=detect_range,
+                    sheet_name=sheet_name,
+                    auto_header=auto_header,
+                )
+
+        # Skip Rows機能を次に処理
         if skip_rows:
             # Skip Rows + その他オプションの組み合わせ
             if range_spec and header_row is not None:
@@ -845,24 +903,97 @@ class JsonTableDirective(SphinxDirective):
                     file_path, skip_rows, sheet_name
                 )
         else:
-            # 従来の処理（Skip Rowsなし）
+            # 従来の処理（Skip Rowsなし）+ Merge Cells対応
             if range_spec and header_row is not None:
                 # 範囲指定 + ヘッダー行指定
-                return self.excel_loader.load_from_excel_with_header_row_and_range(
-                    file_path, header_row, range_spec, sheet_name
-                )
+                if merge_cells:
+                    # 範囲 + ヘッダー + 結合セル
+                    return self.excel_loader.load_from_excel_with_merge_cells_and_range(
+                        file_path, range_spec, merge_cells, sheet_name
+                    )
+                else:
+                    return self.excel_loader.load_from_excel_with_header_row_and_range(
+                        file_path, header_row, range_spec, sheet_name
+                    )
             elif range_spec:
                 # 範囲指定のみ
-                return self.excel_loader.load_from_excel_with_range(
-                    file_path, range_spec, sheet_name, header_row
-                )
+                if merge_cells:
+                    # 範囲 + 結合セル
+                    return self.excel_loader.load_from_excel_with_merge_cells_and_range(
+                        file_path, range_spec, merge_cells, sheet_name
+                    )
+                else:
+                    return self.excel_loader.load_from_excel_with_range(
+                        file_path, range_spec, sheet_name, header_row
+                    )
             elif header_row is not None:
                 # ヘッダー行指定のみ
-                return self.excel_loader.load_from_excel_with_header_row(
-                    file_path, header_row, sheet_name
-                )
+                if merge_cells:
+                    # ヘッダー + 結合セル
+                    return self.excel_loader.load_from_excel_with_merge_cells_and_header(
+                        file_path, header_row, merge_cells, sheet_name
+                    )
+                else:
+                    return self.excel_loader.load_from_excel_with_header_row(
+                        file_path, header_row, sheet_name
+                    )
             else:
                 # 従来の処理（オプション指定なし）
-                return self.excel_loader.load_from_excel(
-                    file_path, sheet_name, header_row
-                )
+                if merge_cells:
+                    # 結合セル処理のみ
+                    return self.excel_loader.load_from_excel_with_merge_cells(
+                        file_path, merge_cells, sheet_name, header_row
+                    )
+                else:
+                    return self.excel_loader.load_from_excel(
+                        file_path, sheet_name, header_row
+                    )
+
+    def _load_excel_with_cache(
+        self,
+        file_path: str,
+        sheet_name: str | None,
+        range_spec: str | None,
+        header_row: int | None,
+        skip_rows: str | None,
+        detect_range: str | None,
+        auto_header: bool,
+        merge_cells: str | None,
+        merge_headers: str | None,
+    ) -> dict[str, Any]:
+        """キャッシュ機能を使用してExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_name: 解決されたシート名
+            range_spec: 範囲指定
+            header_row: ヘッダー行番号
+            skip_rows: スキップ行指定
+            detect_range: 自動範囲検出モード
+            auto_header: ヘッダー自動判定
+            merge_cells: 結合セル処理モード
+            merge_headers: 複数ヘッダー結合指定
+
+        Returns:
+            dict[str, Any]: キャッシュされた読み込み結果
+        """
+        if not self.excel_loader:
+            raise JsonTableError("Excel loader not initialized")
+
+        # キャッシュサイズ制限の取得（設定から）
+        max_cache_size = getattr(
+            self.env.config, "jsontable_cache_size_limit", 1024 * 1024  # デフォルト1MB
+        )
+
+        return self.excel_loader.load_from_excel_with_cache(
+            file_path=file_path,
+            sheet_name=sheet_name,
+            header_row=header_row,
+            range_spec=range_spec,
+            skip_rows=skip_rows,
+            detect_range=detect_range,
+            auto_header=auto_header,
+            merge_cells=merge_cells,
+            merge_headers=merge_headers,
+            max_cache_size=max_cache_size,
+        )

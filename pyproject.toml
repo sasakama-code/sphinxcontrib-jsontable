@@ -214,6 +214,11 @@ autosave = false
 skip = true
 
 [dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "pytest-benchmark>=5.1.0",
+    "pytest-cov>=6.1.1",
+]
 test = [
     "openpyxl>=3.1.0",
     "pandas>=2.0.0",

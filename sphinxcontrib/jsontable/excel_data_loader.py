@@ -14,9 +14,10 @@ JSON形式への変換を担当する。
 
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import pandas as pd
+from openpyxl import load_workbook
 
 
 class RangeSpecificationError(ValueError):
@@ -29,6 +30,14 @@ class RangeSpecificationError(ValueError):
 
 class SkipRowsError(ValueError):
     """Skip Rows指定に関するエラー."""
+
+    def __init__(self, message: str, invalid_spec: str | None = None):
+        super().__init__(message)
+        self.invalid_spec = invalid_spec
+
+
+class MergedCellsError(ValueError):
+    """Merged Cells処理に関するエラー."""
 
     def __init__(self, message: str, invalid_spec: str | None = None):
         super().__init__(message)
@@ -57,7 +66,7 @@ class ExcelDataLoader:
 
     # セキュリティ設定
     MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
-    SUPPORTED_EXTENSIONS = {".xlsx", ".xls"}
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".xlsx", ".xls"}
 
     def __init__(self, base_path: str | None = None):
         """ExcelDataLoaderを初期化。
@@ -147,7 +156,7 @@ class ExcelDataLoader:
             return sheet_names[0]
 
         except Exception as e:
-            raise ValueError(f"Failed to detect sheets in {file_path}: {e!s}")
+            raise ValueError(f"Failed to detect sheets in {file_path}: {e!s}") from e
 
     def _validate_sheet_name(self, file_path: str, sheet_name: str) -> None:
         """指定されたシート名の存在を検証。
@@ -1464,3 +1473,1866 @@ class ExcelDataLoader:
         }
 
         return result
+
+    def load_from_excel_with_detect_range(
+        self,
+        file_path: str,
+        detect_mode: str = "auto",
+        sheet_name: str | None = None,
+        range_hint: str | None = None,
+        ignore_empty_rows: bool = False,
+        auto_header: bool = False,
+    ) -> dict[str, Any]:
+        """自動範囲検出でExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            detect_mode: 検出モード（auto, smart, manual）
+            sheet_name: 読み込むシート名（None=自動検出）
+            range_hint: 範囲ヒント（manualモード用）
+            ignore_empty_rows: 空行を無視するか
+            auto_header: ヘッダー自動判定を行うか
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ（検出情報付き）
+
+        Raises:
+            ValueError: 無効な検出モードの場合
+        """
+        # 検出モードの検証
+        valid_modes = ["auto", "smart", "manual"]
+        if detect_mode not in valid_modes:
+            raise ValueError(
+                f"Invalid detect mode: {detect_mode}. Valid modes: {valid_modes}"
+            )
+
+        # 基本的なExcel読み込み
+        excel_data = self.load_from_excel(file_path, sheet_name)
+
+        if detect_mode == "auto":
+            # autoモード: 基本的な範囲検出
+            detected_range = self._detect_auto_range(excel_data["data"])
+            range_data = self._extract_detected_range(
+                excel_data["data"], detected_range
+            )
+        elif detect_mode == "smart":
+            # smartモード: 複数ブロック検出から最適ブロック選択
+            all_blocks = self._detect_multiple_data_blocks(excel_data["data"])
+            if all_blocks:
+                # 最大のブロックを選択
+                best_block = max(all_blocks, key=lambda b: b["total_cells"])
+                detected_range = f"{chr(65 + best_block['min_col'])}{best_block['min_row'] + 1}:{chr(65 + best_block['max_col'])}{best_block['max_row'] + 1}"
+                range_data = self._extract_detected_range(
+                    excel_data["data"], detected_range
+                )
+            else:
+                # フォールバック: autoモードと同じ
+                detected_range = self._detect_auto_range(excel_data["data"])
+                range_data = self._extract_detected_range(
+                    excel_data["data"], detected_range
+                )
+        elif detect_mode == "manual":
+            # manualモード: range_hintを使用
+            if not range_hint:
+                raise ValueError("range_hint is required for manual mode")
+            range_info = self._parse_range_specification(range_hint)
+            range_data = self._extract_range_data(excel_data["data"], range_info)
+            detected_range = range_hint
+        else:
+            raise ValueError(f"Unsupported detect mode: {detect_mode}")
+
+        # ヘッダー自動判定（autoモードでは自動的に有効）
+        should_detect_header = auto_header or (detect_mode == "auto")
+        has_header = should_detect_header and self._detect_header_in_range(range_data)
+        headers = []
+        if has_header and range_data:
+            headers = [
+                str(cell).strip() if cell else f"Column{i + 1}"
+                for i, cell in enumerate(range_data[0])
+            ]
+            range_data = range_data[1:]  # ヘッダー行を除去
+
+        # 結果を構築
+        result = {
+            "data": range_data,
+            "has_header": has_header,
+            "headers": headers,
+            "sheet_name": excel_data["sheet_name"],
+            "file_path": file_path,
+            "detected_range": detected_range,
+            "detect_mode": detect_mode,
+            "rows": len(range_data),
+            "columns": len(range_data[0]) if range_data else 0,
+        }
+
+        # オプション情報を追加
+        if ignore_empty_rows:
+            result["ignore_empty_rows"] = ignore_empty_rows
+            result["empty_rows_detected"] = []
+            result["empty_cols_detected"] = []
+
+        if auto_header:
+            result["auto_header"] = auto_header
+            # 元ファイル内での絶対行番号を計算
+            if has_header and detect_mode == "auto":
+                # autoモードでは_detect_auto_rangeで検出された範囲の最初の行
+                data_block = self._find_largest_data_block(excel_data["data"])
+                absolute_header_row = data_block["min_row"] if data_block else 0
+            else:
+                absolute_header_row = 0 if has_header else -1
+            result["detected_header_row"] = absolute_header_row
+            result["header_confidence"] = 0.9 if has_header else 0.1
+
+        if detect_mode == "smart":
+            result["detected_blocks"] = []
+
+        return result
+
+    def _detect_auto_range(self, data: list[list[str]]) -> str:
+        """autoモードでの高度な範囲検出。
+
+        Args:
+            data: Excelデータ
+
+        Returns:
+            str: 検出された範囲（A1形式）
+        """
+        if not data:
+            return "A1:A1"
+
+        # データブロックの検出
+        data_block = self._find_largest_data_block(data)
+        if not data_block:
+            return "A1:A1"
+
+        min_row = data_block["min_row"]
+        max_row = data_block["max_row"]
+        min_col = data_block["min_col"]
+        max_col = data_block["max_col"]
+
+        # 範囲を文字列として返す
+        start_cell = f"{chr(65 + min_col)}{min_row + 1}"
+        end_cell = f"{chr(65 + max_col)}{max_row + 1}"
+        return f"{start_cell}:{end_cell}"
+
+    def _find_largest_data_block(self, data: list[list[str]]) -> dict[str, int] | None:
+        """最大のデータブロックを検出。
+
+        Args:
+            data: Excelデータ
+
+        Returns:
+            dict: データブロックの境界情報（min_row, max_row, min_col, max_col）
+        """
+        if not data:
+            return None
+
+        rows = len(data)
+        cols = len(data[0]) if data else 0
+
+        # 各行の有効セル数をカウント
+        row_scores = []
+        for i, row in enumerate(data):
+            non_empty_count = sum(1 for cell in row if str(cell).strip())
+            # ヘッダー行候補の検出（文字列が多い行）
+            text_count = sum(
+                1
+                for cell in row
+                if str(cell).strip()
+                and not str(cell).replace(".", "").replace("-", "").isdigit()
+            )
+            row_scores.append(
+                {
+                    "index": i,
+                    "non_empty_count": non_empty_count,
+                    "text_count": text_count,
+                    "is_potential_header": text_count >= non_empty_count * 0.6
+                    and non_empty_count >= 2,
+                }
+            )
+
+        # 有効な行の範囲を特定
+        valid_rows = [score for score in row_scores if score["non_empty_count"] >= 2]
+        if not valid_rows:
+            return None
+
+        # 連続するデータブロックを検出
+        data_blocks = []
+        current_block = None
+
+        for i, score in enumerate(valid_rows):
+            row_idx = score["index"]
+
+            if current_block is None:
+                # 新しいブロックの開始
+                current_block = {
+                    "start_row": row_idx,
+                    "end_row": row_idx,
+                    "total_cells": score["non_empty_count"],
+                    "has_header": score["is_potential_header"],
+                }
+            else:
+                # 前の行との連続性をチェック
+                gap = row_idx - current_block["end_row"]
+                if gap <= 2:  # 1-2行の空行までは連続とみなす
+                    current_block["end_row"] = row_idx
+                    current_block["total_cells"] += score["non_empty_count"]
+                    if score["is_potential_header"]:
+                        current_block["has_header"] = True
+                else:
+                    # 現在のブロックを保存し、新しいブロックを開始
+                    data_blocks.append(current_block)
+                    current_block = {
+                        "start_row": row_idx,
+                        "end_row": row_idx,
+                        "total_cells": score["non_empty_count"],
+                        "has_header": score["is_potential_header"],
+                    }
+
+        # 最後のブロックを追加
+        if current_block:
+            data_blocks.append(current_block)
+
+        # 最大のデータブロックを選択（セル数とヘッダーの有無で評価）
+        if not data_blocks:
+            return None
+
+        best_block = max(
+            data_blocks,
+            key=lambda block: (
+                block["total_cells"],
+                1 if block["has_header"] else 0,
+                block["end_row"] - block["start_row"] + 1,
+            ),
+        )
+
+        # 列範囲の検出（選択されたブロック内で）
+        min_col, max_col = self._detect_column_range(
+            data, best_block["start_row"], best_block["end_row"]
+        )
+
+        return {
+            "min_row": best_block["start_row"],
+            "max_row": best_block["end_row"],
+            "min_col": min_col,
+            "max_col": max_col,
+        }
+
+    def _detect_column_range(
+        self, data: list[list[str]], start_row: int, end_row: int
+    ) -> tuple[int, int]:
+        """指定された行範囲内での列範囲を検出。
+
+        Args:
+            data: Excelデータ
+            start_row: 開始行
+            end_row: 終了行
+
+        Returns:
+            tuple: (min_col, max_col)
+        """
+        if not data or start_row > end_row:
+            return 0, 0
+
+        max_cols = max(len(row) for row in data[start_row : end_row + 1])
+
+        # 左端の検出
+        min_col = max_cols
+        for row_idx in range(start_row, end_row + 1):
+            row = data[row_idx]
+            for col_idx, cell in enumerate(row):
+                if str(cell).strip():
+                    min_col = min(min_col, col_idx)
+                    break
+
+        # 右端の検出
+        max_col = 0
+        for row_idx in range(start_row, end_row + 1):
+            row = data[row_idx]
+            for col_idx in range(len(row) - 1, -1, -1):
+                if str(row[col_idx]).strip():
+                    max_col = max(max_col, col_idx)
+                    break
+
+        return min_col if min_col < max_cols else 0, max_col
+
+    def _detect_multiple_data_blocks(
+        self, data: list[list[str]]
+    ) -> list[dict[str, Any]]:
+        """複数のデータブロックを検出（改善されたアルゴリズム）。
+
+        Args:
+            data: Excelデータ
+
+        Returns:
+            list[dict]: 検出されたデータブロックのリスト
+        """
+        if not data:
+            return []
+
+        rows = len(data)
+        cols = len(data[0]) if data else 0
+
+        # 各セルの有効性をマップ化
+        cell_map = []
+        for i, row in enumerate(data):
+            row_map = []
+            for j, cell in enumerate(row):
+                is_valid = str(cell).strip() != ""
+                row_map.append(is_valid)
+            # 行の長さを統一
+            while len(row_map) < cols:
+                row_map.append(False)
+            cell_map.append(row_map)
+
+        # 矩形領域ベースのブロック検出
+        visited = [[False] * cols for _ in range(rows)]
+        blocks = []
+
+        for i in range(rows):
+            for j in range(cols):
+                if cell_map[i][j] and not visited[i][j]:
+                    # 新しい矩形ブロックを検出
+                    block = self._find_rectangular_block(
+                        cell_map, visited, i, j, rows, cols
+                    )
+                    if block and block["total_cells"] >= 2:  # 最小2セル以上
+                        blocks.append(block)
+
+        return blocks
+
+    def _find_rectangular_block(
+        self,
+        cell_map: list[list[bool]],
+        visited: list[list[bool]],
+        start_row: int,
+        start_col: int,
+        rows: int,
+        cols: int,
+    ) -> dict[str, Any] | None:
+        """矩形データブロックを検出（改善されたアルゴリズム）。
+
+        Args:
+            cell_map: セルの有効性マップ
+            visited: 訪問済みマップ
+            start_row: 開始行
+            start_col: 開始列
+            rows: 総行数
+            cols: 総列数
+
+        Returns:
+            dict: ブロック情報
+        """
+        # 開始点から右方向に連続する有効セルを探す
+        max_col = start_col
+        for col in range(start_col, cols):
+            if cell_map[start_row][col] and not visited[start_row][col]:
+                max_col = col
+            else:
+                break
+
+        # 開始点から下方向に連続する行を探す
+        max_row = start_row
+        for row in range(start_row, rows):
+            # この行で、start_col から max_col までが全て有効かチェック
+            valid_row = True
+            for col in range(start_col, max_col + 1):
+                if not cell_map[row][col] or visited[row][col]:
+                    valid_row = False
+                    break
+
+            if valid_row:
+                max_row = row
+            else:
+                break
+
+        # 連続しない場合は、最小の矩形ブロックを作成
+        if max_row == start_row and max_col == start_col:
+            # 単一セルの場合、隣接セルを探す
+            for r in range(max(0, start_row - 1), min(rows, start_row + 2)):
+                for c in range(max(0, start_col - 1), min(cols, start_col + 2)):
+                    if (
+                        (r != start_row or c != start_col)
+                        and cell_map[r][c]
+                        and not visited[r][c]
+                    ):
+                        max_row = max(max_row, r)
+                        max_col = max(max_col, c)
+
+        # ブロック内のセルをマーク
+        total_cells = 0
+        for r in range(start_row, max_row + 1):
+            for c in range(start_col, max_col + 1):
+                if cell_map[r][c]:
+                    visited[r][c] = True
+                    total_cells += 1
+
+        return {
+            "min_row": start_row,
+            "max_row": max_row,
+            "min_col": start_col,
+            "max_col": max_col,
+            "total_cells": total_cells,
+            "block_type": "data",
+        }
+
+    def _explore_block(
+        self,
+        cell_map: list[list[bool]],
+        visited: list[list[bool]],
+        start_row: int,
+        start_col: int,
+        rows: int,
+        cols: int,
+    ) -> dict[str, Any] | None:
+        """連続するデータブロックを探索。
+
+        Args:
+            cell_map: セルの有効性マップ
+            visited: 訪問済みマップ
+            start_row: 開始行
+            start_col: 開始列
+            rows: 総行数
+            cols: 総列数
+
+        Returns:
+            dict: ブロック情報
+        """
+        min_row = max_row = start_row
+        min_col = max_col = start_col
+        total_cells = 0
+
+        # 縦方向に連続するセルを検出
+        for row in range(start_row, rows):
+            found_in_row = False
+            for col in range(cols):
+                if cell_map[row][col] and not visited[row][col]:
+                    # 同じ行で連続する範囲を検出
+                    if self._is_connected_region(
+                        cell_map, visited, row, col, min_row, max_row, min_col, max_col
+                    ):
+                        visited[row][col] = True
+                        min_row = min(min_row, row)
+                        max_row = max(max_row, row)
+                        min_col = min(min_col, col)
+                        max_col = max(max_col, col)
+                        total_cells += 1
+                        found_in_row = True
+
+            # 行に有効セルがない場合、ブロック終了の可能性
+            if not found_in_row and row > start_row:
+                break
+
+        # 矩形領域内の有効セル数を再計算
+        actual_cells = 0
+        for i in range(min_row, max_row + 1):
+            for j in range(min_col, max_col + 1):
+                if i < len(cell_map) and j < len(cell_map[i]) and cell_map[i][j]:
+                    actual_cells += 1
+                    visited[i][j] = True
+
+        return {
+            "min_row": min_row,
+            "max_row": max_row,
+            "min_col": min_col,
+            "max_col": max_col,
+            "total_cells": actual_cells,
+            "block_type": "data",
+        }
+
+    def _is_connected_region(
+        self,
+        cell_map: list[list[bool]],
+        visited: list[list[bool]],
+        row: int,
+        col: int,
+        min_row: int,
+        max_row: int,
+        min_col: int,
+        max_col: int,
+    ) -> bool:
+        """指定されたセルが既存のブロック領域と連続しているかチェック。
+
+        Args:
+            cell_map: セルの有効性マップ
+            visited: 訪問済みマップ
+            row: チェックする行
+            col: チェックする列
+            min_row: 現在のブロックの最小行
+            max_row: 現在のブロックの最大行
+            min_col: 現在のブロックの最小列
+            max_col: 現在のブロックの最大列
+
+        Returns:
+            bool: 連続している場合True
+        """
+        # 矩形領域の拡張として妥当かチェック
+        new_min_row = min(min_row, row)
+        new_max_row = max(max_row, row)
+        new_min_col = min(min_col, col)
+        new_max_col = max(max_col, col)
+
+        # 拡張後の領域が極端に大きくならないかチェック
+        height = new_max_row - new_min_row + 1
+        width = new_max_col - new_min_col + 1
+
+        # 最大5x5の矩形まで許可
+        return height <= 5 and width <= 5
+
+    def _extract_detected_range(
+        self, data: list[list[str]], range_spec: str
+    ) -> list[list[str]]:
+        """検出された範囲のデータを抽出。
+
+        Args:
+            data: 全体のデータ
+            range_spec: 範囲指定文字列
+
+        Returns:
+            list[list[str]]: 抽出されたデータ
+        """
+        try:
+            range_info = self._parse_range_specification(range_spec)
+            return self._extract_range_data(data, range_info)
+        except Exception:
+            # 範囲解析に失敗した場合は全データを返す
+            return data
+
+    def _detect_header_in_range(self, range_data: list[list[str]]) -> bool:
+        """範囲内でのヘッダー検出。
+
+        Args:
+            range_data: 範囲データ
+
+        Returns:
+            bool: ヘッダーが存在するか
+        """
+        if not range_data or len(range_data) < 2:
+            return False
+
+        # 最初の行が文字列中心で、2行目が数値中心の場合ヘッダーと判定
+        first_row = range_data[0]
+        second_row = range_data[1]
+
+        text_count = sum(
+            1 for cell in first_row if str(cell).strip() and not str(cell).isdigit()
+        )
+        numeric_count = sum(
+            1
+            for cell in second_row
+            if str(cell).strip() and str(cell).replace(".", "").isdigit()
+        )
+
+        return (
+            text_count > len(first_row) * 0.5 and numeric_count > len(second_row) * 0.3
+        )
+
+    def detect_data_blocks(
+        self, file_path: str, sheet_name: str | None = None
+    ) -> dict[str, Any]:
+        """データブロックの検出。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_name: シート名
+
+        Returns:
+            dict[str, Any]: 検出されたブロック情報
+        """
+        # 複数ブロック検出を使用
+        excel_data = self.load_from_excel(file_path, sheet_name)
+        raw_blocks = self._detect_multiple_data_blocks(excel_data["data"])
+
+        # ブロック情報を整形
+        blocks = []
+        for block in raw_blocks:
+            range_str = f"{chr(65 + block['min_col'])}{block['min_row'] + 1}:{chr(65 + block['max_col'])}{block['max_row'] + 1}"
+            confidence = min(
+                0.9, 0.5 + (block["total_cells"] / 10)
+            )  # セル数に基づく信頼度
+
+            blocks.append(
+                {
+                    "range": range_str,
+                    "confidence_score": confidence,
+                    "block_type": "data",
+                }
+            )
+
+        # ブロックが見つからない場合はフォールバック
+        if not blocks:
+            detected_range = self._detect_auto_range(excel_data["data"])
+            blocks = [
+                {
+                    "range": detected_range,
+                    "confidence_score": 0.8,
+                    "block_type": "data",
+                }
+            ]
+
+        return {
+            "blocks": blocks,
+            "file_path": file_path,
+            "sheet_name": excel_data["sheet_name"],
+        }
+
+    def analyze_data_boundaries(
+        self, file_path: str, sheet_name: str | None = None
+    ) -> dict[str, Any]:
+        """データ境界の分析（自動検出されたデータブロック基準）。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_name: シート名
+
+        Returns:
+            dict[str, Any]: 境界分析結果
+        """
+        # Excelデータを読み込み
+        excel_data = self.load_from_excel(file_path, sheet_name)
+        data = excel_data["data"]
+
+        if not data:
+            return {
+                "top_boundary": 0,
+                "bottom_boundary": 0,
+                "left_boundary": 0,
+                "right_boundary": 0,
+                "file_path": file_path,
+                "sheet_name": excel_data["sheet_name"],
+            }
+
+        # 自動検出されたデータブロックの境界を使用
+        data_block = self._find_largest_data_block(data)
+        if not data_block:
+            return {
+                "top_boundary": 0,
+                "bottom_boundary": 0,
+                "left_boundary": 0,
+                "right_boundary": 0,
+                "file_path": file_path,
+                "sheet_name": excel_data["sheet_name"],
+            }
+
+        return {
+            "top_boundary": data_block["min_row"],
+            "bottom_boundary": data_block["max_row"],
+            "left_boundary": data_block["min_col"],
+            "right_boundary": data_block["max_col"],
+            "file_path": file_path,
+            "sheet_name": excel_data["sheet_name"],
+        }
+
+    def detect_merged_cells(
+        self, file_path: str, sheet_name: str | None = None
+    ) -> dict[str, Any]:
+        """結合セルの検出。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_name: シート名（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 結合セル情報
+
+        Raises:
+            ValueError: ファイル読み込みエラー
+        """
+        # セキュリティチェック
+        if not self.is_safe_path(file_path):
+            raise ValueError(f"Unsafe file path: {file_path}")
+
+        # ファイル妥当性チェック
+        self.validate_excel_file(file_path)
+
+        try:
+            # openpyxlでワークブックを読み込み
+            workbook = load_workbook(file_path, data_only=False)
+
+            # シート名の決定
+            if sheet_name is None:
+                sheet_name = self.basic_sheet_detection(file_path)
+
+            worksheet = workbook[sheet_name]
+
+            # 結合セル情報を取得
+            merged_cells = []
+            for merged_range in worksheet.merged_cells.ranges:
+                # 結合セルの範囲情報を取得
+                min_row = merged_range.min_row
+                max_row = merged_range.max_row
+                min_col = merged_range.min_col
+                max_col = merged_range.max_col
+
+                # 結合セルの値（左上セルの値）
+                cell_value = worksheet.cell(min_row, min_col).value
+
+                merged_cells.append(
+                    {
+                        "range": str(merged_range),
+                        "min_row": min_row - 1,  # 0ベースに変換
+                        "max_row": max_row - 1,  # 0ベースに変換
+                        "min_col": min_col - 1,  # 0ベースに変換
+                        "max_col": max_col - 1,  # 0ベースに変換
+                        "value": str(cell_value) if cell_value is not None else "",
+                        "span_rows": max_row - min_row + 1,
+                        "span_cols": max_col - min_col + 1,
+                    }
+                )
+
+            return {
+                "merged_cells": merged_cells,
+                "merged_ranges": merged_cells,  # エイリアス
+                "merged_count": len(merged_cells),
+                "has_merged_cells": len(merged_cells) > 0,
+                "file_path": file_path,
+                "sheet_name": sheet_name,
+            }
+
+        except Exception as e:
+            if isinstance(e, ValueError):
+                raise
+            raise ValueError(
+                f"Failed to detect merged cells in {file_path}: {e!s}"
+            ) from e
+
+    def load_from_excel_with_merge_cells(
+        self,
+        file_path: str,
+        merge_mode: str = "expand",
+        sheet_name: str | None = None,
+        header_row: int | None = None,
+    ) -> dict[str, Any]:
+        """結合セル処理でExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            merge_mode: 結合セル処理モード（expand, ignore, first-value）
+            sheet_name: 読み込むシート名（None=自動検出）
+            header_row: ヘッダー行番号（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ（結合セル処理情報付き）
+
+        Raises:
+            MergedCellsError: 無効な処理モードの場合
+            ValueError: ファイル読み込みエラー
+        """
+        # 処理モードの検証
+        valid_modes = ["expand", "ignore", "first-value"]
+        if merge_mode not in valid_modes:
+            raise MergedCellsError(
+                f"Invalid merge mode: {merge_mode}. Valid modes: {valid_modes}",
+                merge_mode,
+            )
+
+        # 基本的なExcel読み込み
+        excel_data = self.load_from_excel(file_path, sheet_name, header_row)
+
+        # 結合セル情報を検出
+        merge_info = self.detect_merged_cells(file_path, sheet_name)
+
+        # 結合セル処理を適用
+        processed_data = self._apply_merge_cell_processing(
+            excel_data["data"], merge_info["merged_cells"], merge_mode
+        )
+
+        # 結果を構築（DRY原則適用）
+        return self._build_merged_cells_result(
+            processed_data, excel_data, file_path, merge_mode, merge_info
+        )
+
+    def _build_merged_cells_result(
+        self,
+        processed_data: list[list[str]],
+        excel_data_or_sheet_name: dict[str, Any] | str,
+        file_path: str,
+        merge_mode: str,
+        merge_info: dict[str, Any],
+        additional_metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """結合セル処理結果の共通構築メソッド（DRY原則適用）。
+
+        Args:
+            processed_data: 処理済みデータ
+            excel_data_or_sheet_name: Excelデータまたはシート名
+            file_path: ファイルパス
+            merge_mode: 結合セル処理モード
+            merge_info: 結合セル情報
+            additional_metadata: 追加メタデータ
+
+        Returns:
+            dict[str, Any]: 統一された結果構造
+        """
+        # sheet_nameの取得
+        if isinstance(excel_data_or_sheet_name, dict):
+            sheet_name = excel_data_or_sheet_name["sheet_name"]
+            has_header = excel_data_or_sheet_name.get("has_header", False)
+            headers = excel_data_or_sheet_name.get("headers", [])
+        else:
+            sheet_name = excel_data_or_sheet_name
+            has_header = False
+            headers = []
+
+        # 基本結果構造
+        result = {
+            "data": processed_data,
+            "has_header": has_header,
+            "headers": headers,
+            "sheet_name": sheet_name,
+            "file_path": file_path,
+            "merge_mode": merge_mode,
+            "merged_cells_count": merge_info["merged_count"],
+            "has_merged_cells": merge_info["merged_count"] > 0,
+            "merged_cells_info": merge_info["merged_cells"],
+            "rows": len(processed_data),
+            "columns": len(processed_data[0]) if processed_data else 0,
+        }
+
+        # 追加メタデータの統合
+        if additional_metadata:
+            result.update(additional_metadata)
+
+        return result
+
+    def _apply_merge_cell_processing(
+        self, data: list[list[str]], merged_cells: list[dict], merge_mode: str
+    ) -> list[list[str]]:
+        """結合セル処理をデータに適用。
+
+        Args:
+            data: 元のデータ
+            merged_cells: 結合セル情報のリスト
+            merge_mode: 処理モード
+
+        Returns:
+            list[list[str]]: 処理されたデータ
+        """
+        if not merged_cells:
+            return data
+
+        # データのコピーを作成
+        processed_data = [row[:] for row in data]
+
+        for merge_cell in merged_cells:
+            min_row = merge_cell["min_row"]
+            max_row = merge_cell["max_row"]
+            min_col = merge_cell["min_col"]
+            max_col = merge_cell["max_col"]
+            value = merge_cell["value"]
+
+            if merge_mode == "expand":
+                # 全てのセルに同じ値を展開
+                for row in range(min_row, max_row + 1):
+                    for col in range(min_col, max_col + 1):
+                        if row < len(processed_data) and col < len(processed_data[row]):
+                            processed_data[row][col] = value
+
+            elif merge_mode == "ignore":
+                # 左上以外のセルを空にする
+                for row in range(min_row, max_row + 1):
+                    for col in range(min_col, max_col + 1):
+                        if row < len(processed_data) and col < len(processed_data[row]):
+                            if row == min_row and col == min_col:
+                                processed_data[row][col] = value
+                            else:
+                                processed_data[row][col] = ""
+
+            elif merge_mode == "first-value":
+                # 左上のセルにのみ値を保持、他は空
+                for row in range(min_row, max_row + 1):
+                    for col in range(min_col, max_col + 1):
+                        if row < len(processed_data) and col < len(processed_data[row]):
+                            if row == min_row and col == min_col:
+                                processed_data[row][col] = value
+                            else:
+                                processed_data[row][col] = ""
+
+        return processed_data
+
+    def load_from_excel_with_merge_cells_and_range(
+        self,
+        file_path: str,
+        range_spec: str,
+        merge_mode: str = "expand",
+        sheet_name: str | None = None,
+        header_row: int | None = None,
+    ) -> dict[str, Any]:
+        """結合セル処理と範囲指定の組み合わせでExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            range_spec: 範囲指定（例: "A1:C3", "B2"）
+            merge_mode: 結合セル処理モード（expand, ignore, first-value）
+            sheet_name: 読み込むシート名（None=自動検出）
+            header_row: ヘッダー行番号（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ
+
+        Raises:
+            MergedCellsError: 無効な処理モード
+            RangeSpecificationError: 無効な範囲指定
+        """
+        # 処理モードの検証
+        valid_modes = ["expand", "ignore", "first-value"]
+        if merge_mode not in valid_modes:
+            raise MergedCellsError(
+                f"Invalid merge mode: {merge_mode}. Valid modes: {valid_modes}",
+                merge_mode,
+            )
+
+        # 範囲指定付きで読み込み
+        excel_data = self.load_from_excel_with_range(
+            file_path, range_spec, sheet_name, header_row
+        )
+
+        # 結合セル情報を検出
+        merge_info = self.detect_merged_cells(file_path, sheet_name)
+
+        # 範囲内の結合セルのみをフィルタリング
+        range_info = self._parse_range_specification(range_spec)
+        filtered_merged_cells = self._filter_merged_cells_in_range(
+            merge_info["merged_cells"], range_info
+        )
+
+        # 結合セル処理を適用
+        processed_data = self._apply_merge_cell_processing(
+            excel_data["data"], filtered_merged_cells, merge_mode
+        )
+
+        # 結果を構築（DRY原則適用）
+        # 範囲指定のメタデータを作成
+        range_merge_info = {
+            "merged_cells": filtered_merged_cells,
+            "merged_count": len(filtered_merged_cells),
+        }
+        additional_metadata = {"range": range_spec}
+
+        return self._build_merged_cells_result(
+            processed_data,
+            excel_data,
+            file_path,
+            merge_mode,
+            range_merge_info,
+            additional_metadata,
+        )
+
+    def _filter_merged_cells_in_range(
+        self, merged_cells: list[dict], range_info: dict[str, Any]
+    ) -> list[dict]:
+        """指定範囲内の結合セルのみをフィルタリング。
+
+        Args:
+            merged_cells: 全ての結合セル情報
+            range_info: 範囲情報
+
+        Returns:
+            list[dict]: 範囲内の結合セル情報
+        """
+        filtered = []
+
+        for merge_cell in merged_cells:
+            # 結合セルが範囲と重複するかチェック
+            if (
+                merge_cell["max_row"] >= range_info["start_row"]
+                and merge_cell["min_row"] <= range_info["end_row"]
+                and merge_cell["max_col"] >= range_info["start_col"]
+                and merge_cell["min_col"] <= range_info["end_col"]
+            ):
+                # 範囲内での相対位置に調整
+                adjusted_merge_cell = merge_cell.copy()
+                adjusted_merge_cell["min_row"] = max(
+                    0, merge_cell["min_row"] - range_info["start_row"]
+                )
+                adjusted_merge_cell["max_row"] = min(
+                    range_info["end_row"] - range_info["start_row"],
+                    merge_cell["max_row"] - range_info["start_row"],
+                )
+                adjusted_merge_cell["min_col"] = max(
+                    0, merge_cell["min_col"] - range_info["start_col"]
+                )
+                adjusted_merge_cell["max_col"] = min(
+                    range_info["end_col"] - range_info["start_col"],
+                    merge_cell["max_col"] - range_info["start_col"],
+                )
+
+                filtered.append(adjusted_merge_cell)
+
+        return filtered
+
+    def load_from_excel_with_merge_cells_and_header(
+        self,
+        file_path: str,
+        header_row: int,
+        merge_mode: str = "expand",
+        sheet_name: str | None = None,
+    ) -> dict[str, Any]:
+        """結合セル処理とヘッダー行指定の組み合わせでExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            header_row: ヘッダー行番号（0ベース）
+            merge_mode: 結合セル処理モード（expand, ignore, first-value）
+            sheet_name: 読み込むシート名（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ
+
+        Raises:
+            MergedCellsError: 無効な処理モード
+            ValueError: 無効なヘッダー行指定
+        """
+        # 処理モードの検証
+        valid_modes = ["expand", "ignore", "first-value"]
+        if merge_mode not in valid_modes:
+            raise MergedCellsError(
+                f"Invalid merge mode: {merge_mode}. Valid modes: {valid_modes}",
+                merge_mode,
+            )
+
+        # ヘッダー行の検証
+        self._validate_header_row(header_row)
+
+        # 基本的なExcel読み込み（ヘッダー処理前）
+        excel_data_raw = self.load_from_excel(file_path, sheet_name, None)
+
+        # 結合セル情報を検出
+        merge_info = self.detect_merged_cells(file_path, sheet_name)
+
+        # 全データに結合セル処理を適用（ヘッダー行も含む）
+        processed_all_data = self._apply_merge_cell_processing(
+            excel_data_raw["data"], merge_info["merged_cells"], merge_mode
+        )
+
+        # 処理後のデータからヘッダー行とデータ部分を分離
+        if header_row < len(processed_all_data):
+            headers = [
+                str(cell).strip() if cell else f"Column{i + 1}"
+                for i, cell in enumerate(processed_all_data[header_row])
+            ]
+            # 結合セル展開の場合は重複回避をスキップ（同じ値の展開が期待される）
+            # ヘッダー行より後の行のみをデータとして取得（ヘッダー行以前は除外）
+            processed_data = [
+                row for i, row in enumerate(processed_all_data) if i > header_row
+            ]
+            has_header = True
+        else:
+            headers = []
+            processed_data = processed_all_data
+            has_header = False
+
+        # 結果を構築（DRY原則適用）
+        # ヘッダー処理後のExcelデータ構造を作成
+        processed_excel_data = {
+            "sheet_name": excel_data_raw["sheet_name"],
+            "has_header": has_header,
+            "headers": headers,
+        }
+        additional_metadata = {"header_row": header_row}
+
+        return self._build_merged_cells_result(
+            processed_data,
+            processed_excel_data,
+            file_path,
+            merge_mode,
+            merge_info,
+            additional_metadata,
+        )
+
+    def load_from_excel_with_multiple_headers(
+        self,
+        file_path: str,
+        header_rows: int,
+        sheet_name: str | None = None,
+    ) -> dict[str, Any]:
+        """複数行ヘッダーを結合してExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            header_rows: ヘッダー行数（2以上）
+            sheet_name: シート名（Noneの場合はデフォルトシート）
+
+        Returns:
+            dict[str, Any]: 読み込み結果
+                - data: 2D配列のデータ（ヘッダー除く）
+                - headers: 結合されたヘッダーリスト
+                - has_header: True
+                - merged_header_levels: ヘッダー行数
+                - file_path: ファイルパス
+                - sheet_name: シート名
+
+        Raises:
+            ValueError: header_rowsが無効な場合
+            FileNotFoundError: ファイルが存在しない場合
+        """
+        if header_rows <= 0:
+            raise ValueError("header_rows must be positive")
+
+        try:
+            # 基本的なExcelデータを読み込み
+            excel_data = self.load_from_excel(file_path, sheet_name, None)
+
+            # ヘッダー行数の検証
+            if header_rows > len(excel_data["data"]):
+                raise ValueError("header_rows exceeds available rows")
+
+            # ヘッダー行とデータ行を分離
+            header_rows_data = excel_data["data"][:header_rows]
+            data_rows = excel_data["data"][header_rows:]
+
+            # 複数ヘッダーを結合
+            merged_headers = self._merge_multiple_headers(header_rows_data)
+
+            return {
+                "data": data_rows,
+                "headers": merged_headers,
+                "has_header": True,
+                "merged_header_levels": header_rows,
+                "file_path": file_path,
+                "sheet_name": excel_data["sheet_name"],
+                "row_count": len(data_rows),
+                "col_count": len(merged_headers) if merged_headers else 0,
+            }
+
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Excel file not found: {file_path}")
+        except Exception as e:
+            raise ValueError(f"Failed to load Excel file with multiple headers: {file_path}: {e!s}") from e
+
+    def load_from_excel_with_multiple_headers_and_range(
+        self,
+        file_path: str,
+        range_spec: str,
+        header_rows: int,
+        sheet_name: str | None = None,
+    ) -> dict[str, Any]:
+        """複数行ヘッダーと範囲指定を組み合わせてExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            range_spec: 範囲指定（例: "A1:D10"）
+            header_rows: ヘッダー行数
+            sheet_name: シート名
+
+        Returns:
+            dict[str, Any]: 読み込み結果
+        """
+        if header_rows <= 0:
+            raise ValueError("header_rows must be positive")
+
+        try:
+            # 範囲指定でデータを読み込み
+            excel_data = self.load_from_excel_with_range(file_path, range_spec, sheet_name, None)
+
+            # ヘッダー行数の検証
+            if header_rows > len(excel_data["data"]):
+                raise ValueError(f"header_rows ({header_rows}) exceeds available rows in range")
+
+            # ヘッダー行とデータ行を分離
+            header_rows_data = excel_data["data"][:header_rows]
+            data_rows = excel_data["data"][header_rows:]
+
+            # 複数ヘッダーを結合
+            merged_headers = self._merge_multiple_headers(header_rows_data)
+
+            return {
+                "data": data_rows,
+                "headers": merged_headers,
+                "has_header": True,
+                "merged_header_levels": header_rows,
+                "range": range_spec,
+                "file_path": file_path,
+                "sheet_name": excel_data["sheet_name"],
+                "row_count": len(data_rows),
+                "col_count": len(merged_headers) if merged_headers else 0,
+            }
+
+        except Exception as e:
+            raise ValueError(f"Failed to load Excel file with multiple headers and range: {file_path}: {e!s}") from e
+
+    def _merge_multiple_headers(self, header_rows_data: list[list[str]]) -> list[str]:
+        """複数行のヘッダーを結合して単一のヘッダーリストを生成。
+
+        Args:
+            header_rows_data: ヘッダー行のデータ（2D配列）
+
+        Returns:
+            list[str]: 結合されたヘッダーリスト
+        """
+        if not header_rows_data:
+            return []
+
+        # 最大列数を取得
+        max_cols = max(len(row) for row in header_rows_data) if header_rows_data else 0
+        if max_cols == 0:
+            return []
+
+        merged_headers = []
+
+        for col in range(max_cols):
+            # 各列のヘッダー要素を階層的に収集
+            header_parts = self._collect_hierarchical_header_parts(header_rows_data, col)
+
+            # ヘッダー要素を結合
+            merged_header = self._build_merged_header(header_parts, col)
+            merged_headers.append(merged_header)
+
+        return merged_headers
+
+    def _collect_hierarchical_header_parts(self, header_rows_data: list[list[str]], col: int) -> list[str]:
+        """指定列の階層的ヘッダー要素を収集（DRY原則適用）。
+
+        Args:
+            header_rows_data: ヘッダー行のデータ
+            col: 対象列番号
+
+        Returns:
+            list[str]: 階層的に整理されたヘッダー要素
+        """
+        header_parts = []
+
+        for row_idx, row in enumerate(header_rows_data):
+            if col < len(row):
+                cell_value = str(row[col]).strip() if row[col] is not None else ""
+
+                if cell_value:
+                    # 空でない値：使用する
+                    header_parts.append(cell_value)
+                else:
+                    # 空の値：階層構造の継承ロジック適用
+                    inherited_value = self._find_inherited_value_for_empty_cell(
+                        row_idx, col, header_rows_data
+                    )
+                    if inherited_value:
+                        header_parts.append(inherited_value)
+
+        return header_parts
+
+    def _find_inherited_value_for_empty_cell(
+        self,
+        row_idx: int,
+        col: int,
+        header_rows_data: list[list[str]]
+    ) -> str | None:
+        """空セルの値継承処理（高度階層構造対応）。
+
+        Args:
+            row_idx: 現在の行インデックス
+            col: 現在の列インデックス
+            header_rows_data: 全ヘッダー行データ
+
+        Returns:
+            str | None: 継承された値またはNone
+        """
+        # 最初の行が空の場合
+        if row_idx == 0:
+            # 同一行で左側を探索
+            inherited_value = self._find_left_non_empty_in_row(header_rows_data[row_idx], col)
+            return inherited_value if inherited_value else "空欄"
+
+        # 多層階層継承ロジック：上位レベルから段階的に継承
+        return self._find_hierarchical_inherited_value(row_idx, col, header_rows_data)
+
+    def _find_hierarchical_inherited_value(
+        self,
+        row_idx: int,
+        col: int,
+        header_rows_data: list[list[str]]
+    ) -> str | None:
+        """多層階層継承ロジック（コードエクセレンス：高度アルゴリズム）。
+
+        Args:
+            row_idx: 現在の行インデックス
+            col: 現在の列インデックス
+            header_rows_data: 全ヘッダー行データ
+
+        Returns:
+            str | None: 継承された値またはNone
+        """
+        # 同一行で左側を探索
+        current_row = header_rows_data[row_idx]
+        inherited_value = self._find_left_non_empty_in_row(current_row, col)
+
+        if inherited_value:
+            return inherited_value
+
+        # 上位レベルから継承値を探索
+        for upper_row_idx in range(row_idx - 1, -1, -1):
+            inherited_from_upper = self._find_span_inherited_value(
+                upper_row_idx, col, header_rows_data
+            )
+            if inherited_from_upper:
+                return inherited_from_upper
+
+        return None
+
+    def _find_span_inherited_value(
+        self,
+        row_idx: int,
+        col: int,
+        header_rows_data: list[list[str]]
+    ) -> str | None:
+        """指定行での範囲継承値を探索（結合セル模倣）。
+
+        Args:
+            row_idx: 探索行インデックス
+            col: 対象列インデックス
+            header_rows_data: 全ヘッダー行データ
+
+        Returns:
+            str | None: 範囲継承された値またはNone
+        """
+        if row_idx < 0 or row_idx >= len(header_rows_data):
+            return None
+
+        target_row = header_rows_data[row_idx]
+
+        # 左側の非空値とその範囲を探索
+        for check_col in range(col, -1, -1):
+            if check_col < len(target_row):
+                cell_value = str(target_row[check_col]).strip() if target_row[check_col] is not None else ""
+                if cell_value:
+                    # 見つかった値の影響範囲を計算
+                    span_end = self._calculate_value_span_end(row_idx, check_col, header_rows_data)
+                    if col <= span_end:
+                        return cell_value
+
+        return None
+
+    def _calculate_value_span_end(
+        self,
+        row_idx: int,
+        value_col: int,
+        header_rows_data: list[list[str]]
+    ) -> int:
+        """値の影響範囲終端を計算（結合セル模倣）。
+
+        Args:
+            row_idx: 値の行インデックス
+            value_col: 値の列インデックス
+            header_rows_data: 全ヘッダー行データ
+
+        Returns:
+            int: 影響範囲の終端列インデックス
+        """
+        if row_idx < 0 or row_idx >= len(header_rows_data):
+            return value_col
+
+        target_row = header_rows_data[row_idx]
+
+        # 右側の次の非空値まで範囲を拡張
+        for end_col in range(value_col + 1, len(target_row)):
+            cell_value = str(target_row[end_col]).strip() if target_row[end_col] is not None else ""
+            if cell_value:
+                return end_col - 1  # 次の非空値の直前まで
+
+        # 行の最後まで範囲を拡張
+        return len(target_row) - 1
+
+    def _find_left_non_empty_in_row(self, row: list[str], col: int) -> str | None:
+        """指定行で左側の非空値を探索（SOLID原則：単一責任）。
+
+        Args:
+            row: 対象行データ
+            col: 起点列番号
+
+        Returns:
+            str | None: 見つかった値またはNone
+        """
+        for check_col in range(col - 1, -1, -1):
+            if check_col < len(row):
+                value = str(row[check_col]).strip() if row[check_col] is not None else ""
+                if value:
+                    return value
+        return None
+
+    def _build_merged_header(self, header_parts: list[str], col: int) -> str:
+        """ヘッダー要素から結合ヘッダーを構築（DRY原則適用）。
+
+        Args:
+            header_parts: ヘッダー要素リスト
+            col: 列番号（デフォルト名生成用）
+
+        Returns:
+            str: 結合されたヘッダー名
+        """
+        if header_parts:
+            # 重複除去（順序保持）+ 正規化
+            unique_parts = self._remove_duplicates_preserve_order(header_parts)
+            merged_header = "_".join(unique_parts)
+            return self._normalize_header_name(merged_header)
+        else:
+            return f"列{col + 1}"  # デフォルト列名
+
+    def _remove_duplicates_preserve_order(self, parts: list[str]) -> list[str]:
+        """重複を除去しつつ順序を保持（DRY原則）。
+
+        Args:
+            parts: 元のリスト
+
+        Returns:
+            list[str]: 重複除去後のリスト
+        """
+        unique_parts = []
+        for part in parts:
+            if part not in unique_parts:
+                unique_parts.append(part)
+        return unique_parts
+
+    def _normalize_header_name(self, header_name: str) -> str:
+        """ヘッダー名を正規化（コードエクセレンス：日本語対応強化）。
+
+        Args:
+            header_name: 元のヘッダー名
+
+        Returns:
+            str: 正規化されたヘッダー名
+        """
+        if not header_name:
+            return "空欄"
+
+        # 前後の空白を除去
+        normalized = header_name.strip()
+
+        # 日本語括弧の特別処理（括弧内容を分離）
+        normalized = self._process_japanese_parentheses(normalized)
+
+        # 特殊文字を置換
+        normalized = self._replace_special_characters(normalized)
+
+        # 連続するアンダースコアを単一に
+        normalized = self._clean_consecutive_underscores(normalized)
+
+        # 前後のアンダースコアを除去
+        normalized = normalized.strip("_")
+
+        return normalized or "空欄"
+
+    def _process_japanese_parentheses(self, text: str) -> str:
+        """日本語括弧の特別処理（コードエクセレンス：SOLID原則）。
+
+        Args:
+            text: 処理対象テキスト
+
+        Returns:
+            str: 括弧処理後のテキスト
+        """
+        import re
+
+        # 日本語括弧パターン「売上高（千円）」→「売上高_千円」
+        # 全角括弧
+        text = re.sub(r'（([^）]+)）', r'_\1', text)
+        # 半角括弧
+        text = re.sub(r'\(([^)]+)\)', r'_\1', text)
+
+        return text
+
+    def _replace_special_characters(self, text: str) -> str:
+        """特殊文字の置換処理（DRY原則：設定の一元化）。
+
+        Args:
+            text: 処理対象テキスト
+
+        Returns:
+            str: 特殊文字置換後のテキスト
+        """
+        # 特殊文字マッピング（保守性向上）
+        replacements = {
+            "/": "_", "\\": "_", "[": "_", "]": "_", "{": "_", "}": "_",
+            "|": "_", ":": "_", ";": "_", ",": "_", ".": "_", "?": "_",
+            "*": "_", "+": "_", "-": "_", "=": "_", "!": "_", "@": "_",
+            "#": "_", "$": "_", "%": "_", "^": "_", "&": "_", "<": "_", ">": "_",
+            "~": "_", "`": "_", "'": "_", '"': "_", " ": "_"
+        }
+
+        for old, new in replacements.items():
+            text = text.replace(old, new)
+
+        return text
+
+    def _clean_consecutive_underscores(self, text: str) -> str:
+        """連続するアンダースコアのクリーンアップ（DRY原則）。
+
+        Args:
+            text: 処理対象テキスト
+
+        Returns:
+            str: クリーンアップ後のテキスト
+        """
+        while "__" in text:
+            text = text.replace("__", "_")
+        return text
+
+    # ============================================================================
+    # JSON Cache Functions (Task 3.4)
+    # ============================================================================
+
+    def load_from_excel_with_cache(
+        self,
+        file_path: str,
+        sheet_name: str | None = None,
+        header_row: int | None = None,
+        range_spec: str | None = None,
+        skip_rows: str | None = None,
+        detect_range: str | None = None,
+        auto_header: bool = False,
+        merge_cells: str | None = None,
+        merge_headers: str | None = None,
+        max_cache_size: int | None = None,
+    ) -> dict[str, Any]:
+        """キャッシュを使用してExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_name: シート名
+            header_row: ヘッダー行番号
+            range_spec: 範囲指定
+            skip_rows: スキップ行指定
+            detect_range: 自動範囲検出モード
+            auto_header: ヘッダー自動判定
+            merge_cells: 結合セル処理モード
+            merge_headers: 複数ヘッダー結合指定
+            max_cache_size: 最大キャッシュサイズ（バイト）
+
+        Returns:
+            dict[str, Any]: 読み込み結果（cache_hitフラグ付き）
+        """
+        import json
+
+        # キャッシュキーを生成（全オプションを含む）
+        cache_key = self._generate_cache_key(
+            file_path, sheet_name, header_row, range_spec, skip_rows,
+            detect_range, auto_header, merge_cells, merge_headers
+        )
+
+        # キャッシュファイルパスを取得
+        cache_path = self._get_cache_file_path(file_path, cache_key)
+
+        # キャッシュの有効性をチェック
+        if self._is_cache_valid(file_path, cache_path):
+            try:
+                # キャッシュから読み込み
+                with open(cache_path, encoding="utf-8") as f:
+                    cache_data = json.load(f)
+
+                # キャッシュデータの整合性確認
+                if self._validate_cache_data(cache_data):
+                    cache_data["cache_hit"] = True
+                    cache_data["cache_path"] = cache_path  # テスト用にキャッシュパスを追加
+                    return cache_data
+
+            except (json.JSONDecodeError, KeyError, FileNotFoundError):
+                # キャッシュが破損している場合は無視して再作成
+                pass
+
+        # キャッシュミス: 実際にExcelファイルを読み込み
+        result = self._load_excel_without_cache(
+            file_path, sheet_name, header_row, range_spec, skip_rows,
+            detect_range, auto_header, merge_cells, merge_headers
+        )
+
+        # キャッシュに保存
+        self._save_to_cache(cache_path, result, file_path, max_cache_size)
+
+        result["cache_hit"] = False
+        result["cache_path"] = cache_path  # テスト用にキャッシュパスを追加
+        return result
+
+    def _generate_cache_key(
+        self,
+        file_path: str,
+        sheet_name: str | None,
+        header_row: int | None,
+        range_spec: str | None,
+        skip_rows: str | None,
+        detect_range: str | None,
+        auto_header: bool,
+        merge_cells: str | None,
+        merge_headers: str | None,
+    ) -> str:
+        """キャッシュキーを生成。
+
+        Args:
+            全オプションパラメータ
+
+        Returns:
+            str: MD5ハッシュされたキャッシュキー
+        """
+        import hashlib
+        import json
+
+        # オプション辞書を作成
+        options = {
+            "sheet_name": sheet_name,
+            "header_row": header_row,
+            "range_spec": range_spec,
+            "skip_rows": skip_rows,
+            "detect_range": detect_range,
+            "auto_header": auto_header,
+            "merge_cells": merge_cells,
+            "merge_headers": merge_headers,
+        }
+
+        # JSONエンコードして一意の文字列を生成
+        options_str = json.dumps(options, sort_keys=True, ensure_ascii=False)
+
+        # MD5ハッシュでキーを生成
+        return hashlib.md5(options_str.encode("utf-8")).hexdigest()
+
+    def _get_cache_file_path(self, file_path: str, cache_key: str | None = None) -> str:
+        """キャッシュファイルのパスを生成。
+
+        Args:
+            file_path: 元のExcelファイルパス
+            cache_key: キャッシュキー（Noneの場合は基本キーを生成）
+
+        Returns:
+            str: キャッシュファイルのパス
+        """
+        import os
+
+        # キャッシュディレクトリを決定
+        cache_dir = os.path.join(str(self.base_path), ".jsontable_cache")
+        os.makedirs(cache_dir, exist_ok=True)
+
+        # ファイル名からキャッシュファイル名を生成
+        base_name = os.path.basename(file_path)
+        name_without_ext = os.path.splitext(base_name)[0]
+
+        if cache_key:
+            cache_filename = f"{name_without_ext}_{cache_key}.json"
+        else:
+            cache_filename = f"{name_without_ext}_default.json"
+
+        return os.path.join(cache_dir, cache_filename)
+
+    def _is_cache_valid(self, file_path: str, cache_path: str) -> bool:
+        """キャッシュの有効性をチェック。
+
+        Args:
+            file_path: 元のExcelファイルパス
+            cache_path: キャッシュファイルパス
+
+        Returns:
+            bool: キャッシュが有効な場合True
+        """
+        import os
+
+        # キャッシュファイルの存在確認
+        if not os.path.exists(cache_path):
+            return False
+
+        # 元ファイルの存在確認
+        if not os.path.exists(file_path):
+            return False
+
+        try:
+            # ファイルの更新時刻を比較
+            excel_mtime = os.path.getmtime(file_path)
+            cache_mtime = os.path.getmtime(cache_path)
+
+            # Excelファイルがキャッシュより新しい場合は無効
+            return cache_mtime >= excel_mtime
+
+        except OSError:
+            return False
+
+    def _validate_cache_data(self, cache_data: dict) -> bool:
+        """キャッシュデータの整合性を検証。
+
+        Args:
+            cache_data: キャッシュデータ
+
+        Returns:
+            bool: データが有効な場合True
+        """
+        required_keys = ["data", "headers", "source_file", "cache_timestamp"]
+
+        # 必須キーの存在確認
+        for key in required_keys:
+            if key not in cache_data:
+                return False
+
+        # データ型の確認
+        if not isinstance(cache_data["data"], list):
+            return False
+
+        if not isinstance(cache_data["headers"], list):
+            return False
+
+        return True
+
+    def _load_excel_without_cache(
+        self,
+        file_path: str,
+        sheet_name: str | None,
+        header_row: int | None,
+        range_spec: str | None,
+        skip_rows: str | None,
+        detect_range: str | None,
+        auto_header: bool,
+        merge_cells: str | None,
+        merge_headers: str | None,
+    ) -> dict[str, Any]:
+        """キャッシュを使用せずにExcelファイルを読み込み。
+
+        Args:
+            全オプションパラメータ
+
+        Returns:
+            dict[str, Any]: 読み込み結果
+        """
+        # 複数ヘッダー結合が指定されている場合
+        if merge_headers:
+            try:
+                header_rows = int(merge_headers)
+                return self.load_from_excel_with_multiple_headers(
+                    file_path, header_rows, sheet_name
+                )
+            except ValueError:
+                pass  # 数値でない場合は無視
+
+        # Detect Range機能
+        if detect_range:
+            return self.load_from_excel_with_detect_range(
+                file_path, detect_mode=detect_range, sheet_name=sheet_name, auto_header=auto_header
+            )
+
+        # Skip Rows機能
+        if skip_rows:
+            if range_spec and header_row is not None:
+                return self.load_from_excel_with_skip_rows_range_and_header(
+                    file_path, skip_rows, range_spec, header_row, sheet_name
+                )
+            elif range_spec:
+                return self.load_from_excel_with_skip_rows_and_range(
+                    file_path, range_spec, skip_rows, sheet_name
+                )
+            elif header_row is not None:
+                return self.load_from_excel_with_skip_rows_and_header(
+                    file_path, skip_rows, header_row, sheet_name
+                )
+            else:
+                return self.load_from_excel_with_skip_rows(
+                    file_path, skip_rows, sheet_name
+                )
+
+        # 結合セル処理
+        if merge_cells:
+            if range_spec:
+                return self.load_from_excel_with_merge_cells_and_range(
+                    file_path, range_spec, merge_cells, sheet_name
+                )
+            elif header_row is not None:
+                return self.load_from_excel_with_merge_cells_and_header(
+                    file_path, header_row, merge_cells, sheet_name
+                )
+            else:
+                return self.load_from_excel_with_merge_cells(
+                    file_path, merge_cells, sheet_name, header_row
+                )
+
+        # 範囲指定とヘッダー行の組み合わせ
+        if range_spec and header_row is not None:
+            return self.load_from_excel_with_header_row_and_range(
+                file_path, header_row, range_spec, sheet_name
+            )
+
+        # 範囲指定のみ
+        if range_spec:
+            return self.load_from_excel_with_range(
+                file_path, range_spec, sheet_name, header_row
+            )
+
+        # ヘッダー行指定のみ
+        if header_row is not None:
+            return self.load_from_excel_with_header_row(
+                file_path, header_row, sheet_name
+            )
+
+        # 基本的な読み込み
+        return self.load_from_excel(file_path, sheet_name, header_row)
+
+    def _save_to_cache(
+        self,
+        cache_path: str,
+        result: dict[str, Any],
+        source_file: str,
+        max_cache_size: int | None = None,
+    ) -> None:
+        """結果をキャッシュに保存。
+
+        Args:
+            cache_path: キャッシュファイルパス
+            result: 保存するデータ
+            source_file: 元ファイルパス
+            max_cache_size: 最大キャッシュサイズ（バイト）
+        """
+        import json
+        import time
+
+        # キャッシュデータを構築
+        cache_data = {
+            "source_file": source_file,
+            "cache_timestamp": time.time(),
+            "data": result.get("data", []),
+            "headers": result.get("headers", []),
+            "has_header": result.get("has_header", False),
+        }
+
+        # 追加メタデータがあれば含める
+        for key in ["sheet_name", "row_count", "col_count", "range", "merge_mode"]:
+            if key in result:
+                cache_data[key] = result[key]
+
+        try:
+            # JSONエンコード（サイズチェックのため）
+            json_str = json.dumps(cache_data, ensure_ascii=False, indent=2)
+
+            # サイズ制限チェック
+            if max_cache_size and len(json_str.encode("utf-8")) > max_cache_size:
+                # サイズ制限を超える場合はキャッシュしない
+                return
+
+            # ファイルに保存
+            with open(cache_path, "w", encoding="utf-8") as f:
+                f.write(json_str)
+
+        except (OSError, UnicodeEncodeError):
+            # キャッシュ保存に失敗してもエラーは無視
+            pass
+
+    def clear_cache(self, file_path: str | None = None) -> None:
+        """キャッシュをクリア。
+
+        Args:
+            file_path: 特定ファイルのキャッシュをクリア（Noneの場合は全削除）
+        """
+        import glob
+        import os
+
+        cache_dir = os.path.join(str(self.base_path), ".jsontable_cache")
+
+        if not os.path.exists(cache_dir):
+            return
+
+        if file_path:
+            # 特定ファイルのキャッシュのみ削除
+            base_name = os.path.basename(file_path)
+            name_without_ext = os.path.splitext(base_name)[0]
+            pattern = os.path.join(cache_dir, f"{name_without_ext}_*.json")
+
+            for cache_file in glob.glob(pattern):
+                try:
+                    os.remove(cache_file)
+                except OSError:
+                    pass
+        else:
+            # 全キャッシュを削除
+            pattern = os.path.join(cache_dir, "*.json")
+            for cache_file in glob.glob(pattern):
+                try:
+                    os.remove(cache_file)
+                except OSError:
+                    pass
