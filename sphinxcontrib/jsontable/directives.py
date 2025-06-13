@@ -18,6 +18,7 @@ from sphinx.util.docutils import SphinxDirective
 # Excel対応のインポート
 try:
     from .excel_data_loader import ExcelDataLoader
+
     EXCEL_SUPPORT = True
 except ImportError:
     EXCEL_SUPPORT = False
@@ -604,12 +605,14 @@ class JsonTableDirective(SphinxDirective):
         sheet-index: Excel sheet index to read from (0-based, Excel files only).
         range: Cell range specification for Excel files (e.g., "A1:C10", "B2").
         header-row: Row number to use as header (0-based, Excel files only).
+        skip-rows: Row numbers to skip (e.g., "0,1,2" or "0-2,5,7-9", Excel files only).
 
     Excel-specific Options:
         - sheet: Specify the Excel sheet by name (e.g., "営業データ", "Sheet1")
         - sheet-index: Specify the Excel sheet by index (0-based, e.g., 0, 1, 2)
         - range: Specify cell range in A1:C10 format (e.g., "A1:D5", "B2:F10")
         - header-row: Specify which row to use as header (0-based, e.g., 0, 3, 5)
+        - skip-rows: Skip specified rows (e.g., "0,1,2", "0-2,5", "1,3,5-7")
         - Priority: If both sheet and sheet-index are provided, sheet name takes precedence
         - Default: If neither is provided, the first sheet (index 0) is used
 
@@ -629,6 +632,10 @@ class JsonTableDirective(SphinxDirective):
         .. jsontable:: data.xlsx
            :header:
            :header-row: 3
+
+        .. jsontable:: data.xlsx
+           :header:
+           :skip-rows: 0-2,6
     """
 
     has_content = True
@@ -642,6 +649,7 @@ class JsonTableDirective(SphinxDirective):
         "sheet-index": directives.nonnegative_int,
         "range": directives.unchanged,
         "header-row": directives.nonnegative_int,
+        "skip-rows": directives.unchanged,
     }
 
     def __init__(self, *args, **kwargs):
@@ -703,7 +711,7 @@ class JsonTableDirective(SphinxDirective):
             file_ext = Path(file_path).suffix.lower()
 
             # Excel形式の判定と処理
-            if file_ext in {'.xlsx', '.xls'}:
+            if file_ext in {".xlsx", ".xls"}:
                 if not EXCEL_SUPPORT:
                     raise JsonTableError(
                         "Excel support not available. Install with: pip install 'sphinxcontrib-jsontable[excel]'"
@@ -716,21 +724,24 @@ class JsonTableDirective(SphinxDirective):
                 sheet_index = self.options.get("sheet-index")
                 range_spec = self.options.get("range")
                 header_row = self.options.get("header-row")
+                skip_rows = self.options.get("skip-rows")
 
                 # シート名の解決
-                resolved_sheet_name = self._resolve_sheet_name(file_path, sheet_name, sheet_index)
+                resolved_sheet_name = self._resolve_sheet_name(
+                    file_path, sheet_name, sheet_index
+                )
 
                 # Excelファイルを読み込み（オプションの組み合わせ処理）
                 excel_data = self._load_excel_with_options(
-                    file_path, resolved_sheet_name, range_spec, header_row
+                    file_path, resolved_sheet_name, range_spec, header_row, skip_rows
                 )
 
                 # Excel形式からJSON形式に変換
-                if excel_data['has_header']:
+                if excel_data["has_header"]:
                     # ヘッダーがある場合: オブジェクトの配列形式
-                    headers = excel_data['headers']
+                    headers = excel_data["headers"]
                     json_data = []
-                    for row in excel_data['data']:
+                    for row in excel_data["data"]:
                         row_obj = {}
                         for i, value in enumerate(row):
                             if i < len(headers):
@@ -739,7 +750,7 @@ class JsonTableDirective(SphinxDirective):
                     return json_data
                 else:
                     # ヘッダーなし: 2D配列形式
-                    return excel_data['data']
+                    return excel_data["data"]
             else:
                 # 従来のJSON処理
                 return self.loader.load_from_file(
@@ -765,8 +776,9 @@ class JsonTableDirective(SphinxDirective):
         error_node += nodes.paragraph(text=message)
         return error_node
 
-    def _resolve_sheet_name(self, file_path: str, sheet_name: str | None, 
-                           sheet_index: int | None) -> str | None:
+    def _resolve_sheet_name(
+        self, file_path: str, sheet_name: str | None, sheet_index: int | None
+    ) -> str | None:
         """シート名とシートインデックスからシート名を解決。
 
         Args:
@@ -787,8 +799,14 @@ class JsonTableDirective(SphinxDirective):
             # デフォルトシート
             return None
 
-    def _load_excel_with_options(self, file_path: str, sheet_name: str | None,
-                                range_spec: str | None, header_row: int | None) -> dict[str, Any]:
+    def _load_excel_with_options(
+        self,
+        file_path: str,
+        sheet_name: str | None,
+        range_spec: str | None,
+        header_row: int | None,
+        skip_rows: str | None,
+    ) -> dict[str, Any]:
         """オプションの組み合わせに応じてExcelファイルを読み込み。
 
         Args:
@@ -796,26 +814,55 @@ class JsonTableDirective(SphinxDirective):
             sheet_name: 解決されたシート名
             range_spec: 範囲指定
             header_row: ヘッダー行番号
+            skip_rows: スキップ行指定
 
         Returns:
             dict[str, Any]: 読み込み結果
         """
-        # オプションの組み合わせによる処理分岐
-        if range_spec and header_row is not None:
-            # 範囲指定 + ヘッダー行指定
-            return self.excel_loader.load_from_excel_with_header_row_and_range(
-                file_path, header_row, range_spec, sheet_name
-            )
-        elif range_spec:
-            # 範囲指定のみ
-            return self.excel_loader.load_from_excel_with_range(
-                file_path, range_spec, sheet_name, header_row
-            )
-        elif header_row is not None:
-            # ヘッダー行指定のみ
-            return self.excel_loader.load_from_excel_with_header_row(
-                file_path, header_row, sheet_name
-            )
+        # Skip Rows機能を最優先で処理
+        if skip_rows:
+            # Skip Rows + その他オプションの組み合わせ
+            if range_spec and header_row is not None:
+                # Skip Rows + 範囲指定 + ヘッダー行指定
+                return (
+                    self.excel_loader.load_from_excel_with_skip_rows_range_and_header(
+                        file_path, skip_rows, range_spec, header_row, sheet_name
+                    )
+                )
+            elif range_spec:
+                # Skip Rows + 範囲指定
+                return self.excel_loader.load_from_excel_with_skip_rows_and_range(
+                    file_path, range_spec, skip_rows, sheet_name
+                )
+            elif header_row is not None:
+                # Skip Rows + ヘッダー行指定
+                return self.excel_loader.load_from_excel_with_skip_rows_and_header(
+                    file_path, skip_rows, header_row, sheet_name
+                )
+            else:
+                # Skip Rowsのみ
+                return self.excel_loader.load_from_excel_with_skip_rows(
+                    file_path, skip_rows, sheet_name
+                )
         else:
-            # 従来の処理（オプション指定なし）
-            return self.excel_loader.load_from_excel(file_path, sheet_name, header_row)
+            # 従来の処理（Skip Rowsなし）
+            if range_spec and header_row is not None:
+                # 範囲指定 + ヘッダー行指定
+                return self.excel_loader.load_from_excel_with_header_row_and_range(
+                    file_path, header_row, range_spec, sheet_name
+                )
+            elif range_spec:
+                # 範囲指定のみ
+                return self.excel_loader.load_from_excel_with_range(
+                    file_path, range_spec, sheet_name, header_row
+                )
+            elif header_row is not None:
+                # ヘッダー行指定のみ
+                return self.excel_loader.load_from_excel_with_header_row(
+                    file_path, header_row, sheet_name
+                )
+            else:
+                # 従来の処理（オプション指定なし）
+                return self.excel_loader.load_from_excel(
+                    file_path, sheet_name, header_row
+                )

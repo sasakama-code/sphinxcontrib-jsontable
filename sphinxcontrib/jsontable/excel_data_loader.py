@@ -12,25 +12,38 @@ JSON形式への変換を担当する。
 - セキュリティ（パストラバーサル対策）
 """
 
+import re
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
-import re
 
 
 class RangeSpecificationError(ValueError):
     """範囲指定に関するエラー."""
-    
+
+    def __init__(self, message: str, invalid_spec: str | None = None):
+        super().__init__(message)
+        self.invalid_spec = invalid_spec
+
+
+class SkipRowsError(ValueError):
+    """Skip Rows指定に関するエラー."""
+
     def __init__(self, message: str, invalid_spec: str | None = None):
         super().__init__(message)
         self.invalid_spec = invalid_spec
 
 
 # 定数定義
-CELL_ADDRESS_PATTERN = r'^([A-Z]+)([1-9]\d*)$'
+CELL_ADDRESS_PATTERN = r"^([A-Z]+)([1-9]\d*)$"
 MAX_EXCEL_ROWS = 1048576  # Excel最大行数
-MAX_EXCEL_COLS = 16384    # Excel最大列数
+MAX_EXCEL_COLS = 16384  # Excel最大列数
+
+# Skip Rows関連定数
+MAX_SKIP_ROWS_COUNT = 10000  # 一度にスキップできる最大行数
+SKIP_ROWS_RANGE_SEPARATOR = "-"  # 範囲指定のセパレータ
+SKIP_ROWS_LIST_SEPARATOR = ","  # リスト指定のセパレータ
 
 
 class ExcelDataLoader:
@@ -44,7 +57,7 @@ class ExcelDataLoader:
 
     # セキュリティ設定
     MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
-    SUPPORTED_EXTENSIONS = {'.xlsx', '.xls'}
+    SUPPORTED_EXTENSIONS = {".xlsx", ".xls"}
 
     def __init__(self, base_path: str | None = None):
         """ExcelDataLoaderを初期化。
@@ -95,14 +108,18 @@ class ExcelDataLoader:
 
         # 拡張子チェック
         if file_path_obj.suffix.lower() not in self.SUPPORTED_EXTENSIONS:
-            raise ValueError(f"Unsupported file format: {file_path_obj.suffix}. "
-                           f"Supported formats: {', '.join(self.SUPPORTED_EXTENSIONS)}")
+            raise ValueError(
+                f"Unsupported file format: {file_path_obj.suffix}. "
+                f"Supported formats: {', '.join(self.SUPPORTED_EXTENSIONS)}"
+            )
 
         # ファイルサイズチェック
         file_size = file_path_obj.stat().st_size
         if file_size > self.MAX_FILE_SIZE:
-            raise ValueError(f"File size ({file_size} bytes) exceeds limit "
-                           f"({self.MAX_FILE_SIZE} bytes)")
+            raise ValueError(
+                f"File size ({file_size} bytes) exceeds limit "
+                f"({self.MAX_FILE_SIZE} bytes)"
+            )
 
         return True
 
@@ -147,7 +164,7 @@ class ExcelDataLoader:
             sheet_names = excel_file.sheet_names
 
             if sheet_name not in sheet_names:
-                available_sheets = ', '.join(f"'{name}'" for name in sheet_names)
+                available_sheets = ", ".join(f"'{name}'" for name in sheet_names)
                 raise ValueError(
                     f"Sheet '{sheet_name}' not found in Excel file. "
                     f"Available sheets: {available_sheets}"
@@ -158,7 +175,9 @@ class ExcelDataLoader:
         except Exception as e:
             if isinstance(e, ValueError):
                 raise  # Re-raise our custom ValueError without wrapping
-            raise ValueError(f"Failed to validate sheet '{sheet_name}' in {file_path}: {e!s}") from e
+            raise ValueError(
+                f"Failed to validate sheet '{sheet_name}' in {file_path}: {e!s}"
+            ) from e
 
     def get_sheet_name_by_index(self, file_path: str, sheet_index: int) -> str:
         """シートインデックスからシート名を取得。
@@ -175,8 +194,10 @@ class ExcelDataLoader:
         """
         # 入力検証の強化
         if not isinstance(sheet_index, int):
-            raise ValueError(f"Sheet index must be an integer, got {type(sheet_index).__name__}")
-        
+            raise ValueError(
+                f"Sheet index must be an integer, got {type(sheet_index).__name__}"
+            )
+
         if sheet_index < 0:
             raise ValueError(f"Sheet index must be non-negative, got {sheet_index}")
 
@@ -185,10 +206,10 @@ class ExcelDataLoader:
             sheet_names = excel_file.sheet_names
 
             if sheet_index >= len(sheet_names):
-                available_sheets = ', '.join(f"'{name}'" for name in sheet_names)
+                available_sheets = ", ".join(f"'{name}'" for name in sheet_names)
                 raise ValueError(
                     f"Sheet index {sheet_index} is out of range. "
-                    f"Available sheets (0-{len(sheet_names)-1}): {available_sheets}"
+                    f"Available sheets (0-{len(sheet_names) - 1}): {available_sheets}"
                 )
 
             return sheet_names[sheet_index]
@@ -198,11 +219,13 @@ class ExcelDataLoader:
         except Exception as e:
             if isinstance(e, ValueError):
                 raise  # Re-raise our custom ValueError without wrapping
-            raise ValueError(f"Failed to access sheet index {sheet_index} in {file_path}: {e!s}") from e
+            raise ValueError(
+                f"Failed to access sheet index {sheet_index} in {file_path}: {e!s}"
+            ) from e
 
-    def load_from_excel_by_index(self, file_path: str,
-                                sheet_index: int,
-                                header_row: int | None = None) -> dict[str, Any]:
+    def load_from_excel_by_index(
+        self, file_path: str, sheet_index: int, header_row: int | None = None
+    ) -> dict[str, Any]:
         """シートインデックスを指定してExcelファイルを読み込み。
 
         Args:
@@ -220,7 +243,9 @@ class ExcelDataLoader:
         sheet_name = self.get_sheet_name_by_index(file_path, sheet_index)
 
         # 既存のメソッドを利用して読み込み
-        return self.load_from_excel(file_path, sheet_name=sheet_name, header_row=header_row)
+        return self.load_from_excel(
+            file_path, sheet_name=sheet_name, header_row=header_row
+        )
 
     def header_detection(self, df: pd.DataFrame) -> bool:
         """ヘッダー行の自動検出。
@@ -239,9 +264,12 @@ class ExcelDataLoader:
         second_row = df.iloc[1]
 
         # 最初の行が主に文字列、2行目が主に数値の場合
-        first_row_text_ratio = sum(isinstance(val, str) for val in first_row) / len(first_row)
-        second_row_numeric_ratio = sum(pd.api.types.is_numeric_dtype(type(val))
-                                     for val in second_row) / len(second_row)
+        first_row_text_ratio = sum(isinstance(val, str) for val in first_row) / len(
+            first_row
+        )
+        second_row_numeric_ratio = sum(
+            pd.api.types.is_numeric_dtype(type(val)) for val in second_row
+        ) / len(second_row)
 
         return first_row_text_ratio > 0.5 and second_row_numeric_ratio > 0.3
 
@@ -255,7 +283,7 @@ class ExcelDataLoader:
             List[List[str]]: JSON互換の2D配列
         """
         # NaN値を空文字列に変換
-        df_filled = df.fillna('')
+        df_filled = df.fillna("")
 
         # 全ての値を文字列に変換（JSON互換性のため）
         result = []
@@ -263,7 +291,7 @@ class ExcelDataLoader:
             converted_row = []
             for value in row:
                 if pd.isna(value):
-                    converted_row.append('')
+                    converted_row.append("")
                 elif isinstance(value, int | float):
                     # 数値は適切に文字列変換
                     if isinstance(value, float) and value.is_integer():
@@ -276,9 +304,12 @@ class ExcelDataLoader:
 
         return result
 
-    def load_from_excel(self, file_path: str,
-                       sheet_name: str | None = None,
-                       header_row: int | None = None) -> dict[str, Any]:
+    def load_from_excel(
+        self,
+        file_path: str,
+        sheet_name: str | None = None,
+        header_row: int | None = None,
+    ) -> dict[str, Any]:
         """Excelファイルを読み込みJSON形式に変換。
 
         Args:
@@ -315,7 +346,9 @@ class ExcelDataLoader:
                 df = pd.read_excel(file_path, sheet_name=sheet_name, header=header_row)
             else:
                 # 自動ヘッダー検出
-                df_no_header = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
+                df_no_header = pd.read_excel(
+                    file_path, sheet_name=sheet_name, header=None
+                )
 
                 if self.header_detection(df_no_header):
                     # ヘッダーありとして再読み込み
@@ -326,24 +359,28 @@ class ExcelDataLoader:
 
             # 空のDataFrameチェック
             if df.empty:
-                raise ValueError(f"Empty data in sheet '{sheet_name}' of file: {file_path}")
+                raise ValueError(
+                    f"Empty data in sheet '{sheet_name}' of file: {file_path}"
+                )
 
             # データ変換
             data_array = self.data_type_conversion(df)
 
             # ヘッダー情報の抽出
-            has_header = not isinstance(df.columns[0], int)  # 数値カラム名でない=ヘッダーあり
+            has_header = not isinstance(
+                df.columns[0], int
+            )  # 数値カラム名でない=ヘッダーあり
             headers = list(df.columns) if has_header else None
 
             # 結果構築
             result = {
-                'data': data_array,
-                'has_header': has_header,
-                'headers': headers,
-                'sheet_name': sheet_name,
-                'file_path': file_path,
-                'rows': len(data_array),
-                'columns': len(data_array[0]) if data_array else 0
+                "data": data_array,
+                "has_header": has_header,
+                "headers": headers,
+                "sheet_name": sheet_name,
+                "file_path": file_path,
+                "rows": len(data_array),
+                "columns": len(data_array[0]) if data_array else 0,
             }
 
             return result
@@ -356,7 +393,9 @@ class ExcelDataLoader:
             # Re-raise our custom ValueErrors without wrapping
             raise
         except Exception as e:
-            raise Exception(f"Unexpected error loading Excel file {file_path}: {e!s}") from e
+            raise Exception(
+                f"Unexpected error loading Excel file {file_path}: {e!s}"
+            ) from e
 
     def _parse_range_specification(self, range_spec: str) -> dict[str, Any]:
         """範囲指定文字列（A1:C3形式）をパースして範囲情報を取得。
@@ -377,14 +416,18 @@ class ExcelDataLoader:
         """
         # 入力検証の強化
         if not isinstance(range_spec, str):
-            raise TypeError(f"Range specification must be a string, got {type(range_spec).__name__}")
-        
+            raise TypeError(
+                f"Range specification must be a string, got {type(range_spec).__name__}"
+            )
+
         range_spec_clean = range_spec.strip()
         if not range_spec_clean:
-            raise RangeSpecificationError("Range specification cannot be empty", range_spec)
+            raise RangeSpecificationError(
+                "Range specification cannot be empty", range_spec
+            )
 
         range_spec_upper = range_spec_clean.upper()
-        
+
         # 範囲形式の解析
         try:
             start_cell, end_cell = self._split_range_specification(range_spec_upper)
@@ -392,8 +435,7 @@ class ExcelDataLoader:
             raise
         except Exception as e:
             raise RangeSpecificationError(
-                f"Failed to parse range specification: {e}", 
-                range_spec_upper
+                f"Failed to parse range specification: {e}", range_spec_upper
             ) from e
 
         # セルアドレスを行・列インデックスに変換
@@ -404,19 +446,20 @@ class ExcelDataLoader:
             raise
         except Exception as e:
             raise RangeSpecificationError(
-                f"Failed to parse cell addresses in range: {e}",
-                range_spec_upper
+                f"Failed to parse cell addresses in range: {e}", range_spec_upper
             ) from e
 
         # 範囲の妥当性チェック
-        self._validate_range_bounds(start_row, start_col, end_row, end_col, range_spec_upper)
+        self._validate_range_bounds(
+            start_row, start_col, end_row, end_col, range_spec_upper
+        )
 
         return {
-            'start_row': start_row,
-            'end_row': end_row,
-            'start_col': start_col,
-            'end_col': end_col,
-            'original_spec': range_spec_upper
+            "start_row": start_row,
+            "end_row": end_row,
+            "start_col": start_col,
+            "end_col": end_col,
+            "original_spec": range_spec_upper,
         }
 
     def _split_range_specification(self, range_spec: str) -> tuple[str, str]:
@@ -431,21 +474,27 @@ class ExcelDataLoader:
         Raises:
             RangeSpecificationError: 無効な範囲形式の場合
         """
-        if ':' in range_spec:
+        if ":" in range_spec:
             # 範囲形式 (A1:C3)
-            parts = range_spec.split(':')
+            parts = range_spec.split(":")
             if len(parts) != 2:
                 raise RangeSpecificationError(
                     f"Invalid range format. Expected 'A1:C3', got '{range_spec}'",
-                    range_spec
+                    range_spec,
                 )
             return parts[0], parts[1]
         else:
             # 単一セル形式 (A1)
             return range_spec, range_spec
 
-    def _validate_range_bounds(self, start_row: int, start_col: int, 
-                              end_row: int, end_col: int, range_spec: str) -> None:
+    def _validate_range_bounds(
+        self,
+        start_row: int,
+        start_col: int,
+        end_row: int,
+        end_col: int,
+        range_spec: str,
+    ) -> None:
         """範囲の境界値を検証。
 
         Args:
@@ -462,22 +511,22 @@ class ExcelDataLoader:
         if start_row > end_row or start_col > end_col:
             raise RangeSpecificationError(
                 f"Invalid range: start cell must be before or equal to end cell. "
-                f"Start: ({start_row+1}, {chr(65+start_col)}), "
-                f"End: ({end_row+1}, {chr(65+end_col)})",
-                range_spec
+                f"Start: ({start_row + 1}, {chr(65 + start_col)}), "
+                f"End: ({end_row + 1}, {chr(65 + end_col)})",
+                range_spec,
             )
-        
+
         # Excel の最大値を超えている場合
         if end_row >= MAX_EXCEL_ROWS:
             raise RangeSpecificationError(
-                f"Row {end_row+1} exceeds Excel maximum ({MAX_EXCEL_ROWS})",
-                range_spec
+                f"Row {end_row + 1} exceeds Excel maximum ({MAX_EXCEL_ROWS})",
+                range_spec,
             )
-        
+
         if end_col >= MAX_EXCEL_COLS:
             raise RangeSpecificationError(
-                f"Column {chr(65+end_col) if end_col < 26 else 'beyond Z'} exceeds Excel maximum",
-                range_spec
+                f"Column {chr(65 + end_col) if end_col < 26 else 'beyond Z'} exceeds Excel maximum",
+                range_spec,
             )
 
     def _parse_cell_address(self, cell_address: str) -> tuple[int, int]:
@@ -496,49 +545,47 @@ class ExcelDataLoader:
         if not cell_address or not isinstance(cell_address, str):
             raise RangeSpecificationError(
                 f"Cell address must be a non-empty string, got: {cell_address}",
-                cell_address
+                cell_address,
             )
-        
+
         # セルアドレスのパターンマッチング
         match = re.match(CELL_ADDRESS_PATTERN, cell_address.strip())
-        
+
         if not match:
             raise RangeSpecificationError(
                 f"Invalid cell address format. Expected format: 'A1', 'AB123', etc. Got: '{cell_address}'",
-                cell_address
+                cell_address,
             )
 
         col_letters, row_str = match.groups()
-        
+
         try:
             # 行番号の変換（1ベース→0ベース）
             row_index = int(row_str) - 1
-            
+
             # 行番号の範囲チェック
             if row_index >= MAX_EXCEL_ROWS:
                 raise RangeSpecificationError(
                     f"Row number {row_str} exceeds Excel maximum ({MAX_EXCEL_ROWS})",
-                    cell_address
+                    cell_address,
                 )
-            
+
             # 列番号の変換（A=0, B=1, ..., Z=25, AA=26, ...）
             col_index = self._convert_column_letters_to_index(col_letters)
-            
+
             # 列番号の範囲チェック
             if col_index >= MAX_EXCEL_COLS:
                 raise RangeSpecificationError(
-                    f"Column '{col_letters}' exceeds Excel maximum",
-                    cell_address
+                    f"Column '{col_letters}' exceeds Excel maximum", cell_address
                 )
-            
+
             return row_index, col_index
-            
+
         except ValueError as e:
             if isinstance(e, RangeSpecificationError):
                 raise
             raise RangeSpecificationError(
-                f"Failed to parse cell address '{cell_address}': {e}",
-                cell_address
+                f"Failed to parse cell address '{cell_address}': {e}", cell_address
             ) from e
 
     def _convert_column_letters_to_index(self, col_letters: str) -> int:
@@ -555,25 +602,26 @@ class ExcelDataLoader:
         """
         if not col_letters or not col_letters.isalpha():
             raise RangeSpecificationError(
-                f"Invalid column letters: '{col_letters}'",
-                col_letters
+                f"Invalid column letters: '{col_letters}'", col_letters
             )
-        
+
         col_index = 0
         for char in col_letters:
-            if not 'A' <= char <= 'Z':
+            if not "A" <= char <= "Z":
                 raise RangeSpecificationError(
-                    f"Invalid character in column: '{char}'",
-                    col_letters
+                    f"Invalid character in column: '{char}'", col_letters
                 )
-            col_index = col_index * 26 + (ord(char) - ord('A') + 1)
-        
+            col_index = col_index * 26 + (ord(char) - ord("A") + 1)
+
         return col_index - 1  # 0ベースに変換
 
-    def load_from_excel_with_range(self, file_path: str,
-                                  range_spec: str,
-                                  sheet_name: str | None = None,
-                                  header_row: int | None = None) -> dict[str, Any]:
+    def load_from_excel_with_range(
+        self,
+        file_path: str,
+        range_spec: str,
+        sheet_name: str | None = None,
+        header_row: int | None = None,
+    ) -> dict[str, Any]:
         """指定された範囲でExcelファイルを読み込み。
 
         Args:
@@ -596,32 +644,37 @@ class ExcelDataLoader:
             raise
         except Exception as e:
             raise RangeSpecificationError(
-                f"Unexpected error parsing range specification: {e}",
-                range_spec
+                f"Unexpected error parsing range specification: {e}", range_spec
             ) from e
-        
+
         # Excel全体を読み込み
         try:
             excel_data = self.load_from_excel(file_path, sheet_name, header_row)
         except Exception as e:
-            raise ValueError(f"Failed to load Excel file for range extraction: {e}") from e
-        
+            raise ValueError(
+                f"Failed to load Excel file for range extraction: {e}"
+            ) from e
+
         # データサイズの検証
-        data_rows = len(excel_data['data'])
-        data_cols = len(excel_data['data'][0]) if excel_data['data'] else 0
-        
+        data_rows = len(excel_data["data"])
+        data_cols = len(excel_data["data"][0]) if excel_data["data"] else 0
+
         # 範囲外アクセスのチェック
         self._validate_range_against_data(range_info, data_rows, data_cols, range_spec)
-        
+
         # 指定範囲のデータを効率的に抽出
-        range_data = self._extract_range_data(excel_data['data'], range_info)
-        
+        range_data = self._extract_range_data(excel_data["data"], range_info)
+
         # 結果を構築
         return self._build_range_result(range_data, excel_data, range_spec)
 
-    def _validate_range_against_data(self, range_info: dict[str, Any], 
-                                   data_rows: int, data_cols: int, 
-                                   range_spec: str) -> None:
+    def _validate_range_against_data(
+        self,
+        range_info: dict[str, Any],
+        data_rows: int,
+        data_cols: int,
+        range_spec: str,
+    ) -> None:
         """指定範囲がデータサイズ内に収まっているかチェック。
 
         Args:
@@ -636,26 +689,27 @@ class ExcelDataLoader:
         if data_rows == 0 or data_cols == 0:
             raise RangeSpecificationError(
                 f"Cannot apply range to empty data. Data size: {data_rows}x{data_cols}",
-                range_spec
-            )
-        
-        # 範囲の終了位置がデータサイズを超えているかチェック
-        if range_info['end_row'] >= data_rows:
-            raise RangeSpecificationError(
-                f"Range row {range_info['end_row']+1} exceeds data rows ({data_rows}). "
-                f"Data size: {data_rows}x{data_cols}",
-                range_spec
-            )
-        
-        if range_info['end_col'] >= data_cols:
-            raise RangeSpecificationError(
-                f"Range column {range_info['end_col']+1} exceeds data columns ({data_cols}). "
-                f"Data size: {data_rows}x{data_cols}",
-                range_spec
+                range_spec,
             )
 
-    def _extract_range_data(self, full_data: list[list[str]], 
-                           range_info: dict[str, Any]) -> list[list[str]]:
+        # 範囲の終了位置がデータサイズを超えているかチェック
+        if range_info["end_row"] >= data_rows:
+            raise RangeSpecificationError(
+                f"Range row {range_info['end_row'] + 1} exceeds data rows ({data_rows}). "
+                f"Data size: {data_rows}x{data_cols}",
+                range_spec,
+            )
+
+        if range_info["end_col"] >= data_cols:
+            raise RangeSpecificationError(
+                f"Range column {range_info['end_col'] + 1} exceeds data columns ({data_cols}). "
+                f"Data size: {data_rows}x{data_cols}",
+                range_spec,
+            )
+
+    def _extract_range_data(
+        self, full_data: list[list[str]], range_info: dict[str, Any]
+    ) -> list[list[str]]:
         """データから指定範囲を効率的に抽出。
 
         Args:
@@ -666,25 +720,25 @@ class ExcelDataLoader:
             list[list[str]]: 抽出されたデータ
         """
         range_data = []
-        
-        for row_idx in range(range_info['start_row'], range_info['end_row'] + 1):
+
+        for row_idx in range(range_info["start_row"], range_info["end_row"] + 1):
             row = []
             source_row = full_data[row_idx]
-            
-            for col_idx in range(range_info['start_col'], range_info['end_col'] + 1):
+
+            for col_idx in range(range_info["start_col"], range_info["end_col"] + 1):
                 # 範囲チェックは既に済んでいるので、安全にアクセス可能
                 if col_idx < len(source_row):
                     row.append(source_row[col_idx])
                 else:
-                    row.append('')  # 空セルの処理
-            
+                    row.append("")  # 空セルの処理
+
             range_data.append(row)
-        
+
         return range_data
 
-    def _build_range_result(self, range_data: list[list[str]], 
-                          excel_data: dict[str, Any], 
-                          range_spec: str) -> dict[str, Any]:
+    def _build_range_result(
+        self, range_data: list[list[str]], excel_data: dict[str, Any], range_spec: str
+    ) -> dict[str, Any]:
         """範囲抽出結果を構築。
 
         Args:
@@ -696,19 +750,19 @@ class ExcelDataLoader:
             dict[str, Any]: 構築された結果
         """
         return {
-            'data': range_data,
-            'has_header': excel_data['has_header'],
-            'headers': excel_data['headers'],
-            'sheet_name': excel_data['sheet_name'],
-            'file_path': excel_data['file_path'],
-            'range': range_spec,
-            'rows': len(range_data),
-            'columns': len(range_data[0]) if range_data else 0
+            "data": range_data,
+            "has_header": excel_data["has_header"],
+            "headers": excel_data["headers"],
+            "sheet_name": excel_data["sheet_name"],
+            "file_path": excel_data["file_path"],
+            "range": range_spec,
+            "rows": len(range_data),
+            "columns": len(range_data[0]) if range_data else 0,
         }
 
-    def load_from_excel_with_header_row(self, file_path: str,
-                                       header_row: int,
-                                       sheet_name: str | None = None) -> dict[str, Any]:
+    def load_from_excel_with_header_row(
+        self, file_path: str, header_row: int, sheet_name: str | None = None
+    ) -> dict[str, Any]:
         """指定されたヘッダー行でExcelファイルを読み込み。
 
         Args:
@@ -725,32 +779,39 @@ class ExcelDataLoader:
         """
         # 事前検証
         self._validate_header_row(header_row)
-        
+
         try:
             # Excel読み込み（明示的なheader_row指定）
             excel_data = self.load_from_excel(file_path, sheet_name, header_row)
-            
+
             # データ範囲内でのヘッダー行チェック
             self._validate_header_row_against_data(header_row, excel_data, file_path)
-            
+
             # ヘッダー行情報を追加
-            excel_data['header_row'] = header_row
-            
+            excel_data["header_row"] = header_row
+
             # ヘッダー名の正規化（必要に応じて）
-            if excel_data['has_header'] and excel_data['headers']:
-                excel_data['headers'] = self._normalize_header_names(excel_data['headers'])
-            
+            if excel_data["has_header"] and excel_data["headers"]:
+                excel_data["headers"] = self._normalize_header_names(
+                    excel_data["headers"]
+                )
+
             return excel_data
-            
+
         except Exception as e:
             if isinstance(e, (ValueError, TypeError)):
                 raise
-            raise ValueError(f"Failed to load Excel with header row {header_row}: {e}") from e
+            raise ValueError(
+                f"Failed to load Excel with header row {header_row}: {e}"
+            ) from e
 
-    def load_from_excel_with_header_row_and_range(self, file_path: str,
-                                                 header_row: int,
-                                                 range_spec: str,
-                                                 sheet_name: str | None = None) -> dict[str, Any]:
+    def load_from_excel_with_header_row_and_range(
+        self,
+        file_path: str,
+        header_row: int,
+        range_spec: str,
+        sheet_name: str | None = None,
+    ) -> dict[str, Any]:
         """ヘッダー行指定と範囲指定の組み合わせでExcelファイルを読み込み。
 
         Args:
@@ -769,23 +830,29 @@ class ExcelDataLoader:
         """
         # 事前検証
         self._validate_header_row(header_row)
-        
+
         try:
             # 範囲指定付きで読み込み（header_rowも考慮）
-            excel_data = self.load_from_excel_with_range(file_path, range_spec, sheet_name, header_row)
-            
+            excel_data = self.load_from_excel_with_range(
+                file_path, range_spec, sheet_name, header_row
+            )
+
             # ヘッダー行と範囲の整合性チェック
-            self._validate_header_row_and_range_compatibility(header_row, range_spec, excel_data)
-            
+            self._validate_header_row_and_range_compatibility(
+                header_row, range_spec, excel_data
+            )
+
             # ヘッダー行情報を追加
-            excel_data['header_row'] = header_row
-            
+            excel_data["header_row"] = header_row
+
             # ヘッダー名の正規化（必要に応じて）
-            if excel_data['has_header'] and excel_data['headers']:
-                excel_data['headers'] = self._normalize_header_names(excel_data['headers'])
-            
+            if excel_data["has_header"] and excel_data["headers"]:
+                excel_data["headers"] = self._normalize_header_names(
+                    excel_data["headers"]
+                )
+
             return excel_data
-            
+
         except (RangeSpecificationError, ValueError, TypeError):
             raise
         except Exception as e:
@@ -793,9 +860,9 @@ class ExcelDataLoader:
                 f"Failed to load Excel with header row {header_row} and range {range_spec}: {e}"
             ) from e
 
-    def _validate_header_row_and_range_compatibility(self, header_row: int, 
-                                                   range_spec: str,
-                                                   excel_data: dict[str, Any]) -> None:
+    def _validate_header_row_and_range_compatibility(
+        self, header_row: int, range_spec: str, excel_data: dict[str, Any]
+    ) -> None:
         """ヘッダー行と範囲指定の整合性をチェック。
 
         Args:
@@ -810,17 +877,19 @@ class ExcelDataLoader:
         try:
             range_info = self._parse_range_specification(range_spec)
         except RangeSpecificationError as e:
-            raise ValueError(f"Invalid range specification for header row validation: {e}") from e
-        
+            raise ValueError(
+                f"Invalid range specification for header row validation: {e}"
+            ) from e
+
         # ヘッダー行が範囲内にあるかチェック
-        if not (range_info['start_row'] <= header_row <= range_info['end_row']):
+        if not (range_info["start_row"] <= header_row <= range_info["end_row"]):
             raise ValueError(
                 f"Header row {header_row} is outside the specified range {range_spec}. "
                 f"Range rows: {range_info['start_row']}-{range_info['end_row']}"
             )
-        
+
         # データが実際に存在するかチェック
-        if not excel_data['data']:
+        if not excel_data["data"]:
             raise ValueError(
                 f"No data available for header row {header_row} in range {range_spec}"
             )
@@ -837,20 +906,24 @@ class ExcelDataLoader:
         """
         if header_row is None:
             return  # 自動検出モード
-        
+
         if not isinstance(header_row, int):
-            raise TypeError(f"Header row must be an integer, got {type(header_row).__name__}")
-        
+            raise TypeError(
+                f"Header row must be an integer, got {type(header_row).__name__}"
+            )
+
         if header_row < 0:
             raise ValueError(f"Header row must be non-negative, got {header_row}")
-        
+
         # Excel の最大行数チェック
         if header_row >= MAX_EXCEL_ROWS:
-            raise ValueError(f"Header row {header_row} exceeds Excel maximum ({MAX_EXCEL_ROWS})")
+            raise ValueError(
+                f"Header row {header_row} exceeds Excel maximum ({MAX_EXCEL_ROWS})"
+            )
 
-    def _validate_header_row_against_data(self, header_row: int, 
-                                        excel_data: dict[str, Any], 
-                                        file_path: str) -> None:
+    def _validate_header_row_against_data(
+        self, header_row: int, excel_data: dict[str, Any], file_path: str
+    ) -> None:
         """ヘッダー行がデータ範囲内にあるかチェック。
 
         Args:
@@ -861,17 +934,17 @@ class ExcelDataLoader:
         Raises:
             ValueError: ヘッダー行がデータ範囲外の場合
         """
-        data_rows = len(excel_data['data'])
-        
+        data_rows = len(excel_data["data"])
+
         if data_rows == 0:
             raise ValueError(
                 f"Cannot use header row {header_row} on empty data in {file_path}"
             )
-        
+
         if header_row >= data_rows:
             raise ValueError(
                 f"Header row {header_row} is out of range. "
-                f"Data has {data_rows} rows (0-{data_rows-1}). File: {file_path}"
+                f"Data has {data_rows} rows (0-{data_rows - 1}). File: {file_path}"
             )
 
     def _normalize_header_names(self, headers: list[str]) -> list[str]:
@@ -885,23 +958,509 @@ class ExcelDataLoader:
         """
         normalized = []
         seen = set()
-        
+
         for i, header in enumerate(headers):
             # 基本的な正規化
             normalized_header = str(header).strip() if header else ""
-            
+
             # 空のヘッダーに対するデフォルト名
             if not normalized_header:
-                normalized_header = f"Column{i+1}"
-            
+                normalized_header = f"Column{i + 1}"
+
             # 重複回避
             original = normalized_header
             counter = 1
             while normalized_header in seen:
                 normalized_header = f"{original}_{counter}"
                 counter += 1
-            
+
             seen.add(normalized_header)
             normalized.append(normalized_header)
-        
+
         return normalized
+
+    def _parse_skip_rows_specification(self, skip_rows: str) -> list[int]:
+        """Skip Rows指定文字列を解析してリストに変換。
+
+        Args:
+            skip_rows: Skip Rows指定文字列（例: "0,1,2", "0-2,5,7-9"）
+
+        Returns:
+            list[int]: ソート済みの一意な行番号リスト
+
+        Raises:
+            SkipRowsError: 無効な形式の場合
+            TypeError: skip_rowsが文字列でない場合
+        """
+        if not isinstance(skip_rows, str):
+            raise TypeError("Skip rows must be a string")
+
+        skip_rows_clean = skip_rows.strip()
+        if not skip_rows_clean:
+            raise SkipRowsError("Skip rows specification cannot be empty", skip_rows)
+
+        row_numbers = []
+
+        # カンマ区切りで分割
+        parts = skip_rows_clean.split(SKIP_ROWS_LIST_SEPARATOR)
+
+        for part in parts:
+            part = part.strip()
+            if not part:
+                raise SkipRowsError(
+                    "Invalid skip rows format: empty part found", skip_rows
+                )
+
+            if SKIP_ROWS_RANGE_SEPARATOR in part:
+                # 範囲形式（例: "0-2", "5-7"）
+                try:
+                    start_str, end_str = part.split(SKIP_ROWS_RANGE_SEPARATOR, 1)
+                    start = int(start_str.strip())
+                    end = int(end_str.strip())
+
+                    # 範囲の妥当性チェック
+                    self._validate_skip_rows_range(start, end, part, skip_rows)
+
+                    row_numbers.extend(range(start, end + 1))
+
+                except ValueError as e:
+                    if isinstance(e, SkipRowsError):
+                        raise
+                    if "invalid literal" in str(e):
+                        raise SkipRowsError(
+                            f"Invalid skip rows format: {part}", skip_rows
+                        )
+                    raise SkipRowsError(
+                        f"Error parsing range {part}: {e}", skip_rows
+                    ) from e
+            else:
+                # 単一行番号
+                try:
+                    row_num = int(part)
+                    if row_num < 0:
+                        raise SkipRowsError(
+                            f"Negative row number not allowed: {row_num}", skip_rows
+                        )
+                    if row_num >= MAX_EXCEL_ROWS:
+                        raise SkipRowsError(
+                            f"Row number {row_num} exceeds Excel maximum ({MAX_EXCEL_ROWS})",
+                            skip_rows,
+                        )
+                    row_numbers.append(row_num)
+                except ValueError as e:
+                    if isinstance(e, SkipRowsError):
+                        raise
+                    raise SkipRowsError(
+                        f"Invalid skip rows format: {part}", skip_rows
+                    ) from e
+
+        # 重複を排除してソート
+        unique_rows = sorted(set(row_numbers))
+
+        # 最大数チェック
+        if len(unique_rows) > MAX_SKIP_ROWS_COUNT:
+            raise SkipRowsError(
+                f"Too many skip rows ({len(unique_rows)}). Maximum allowed: {MAX_SKIP_ROWS_COUNT}",
+                skip_rows,
+            )
+
+        return unique_rows
+
+    def _validate_skip_rows_range(
+        self, start: int, end: int, part: str, original_spec: str
+    ) -> None:
+        """Skip Rows範囲の妥当性を検証。
+
+        Args:
+            start: 開始行番号
+            end: 終了行番号
+            part: 範囲指定部分
+            original_spec: 元の指定文字列
+
+        Raises:
+            SkipRowsError: 無効な範囲の場合
+        """
+        if start < 0 or end < 0:
+            raise SkipRowsError(
+                f"Negative row numbers not allowed: {part}", original_spec
+            )
+
+        if start > end:
+            raise SkipRowsError(f"Invalid range (start > end): {part}", original_spec)
+
+        if start >= MAX_EXCEL_ROWS or end >= MAX_EXCEL_ROWS:
+            raise SkipRowsError(
+                f"Row number in range {part} exceeds Excel maximum ({MAX_EXCEL_ROWS})",
+                original_spec,
+            )
+
+        if (end - start + 1) > MAX_SKIP_ROWS_COUNT:
+            raise SkipRowsError(
+                f"Range {part} too large ({end - start + 1} rows). Maximum range size: {MAX_SKIP_ROWS_COUNT}",
+                original_spec,
+            )
+
+    def _validate_skip_rows_specification(self, skip_rows: str | None) -> None:
+        """Skip Rows指定の妥当性を検証。
+
+        Args:
+            skip_rows: Skip Rows指定文字列（None=スキップなし）
+
+        Raises:
+            TypeError: skip_rowsが文字列でない場合
+            ValueError: 無効な形式の場合
+        """
+        if skip_rows is None:
+            return  # スキップなしモード
+
+        if not isinstance(skip_rows, str):
+            raise TypeError("Skip rows must be a string")
+
+        if not skip_rows.strip():
+            raise ValueError("Skip rows specification cannot be empty")
+
+    def load_from_excel_with_skip_rows(
+        self, file_path: str, skip_rows: str, sheet_name: str | None = None
+    ) -> dict[str, Any]:
+        """Skip Rows指定でExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            skip_rows: Skip Rows指定（例: "0,1,2", "0-2,5"）
+            sheet_name: 読み込むシート名（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ（Skip Rows情報付き）
+
+        Raises:
+            ValueError: 無効なSkip Rows指定の場合
+        """
+        # Skip Rows指定の検証
+        self._validate_skip_rows_specification(skip_rows)
+
+        # Skip Rows指定を解析
+        skip_row_list = self._parse_skip_rows_specification(skip_rows)
+
+        # 通常のExcel読み込みを実行
+        excel_data = self.load_from_excel(file_path, sheet_name)
+
+        # Skip Rows処理
+        filtered_data = self._apply_skip_rows(excel_data["data"], skip_row_list)
+
+        # 結果を構築
+        result = {
+            "data": filtered_data,
+            "has_header": excel_data["has_header"],
+            "headers": excel_data["headers"],
+            "sheet_name": excel_data["sheet_name"],
+            "file_path": file_path,
+            "skip_rows": skip_rows,
+            "skipped_row_count": len(skip_row_list),
+            "rows": len(filtered_data),
+            "columns": len(filtered_data[0]) if filtered_data else 0,
+        }
+
+        return result
+
+    def _apply_skip_rows(
+        self, data: list[list[str]], skip_row_list: list[int]
+    ) -> list[list[str]]:
+        """データからスキップ行を除外。
+
+        Args:
+            data: 元のデータ
+            skip_row_list: スキップする行番号のリスト
+
+        Returns:
+            list[list[str]]: スキップ処理されたデータ
+        """
+        if not skip_row_list:
+            return data
+
+        # スキップ行の最大値がデータ範囲内かチェック
+        max_skip_row = max(skip_row_list) if skip_row_list else -1
+        if max_skip_row >= len(data):
+            raise ValueError(
+                f"Skip row {max_skip_row} is out of range. Data has {len(data)} rows (0-{len(data) - 1})"
+            )
+
+        # スキップ行を除外したデータを構築
+        filtered_data = []
+        for row_index, row in enumerate(data):
+            if row_index not in skip_row_list:
+                filtered_data.append(row)
+
+        return filtered_data
+
+    def load_from_excel_with_skip_rows_and_header(
+        self,
+        file_path: str,
+        skip_rows: str,
+        header_row: int,
+        sheet_name: str | None = None,
+    ) -> dict[str, Any]:
+        """Skip Rowsとヘッダー行指定の組み合わせでExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            skip_rows: Skip Rows指定（例: "0,1,2", "0-2,5"）
+            header_row: ヘッダー行番号（0ベース）
+            sheet_name: 読み込むシート名（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ
+
+        Raises:
+            ValueError: 無効なSkip Rowsまたはヘッダー行指定の場合
+            TypeError: header_rowが整数でない場合
+        """
+        # 事前検証
+        self._validate_skip_rows_specification(skip_rows)
+        self._validate_header_row(header_row)
+
+        # Skip Rows指定を解析
+        skip_row_list = self._parse_skip_rows_specification(skip_rows)
+
+        # 通常のExcel読み込みを実行
+        excel_data = self.load_from_excel(file_path, sheet_name)
+
+        # Skip Rows処理を先に適用
+        filtered_data = self._apply_skip_rows(excel_data["data"], skip_row_list)
+
+        # 共通化されたヘッダー処理を使用
+        headers, has_header, data_without_header = self._process_header_after_skip(
+            filtered_data, header_row, skip_row_list
+        )
+
+        # 調整後のヘッダー行番号を取得（結果表示用）
+        adjusted_header_row = self._adjust_header_row_after_skip(
+            header_row, skip_row_list
+        )
+
+        # 結果を構築
+        result = {
+            "data": data_without_header,
+            "has_header": has_header,
+            "headers": headers,
+            "sheet_name": excel_data["sheet_name"],
+            "file_path": file_path,
+            "skip_rows": skip_rows,
+            "header_row": header_row,
+            "adjusted_header_row": adjusted_header_row,
+            "skipped_row_count": len(skip_row_list),
+            "rows": len(data_without_header),
+            "columns": len(data_without_header[0]) if data_without_header else 0,
+        }
+
+        return result
+
+    def load_from_excel_with_skip_rows_and_range(
+        self,
+        file_path: str,
+        range_spec: str,
+        skip_rows: str,
+        sheet_name: str | None = None,
+    ) -> dict[str, Any]:
+        """Skip Rowsと範囲指定の組み合わせでExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            range_spec: 範囲指定（例: "A1:C3", "B2"）
+            skip_rows: Skip Rows指定（例: "0,1,2", "0-2,5"）
+            sheet_name: 読み込むシート名（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ
+
+        Raises:
+            ValueError: 無効なSkip Rowsまたは範囲指定の場合
+            RangeSpecificationError: 無効な範囲指定の場合
+        """
+        # 事前検証
+        self._validate_skip_rows_specification(skip_rows)
+
+        # Skip Rows指定を解析
+        skip_row_list = self._parse_skip_rows_specification(skip_rows)
+
+        # 範囲指定付きでExcel読み込み
+        excel_data = self.load_from_excel_with_range(file_path, range_spec, sheet_name)
+
+        # Skip Rows処理を適用
+        filtered_data = self._apply_skip_rows(excel_data["data"], skip_row_list)
+
+        # 結果を構築
+        result = {
+            "data": filtered_data,
+            "has_header": excel_data["has_header"],
+            "headers": excel_data["headers"],
+            "sheet_name": excel_data["sheet_name"],
+            "file_path": file_path,
+            "range": range_spec,
+            "skip_rows": skip_rows,
+            "skipped_row_count": len(skip_row_list),
+            "rows": len(filtered_data),
+            "columns": len(filtered_data[0]) if filtered_data else 0,
+        }
+
+        return result
+
+    def _adjust_header_row_after_skip(
+        self, original_header_row: int, skip_row_list: list[int]
+    ) -> int:
+        """スキップ処理後のヘッダー行番号を調整。
+
+        Args:
+            original_header_row: 元のヘッダー行番号
+            skip_row_list: スキップする行番号のリスト
+
+        Returns:
+            int: 調整後のヘッダー行番号
+        """
+        if not skip_row_list:
+            return original_header_row
+
+        # 元のヘッダー行がスキップされるかチェック
+        if original_header_row in skip_row_list:
+            raise ValueError(
+                f"Header row {original_header_row} is specified to be skipped. "
+                f"This is not allowed."
+            )
+
+        # スキップされる行のうち、ヘッダー行より前にある行をカウント
+        skipped_before_header = sum(
+            1 for skip_row in skip_row_list if skip_row < original_header_row
+        )
+
+        return original_header_row - skipped_before_header
+
+    def _process_header_after_skip(
+        self, filtered_data: list[list[str]], header_row: int, skip_row_list: list[int]
+    ) -> tuple[list[str], bool, list[list[str]]]:
+        """スキップ処理後のヘッダー処理を共通化。
+
+        Args:
+            filtered_data: スキップ処理後のデータ
+            header_row: 元のヘッダー行番号
+            skip_row_list: スキップした行番号のリスト
+
+        Returns:
+            tuple: (headers, has_header, data_without_header)
+
+        Raises:
+            ValueError: ヘッダー行がスキップ後に無効になる場合
+        """
+        # スキップ後のデータでヘッダー行番号を調整
+        adjusted_header_row = self._adjust_header_row_after_skip(
+            header_row, skip_row_list
+        )
+
+        # 調整後のヘッダー行がデータ範囲内かチェック
+        if adjusted_header_row >= len(filtered_data):
+            raise ValueError(
+                f"Header row {header_row} becomes invalid after skipping rows. "
+                f"Filtered data has {len(filtered_data)} rows"
+            )
+
+        # ヘッダー処理
+        headers = []
+        has_header = False
+        data_without_header = filtered_data
+
+        if 0 <= adjusted_header_row < len(filtered_data):
+            headers = [
+                str(cell).strip() if cell else f"Column{i + 1}"
+                for i, cell in enumerate(filtered_data[adjusted_header_row])
+            ]
+            headers = self._normalize_header_names(headers)
+            has_header = True
+            # ヘッダー行を除外
+            data_without_header = [
+                row for i, row in enumerate(filtered_data) if i != adjusted_header_row
+            ]
+
+        return headers, has_header, data_without_header
+
+    def load_from_excel_with_skip_rows_range_and_header(
+        self,
+        file_path: str,
+        skip_rows: str,
+        range_spec: str,
+        header_row: int,
+        sheet_name: str | None = None,
+    ) -> dict[str, Any]:
+        """Skip Rows、範囲指定、ヘッダー行指定の3つを組み合わせたExcelファイル読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            skip_rows: Skip Rows指定（例: "0,1,2", "0-2,5"）
+            range_spec: 範囲指定（例: "A1:C3", "B2"）
+            header_row: ヘッダー行番号（0ベース）
+            sheet_name: 読み込むシート名（None=自動検出）
+
+        Returns:
+            dict[str, Any]: 変換されたJSONデータ
+
+        Raises:
+            ValueError: 無効な指定の場合
+            RangeSpecificationError: 無効な範囲指定の場合
+            TypeError: header_rowが整数でない場合
+        """
+        # 事前検証
+        self._validate_skip_rows_specification(skip_rows)
+        self._validate_header_row(header_row)
+
+        # Skip Rows指定を解析
+        skip_row_list = self._parse_skip_rows_specification(skip_rows)
+
+        # 範囲指定付きでExcel読み込み
+        excel_data = self.load_from_excel_with_range(file_path, range_spec, sheet_name)
+
+        # Skip Rows処理を先に適用
+        filtered_data = self._apply_skip_rows(excel_data["data"], skip_row_list)
+
+        # スキップ後のデータでヘッダー行番号を調整
+        adjusted_header_row = self._adjust_header_row_after_skip(
+            header_row, skip_row_list
+        )
+
+        # 調整後のヘッダー行がデータ範囲内かチェック
+        if adjusted_header_row >= len(filtered_data):
+            raise ValueError(
+                f"Header row {header_row} becomes invalid after skipping rows {skip_rows}. "
+                f"Filtered data has {len(filtered_data)} rows"
+            )
+
+        # ヘッダー処理
+        headers = []
+        has_header = False
+        data_without_header = filtered_data
+
+        if 0 <= adjusted_header_row < len(filtered_data):
+            headers = [
+                str(cell).strip() if cell else f"Column{i + 1}"
+                for i, cell in enumerate(filtered_data[adjusted_header_row])
+            ]
+            headers = self._normalize_header_names(headers)
+            has_header = True
+            # ヘッダー行を除外
+            data_without_header = [
+                row for i, row in enumerate(filtered_data) if i != adjusted_header_row
+            ]
+
+        # 結果を構築
+        result = {
+            "data": data_without_header,
+            "has_header": has_header,
+            "headers": headers,
+            "sheet_name": excel_data["sheet_name"],
+            "file_path": file_path,
+            "range": range_spec,
+            "skip_rows": skip_rows,
+            "header_row": header_row,
+            "adjusted_header_row": adjusted_header_row,
+            "skipped_row_count": len(skip_row_list),
+            "rows": len(data_without_header),
+            "columns": len(data_without_header[0]) if data_without_header else 0,
+        }
+
+        return result
