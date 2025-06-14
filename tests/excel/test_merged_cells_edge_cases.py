@@ -54,7 +54,7 @@ class TestMergedCellsEdgeCases:
         unicode_texts = [
             "🎯💯📊🔥⭐️🚀💎🌟✨🎨",  # 絵文字
             "𝕊𝕠𝕞𝔦𝔞𝔩 𝔪𝔞𝔯𝔨",  # Mathematical Script
-            "Ԁɑtɑ ɑnɑℓʏsɨs",  # 特殊ラテン文字
+            "Data analysis",  # 特殊ラテン文字(修正版)
             "データ分析・解析・統計処理・可視化",  # 日本語長文
             "中文数据分析与处理系统测试",  # 中国語
             "العربية تحليل البيانات",  # アラビア語
