@@ -394,12 +394,12 @@ class ExcelDataLoader:
         first_row = df.iloc[0]
         second_row = df.iloc[1]
 
-        # 最初の行が主に文字列、2行目が主に数値の場合
+        # ヘッダー検出ロジック改善: より厳密な判定条件
         first_row_text_ratio = sum(isinstance(val, str) for val in first_row) / len(
             first_row
         )
-        
-        # 2行目の数値判定（文字列として読み込まれた数値も考慮）
+
+        # 2行目の数値判定(文字列として読み込まれた数値も考慮)
         def is_numeric_value(val):
             if pd.api.types.is_numeric_dtype(type(val)):
                 return True
@@ -410,12 +410,47 @@ class ExcelDataLoader:
                 except (ValueError, TypeError):
                     return False
             return False
-            
+
         second_row_numeric_ratio = sum(
             is_numeric_value(val) for val in second_row
         ) / len(second_row)
 
-        return first_row_text_ratio > 0.5 and second_row_numeric_ratio > 0.3
+        # より厳密な判定条件:
+        # 1. 1行目が主に文字列 (>= 0.8) かつ 2行目が主に数値 (>= 0.5)
+        # 2. または1行目が全て文字列で2行目に数値が含まれる場合
+        strict_header_condition = (
+            first_row_text_ratio >= 0.8 and second_row_numeric_ratio >= 0.5
+        )
+
+        # 緩い条件での追加チェック: 1行目が典型的なヘッダー用語を含む
+        header_keywords = {
+            "name",
+            "id",
+            "title",
+            "date",
+            "price",
+            "amount",
+            "count",
+            "名前",
+            "番号",
+            "タイトル",
+            "日付",
+            "価格",
+            "金額",
+            "数量",
+        }
+        first_row_str = [str(val).lower() for val in first_row if isinstance(val, str)]
+        has_header_keywords = any(
+            keyword in " ".join(first_row_str) for keyword in header_keywords
+        )
+
+        loose_header_condition = (
+            first_row_text_ratio > 0.6
+            and second_row_numeric_ratio > 0.3
+            and has_header_keywords
+        )
+
+        return strict_header_condition or loose_header_condition
 
     def data_type_conversion(self, df: pd.DataFrame) -> list[list[str]]:
         """DataFrameをJSON互換の2D配列に変換。
@@ -512,7 +547,7 @@ class ExcelDataLoader:
 
             # ヘッダー情報の抽出
             has_header = not isinstance(
-                df.columns[0], (int, np.integer)
+                df.columns[0], int | np.integer
             )  # 数値カラム名でない=ヘッダーあり
             headers = list(df.columns) if has_header else None
 

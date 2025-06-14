@@ -28,39 +28,42 @@ except ImportError:
 
 def create_mock_state_machine(srcdir="/tmp"):
     """Create a mock state machine for testing JsonTableDirective."""
+
     class MockReporter:
         def warning(self, msg, *args, **kwargs):
             pass
+
         def error(self, msg, *args, **kwargs):
             pass
+
         def info(self, msg, *args, **kwargs):
             pass
-    
+
     class MockConfig:
         def __init__(self):
             self.jsontable_max_rows = 1000
-    
+
     class MockEnv:
         def __init__(self, srcdir):
             self.config = MockConfig()
             self.srcdir = srcdir
-    
+
     class MockSettings:
         def __init__(self, srcdir):
             self.env = MockEnv(srcdir)
-    
+
     class MockDocument:
         def __init__(self, srcdir):
             self.settings = MockSettings(srcdir)
-    
+
     class MockState:
         def __init__(self, srcdir):
             self.document = MockDocument(srcdir)
-    
+
     class MockStateMachine:
         def __init__(self):
             self.reporter = MockReporter()
-    
+
     return MockStateMachine(), MockState(srcdir)
 
 

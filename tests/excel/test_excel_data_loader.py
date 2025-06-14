@@ -187,9 +187,10 @@ class TestExcelDataLoader:
         with pytest.raises(ValueError, match="Unsafe file path"):
             self.loader.load_from_excel("../../../etc/passwd")
 
-        # 存在しないファイル
+        # 存在しないファイル(絶対パスを使用)
+        nonexistent_path = os.path.join(self.temp_dir, "nonexistent.xlsx")
         with pytest.raises(FileNotFoundError):
-            self.loader.load_from_excel("nonexistent.xlsx")
+            self.loader.load_from_excel(nonexistent_path)
 
     def test_load_from_excel_empty_file(self):
         """空のExcelファイルのテスト。"""

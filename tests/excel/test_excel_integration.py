@@ -16,43 +16,47 @@ try:
     EXCEL_AVAILABLE = True
 except ImportError:
     EXCEL_AVAILABLE = False
+
+
 def create_mock_state_machine(srcdir="/tmp"):
     """Create a mock state machine for testing JsonTableDirective."""
+
     class MockReporter:
         def warning(self, msg, *args, **kwargs):
             pass
+
         def error(self, msg, *args, **kwargs):
             pass
+
         def info(self, msg, *args, **kwargs):
             pass
-    
+
     class MockConfig:
         def __init__(self):
             self.jsontable_max_rows = 1000
-    
+
     class MockEnv:
         def __init__(self, srcdir):
             self.config = MockConfig()
             self.srcdir = srcdir
-    
+
     class MockSettings:
         def __init__(self, srcdir):
             self.env = MockEnv(srcdir)
-    
+
     class MockDocument:
         def __init__(self, srcdir):
             self.settings = MockSettings(srcdir)
-    
+
     class MockState:
         def __init__(self, srcdir):
             self.document = MockDocument(srcdir)
-    
+
     class MockStateMachine:
         def __init__(self):
             self.reporter = MockReporter()
-    
-    return MockStateMachine(), MockState(srcdir)
 
+    return MockStateMachine(), MockState(srcdir)
 
 
 @pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
@@ -115,7 +119,6 @@ class TestExcelIntegration:
         excel_path = self.create_test_excel("test.xlsx", test_data)
 
         # ディレクティブインスタンス作成
-        env = self.create_mock_env()
 
         with docutils_namespace():
             mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
@@ -147,7 +150,7 @@ class TestExcelIntegration:
         test_data = [["Alice", "25", "Tokyo"], ["Bob", "30", "Osaka"]]
         excel_path = self.create_test_excel("test_no_header.xlsx", test_data, False)
 
-        env = self.create_mock_env()
+        self.create_mock_env()
 
         with docutils_namespace():
             mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
@@ -196,12 +199,12 @@ class TestExcelIntegration:
         with open(json_path, "w") as f:
             json_module.dump(json_data, f)
 
-        env = self.create_mock_env()
+        self.create_mock_env()
 
         # Excelからの読み込み
         with docutils_namespace():
             mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
-            
+
             excel_directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(excel_path)],
@@ -220,7 +223,7 @@ class TestExcelIntegration:
         # JSONからの読み込み
         with docutils_namespace():
             mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
-            
+
             json_directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(json_path)],
@@ -241,7 +244,7 @@ class TestExcelIntegration:
 
     def test_error_handling(self):
         """エラーハンドリングのテスト。"""
-        env = self.create_mock_env()
+        self.create_mock_env()
 
         # 存在しないExcelファイル
         with docutils_namespace():
@@ -267,7 +270,7 @@ class TestExcelIntegration:
         """xlsx と xls 両方の対応テスト。"""
         test_data = [["Name", "Age"], ["Alice", "25"], ["Bob", "30"]]
 
-        env = self.create_mock_env()
+        self.create_mock_env()
 
         # .xlsx ファイルのテスト
         xlsx_path = self.create_test_excel("test.xlsx", test_data)
@@ -292,14 +295,16 @@ class TestExcelIntegration:
             assert len(xlsx_data) == 2
             assert xlsx_data[0]["Name"] == "Alice"
 
-        # .xls ファイルのテスト(パンダスがサポートしている場合)
+        # .xls ファイルのテスト(xlwtエンジンがサポートされている場合)
         try:
             xls_path = os.path.join(self.temp_dir, "test.xls")
             df = pd.DataFrame(test_data[1:], columns=test_data[0])
             df.to_excel(xls_path, index=False, engine="xlwt")
 
             with docutils_namespace():
-                mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+                mock_state_machine, mock_state = create_mock_state_machine(
+                    self.temp_dir
+                )
 
                 directive = JsonTableDirective(
                     name="jsontable",
@@ -310,7 +315,7 @@ class TestExcelIntegration:
                     content_offset=0,
                     block_text="",
                     state=mock_state,
-                state_machine=mock_state_machine,
+                    state_machine=mock_state_machine,
                 )
             directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
@@ -318,9 +323,9 @@ class TestExcelIntegration:
             assert len(xls_data) == 2
             assert xls_data[0]["Name"] == "Alice"
 
-        except ImportError:
-            # xlwt が利用できない場合はスキップ
-            pytest.skip("xlwt not available for .xls file testing")
+        except (ImportError, ValueError):
+            # xlwtエンジンが利用できない場合はスキップ
+            pytest.skip("xlwt engine not available for .xls file testing")
 
 
 @pytest.mark.skipif(EXCEL_AVAILABLE, reason="Test Excel unavailable error")
