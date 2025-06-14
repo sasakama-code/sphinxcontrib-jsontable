@@ -16,6 +16,43 @@ try:
     EXCEL_AVAILABLE = True
 except ImportError:
     EXCEL_AVAILABLE = False
+def create_mock_state_machine(srcdir="/tmp"):
+    """Create a mock state machine for testing JsonTableDirective."""
+    class MockReporter:
+        def warning(self, msg, *args, **kwargs):
+            pass
+        def error(self, msg, *args, **kwargs):
+            pass
+        def info(self, msg, *args, **kwargs):
+            pass
+    
+    class MockConfig:
+        def __init__(self):
+            self.jsontable_max_rows = 1000
+    
+    class MockEnv:
+        def __init__(self, srcdir):
+            self.config = MockConfig()
+            self.srcdir = srcdir
+    
+    class MockSettings:
+        def __init__(self, srcdir):
+            self.env = MockEnv(srcdir)
+    
+    class MockDocument:
+        def __init__(self, srcdir):
+            self.settings = MockSettings(srcdir)
+    
+    class MockState:
+        def __init__(self, srcdir):
+            self.document = MockDocument(srcdir)
+    
+    class MockStateMachine:
+        def __init__(self):
+            self.reporter = MockReporter()
+    
+    return MockStateMachine(), MockState(srcdir)
+
 
 
 @pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
@@ -81,6 +118,8 @@ class TestExcelIntegration:
         env = self.create_mock_env()
 
         with docutils_namespace():
+            mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+
             directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(excel_path)],
@@ -89,10 +128,9 @@ class TestExcelIntegration:
                 lineno=1,
                 content_offset=0,
                 block_text="",
-                state=None,
-                state_machine=None,
+                state=mock_state,
+                state_machine=mock_state_machine,
             )
-            directive.env = env
             directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
             # JSON形式に変換されたデータを確認
@@ -112,6 +150,8 @@ class TestExcelIntegration:
         env = self.create_mock_env()
 
         with docutils_namespace():
+            mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+
             directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(excel_path)],
@@ -120,10 +160,9 @@ class TestExcelIntegration:
                 lineno=1,
                 content_offset=0,
                 block_text="",
-                state=None,
-                state_machine=None,
+                state=mock_state,
+                state_machine=mock_state_machine,
             )
-            directive.env = env
             directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
             # 2D配列形式のデータを確認
@@ -161,6 +200,8 @@ class TestExcelIntegration:
 
         # Excelからの読み込み
         with docutils_namespace():
+            mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+            
             excel_directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(excel_path)],
@@ -169,16 +210,17 @@ class TestExcelIntegration:
                 lineno=1,
                 content_offset=0,
                 block_text="",
-                state=None,
-                state_machine=None,
+                state=mock_state,
+                state_machine=mock_state_machine,
             )
-            excel_directive.env = env
             excel_directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
             excel_json_data = excel_directive._load_json_data()
 
         # JSONからの読み込み
         with docutils_namespace():
+            mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+            
             json_directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(json_path)],
@@ -187,11 +229,9 @@ class TestExcelIntegration:
                 lineno=1,
                 content_offset=0,
                 block_text="",
-                state=None,
-                state_machine=None,
+                state=mock_state,
+                state_machine=mock_state_machine,
             )
-            json_directive.env = env
-
             json_json_data = json_directive._load_json_data()
 
         # 両方のデータが同じ構造であることを確認
@@ -205,6 +245,8 @@ class TestExcelIntegration:
 
         # 存在しないExcelファイル
         with docutils_namespace():
+            mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+
             directive = JsonTableDirective(
                 name="jsontable",
                 arguments=["nonexistent.xlsx"],
@@ -213,10 +255,9 @@ class TestExcelIntegration:
                 lineno=1,
                 content_offset=0,
                 block_text="",
-                state=None,
-                state_machine=None,
+                state=mock_state,
+                state_machine=mock_state_machine,
             )
-            directive.env = env
             directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
             with pytest.raises(FileNotFoundError):
@@ -232,6 +273,8 @@ class TestExcelIntegration:
         xlsx_path = self.create_test_excel("test.xlsx", test_data)
 
         with docutils_namespace():
+            mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+
             directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(xlsx_path)],
@@ -240,10 +283,9 @@ class TestExcelIntegration:
                 lineno=1,
                 content_offset=0,
                 block_text="",
-                state=None,
-                state_machine=None,
+                state=mock_state,
+                state_machine=mock_state_machine,
             )
-            directive.env = env
             directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
             xlsx_data = directive._load_json_data()
@@ -257,6 +299,8 @@ class TestExcelIntegration:
             df.to_excel(xls_path, index=False, engine="xlwt")
 
             with docutils_namespace():
+                mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+
                 directive = JsonTableDirective(
                     name="jsontable",
                     arguments=[os.path.basename(xls_path)],
@@ -265,15 +309,14 @@ class TestExcelIntegration:
                     lineno=1,
                     content_offset=0,
                     block_text="",
-                    state=None,
-                    state_machine=None,
+                    state=mock_state,
+                state_machine=mock_state_machine,
                 )
-                directive.env = env
-                directive.excel_loader = ExcelDataLoader(self.temp_dir)
+            directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
-                xls_data = directive._load_json_data()
-                assert len(xls_data) == 2
-                assert xls_data[0]["Name"] == "Alice"
+            xls_data = directive._load_json_data()
+            assert len(xls_data) == 2
+            assert xls_data[0]["Name"] == "Alice"
 
         except ImportError:
             # xlwt が利用できない場合はスキップ

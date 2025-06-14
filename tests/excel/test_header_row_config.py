@@ -23,6 +23,43 @@ try:
     EXCEL_AVAILABLE = True
 except ImportError:
     EXCEL_AVAILABLE = False
+def create_mock_state_machine(srcdir="/tmp"):
+    """Create a mock state machine for testing JsonTableDirective."""
+    class MockReporter:
+        def warning(self, msg, *args, **kwargs):
+            pass
+        def error(self, msg, *args, **kwargs):
+            pass
+        def info(self, msg, *args, **kwargs):
+            pass
+    
+    class MockConfig:
+        def __init__(self):
+            self.jsontable_max_rows = 1000
+    
+    class MockEnv:
+        def __init__(self, srcdir):
+            self.config = MockConfig()
+            self.srcdir = srcdir
+    
+    class MockSettings:
+        def __init__(self, srcdir):
+            self.env = MockEnv(srcdir)
+    
+    class MockDocument:
+        def __init__(self, srcdir):
+            self.settings = MockSettings(srcdir)
+    
+    class MockState:
+        def __init__(self, srcdir):
+            self.document = MockDocument(srcdir)
+    
+    class MockStateMachine:
+        def __init__(self):
+            self.reporter = MockReporter()
+    
+    return MockStateMachine(), MockState(srcdir)
+
 
 
 @pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
@@ -48,20 +85,28 @@ class TestHeaderRowConfiguration:
 
         # 複数行でヘッダーが異なる位置にあるデータを作成
         data = [
-            ["メタデータ", "作成日: 2025-06-13", "", ""],  # Row 1: メタデータ行
-            ["説明", "売上データの月次集計", "", ""],  # Row 2: 説明行
-            ["", "", "", ""],  # Row 3: 空行
-            ["商品名", "1月売上", "2月売上", "3月売上"],  # Row 4: ヘッダー行
-            ["商品A", "100000", "120000", "110000"],  # Row 5: データ行
-            ["商品B", "150000", "180000", "160000"],  # Row 6: データ行
-            ["商品C", "80000", "90000", "85000"],  # Row 7: データ行
+            ["メタデータ", "作成日: 2025-06-13", "", ""],  # Row 0: メタデータ行
+            ["説明", "売上データの月次集計", "", ""],  # Row 1: 説明行
+            ["", "", "", ""],  # Row 2: 空行
+            ["商品名", "1月売上", "2月売上", "3月売上"],  # Row 3: ヘッダー行
+            ["商品A", "100000", "120000", "110000"],  # Row 4: データ行
+            ["商品B", "150000", "180000", "160000"],  # Row 5: データ行
+            ["商品C", "80000", "90000", "85000"],  # Row 6: データ行
         ]
 
-        df = pd.DataFrame(data)
-
-        with pd.ExcelWriter(file_path, engine="openpyxl") as writer:
-            df.to_excel(writer, sheet_name="Sheet1", index=False, header=False)
-
+        # DataFrameではなく、直接openpyxlを使用してデータを書き込む
+        from openpyxl import Workbook
+        
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Sheet1"
+        
+        # データを行ごとに書き込み
+        for row_idx, row_data in enumerate(data, 1):
+            for col_idx, value in enumerate(row_data, 1):
+                ws.cell(row=row_idx, column=col_idx, value=value)
+        
+        wb.save(file_path)
         return file_path
 
     def test_header_row_specification(self):
@@ -76,7 +121,7 @@ class TestHeaderRowConfiguration:
         assert result["headers"] == expected_headers
         assert result["has_header"]
 
-        # データ部分(5行目以降)
+        # データ部分(header_row=3の場合、前の行は削除され、4,5,6行目がデータになる)
         expected_data = [
             ["商品A", "100000", "120000", "110000"],
             ["商品B", "150000", "180000", "160000"],
@@ -146,6 +191,8 @@ class TestHeaderRowConfiguration:
 
         with docutils_namespace():
             # ヘッダー行指定付きディレクティブ
+            mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+
             directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(excel_path)],
@@ -154,10 +201,9 @@ class TestHeaderRowConfiguration:
                 lineno=1,
                 content_offset=0,
                 block_text="",
-                state=None,
-                state_machine=None,
+                state=mock_state,
+                state_machine=mock_state_machine,
             )
-            directive.env = env
             directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
             json_data = directive._load_json_data()
@@ -184,6 +230,8 @@ class TestHeaderRowConfiguration:
 
         with docutils_namespace():
             # シートとヘッダー行の両方を指定
+            mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+
             directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(excel_path)],
@@ -192,10 +240,9 @@ class TestHeaderRowConfiguration:
                 lineno=1,
                 content_offset=0,
                 block_text="",
-                state=None,
-                state_machine=None,
+                state=mock_state,
+                state_machine=mock_state_machine,
             )
-            directive.env = env
             directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
             json_data = directive._load_json_data()

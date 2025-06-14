@@ -26,6 +26,44 @@ except ImportError:
     EXCEL_AVAILABLE = False
 
 
+def create_mock_state_machine(srcdir="/tmp"):
+    """Create a mock state machine for testing JsonTableDirective."""
+    class MockReporter:
+        def warning(self, msg, *args, **kwargs):
+            pass
+        def error(self, msg, *args, **kwargs):
+            pass
+        def info(self, msg, *args, **kwargs):
+            pass
+    
+    class MockConfig:
+        def __init__(self):
+            self.jsontable_max_rows = 1000
+    
+    class MockEnv:
+        def __init__(self, srcdir):
+            self.config = MockConfig()
+            self.srcdir = srcdir
+    
+    class MockSettings:
+        def __init__(self, srcdir):
+            self.env = MockEnv(srcdir)
+    
+    class MockDocument:
+        def __init__(self, srcdir):
+            self.settings = MockSettings(srcdir)
+    
+    class MockState:
+        def __init__(self, srcdir):
+            self.document = MockDocument(srcdir)
+    
+    class MockStateMachine:
+        def __init__(self):
+            self.reporter = MockReporter()
+    
+    return MockStateMachine(), MockState(srcdir)
+
+
 @pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
 class TestAutoRangeDetection:
     """Phase 3: Automatic Range Detection機能のテスト."""
@@ -210,19 +248,9 @@ class TestAutoRangeDetection:
         """JsonTableDirectiveの:detect-range:オプションテスト(未実装なので失敗する)."""
         excel_path = self.create_complex_data_excel()
 
-        # モックSphinx環境
-        class MockConfig:
-            jsontable_max_rows = 10000
-
-        class MockEnv:
-            def __init__(self, srcdir):
-                self.srcdir = srcdir
-                self.config = MockConfig()
-
-        env = MockEnv(self.temp_dir)
-
         with docutils_namespace():
             # detect-range指定付きディレクティブ
+            mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
             directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(excel_path)],
@@ -231,10 +259,9 @@ class TestAutoRangeDetection:
                 lineno=1,
                 content_offset=0,
                 block_text="",
-                state=None,
-                state_machine=None,
+                state=mock_state,
+                state_machine=mock_state_machine,
             )
-            directive.env = env
             directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
             json_data = directive._load_json_data()

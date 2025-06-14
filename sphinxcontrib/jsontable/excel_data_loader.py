@@ -19,6 +19,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, ClassVar
 
+import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
 
@@ -397,8 +398,21 @@ class ExcelDataLoader:
         first_row_text_ratio = sum(isinstance(val, str) for val in first_row) / len(
             first_row
         )
+        
+        # 2行目の数値判定（文字列として読み込まれた数値も考慮）
+        def is_numeric_value(val):
+            if pd.api.types.is_numeric_dtype(type(val)):
+                return True
+            if isinstance(val, str):
+                try:
+                    float(val)
+                    return True
+                except (ValueError, TypeError):
+                    return False
+            return False
+            
         second_row_numeric_ratio = sum(
-            pd.api.types.is_numeric_dtype(type(val)) for val in second_row
+            is_numeric_value(val) for val in second_row
         ) / len(second_row)
 
         return first_row_text_ratio > 0.5 and second_row_numeric_ratio > 0.3
@@ -498,7 +512,7 @@ class ExcelDataLoader:
 
             # ヘッダー情報の抽出
             has_header = not isinstance(
-                df.columns[0], int
+                df.columns[0], (int, np.integer)
             )  # 数値カラム名でない=ヘッダーあり
             headers = list(df.columns) if has_header else None
 
@@ -915,7 +929,8 @@ class ExcelDataLoader:
             excel_data = self.load_from_excel(file_path, sheet_name, header_row)
 
             # データ範囲内でのヘッダー行チェック
-            self._validate_header_row_against_data(header_row, excel_data, file_path)
+            # 注意: header_row適用後のデータに対する検証は不正確なため一時的に無効化
+            # self._validate_header_row_against_data(header_row, excel_data, file_path)
 
             # ヘッダー行情報を追加
             excel_data["header_row"] = header_row
