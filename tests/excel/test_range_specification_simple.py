@@ -1,54 +1,54 @@
-"""Phase 2: Range Specification機能の簡略化されたTDDテスト.
+"""Phase 2: Range Specification機能の簡略化されたテスト.
 
-Task 2.2: `:range:` オプション実装の未実装機能確認テスト
+Task 2.2: `:range:` オプション実装の基本確認テスト
 """
 
 import pytest
 
 
-def test_range_functionality_not_implemented():
-    """Range機能が未実装であることを確認するテスト(RED段階)。"""
+def test_range_functionality_implemented():
+    """Range機能が実装済みであることを確認するテスト。"""
 
-    # ExcelDataLoaderをインポートして未実装メソッドをチェック
+    # ExcelDataLoaderをインポートして実装済みメソッドをチェック
     try:
         from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
 
         loader = ExcelDataLoader()
 
-        # load_from_excel_with_range メソッドが存在しないことを確認
-        assert not hasattr(loader, "load_from_excel_with_range"), (
-            "load_from_excel_with_range method should not exist yet (RED phase)"
+        # load_from_excel_with_range メソッドが存在することを確認
+        assert hasattr(loader, "load_from_excel_with_range"), (
+            "load_from_excel_with_range method should exist (implemented)"
         )
 
-        # _parse_range_specification メソッドが存在しないことを確認
-        assert not hasattr(loader, "_parse_range_specification"), (
-            "_parse_range_specification method should not exist yet (RED phase)"
+        # _parse_range_specification メソッドが存在することを確認
+        assert hasattr(loader, "_parse_range_specification"), (
+            "_parse_range_specification method should exist (implemented)"
         )
 
-        print("✅ RED段階確認: Range Specification機能は未実装")
+        print("✅ Range Specification機能は実装済み")
 
     except ImportError:
         pytest.skip("Excel support not available")
 
 
-def test_directive_range_option_not_implemented():
-    """JsonTableDirectiveで:range:オプションが未実装であることを確認。"""
+def test_directive_range_option_implemented():
+    """JsonTableDirectiveで:range:オプションが実装済みであることを確認。"""
 
     try:
         from sphinxcontrib.jsontable.directives import JsonTableDirective
 
-        # option_specに'range'が存在しないことを確認
-        assert "range" not in JsonTableDirective.option_spec, (
-            "Range option should not exist yet (RED phase)"
+        # option_specに'range'が存在することを確認
+        assert "range" in JsonTableDirective.option_spec, (
+            "Range option should exist (implemented)"
         )
 
-        print("✅ RED段階確認: :range:オプションは未実装")
+        print("✅ :range:オプションは実装済み")
 
     except ImportError:
         pytest.skip("Excel support not available")
 
 
 if __name__ == "__main__":
-    test_range_functionality_not_implemented()
-    test_directive_range_option_not_implemented()
-    print("🔴 RED段階完了: Range Specification機能は未実装のため、GREEN段階に進みます")
+    test_range_functionality_implemented()
+    test_directive_range_option_implemented()
+    print("✅ Range Specification機能実装確認完了")

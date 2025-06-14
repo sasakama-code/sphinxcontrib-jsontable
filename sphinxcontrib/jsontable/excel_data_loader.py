@@ -438,6 +438,27 @@ class ExcelDataLoader:
             "価格",
             "金額",
             "数量",
+            "商品",
+            "売上",
+            "担当者",
+            "部門",
+            "従業員",
+            "地域",
+            "年齢",
+            "住所",
+            "電話",
+            "メール",
+            "顧客",
+            "契約",
+            "注文",
+            "製品",
+            "在庫",
+            "会社",
+            "営業",
+            "total",
+            "sum",
+            "avg",
+            "average",
         }
         first_row_str = [str(val).lower() for val in first_row if isinstance(val, str)]
         has_header_keywords = any(
@@ -960,12 +981,21 @@ class ExcelDataLoader:
         self._validate_header_row(header_row)
 
         try:
+            # ファイルの行数を事前に確認してより適切なエラーメッセージを提供
+            # sheet_name=Noneの場合は辞書が返されるため、デフォルトシートを使用
+            if sheet_name is None:
+                df_temp = pd.read_excel(file_path, header=None)
+            else:
+                df_temp = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
+            total_rows = len(df_temp)
+
+            if header_row >= total_rows:
+                raise ValueError(
+                    f"Header row {header_row} is out of range. Data has {total_rows} rows (0-{total_rows - 1})"
+                )
+
             # Excel読み込み(明示的なheader_row指定)
             excel_data = self.load_from_excel(file_path, sheet_name, header_row)
-
-            # データ範囲内でのヘッダー行チェック
-            # 注意: header_row適用後のデータに対する検証は不正確なため一時的に無効化
-            # self._validate_header_row_against_data(header_row, excel_data, file_path)
 
             # ヘッダー行情報を追加
             excel_data["header_row"] = header_row
