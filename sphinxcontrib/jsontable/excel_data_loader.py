@@ -2833,10 +2833,10 @@ class ExcelDataLoader:
                 cell_value = str(row[col]).strip() if row[col] is not None else ""
 
                 if cell_value:
-                    # 空でない値：使用する
+                    # 空でない値:使用する
                     header_parts.append(cell_value)
                 else:
-                    # 空の値：階層構造の継承ロジック適用
+                    # 空の値:階層構造の継承ロジック適用
                     inherited_value = self._find_inherited_value_for_empty_cell(
                         row_idx, col, header_rows_data
                     )
@@ -2866,13 +2866,13 @@ class ExcelDataLoader:
             )
             return inherited_value if inherited_value else "空欄"
 
-        # 多層階層継承ロジック：上位レベルから段階的に継承
+        # 多層階層継承ロジック:上位レベルから段階的に継承
         return self._find_hierarchical_inherited_value(row_idx, col, header_rows_data)
 
     def _find_hierarchical_inherited_value(
         self, row_idx: int, col: int, header_rows_data: list[list[str]]
     ) -> str | None:
-        """多層階層継承ロジック(コードエクセレンス：高度アルゴリズム)。
+        """多層階層継承ロジック(コードエクセレンス:高度アルゴリズム)。
 
         Args:
             row_idx: 現在の行インデックス
@@ -2967,7 +2967,7 @@ class ExcelDataLoader:
         return len(target_row) - 1
 
     def _find_left_non_empty_in_row(self, row: list[str], col: int) -> str | None:
-        """指定行で左側の非空値を探索(SOLID原則：単一責任)。
+        """指定行で左側の非空値を探索(SOLID原則:単一責任)。
 
         Args:
             row: 対象行データ
@@ -3019,7 +3019,7 @@ class ExcelDataLoader:
         return unique_parts
 
     def _normalize_header_name(self, header_name: str) -> str:
-        """ヘッダー名を正規化(コードエクセレンス：日本語対応強化)。
+        """ヘッダー名を正規化(コードエクセレンス:日本語対応強化)。
 
         Args:
             header_name: 元のヘッダー名
@@ -3048,7 +3048,7 @@ class ExcelDataLoader:
         return normalized or "空欄"
 
     def _process_japanese_parentheses(self, text: str) -> str:
-        """日本語括弧の特別処理(コードエクセレンス：SOLID原則)。
+        """日本語括弧の特別処理(コードエクセレンス:SOLID原則)。
 
         Args:
             text: 処理対象テキスト
@@ -3067,7 +3067,7 @@ class ExcelDataLoader:
         return text
 
     def _replace_special_characters(self, text: str) -> str:
-        """特殊文字の置換処理(DRY原則：設定の一元化)。
+        """特殊文字の置換処理(DRY原則:設定の一元化)。
 
         Args:
             text: 処理対象テキスト
@@ -3131,7 +3131,7 @@ class ExcelDataLoader:
     # JSON Cache Functions (Task 3.4) - コードエクセレンス適用
     # ============================================================================
 
-    # キャッシュ関連定数(DRY原則：設定の一元化)
+    # キャッシュ関連定数(DRY原則:設定の一元化)
     CACHE_DIR_NAME: ClassVar[str] = ".jsontable_cache"
     CACHE_FILE_EXTENSION: ClassVar[str] = ".json"
     REQUIRED_CACHE_KEYS: ClassVar[list[str]] = [
@@ -3155,7 +3155,7 @@ class ExcelDataLoader:
         merge_headers: str | None = None,
         max_cache_size: int | None = None,
     ) -> dict[str, Any]:
-        """キャッシュを使用してExcelファイルを読み込み(コードエクセレンス：高品質実装)。
+        """キャッシュを使用してExcelファイルを読み込み(コードエクセレンス:高品質実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -3172,7 +3172,7 @@ class ExcelDataLoader:
         Returns:
             dict[str, Any]: 読み込み結果(cache_hitフラグ付き)
         """
-        # キャッシュシステムの処理フロー(SOLID原則：単一責任)
+        # キャッシュシステムの処理フロー(SOLID原則:単一責任)
         cache_context = self._build_cache_context(
             file_path,
             sheet_name,
@@ -3224,7 +3224,7 @@ class ExcelDataLoader:
         merge_cells: str | None,
         merge_headers: str | None,
     ) -> dict[str, str]:
-        """キャッシュコンテキストを構築(DRY原則：情報の一元化)。
+        """キャッシュコンテキストを構築(DRY原則:情報の一元化)。
 
         Args:
             全オプションパラメータ
@@ -3255,7 +3255,7 @@ class ExcelDataLoader:
     def _try_load_from_cache(
         self, cache_context: dict[str, str]
     ) -> dict[str, Any] | None:
-        """キャッシュからの読み込み試行(SOLID原則：単一責任)。
+        """キャッシュからの読み込み試行(SOLID原則:単一責任)。
 
         Args:
             cache_context: キャッシュコンテキスト
@@ -3328,7 +3328,7 @@ class ExcelDataLoader:
         return hashlib.md5(options_str.encode("utf-8")).hexdigest()
 
     def _get_cache_file_path(self, file_path: str, cache_key: str | None = None) -> str:
-        """キャッシュファイルのパスを生成(DRY原則：定数活用)。
+        """キャッシュファイルのパスを生成(DRY原則:定数活用)。
 
         Args:
             file_path: 元のExcelファイルパス
@@ -3387,7 +3387,7 @@ class ExcelDataLoader:
             return False
 
     def _validate_cache_data(self, cache_data: dict) -> bool:
-        """キャッシュデータの整合性を検証(DRY原則：定数活用)。
+        """キャッシュデータの整合性を検証(DRY原則:定数活用)。
 
         Args:
             cache_data: キャッシュデータ
@@ -3552,7 +3552,7 @@ class ExcelDataLoader:
             pass
 
     def clear_cache(self, file_path: str | None = None) -> None:
-        """キャッシュをクリア(DRY原則：定数活用、エラーハンドリング強化)。
+        """キャッシュをクリア(DRY原則:定数活用、エラーハンドリング強化)。
 
         Args:
             file_path: 特定ファイルのキャッシュをクリア(Noneの場合は全削除)
@@ -3573,7 +3573,7 @@ class ExcelDataLoader:
             self._clear_all_cache(cache_dir)
 
     def _clear_specific_file_cache(self, cache_dir: str, file_path: str) -> None:
-        """特定ファイルのキャッシュ削除(SOLID原則：単一責任)。
+        """特定ファイルのキャッシュ削除(SOLID原則:単一責任)。
 
         Args:
             cache_dir: キャッシュディレクトリ
@@ -3590,7 +3590,7 @@ class ExcelDataLoader:
         self._remove_cache_files_by_pattern(pattern)
 
     def _clear_all_cache(self, cache_dir: str) -> None:
-        """全キャッシュ削除(SOLID原則：単一責任)。
+        """全キャッシュ削除(SOLID原則:単一責任)。
 
         Args:
             cache_dir: キャッシュディレクトリ
@@ -3601,7 +3601,7 @@ class ExcelDataLoader:
         self._remove_cache_files_by_pattern(pattern)
 
     def _remove_cache_files_by_pattern(self, pattern: str) -> None:
-        """パターンに基づくキャッシュファイル削除(DRY原則：共通処理化)。
+        """パターンに基づくキャッシュファイル削除(DRY原則:共通処理化)。
 
         Args:
             pattern: ファイルパターン
@@ -3628,7 +3628,7 @@ class ExcelDataLoader:
     def _measure_performance(
         self, operation: callable, *args, **kwargs
     ) -> tuple[dict[str, Any], dict[str, Any]]:
-        """パフォーマンス測定共通メソッド(DRY原則：重複排除)。
+        """パフォーマンス測定共通メソッド(DRY原則:重複排除)。
 
         Args:
             operation: 測定対象の操作
@@ -3951,7 +3951,7 @@ class ExcelDataLoader:
         context: dict[str, Any] | None = None,
         debug_info: dict[str, Any] | None = None,
     ) -> EnhancedExcelError:
-        """強化エラーハンドリング共通メソッド(DRY原則：重複排除)。
+        """強化エラーハンドリング共通メソッド(DRY原則:重複排除)。
 
         Args:
             file_path: Excelファイルパス
@@ -3974,7 +3974,7 @@ class ExcelDataLoader:
     def _create_operation_context(
         self, operation_name: str, file_path: str, **kwargs
     ) -> dict[str, Any]:
-        """操作文脈作成共通メソッド(DRY原則：文脈情報統一)。
+        """操作文脈作成共通メソッド(DRY原則:文脈情報統一)。
 
         Args:
             operation_name: 操作名

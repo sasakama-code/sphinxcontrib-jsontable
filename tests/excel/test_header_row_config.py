@@ -214,7 +214,7 @@ class TestHeaderRowConfiguration:
         # ヘッダー名が適切に正規化されることを確認
         normalized_headers = self.loader._normalize_header_names(result["headers"])
 
-        # 期待される正規化(例：空白トリム、重複回避)
+        # 期待される正規化(例:空白トリム、重複回避)
         expected_normalized = ["商品名", "1月売上", "2月売上", "3月売上"]
         assert normalized_headers == expected_normalized
 

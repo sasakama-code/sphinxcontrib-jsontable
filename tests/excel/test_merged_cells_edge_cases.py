@@ -1,6 +1,6 @@
 """Merged Cells Edge Cases Testing: セル結合の極限エッジケーステスト.
 
-品質保証における最重要項目：境界値・異常データ・セキュリティ・互換性
+品質保証における最重要項目:境界値・異常データ・セキュリティ・互換性
 - Excel形式固有の限界値テスト
 - エンコーディング・文字セット問題
 - 数値精度・データ型変換エッジケース
@@ -102,7 +102,7 @@ class TestMergedCellsEdgeCases:
             -1.7976931348623157e100,  # 極大負値
             999999999999999.9,  # 大きな数値(無限大の代替)
             -999999999999999.9,  # 大きな負値
-            # float('nan'),  # NaN(コメントアウト：Excelでの取り扱いが複雑)
+            # float('nan'),  # NaN(コメントアウト:Excelでの取り扱いが複雑)
         ]
 
         for i, num in enumerate(extreme_numbers):
@@ -175,7 +175,7 @@ class TestMergedCellsEdgeCases:
 
         # 極端に大きな結合セル範囲
         ws["A200"] = "巨大結合範囲"
-        ws.merge_cells("A200:Z300")  # 26列×101行の巨大結合
+        ws.merge_cells("A200:Z300")  # 26列x101行の巨大結合
 
         wb.save(file_path)
         return file_path
