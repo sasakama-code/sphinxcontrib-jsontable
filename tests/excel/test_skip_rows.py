@@ -181,7 +181,7 @@ class TestSkipRows:
         assert result["data"] == expected_data
 
     def test_skip_rows_with_range(self):
-        """Skip Rowsと範囲指定の組み合わせテスト(未実装なので失敗する)。"""
+        """Skip Rowsと範囲指定の組み合わせテスト。"""
         excel_path = self.create_skip_rows_test_excel()
 
         # A3:C8の範囲で、範囲内index 3をスキップ(元のExcel行6に相当)
@@ -194,9 +194,9 @@ class TestSkipRows:
             ["", "", ""],  # Row 3 (range index 0)
             ["商品名", "価格", "在庫"],  # Row 4 (range index 1)
             ["商品A", "1000", "50"],  # Row 5 (range index 2)
-            # Range index 3はスキップ(元Excel Row 6)
-            ["無効行", "X", "Y"],  # Row 7 (range index 4)
-            ["商品C", "1500", "20"],  # Row 8 (range index 5)
+            # Range index 3 (["商品B", "2000", "30"]) はスキップ
+            ["# 中間コメント", "", ""],  # Row 7 (元のrange index 4)
+            ["商品C", "1500", "20"],  # Row 8 (元のrange index 5)
         ]
 
         assert result["data"] == expected_data

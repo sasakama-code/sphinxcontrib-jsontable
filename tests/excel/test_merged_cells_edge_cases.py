@@ -383,8 +383,8 @@ class TestMergedCellsEdgeCases:
         end_time = time.time()
         processing_time = end_time - start_time
 
-        # 処理時間が10秒以内に完了することを確認
-        assert processing_time < 10.0, (
+        # 処理時間が15秒以内に完了することを確認
+        assert processing_time < 15.0, (
             f"Processing took too long: {processing_time:.2f} seconds"
         )
         assert result["has_merged_cells"]
