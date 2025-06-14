@@ -3,7 +3,6 @@
 import os
 import tempfile
 from datetime import datetime
-from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -11,8 +10,8 @@ import pytest
 # Excel対応がある場合のみテストを実行
 try:
     from sphinxcontrib.jsontable.excel_data_loader import (
-        ExcelDataLoader,
         EnhancedExcelError,
+        ExcelDataLoader,
         RangeSpecificationError,
         SkipRowsError,
     )
@@ -194,11 +193,9 @@ class TestExcelDataLoaderErrors:
     def test_data_type_conversion_edge_cases(self):
         """データ型変換のエッジケースのテスト。"""
         # None値を含むDataFrame
-        df_with_none = pd.DataFrame([
-            ["Alice", None, 25.5],
-            [None, "Bob", None],
-            ["Charlie", "Engineer", 30]
-        ])
+        df_with_none = pd.DataFrame(
+            [["Alice", None, 25.5], [None, "Bob", None], ["Charlie", "Engineer", 30]]
+        )
 
         result = self.loader.data_type_conversion(df_with_none)
         assert result[0] == ["Alice", "", "25.5"]
@@ -206,10 +203,7 @@ class TestExcelDataLoaderErrors:
         assert result[2] == ["Charlie", "Engineer", "30"]
 
         # 異なる数値型を含むDataFrame
-        df_numeric = pd.DataFrame([
-            [1, 2.0, 3.14159, True],
-            [100, 200.5, 0.0, False]
-        ])
+        df_numeric = pd.DataFrame([[1, 2.0, 3.14159, True], [100, 200.5, 0.0, False]])
 
         result = self.loader.data_type_conversion(df_numeric)
         assert result[0] == ["1", "2", "3.14159", "True"]

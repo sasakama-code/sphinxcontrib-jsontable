@@ -2,11 +2,9 @@
 
 import os
 import tempfile
-from pathlib import Path
 
 import pandas as pd
 import pytest
-from docutils.core import publish_doctree
 from sphinx.util.docutils import docutils_namespace
 
 try:
@@ -158,7 +156,7 @@ class TestJsonTableDirectiveAdvanced:
             # ディレクティブの実行
             try:
                 result = directive.run()
-                # 結果が有効なdocutilsノードであることを確認
+                # 結果が有効なdocutils nodeであることを確認
                 assert isinstance(result, list)
                 assert len(result) > 0
             except Exception as e:
@@ -192,7 +190,7 @@ class TestJsonTableDirectiveAdvanced:
                 assert isinstance(result, list)
             except Exception as e:
                 # 予期されるエラーの場合は正常
-                assert isinstance(e, (FileNotFoundError, ValueError))
+                assert isinstance(e, FileNotFoundError | ValueError)
 
     def test_directive_with_inline_content(self):
         """インラインコンテンツ付きディレクティブのテスト。"""
@@ -204,7 +202,7 @@ class TestJsonTableDirectiveAdvanced:
             # インラインJSONコンテンツでのディレクティブ
             inline_content = [
                 '[{"name": "Alice", "age": 25},',
-                ' {"name": "Bob", "age": 30}]'
+                ' {"name": "Bob", "age": 30}]',
             ]
 
             directive = JsonTableDirective(
@@ -374,8 +372,10 @@ class TestJsonTableDirectiveAdvanced:
                 # 生成されたノードの基本的な検証
                 if result:
                     first_node = result[0]
-                    # docutilsのノードであることを確認
-                    assert hasattr(first_node, "tagname") or hasattr(first_node, "source")
+                    # docutilsのnodeであることを確認
+                    assert hasattr(first_node, "tagname") or hasattr(
+                        first_node, "source"
+                    )
             except Exception as e:
                 pytest.skip(f"Table generation test failed: {e}")
 
@@ -390,7 +390,10 @@ class TestJsonTableDirectiveAdvanced:
             # 2次元配列
             [["A", "B"], ["1", "2"], ["3", "4"]],
             # 混合データ
-            [{"type": "header", "data": ["A", "B"]}, {"type": "row", "data": ["1", "2"]}],
+            [
+                {"type": "header", "data": ["A", "B"]},
+                {"type": "row", "data": ["1", "2"]},
+            ],
         ]
 
         for i, test_data in enumerate(test_cases):
@@ -398,7 +401,9 @@ class TestJsonTableDirectiveAdvanced:
             self.create_mock_env()
 
             with docutils_namespace():
-                mock_state_machine, mock_state = create_mock_state_machine(self.temp_dir)
+                mock_state_machine, mock_state = create_mock_state_machine(
+                    self.temp_dir
+                )
 
                 directive = JsonTableDirective(
                     name="jsontable",

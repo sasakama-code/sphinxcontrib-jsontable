@@ -67,7 +67,7 @@ class TestExcelDataLoaderAdvanced:
 
     def test_file_extension_validation(self):
         """ファイル拡張子の包括的検証テスト。"""
-        # 有効な拡張子（小文字のみ対応）
+        # 有効な拡張子(小文字のみ対応)
         valid_extensions = [".xlsx"]
         for ext in valid_extensions:
             test_file = os.path.join(self.temp_dir, f"test{ext}")
@@ -112,29 +112,25 @@ class TestExcelDataLoaderAdvanced:
     def test_header_detection_various_cases(self):
         """様々なケースでのヘッダー検出テスト。"""
         # 明確にヘッダーがあるケース
-        header_data = pd.DataFrame([
-            ["Name", "Age", "City", "Country"],
-            ["Alice", 25, "Tokyo", "Japan"],
-            ["Bob", 30, "New York", "USA"]
-        ])
+        header_data = pd.DataFrame(
+            [
+                ["Name", "Age", "City", "Country"],
+                ["Alice", 25, "Tokyo", "Japan"],
+                ["Bob", 30, "New York", "USA"],
+            ]
+        )
         # ヘッダー検出結果は実装に依存するため、booleanであることを確認
         result = self.loader.header_detection(header_data)
         assert isinstance(result, bool)
 
         # 数値のみのケース
-        numeric_data = pd.DataFrame([
-            [1, 2, 3, 4],
-            [5, 6, 7, 8],
-            [9, 10, 11, 12]
-        ])
+        numeric_data = pd.DataFrame([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]])
         assert self.loader.header_detection(numeric_data) is False
 
         # 混合だが第1行が数値多数のケース
-        mixed_numeric_first = pd.DataFrame([
-            [1, 2, "Category"],
-            ["Alice", 25, "Person"],
-            ["Bob", 30, "Person"]
-        ])
+        mixed_numeric_first = pd.DataFrame(
+            [[1, 2, "Category"], ["Alice", 25, "Person"], ["Bob", 30, "Person"]]
+        )
         result = self.loader.header_detection(mixed_numeric_first)
         # 実装に依存するが、少なくともbooleanが返される
         assert isinstance(result, bool)
@@ -154,7 +150,7 @@ class TestExcelDataLoaderAdvanced:
         loader_with_str = ExcelDataLoader(self.temp_dir)
         assert str(loader_with_str.base_path) == self.temp_dir
 
-        # デフォルト（引数なし）
+        # デフォルト(引数なし)
         loader_default = ExcelDataLoader()
         assert loader_default.base_path == Path.cwd()
 
@@ -186,10 +182,8 @@ class TestExcelDataLoaderAdvanced:
         sheet_name = self.loader.basic_sheet_detection(excel_path)
         assert sheet_name in ["Sheet1", "シート1"]  # 環境により異なる可能性
 
-        # 複数シートを持つファイル（最初のシートが検出される）
-        with pd.ExcelWriter(
-            os.path.join(self.temp_dir, "multi_sheet.xlsx")
-        ) as writer:
+        # 複数シートを持つファイル(最初のシートが検出される)
+        with pd.ExcelWriter(os.path.join(self.temp_dir, "multi_sheet.xlsx")) as writer:
             pd.DataFrame([["A", "B"], ["1", "2"]]).to_excel(
                 writer, sheet_name="FirstSheet", index=False
             )
@@ -215,7 +209,7 @@ class TestExcelDataLoaderAdvanced:
         # 空ファイルでも形式的には有効
         assert self.loader.validate_excel_file(empty_path) is True
 
-        # 破損したファイル（Excelファイルとして認識されない）
+        # 破損したファイル(Excelファイルとして認識されない)
         corrupted_path = os.path.join(self.temp_dir, "corrupted.xlsx")
         with open(corrupted_path, "w") as f:
             f.write("This is not an Excel file")
@@ -235,7 +229,7 @@ class TestExcelDataLoaderAdvanced:
         japanese_data = [
             ["名前", "年齢", "職業"],
             ["田中太郎", "30", "エンジニア"],
-            ["佐藤花子", "25", "デザイナー"]
+            ["佐藤花子", "25", "デザイナー"],
         ]
         jp_path = self.create_test_excel("japanese.xlsx", japanese_data, True)
         result = self.loader.load_from_excel(jp_path)
@@ -245,7 +239,7 @@ class TestExcelDataLoaderAdvanced:
         # 特殊文字を含むヘッダー
         special_data = [
             ["名前/Name", "年齢(Age)", "職業@Job"],
-            ["Test User", "35", "Manager"]
+            ["Test User", "35", "Manager"],
         ]
         special_path = self.create_test_excel("special.xlsx", special_data, True)
         result = self.loader.load_from_excel(special_path)
@@ -253,12 +247,12 @@ class TestExcelDataLoaderAdvanced:
 
     def test_data_consistency_check(self):
         """データ整合性チェックのテスト。"""
-        # 不整合なデータ（行によって列数が異なる）
+        # 不整合なデータ(行によって列数が異なる)
         # pandasは自動的に調整するため、実際にはエラーにならない
         inconsistent_data = [
             ["A", "B", "C"],
             ["1", "2"],  # 列数が少ない
-            ["4", "5", "6", "7"]  # 列数が多い（pandasが調整）
+            ["4", "5", "6", "7"],  # 列数が多い(pandasが調整)
         ]
         df = pd.DataFrame(inconsistent_data)
         result = self.loader.data_type_conversion(df)

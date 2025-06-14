@@ -52,13 +52,8 @@ class TestExcelDataLoaderRangeSkip:
         """大きなテスト用Excelファイルを作成。"""
         data = [["ID", "Name", "Score", "Category"]]
         for i in range(100):
-            data.append([
-                str(i),
-                f"User_{i}",
-                str(i * 10 % 100),
-                f"Category_{i % 5}"
-            ])
-        
+            data.append([str(i), f"User_{i}", str(i * 10 % 100), f"Category_{i % 5}"])
+
         return self.create_test_excel("large_test.xlsx", data, True)
 
     def test_range_specification_parsing(self):
@@ -74,7 +69,7 @@ class TestExcelDataLoaderRangeSkip:
         # 有効な範囲指定
         valid_ranges = [
             "A1:C3",
-            "B2:D4", 
+            "B2:D4",
             "A1:B2",
             "C1:D2",
         ]
@@ -94,24 +89,26 @@ class TestExcelDataLoaderRangeSkip:
         """Skip Rows指定の解析機能テスト。"""
         test_data = [
             ["Comment line", "", "", ""],  # Row 0
-            ["Header", "A", "B", "C"],     # Row 1
-            ["Data1", "1", "2", "3"],      # Row 2
-            ["Comment", "", "", ""],       # Row 3
-            ["Data2", "4", "5", "6"],      # Row 4
+            ["Header", "A", "B", "C"],  # Row 1
+            ["Data1", "1", "2", "3"],  # Row 2
+            ["Comment", "", "", ""],  # Row 3
+            ["Data2", "4", "5", "6"],  # Row 4
         ]
         excel_path = self.create_test_excel("skip_rows.xlsx", test_data, False)
 
         # 有効なSkip Rows指定
         valid_skip_specs = [
-            "0",        # 単一行
-            "0,3",      # 複数行
-            "0-2",      # 範囲
-            "0,3-4",    # 混合
+            "0",  # 単一行
+            "0,3",  # 複数行
+            "0-2",  # 範囲
+            "0,3-4",  # 混合
         ]
 
         for skip_spec in valid_skip_specs:
             try:
-                result = self.loader.load_from_excel_with_skip_rows(excel_path, skip_spec)
+                result = self.loader.load_from_excel_with_skip_rows(
+                    excel_path, skip_spec
+                )
                 assert isinstance(result, dict)
                 assert "data" in result
                 assert "skip_rows" in result
@@ -123,17 +120,17 @@ class TestExcelDataLoaderRangeSkip:
     def test_range_and_skip_combination(self):
         """範囲指定とSkip Rowsの組み合わせテスト。"""
         test_data = [
-            ["Comment", "", "", ""],       # Row 0
-            ["Header", "A", "B", "C"],     # Row 1
-            ["Data1", "1", "2", "3"],      # Row 2
-            ["Comment", "", "", ""],       # Row 3
-            ["Data2", "4", "5", "6"],      # Row 4
-            ["Data3", "7", "8", "9"],      # Row 5
+            ["Comment", "", "", ""],  # Row 0
+            ["Header", "A", "B", "C"],  # Row 1
+            ["Data1", "1", "2", "3"],  # Row 2
+            ["Comment", "", "", ""],  # Row 3
+            ["Data2", "4", "5", "6"],  # Row 4
+            ["Data3", "7", "8", "9"],  # Row 5
         ]
         excel_path = self.create_test_excel("combo.xlsx", test_data, False)
 
         try:
-            # A1:C5の範囲で、コメント行（0,3）をスキップ
+            # A1:C5の範囲で、コメント行(0,3)をスキップ
             result = self.loader.load_from_excel_with_skip_rows_and_range(
                 excel_path, range_spec="A1:C5", skip_rows="0,3"
             )
@@ -147,10 +144,10 @@ class TestExcelDataLoaderRangeSkip:
     def test_header_row_specification(self):
         """ヘッダー行指定機能のテスト。"""
         test_data = [
-            ["Comment", "", ""],      # Row 0
+            ["Comment", "", ""],  # Row 0
             ["Name", "Age", "City"],  # Row 1 - Header
-            ["Alice", "25", "Tokyo"], # Row 2
-            ["Bob", "30", "Osaka"],   # Row 3
+            ["Alice", "25", "Tokyo"],  # Row 2
+            ["Bob", "30", "Osaka"],  # Row 3
         ]
         excel_path = self.create_test_excel("header_spec.xlsx", test_data, False)
 
@@ -189,16 +186,16 @@ class TestExcelDataLoaderRangeSkip:
     def test_skip_rows_with_header_row(self):
         """Skip Rowsとヘッダー行指定の組み合わせテスト。"""
         test_data = [
-            ["Comment1", "", ""],     # Row 0 - Skip
+            ["Comment1", "", ""],  # Row 0 - Skip
             ["Name", "Age", "City"],  # Row 1 - Header
-            ["Alice", "25", "Tokyo"], # Row 2
-            ["Comment2", "", ""],     # Row 3 - Skip
-            ["Bob", "30", "Osaka"],   # Row 4
+            ["Alice", "25", "Tokyo"],  # Row 2
+            ["Comment2", "", ""],  # Row 3 - Skip
+            ["Bob", "30", "Osaka"],  # Row 4
         ]
         excel_path = self.create_test_excel("skip_header.xlsx", test_data, False)
 
         try:
-            # コメント行（0,3）をスキップ、1行目をヘッダーとして指定
+            # コメント行(0,3)をスキップ、1行目をヘッダーとして指定
             result = self.loader.load_from_excel_with_skip_rows_and_header(
                 excel_path, skip_rows="0,3", header_row=1
             )
@@ -216,11 +213,11 @@ class TestExcelDataLoaderRangeSkip:
 
         # 無効な範囲指定
         invalid_ranges = [
-            "Z1:Z2",      # 存在しない列
-            "A1:A100",    # 存在しない行
-            "B1:A1",      # 逆順
-            "invalid",    # 無効な形式
-            "",           # 空文字
+            "Z1:Z2",  # 存在しない列
+            "A1:A100",  # 存在しない行
+            "B1:A1",  # 逆順
+            "invalid",  # 無効な形式
+            "",  # 空文字
         ]
 
         for invalid_range in invalid_ranges:
@@ -234,11 +231,11 @@ class TestExcelDataLoaderRangeSkip:
 
         # 無効なSkip Rows指定
         invalid_skip_specs = [
-            "100",        # 存在しない行
-            "-1",         # 負の値
-            "a,b",        # 無効な文字
-            "1-",         # 不完全な範囲
-            "",           # 空文字
+            "100",  # 存在しない行
+            "-1",  # 負の値
+            "a,b",  # 無効な文字
+            "1-",  # 不完全な範囲
+            "",  # 空文字
         ]
 
         for invalid_skip in invalid_skip_specs:
@@ -257,18 +254,17 @@ class TestExcelDataLoaderRangeSkip:
             assert result["columns"] == 4
 
             # 範囲指定での読み込み
-            range_result = self.loader.load_from_excel_with_range(
-                excel_path, "A1:C50"
-            )
+            range_result = self.loader.load_from_excel_with_range(excel_path, "A1:C50")
             assert isinstance(range_result, dict)
             assert len(range_result["data"]) == 50
 
             # Skip Rowsでの読み込み
             skip_result = self.loader.load_from_excel_with_skip_rows(
-                excel_path, "0-9"  # 最初の10行をスキップ
+                excel_path,
+                "0-9",  # 最初の10行をスキップ
             )
             assert isinstance(skip_result, dict)
-            assert len(skip_result["data"]) == 91  # 100行 - 10行 + 1行（ヘッダー）
+            assert len(skip_result["data"]) == 91  # 100行 - 10行 + 1行(ヘッダー)
         except Exception as e:
             pytest.skip(f"Large dataset handling not implemented: {e}")
 
@@ -284,7 +280,7 @@ class TestExcelDataLoaderRangeSkip:
         for valid_range in valid_ranges:
             try:
                 # 範囲検証メソッドが存在する場合
-                if hasattr(self.loader, '_validate_range_specification'):
+                if hasattr(self.loader, "_validate_range_specification"):
                     result = self.loader._validate_range_specification(valid_range)
                     assert result is True or result is None
             except Exception:
@@ -304,7 +300,7 @@ class TestExcelDataLoaderRangeSkip:
         for valid_skip in valid_skip_specs:
             try:
                 # Skip Rows検証メソッドが存在する場合
-                if hasattr(self.loader, '_validate_skip_rows_specification'):
+                if hasattr(self.loader, "_validate_skip_rows_specification"):
                     result = self.loader._validate_skip_rows_specification(valid_skip)
                     assert result is True or result is None
             except Exception:
@@ -345,7 +341,7 @@ class TestExcelDataLoaderRangeSkip:
         # 複数シートを持つExcelファイルを作成
         multi_sheet_path = os.path.join(self.temp_dir, "multi_sheet.xlsx")
 
-        with pd.ExcelWriter(multi_sheet_path, engine='openpyxl') as writer:
+        with pd.ExcelWriter(multi_sheet_path, engine="openpyxl") as writer:
             # Sheet1
             pd.DataFrame([["A1", "B1"], ["A2", "B2"]]).to_excel(
                 writer, sheet_name="Sheet1", index=False
@@ -361,10 +357,12 @@ class TestExcelDataLoaderRangeSkip:
             assert isinstance(result1, dict)
 
             # 明示的なシート指定での読み込み
-            if hasattr(self.loader, 'load_from_excel'):
+            if hasattr(self.loader, "load_from_excel"):
                 # シート名を指定できる場合
                 try:
-                    result2 = self.loader.load_from_excel(multi_sheet_path, sheet_name="Sheet2")
+                    result2 = self.loader.load_from_excel(
+                        multi_sheet_path, sheet_name="Sheet2"
+                    )
                     assert isinstance(result2, dict)
                 except TypeError:
                     # sheet_nameパラメータがサポートされていない場合
