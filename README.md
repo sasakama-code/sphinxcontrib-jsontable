@@ -7,7 +7,9 @@
 
 **Languages:** [English](README.md) | [日本語](README_ja.md)
 
-A powerful Sphinx extension that renders JSON data (from files or inline content) as beautifully formatted reStructuredText tables. Perfect for documentation that needs to display structured data, API examples, configuration references, and data-driven content.
+A powerful Sphinx extension that renders **JSON and Excel data** (from files or inline content) as beautifully formatted reStructuredText tables. Perfect for documentation that needs to display structured data, API examples, configuration references, and data-driven content.
+
+✨ **New Excel Support**: Directly render Excel files (.xlsx/.xls) with advanced features like sheet selection, range specification, merged cell processing, and automatic range detection.
 
 ## Background / Motivation
 
@@ -19,14 +21,25 @@ Against this backdrop, sphinxcontrib-jsontable was developed to directly embed s
 
 ✨ **Flexible Data Sources**
 * Load JSON from files within your Sphinx project
+* **Load Excel files (.xlsx/.xls) directly with advanced processing**
 * Embed JSON directly inline in your documentation
 * Support for relative file paths with safe path resolution
 
 📊 **Multiple Data Formats**
 * JSON objects (single or arrays)
 * 2D arrays with optional headers
+* **Excel spreadsheets with complex structures**
 * Mixed data types with automatic string conversion
 * Nested data structures (flattened appropriately)
+
+📋 **Excel-Specific Features**
+* **Sheet Selection**: Target specific sheets by name or index
+* **Range Specification**: Extract data from specific cell ranges (A1:D10)
+* **Smart Header Detection**: Automatic header row identification
+* **Merged Cell Processing**: Handle merged cells with various strategies
+* **Row Skipping**: Skip unwanted rows with flexible patterns
+* **Auto Range Detection**: Intelligent data boundary detection
+* **JSON Caching**: Cache converted data for improved performance
 
 🎛️ **Customizable Output**
 * Optional header rows with automatic key extraction
@@ -49,16 +62,34 @@ Against this backdrop, sphinxcontrib-jsontable was developed to directly embed s
 ## Installation
 
 ### From PyPI
+
+**Basic Installation (JSON support only):**
 ```bash
 pip install sphinxcontrib-jsontable
+```
+
+**With Excel Support:**
+```bash
+pip install sphinxcontrib-jsontable[excel]
+```
+
+**Complete Installation (all features):**
+```bash
+pip install sphinxcontrib-jsontable[all]
 ```
 
 ### From Source
 ```bash
 git clone https://github.com/sasakama-code/sphinxcontrib-jsontable.git
 cd sphinxcontrib-jsontable
-pip install -e .
+pip install -e .[excel]  # With Excel support
 ```
+
+### Dependencies
+
+**Core:** Python 3.10+, Sphinx 3.0+, docutils 0.18+
+
+**Excel Support:** pandas 2.0+, openpyxl 3.1+
 
 ## Quick Start
 
@@ -100,7 +131,7 @@ Create `data/users.json`:
 
 ### 3. Add to Your Documentation
 
-**In reStructuredText (.rst):**
+**JSON Example in reStructuredText (.rst):**
 ```rst
 User Database
 =============
@@ -108,6 +139,17 @@ User Database
 .. jsontable:: data/users.json
    :header:
    :limit: 10
+```
+
+**Excel Example in reStructuredText (.rst):**
+```rst
+Sales Report
+============
+
+.. jsontable:: data/sales_report.xlsx
+   :header:
+   :sheet: Q1 Sales
+   :range: A1:E20
 ```
 
 **In Markdown (with myst-parser):**
@@ -118,6 +160,14 @@ User Database
 :header:
 :limit: 10
 ```
+
+# Excel Sales Data
+
+```{jsontable} data/quarterly_sales.xlsx
+:header:
+:sheet: Summary
+:header-row: 2
+```
 ````
 
 ### 4. Build Your Documentation
@@ -125,6 +175,123 @@ User Database
 ```bash
 sphinx-build -b html docs/ build/html/
 ```
+
+## Excel Support Guide
+
+### Excel File Processing
+
+sphinxcontrib-jsontable provides comprehensive Excel file support with advanced features for handling complex spreadsheet structures.
+
+#### Basic Excel Usage
+
+```rst
+.. jsontable:: data/employees.xlsx
+   :header:
+```
+
+#### Sheet Selection
+
+**By Sheet Name:**
+```rst
+.. jsontable:: data/financial_report.xlsx
+   :header:
+   :sheet: Quarterly Results
+```
+
+**By Sheet Index (0-based):**
+```rst
+.. jsontable:: data/financial_report.xlsx
+   :header:
+   :sheet-index: 2
+```
+
+#### Range Specification
+
+**Specific Cell Range:**
+```rst
+.. jsontable:: data/large_dataset.xlsx
+   :header:
+   :range: A1:F25
+```
+
+**Starting from Specific Cell:**
+```rst
+.. jsontable:: data/data_with_headers.xlsx
+   :header:
+   :range: B3:H50
+```
+
+#### Advanced Header Configuration
+
+**Custom Header Row:**
+```rst
+.. jsontable:: data/complex_report.xlsx
+   :header:
+   :header-row: 3
+```
+
+**Skip Unwanted Rows:**
+```rst
+.. jsontable:: data/messy_data.xlsx
+   :header:
+   :skip-rows: 0-2,5,7-9
+```
+
+#### Merged Cell Processing
+
+**Expand Merged Cells:**
+```rst
+.. jsontable:: data/formatted_report.xlsx
+   :header:
+   :merge-cells: expand
+```
+
+**Ignore Merged Cells:**
+```rst
+.. jsontable:: data/formatted_report.xlsx
+   :header:
+   :merge-cells: ignore
+```
+
+#### Automatic Range Detection
+
+**Smart Data Detection:**
+```rst
+.. jsontable:: data/unstructured.xlsx
+   :header:
+   :detect-range: auto
+```
+
+**Manual Override:**
+```rst
+.. jsontable:: data/complex_layout.xlsx
+   :header:
+   :detect-range: manual
+   :range: C5:J30
+```
+
+#### Performance Optimization
+
+**Enable JSON Caching:**
+```rst
+.. jsontable:: data/large_workbook.xlsx
+   :header:
+   :json-cache:
+```
+
+### Excel Options Reference
+
+| Option | Type | Description | Example |
+|--------|------|-------------|---------|
+| `sheet` | string | Sheet name to read | `:sheet: Sales Data` |
+| `sheet-index` | int | Sheet index (0-based) | `:sheet-index: 1` |
+| `range` | string | Cell range (A1:D10) | `:range: B2:F20` |
+| `header-row` | int | Header row number (0-based) | `:header-row: 2` |
+| `skip-rows` | string | Rows to skip | `:skip-rows: 0-2,5,7-9` |
+| `detect-range` | string | Auto detection mode | `:detect-range: auto` |
+| `merge-cells` | string | Merged cell handling | `:merge-cells: expand` |
+| `merge-headers` | string | Multi-row header merging | `:merge-headers: true` |
+| `json-cache` | flag | Enable caching | `:json-cache:` |
 
 ## Comprehensive Usage Guide
 
@@ -586,6 +753,49 @@ jsontable_max_rows = 5000  # Adjust based on your needs
 - Check for trailing commas, unquoted keys
 - Ensure proper escaping of special characters
 
+**Excel-Specific Errors:**
+
+**Error: "Excel file not found"**
+```rst
+# ❌ Incorrect path
+.. jsontable:: data/missing_file.xlsx
+
+# ✅ Correct path and file exists
+.. jsontable:: data/actual_file.xlsx
+```
+
+**Error: "Invalid Excel file format"**
+- Ensure file has .xlsx or .xls extension
+- Verify file is not corrupted
+- Check if file is actually an Excel file (not renamed CSV)
+
+**Error: "Sheet not found"**
+```rst
+# ❌ Non-existent sheet name
+.. jsontable:: data/report.xlsx
+   :sheet: NonExistentSheet
+
+# ✅ Valid sheet name or index
+.. jsontable:: data/report.xlsx
+   :sheet: Sheet1
+```
+
+**Error: "Invalid range specification"**
+```rst
+# ❌ Invalid range format
+.. jsontable:: data/report.xlsx
+   :range: Z99:AA1000
+
+# ✅ Valid range format
+.. jsontable:: data/report.xlsx
+   :range: A1:F25
+```
+
+**Error: "No data found in specified range"**
+- Check if the specified range contains data
+- Verify range coordinates are within sheet bounds
+- Ensure range specification format is correct (A1:D10)
+
 **Performance Warnings**
 ```
 WARNING: Large dataset detected (25,000 rows). Showing first 10,000 rows for performance.
@@ -682,38 +892,173 @@ The extension automatically prevents directory traversal attacks:
 - **Python:** 3.10+ (recommended: 3.11+)
 - **Docutils:** 0.14+
 
+## Developer Documentation
+
+### Architecture Overview
+
+sphinxcontrib-jsontable follows a modular, layered architecture designed for extensibility and maintainability:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Sphinx Integration                       │
+├─────────────────────────────────────────────────────────────┤
+│              JsonTableDirective (Main Entry)                │
+├─────────────────────┬───────────────────────────────────────┤
+│   JsonDataLoader    │        ExcelDataLoader               │
+│   (JSON Support)    │        (Excel Support)               │
+├─────────────────────┴───────────────────────────────────────┤
+│                   TableConverter                            │
+│              (Format-agnostic Processing)                   │
+├─────────────────────────────────────────────────────────────┤
+│                    TableBuilder                             │
+│                (Docutils Integration)                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ### API Reference
 
 #### Core Classes
 
-**`JsonTableDirective`**
+**`JsonTableDirective`** (`sphinxcontrib/jsontable/directives.py:596`)
 - Main Sphinx directive class
-- Handles option parsing and execution
+- Handles option parsing and execution  
 - Coordinates data loading, conversion, and rendering
+- **Options**: 13 total options including Excel-specific features
 
-**`JsonDataLoader`**  
+**`JsonDataLoader`** (`sphinxcontrib/jsontable/directives.py:112`)
 - Loads JSON from files or inline content
 - Validates encoding and file paths
-- Provides secure file access
+- Provides secure file access with path traversal protection
 
-**`TableConverter`**
-- Transforms JSON structures into 2D table data
+**`ExcelDataLoader`** (`sphinxcontrib/jsontable/excel_data_loader.py`)
+- Comprehensive Excel file processing
+- **Methods**: `load_from_excel()`, `validate_excel_file()`, `header_detection()`
+- **Features**: Sheet selection, range specification, merged cell handling
+- **Error Handling**: Enhanced error classes with multilingual support
+
+**`TableConverter`** (`sphinxcontrib/jsontable/directives.py:204`)
+- Transforms JSON/Excel data into 2D table format
 - Handles different data formats (objects, arrays, mixed)
 - Manages header extraction and row limiting
-- Applies automatic performance limits
+- Applies automatic performance limits (10,000 rows default)
 
-**`TableBuilder`**
-- Generates Docutils table nodes
+**`TableBuilder`** (`sphinxcontrib/jsontable/directives.py:403`)
+- Generates Docutils table nodes for Sphinx rendering
 - Creates proper table structure with headers/body
 - Handles cell formatting and padding
 
+#### Excel-Specific Classes
+
+**Enhanced Error Classes** (`excel_data_loader.py:29-143`)
+```python
+class EnhancedExcelError(Exception):
+    """Base class for enhanced Excel errors with multilingual support"""
+    
+class ExcelFileNotFoundError(EnhancedExcelError):
+    """Excel file not found with recovery suggestions"""
+    
+class ExcelFileFormatError(EnhancedExcelError):
+    """Invalid Excel format with user-friendly guidance"""
+```
+
+#### Option Specification
+
+```python
+option_spec = {
+    # Core options
+    "header": directives.flag,
+    "encoding": directives.unchanged,
+    "limit": directives.nonnegative_int,
+    
+    # Excel-specific options  
+    "sheet": directives.unchanged,
+    "sheet-index": directives.nonnegative_int,
+    "range": directives.unchanged,
+    "header-row": directives.nonnegative_int,
+    "skip-rows": directives.unchanged,
+    "detect-range": directives.unchanged,
+    "auto-header": directives.flag,
+    "merge-cells": directives.unchanged,
+    "merge-headers": directives.unchanged,
+    "json-cache": directives.flag,
+}
+```
+
+### Extension Development
+
+#### Adding New Data Sources
+
+To add support for new data formats, follow this pattern:
+
+1. **Create a Data Loader Class**:
+```python
+class NewFormatDataLoader:
+    def __init__(self, source_dir: str):
+        self.source_dir = source_dir
+        
+    def load_from_format(self, file_path: str, **options) -> dict:
+        """Load and convert to JSON-compatible format"""
+        # Implementation here
+        return {"data": converted_data, "headers": headers}
+```
+
+2. **Update JsonTableDirective**:
+```python
+def run(self) -> list[nodes.Node]:
+    # Add format detection
+    if file_path.endswith('.newformat'):
+        loader = NewFormatDataLoader(self.env.srcdir)
+        result = loader.load_from_format(file_path, **options)
+```
+
+3. **Add Option Specifications**:
+```python
+option_spec["new-option"] = directives.unchanged
+```
+
+#### Performance Considerations
+
+**Memory Management**:
+- Large datasets are automatically limited (configurable)
+- Streaming processing for Excel files
+- JSON caching for improved rebuild performance
+
+**Security Features**:
+- Path traversal protection via `is_safe_path()`
+- File access restricted to source directory
+- Input validation for all options
+
 #### Error Handling
 
-All errors inherit from `JsonTableError`:
-- File access errors
-- JSON parsing errors  
-- Invalid data structure errors
-- Path traversal attempts
+All errors inherit from domain-specific base classes:
+- `JsonTableError`: Base error class
+- `EnhancedExcelError`: Excel-specific enhanced errors
+- File access errors with recovery suggestions
+- Input validation errors with user guidance
+
+### Testing Framework
+
+**Test Organization**:
+```
+tests/
+├── excel/              # Excel-specific tests (18 files)
+├── unit/               # Core component unit tests  
+├── integration/        # Cross-component integration tests
+├── performance/        # Performance and benchmark tests
+└── coverage/           # Coverage-specific tests
+```
+
+**Test Execution**:
+```bash
+# Standard test execution
+uv run python -m pytest
+
+# Excel-specific tests
+uv run python -m pytest tests/excel/
+
+# Performance tests
+uv run python -m pytest --benchmark-only
+```
 
 ### Contributing
 
