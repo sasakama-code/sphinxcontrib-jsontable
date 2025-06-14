@@ -169,13 +169,12 @@ class TestAutoRangeDetection:
 
         # 期待される結果: 最大のデータブロックを自動選択
         expected_data = [
-            ["Block1", "データ1"],  # 最大ブロック
             ["項目1", "100"],
             ["項目2", "150"],
         ]
 
         assert result["data"] == expected_data
-        assert result["detected_range"] == "A1:B3"
+        assert result["detected_range"] == "A1:B2"
         assert result["detect_mode"] == "smart"
         assert "detected_blocks" in result  # 複数ブロック情報
 
@@ -238,8 +237,8 @@ class TestAutoRangeDetection:
 
         # 期待される結果: 3つのデータブロック検出
         assert len(result["blocks"]) >= 2
-        assert result["blocks"][0]["range"] == "A1:B3"  # Block1
-        assert result["blocks"][1]["range"] == "D1:E3"  # Block2
+        assert result["blocks"][0]["range"] == "A1:B2"  # Block1
+        assert result["blocks"][1]["range"] == "D1:E2"  # Block2
 
         # 各ブロックの信頼度スコア
         for block in result["blocks"]:

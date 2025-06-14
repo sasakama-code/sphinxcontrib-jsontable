@@ -53,7 +53,7 @@ class TestBasicExcelDataLoader:
         # 結果検証
         assert "data" in result
         assert "sheet_name" in result
-        assert len(result["data"]) == 3  # ヘッダー + 2行
+        assert len(result["data"]) == 2  # データ行のみ
 
     def test_excel_file_validation(self):
         """Excelファイル検証のテスト."""

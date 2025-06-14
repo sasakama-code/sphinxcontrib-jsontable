@@ -27,8 +27,8 @@ def test_range_functionality_implemented():
 
         print("✅ Range Specification機能は実装済み")
 
-    except ImportError:
-        pytest.skip("Excel support not available")
+    except ImportError as e:
+        pytest.fail(f"Excel support should be available: {e}")
 
 
 def test_directive_range_option_implemented():
@@ -44,8 +44,8 @@ def test_directive_range_option_implemented():
 
         print("✅ :range:オプションは実装済み")
 
-    except ImportError:
-        pytest.skip("Excel support not available")
+    except ImportError as e:
+        pytest.fail(f"Excel support should be available: {e}")
 
 
 if __name__ == "__main__":

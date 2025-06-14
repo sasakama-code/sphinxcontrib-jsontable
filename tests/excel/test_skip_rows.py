@@ -67,7 +67,6 @@ def create_mock_state_machine(srcdir="/tmp"):
     return MockStateMachine(), MockState(srcdir)
 
 
-@pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
 class TestSkipRows:
     """Phase 2: Skip Rows機能のテスト."""
 

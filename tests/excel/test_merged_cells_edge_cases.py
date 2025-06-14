@@ -28,7 +28,6 @@ except ImportError:
     EXCEL_AVAILABLE = False
 
 
-@pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
 class TestMergedCellsEdgeCases:
     """Merged Cells Edge Cases: セル結合の極限エッジケーステスト."""
 

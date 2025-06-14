@@ -57,7 +57,6 @@ def create_mock_state_machine(srcdir="/tmp"):
     return MockStateMachine(), MockState(srcdir)
 
 
-@pytest.mark.skipif(not DIRECTIVE_AVAILABLE, reason="Directive support not available")
 class TestJsonTableDirectiveAdvanced:
     """JsonTableDirectiveの高度機能のテスト."""
 

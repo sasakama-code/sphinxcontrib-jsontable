@@ -16,7 +16,6 @@ except ImportError:
     EXCEL_AVAILABLE = False
 
 
-@pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
 class TestExcelDataLoader:
     """ExcelDataLoaderクラスのテスト."""
 

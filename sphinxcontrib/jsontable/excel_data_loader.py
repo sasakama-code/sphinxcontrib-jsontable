@@ -4466,3 +4466,326 @@ class ExcelDataLoader:
             }
         )
         return result
+
+    # ==========================================
+    # Additional Utility Methods for Tests
+    # ==========================================
+
+    def _column_letter_to_number(self, column_letter: str) -> int:
+        """列文字(A, B, C...)を番号(0, 1, 2...)に変換。
+
+        Args:
+            column_letter: 列文字(例: A, B, AA, AB)
+
+        Returns:
+            int: 0ベースの列番号
+        """
+        result = 0
+        for char in column_letter.upper():
+            result = result * 26 + (ord(char) - ord("A") + 1)
+        return result - 1
+
+    def _number_to_column_letter(self, column_number: int) -> str:
+        """番号(0, 1, 2...)を列文字(A, B, C...)に変換。
+
+        Args:
+            column_number: 0ベースの列番号
+
+        Returns:
+            str: 列文字(例: A, B, AA, AB)
+        """
+        column_letter = ""
+        column_number += 1  # 1ベースに変換
+        while column_number > 0:
+            column_number -= 1
+            column_letter = chr(column_number % 26 + ord("A")) + column_letter
+            column_number //= 26
+        return column_letter
+
+    def _validate_range_bounds(
+        self, start_row: int, end_row: int, start_col: int, end_col: int
+    ) -> None:
+        """範囲の境界値を検証。
+
+        Args:
+            start_row: 開始行(0ベース)
+            end_row: 終了行(0ベース)
+            start_col: 開始列(0ベース)
+            end_col: 終了列(0ベース)
+
+        Raises:
+            ValueError: 不正な範囲の場合
+        """
+        if start_row > end_row:
+            raise ValueError(
+                f"Start row ({start_row}) cannot be greater than end row ({end_row})"
+            )
+        if start_col > end_col:
+            raise ValueError(
+                f"Start column ({start_col}) cannot be greater than end column ({end_col})"
+            )
+        if start_row < 0 or start_col < 0:
+            raise ValueError("Row and column indices must be non-negative")
+
+    def _extract_range(self, data: list[list], range_info: dict) -> list[list]:
+        """データから指定範囲を抽出。
+
+        Args:
+            data: 元のデータ
+            range_info: 範囲情報(start_row, end_row, start_col, end_col)
+
+        Returns:
+            list[list]: 抽出されたデータ
+        """
+        start_row = range_info["start_row"]
+        end_row = range_info["end_row"]
+        start_col = range_info["start_col"]
+        end_col = range_info["end_col"]
+
+        # 範囲検証
+        self._validate_range_bounds(start_row, end_row, start_col, end_col)
+
+        result = []
+        for row_idx in range(start_row, min(end_row + 1, len(data))):
+            row_data = []
+            for col_idx in range(
+                start_col,
+                min(end_col + 1, len(data[row_idx]) if row_idx < len(data) else 0),
+            ):
+                row_data.append(data[row_idx][col_idx])
+            result.append(row_data)
+
+        return result
+
+    def _normalize_header_names(self, headers: list[str]) -> list[str]:
+        """ヘッダー名を正規化。
+
+        Args:
+            headers: 元のヘッダー名リスト
+
+        Returns:
+            list[str]: 正規化されたヘッダー名リスト
+        """
+        normalized = []
+        for header in headers:
+            # 空白の削除、小文字変換
+            normalized_header = str(header).strip().lower()
+            # 特殊文字の処理
+            normalized_header = re.sub(r"[^\w\s]", "", normalized_header)
+            normalized.append(normalized_header)
+        return normalized
+
+    def _is_likely_header_statistical(self, row_data: list) -> bool:
+        """統計的手法でヘッダー行である可能性を判定。
+
+        Args:
+            row_data: 行データ
+
+        Returns:
+            bool: ヘッダー行である可能性が高い場合True
+        """
+        if not row_data:
+            return False
+
+        text_count = 0
+        numeric_count = 0
+
+        for cell in row_data:
+            if self._is_numeric_value(cell):
+                numeric_count += 1
+            else:
+                text_count += 1
+
+        total = len(row_data)
+        text_ratio = text_count / total if total > 0 else 0
+        numeric_ratio = numeric_count / total if total > 0 else 0
+
+        # 厳密条件: テキスト比率80%以上、数値比率50%以下
+        return text_ratio >= 0.8 and numeric_ratio <= 0.5
+
+    def _contains_header_keywords(self, row_data: list) -> bool:
+        """ヘッダーキーワードが含まれているかチェック。
+
+        Args:
+            row_data: 行データ
+
+        Returns:
+            bool: ヘッダーキーワードが含まれている場合True
+        """
+        header_keywords = {
+            "ja": [
+                "名前",
+                "氏名",
+                "年齢",
+                "住所",
+                "id",
+                "name",
+                "age",
+                "address",
+                "項目",
+                "データ",
+            ],
+            "en": ["name", "id", "age", "address", "item", "data", "value", "column"],
+        }
+
+        all_keywords = set()
+        for keywords in header_keywords.values():
+            all_keywords.update(keywords)
+
+        for cell in row_data:
+            cell_str = str(cell).lower().strip()
+            if cell_str in all_keywords:
+                return True
+
+        return False
+
+    def _calculate_text_ratio(self, row_data: list) -> float:
+        """行データのテキスト比率を計算。
+
+        Args:
+            row_data: 行データ
+
+        Returns:
+            float: テキスト比率(0.0-1.0)
+        """
+        if not row_data:
+            return 0.0
+
+        text_count = sum(1 for cell in row_data if not self._is_numeric_value(cell))
+        return text_count / len(row_data)
+
+    def _calculate_numeric_ratio(self, row_data: list) -> float:
+        """行データの数値比率を計算。
+
+        Args:
+            row_data: 行データ
+
+        Returns:
+            float: 数値比率(0.0-1.0)
+        """
+        if not row_data:
+            return 0.0
+
+        numeric_count = sum(1 for cell in row_data if self._is_numeric_value(cell))
+        return numeric_count / len(row_data)
+
+    def _is_numeric_value(self, val) -> bool:
+        """値が数値かどうかを判定。
+
+        Args:
+            val: 判定する値
+
+        Returns:
+            bool: 数値の場合True
+        """
+        if pd.api.types.is_numeric_dtype(type(val)):
+            return True
+        if isinstance(val, str):
+            try:
+                float(val)
+                return True
+            except (ValueError, TypeError):
+                return False
+        return False
+
+    def _detect_header_row_basic(self, df: pd.DataFrame) -> dict:
+        """基本的なヘッダー行検出。
+
+        Args:
+            df: Pandasデータフレーム
+
+        Returns:
+            dict: ヘッダー検出結果
+        """
+        if df.empty:
+            return {"has_header": False, "header_row": -1, "confidence": 0.0}
+
+        # 最初の行をチェック
+        first_row = df.iloc[0].tolist()
+
+        # 統計的判定
+        statistical_result = self._is_likely_header_statistical(first_row)
+
+        # キーワード判定
+        keyword_result = self._contains_header_keywords(first_row)
+
+        # 総合判定
+        has_header = statistical_result or keyword_result
+        confidence = (
+            0.8
+            if statistical_result and keyword_result
+            else 0.6
+            if statistical_result or keyword_result
+            else 0.2
+        )
+
+        return {
+            "has_header": has_header,
+            "header_row": 0 if has_header else -1,
+            "confidence": confidence,
+        }
+
+    def _extract_headers_from_data(self, data: list[list]) -> list[str]:
+        """データから ヘッダーを抽出。
+
+        Args:
+            data: データリスト
+
+        Returns:
+            list[str]: ヘッダーリスト
+        """
+        if not data:
+            return []
+
+        # 最初の行をヘッダーとして使用
+        return [str(cell) for cell in data[0]]
+
+    def _parse_range_specification(self, range_spec: str) -> dict:
+        """範囲指定文字列を解析。
+
+        Args:
+            range_spec: 範囲指定(例: "A1:C3", "B2")
+
+        Returns:
+            dict: 解析結果(start_row, end_row, start_col, end_col)
+        """
+        if ":" in range_spec:
+            # 範囲指定(例: A1:C3)
+            start_cell, end_cell = range_spec.split(":")
+            start_row, start_col = self._parse_cell_reference(start_cell)
+            end_row, end_col = self._parse_cell_reference(end_cell)
+        else:
+            # 単一セル指定(例: B2)
+            start_row, start_col = self._parse_cell_reference(range_spec)
+            end_row, end_col = start_row, start_col
+
+        return {
+            "start_row": start_row,
+            "end_row": end_row,
+            "start_col": start_col,
+            "end_col": end_col,
+        }
+
+    def _parse_cell_reference(self, cell_ref: str) -> tuple[int, int]:
+        """セル参照(例: A1, B2)を行・列番号に変換。
+
+        Args:
+            cell_ref: セル参照文字列
+
+        Returns:
+            tuple[int, int]: (行番号, 列番号) 0ベース
+        """
+        # 文字と数字を分離
+        match = re.match(r"([A-Z]+)(\d+)", cell_ref.upper())
+        if not match:
+            raise ValueError(f"Invalid cell reference: {cell_ref}")
+
+        col_letters, row_num = match.groups()
+
+        # 列文字を番号に変換
+        col_num = self._column_letter_to_number(col_letters)
+
+        # 行番号を0ベースに変換
+        row_num = int(row_num) - 1
+
+        return row_num, col_num
