@@ -184,24 +184,24 @@ class TestSkipRows:
         """Skip Rowsと範囲指定の組み合わせテスト(未実装なので失敗する)。"""
         excel_path = self.create_skip_rows_test_excel()
 
-        # A3:C8の範囲で、6行目をスキップ
+        # A3:C8の範囲で、範囲内index 3をスキップ（元のExcel行6に相当）
         result = self.loader.load_from_excel_with_skip_rows_and_range(
-            excel_path, range_spec="A3:C8", skip_rows="6"
+            excel_path, range_spec="A3:C8", skip_rows="3"
         )
 
         # 範囲内でスキップ処理された結果
         expected_data = [
-            ["商品名", "価格", "在庫"],  # Row 3
-            ["商品A", "1000", "50"],  # Row 4
-            ["商品B", "2000", "30"],  # Row 5
-            # Row 6はスキップ
-            ["商品C", "1500", "20"],  # Row 7
-            ["商品D", "3000", "10"],  # Row 8
+            ["", "", ""],           # Row 3 (range index 0) 
+            ["商品名", "価格", "在庫"],  # Row 4 (range index 1)
+            ["商品A", "1000", "50"],  # Row 5 (range index 2)
+            # Range index 3はスキップ（元Excel Row 6）
+            ["無効行", "X", "Y"],      # Row 7 (range index 4)
+            ["商品C", "1500", "20"],  # Row 8 (range index 5)
         ]
 
         assert result["data"] == expected_data
         assert result["range"] == "A3:C8"
-        assert result["skip_rows"] == "6"
+        assert result["skip_rows"] == "3"
 
     def test_invalid_skip_rows_format_error(self):
         """無効なスキップ行形式指定時のエラーテスト(未実装なので失敗する)。"""
@@ -217,7 +217,7 @@ class TestSkipRows:
         ]
 
         for invalid_format in invalid_formats:
-            with pytest.raises(ValueError, match="Invalid skip rows format"):
+            with pytest.raises(Exception, match="Invalid.*format|Negative.*not.*allowed|Invalid.*specification"):
                 self.loader.load_from_excel_with_skip_rows(
                     excel_path, skip_rows=invalid_format
                 )

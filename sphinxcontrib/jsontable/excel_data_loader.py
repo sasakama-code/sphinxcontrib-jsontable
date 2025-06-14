@@ -847,9 +847,36 @@ class ExcelDataLoader:
                 f"Unexpected error parsing range specification: {e}", range_spec
             ) from e
 
-        # Excel全体を読み込み
+        # Excel全体を読み込み（範囲指定時は生データを取得）
         try:
-            excel_data = self.load_from_excel(file_path, sheet_name, header_row)
+            # 範囲指定時は自動ヘッダー検出を無効化し、生データを取得
+            self._validate_sheet_name(file_path, sheet_name) if sheet_name else None
+            
+            if sheet_name is None:
+                sheet_name = self.basic_sheet_detection(file_path)
+            
+            # 生データとして読み込み（ヘッダー処理無効）
+            df_raw = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
+            
+            if df_raw.empty:
+                raise ValueError(
+                    f"Empty data in sheet '{sheet_name}' of file: {file_path}"
+                )
+            
+            # 生データを変換
+            raw_data = self.data_type_conversion(df_raw)
+            
+            # 一時的なexcel_data構造を作成
+            excel_data = {
+                "data": raw_data,
+                "has_header": False,  # 範囲指定では生データを扱う
+                "headers": None,
+                "sheet_name": sheet_name,
+                "file_path": file_path,
+                "rows": len(raw_data),
+                "columns": len(raw_data[0]) if raw_data else 0,
+            }
+            
         except Exception as e:
             raise ValueError(
                 f"Failed to load Excel file for range extraction: {e}"
@@ -1002,8 +1029,16 @@ class ExcelDataLoader:
 
             # ヘッダー名の正規化(必要に応じて)
             if excel_data["has_header"] and excel_data["headers"]:
+                # pandasの"Unnamed: X"ヘッダーを空文字として扱って正規化
+                headers_to_normalize = []
+                for header in excel_data["headers"]:
+                    if isinstance(header, str) and header.startswith("Unnamed:"):
+                        headers_to_normalize.append("")  # 空文字として扱う
+                    else:
+                        headers_to_normalize.append(header)
+                
                 excel_data["headers"] = self._normalize_header_names(
-                    excel_data["headers"]
+                    headers_to_normalize
                 )
 
             return excel_data
@@ -1042,23 +1077,47 @@ class ExcelDataLoader:
         self._validate_header_row(header_row)
 
         try:
-            # 範囲指定付きで読み込み(header_rowも考慮)
+            # 範囲指定付きで読み込み（生データ取得）
             excel_data = self.load_from_excel_with_range(
-                file_path, range_spec, sheet_name, header_row
+                file_path, range_spec, sheet_name
             )
 
-            # ヘッダー行と範囲の整合性チェック
-            self._validate_header_row_and_range_compatibility(
-                header_row, range_spec, excel_data
-            )
+            # 範囲情報を解析して、ヘッダー行の相対位置を計算
+            range_info = self._parse_range_specification(range_spec)
+            
+            # ヘッダー行が範囲内にあるかチェック
+            if header_row < range_info["start_row"] or header_row > range_info["end_row"]:
+                raise ValueError(
+                    f"Header row {header_row} is outside the specified range {range_spec}. "
+                    f"Range covers rows {range_info['start_row']}-{range_info['end_row']}"
+                )
 
-            # ヘッダー行情報を追加
-            excel_data["header_row"] = header_row
-
-            # ヘッダー名の正規化(必要に応じて)
-            if excel_data["has_header"] and excel_data["headers"]:
-                excel_data["headers"] = self._normalize_header_names(
-                    excel_data["headers"]
+            # 範囲内でのヘッダー行の相対位置
+            header_row_relative = header_row - range_info["start_row"]
+            
+            # ヘッダーを抽出
+            if header_row_relative < len(excel_data["data"]):
+                headers = excel_data["data"][header_row_relative]
+                # データからヘッダー行を除去
+                data_without_header = [
+                    row for i, row in enumerate(excel_data["data"]) 
+                    if i != header_row_relative
+                ]
+                
+                # ヘッダー名の正規化
+                normalized_headers = self._normalize_header_names(headers)
+                
+                # 結果を更新
+                excel_data.update({
+                    "data": data_without_header,
+                    "has_header": True,
+                    "headers": normalized_headers,
+                    "header_row": header_row,
+                    "rows": len(data_without_header),
+                })
+            else:
+                raise ValueError(
+                    f"Header row {header_row} is out of range for the extracted data"
                 )
 
             return excel_data
