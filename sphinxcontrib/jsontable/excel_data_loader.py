@@ -300,7 +300,7 @@ class ExcelDataLoader:
                 )
 
         except pd.errors.EmptyDataError:
-            raise ValueError(f"Excel file {file_path} is empty or corrupted")
+            raise ValueError(f"Excel file {file_path} is empty or corrupted") from None
         except Exception as e:
             if isinstance(e, ValueError):
                 raise  # Re-raise our custom ValueError without wrapping
@@ -344,7 +344,7 @@ class ExcelDataLoader:
             return sheet_names[sheet_index]
 
         except pd.errors.EmptyDataError:
-            raise ValueError(f"Excel file {file_path} is empty or corrupted")
+            raise ValueError(f"Excel file {file_path} is empty or corrupted") from None
         except Exception as e:
             if isinstance(e, ValueError):
                 raise  # Re-raise our custom ValueError without wrapping
@@ -1158,7 +1158,7 @@ class ExcelDataLoader:
                     if "invalid literal" in str(e):
                         raise SkipRowsError(
                             f"Invalid skip rows format: {part}", skip_rows
-                        )
+                        ) from e
                     raise SkipRowsError(
                         f"Error parsing range {part}: {e}", skip_rows
                     ) from e
@@ -2716,7 +2716,7 @@ class ExcelDataLoader:
             }
 
         except FileNotFoundError:
-            raise FileNotFoundError(f"Excel file not found: {file_path}")
+            raise FileNotFoundError(f"Excel file not found: {file_path}") from None
         except Exception as e:
             raise ValueError(
                 f"Failed to load Excel file with multiple headers: {file_path}: {e!s}"
@@ -4015,7 +4015,9 @@ class ExcelDataLoader:
             context = self._create_operation_context(
                 "load_from_excel_with_detailed_errors", file_path, sheet_name=sheet_name
             )
-            raise self._handle_enhanced_error(file_path, e, context, debug_info)
+            raise self._handle_enhanced_error(
+                file_path, e, context, debug_info
+            ) from None
 
     def load_from_excel_with_user_friendly_errors(
         self, file_path: str, sheet_name: str | None = None
@@ -4041,7 +4043,7 @@ class ExcelDataLoader:
                 file_path,
                 sheet_name=sheet_name,
             )
-            raise self._handle_enhanced_error(file_path, e, context)
+            raise self._handle_enhanced_error(file_path, e, context) from None
 
     def load_from_excel_with_debug_info(
         self,
@@ -4090,7 +4092,9 @@ class ExcelDataLoader:
                 sheet_name=sheet_name,
                 debug_level=effective_level,
             )
-            raise self._handle_enhanced_error(file_path, e, context, debug_info)
+            raise self._handle_enhanced_error(
+                file_path, e, context, debug_info
+            ) from None
 
     def load_from_excel_with_partial_recovery(
         self,
@@ -4219,7 +4223,7 @@ class ExcelDataLoader:
             # 既に発生したExcelDataNotFoundErrorはそのまま再発生
             raise
         except Exception:
-            raise ExcelFileFormatError(file_path)
+            raise ExcelFileFormatError(file_path) from None
 
     def load_from_excel_with_context_preservation(
         self,
@@ -4251,9 +4255,9 @@ class ExcelDataLoader:
         try:
             return self.load_from_excel(file_path, sheet_name)
         except FileNotFoundError:
-            raise ExcelFileNotFoundError(file_path, error_context=context)
+            raise ExcelFileNotFoundError(file_path, error_context=context) from None
         except Exception:
-            raise ExcelFileFormatError(file_path, error_context=context)
+            raise ExcelFileFormatError(file_path, error_context=context) from None
 
     def load_from_excel_with_multilingual_errors(
         self, file_path: str, language: str = "ja", sheet_name: str | None = None
@@ -4274,9 +4278,9 @@ class ExcelDataLoader:
         try:
             return self.load_from_excel(file_path, sheet_name)
         except FileNotFoundError:
-            raise ExcelFileNotFoundError(file_path)
+            raise ExcelFileNotFoundError(file_path) from None
         except Exception:
-            raise ExcelFileFormatError(file_path)
+            raise ExcelFileFormatError(file_path) from None
 
     def load_from_excel_with_recovery_strategies(
         self,
