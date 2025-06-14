@@ -250,7 +250,7 @@ class TestExcelIntegration:
             assert len(xlsx_data) == 2
             assert xlsx_data[0]["Name"] == "Alice"
 
-        # .xls ファイルのテスト（パンダスがサポートしている場合）
+        # .xls ファイルのテスト(パンダスがサポートしている場合)
         try:
             xls_path = os.path.join(self.temp_dir, "test.xls")
             df = pd.DataFrame(test_data[1:], columns=test_data[0])

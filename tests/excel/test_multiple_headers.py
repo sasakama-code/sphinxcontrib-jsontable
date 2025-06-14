@@ -51,13 +51,13 @@ class TestMultipleHeaders:
         ws.title = "MultipleHeadersData"
 
         # 階層構造のヘッダー作成
-        # Row 1: 年度レベル（トップレベル）
+        # Row 1: 年度レベル(トップレベル)
         ws["A1"] = "基本情報"
         ws["B1"] = "2025年度"
         ws["D1"] = "2024年度"
         ws["F1"] = "比較"
 
-        # Row 2: 四半期レベル（セカンドレベル）
+        # Row 2: 四半期レベル(セカンドレベル)
         ws["A2"] = "部門"
         ws["B2"] = "Q1"
         ws["C2"] = "Q2"
@@ -127,15 +127,15 @@ class TestMultipleHeaders:
         return file_path
 
     def test_two_level_headers_merge(self):
-        """2レベルヘッダーの結合テスト（未実装なので失敗する）."""
+        """2レベルヘッダーの結合テスト(未実装なので失敗する)."""
         excel_path = self.create_multiple_headers_excel()
 
-        # 2行のヘッダーを結合（header_rows=2）
+        # 2行のヘッダーを結合(header_rows=2)
         result = self.loader.load_from_excel_with_multiple_headers(
             excel_path, header_rows=2
         )
 
-        # 期待される結合ヘッダー（実際のExcel構造に基づく）
+        # 期待される結合ヘッダー(実際のExcel構造に基づく)
         expected_headers = [
             "基本情報_部門",
             "2025年度_Q1",
@@ -152,14 +152,14 @@ class TestMultipleHeaders:
 
         assert result["headers"] == expected_headers
         assert result["data"] == expected_data
-        assert result["has_header"] == True
+        assert result["has_header"]
         assert result["merged_header_levels"] == 2
 
     def test_three_level_headers_merge(self):
-        """3レベルヘッダーの結合テスト（未実装なので失敗する）."""
+        """3レベルヘッダーの結合テスト(未実装なので失敗する)."""
         excel_path = self.create_three_level_headers_excel()
 
-        # 3行のヘッダーを結合（header_rows=3）
+        # 3行のヘッダーを結合(header_rows=3)
         result = self.loader.load_from_excel_with_multiple_headers(
             excel_path, header_rows=3
         )
@@ -178,11 +178,11 @@ class TestMultipleHeaders:
 
         assert result["headers"] == expected_headers
         assert result["data"] == expected_data
-        assert result["has_header"] == True
+        assert result["has_header"]
         assert result["merged_header_levels"] == 3
 
     def test_header_name_normalization(self):
-        """ヘッダー名の正規化テスト（未実装なので失敗する）."""
+        """ヘッダー名の正規化テスト(未実装なので失敗する)."""
         # 空白・特殊文字を含むヘッダー
         file_path = os.path.join(self.temp_dir, "special_headers.xlsx")
         wb = Workbook()
@@ -218,7 +218,7 @@ class TestMultipleHeaders:
         assert result["headers"] == expected_headers
 
     def test_empty_cells_in_headers(self):
-        """ヘッダー内の空セル処理テスト（未実装なので失敗する）."""
+        """ヘッダー内の空セル処理テスト(未実装なので失敗する)."""
         file_path = os.path.join(self.temp_dir, "empty_headers.xlsx")
         wb = Workbook()
         ws = wb.active
@@ -253,7 +253,7 @@ class TestMultipleHeaders:
         assert result["headers"] == expected_headers
 
     def test_duplicate_header_handling(self):
-        """重複ヘッダー名の処理テスト（未実装なので失敗する）."""
+        """重複ヘッダー名の処理テスト(未実装なので失敗する)."""
         file_path = os.path.join(self.temp_dir, "duplicate_headers.xlsx")
         wb = Workbook()
         ws = wb.active
@@ -284,7 +284,7 @@ class TestMultipleHeaders:
         assert result["headers"] == expected_headers
 
     def test_multiple_headers_with_range(self):
-        """複数ヘッダーと範囲指定の組み合わせテスト（未実装なので失敗する）."""
+        """複数ヘッダーと範囲指定の組み合わせテスト(未実装なので失敗する)."""
         excel_path = self.create_multiple_headers_excel()
 
         # B1:E4の範囲で2レベルヘッダー
@@ -310,7 +310,7 @@ class TestMultipleHeaders:
         assert result["range"] == "B1:E4"
 
     def test_invalid_header_rows_error(self):
-        """無効なheader_rows指定時のエラーテスト（未実装なので失敗する）."""
+        """無効なheader_rows指定時のエラーテスト(未実装なので失敗する)."""
         excel_path = self.create_multiple_headers_excel()
 
         # 負の値
@@ -330,10 +330,10 @@ class TestMultipleHeaders:
             )
 
     def test_single_header_row_compatibility(self):
-        """単一行ヘッダーでの互換性テスト（未実装なので失敗する）."""
+        """単一行ヘッダーでの互換性テスト(未実装なので失敗する)."""
         excel_path = self.create_multiple_headers_excel()
 
-        # header_rows=1での動作（従来の動作と同等）
+        # header_rows=1での動作(従来の動作と同等)
         result = self.loader.load_from_excel_with_multiple_headers(
             excel_path, header_rows=1
         )
@@ -345,15 +345,15 @@ class TestMultipleHeaders:
         assert result["merged_header_levels"] == 1
 
     def test_japanese_header_processing(self):
-        """日本語ヘッダーの処理テスト（未実装なので失敗する）."""
+        """日本語ヘッダーの処理テスト(未実装なので失敗する)."""
         file_path = os.path.join(self.temp_dir, "japanese_headers.xlsx")
         wb = Workbook()
         ws = wb.active
 
         # 日本語の複雑なヘッダー
         ws["A1"] = "株式会社○○"
-        ws["B1"] = "売上高（千円）"
-        ws["C1"] = "従業員数（人）"
+        ws["B1"] = "売上高(千円)"
+        ws["C1"] = "従業員数(人)"
 
         ws["A2"] = "部門名"
         ws["B2"] = "年間実績"

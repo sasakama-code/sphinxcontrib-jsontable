@@ -2,7 +2,7 @@
 
 
 def test_range_methods_implemented():
-    """Range機能が実装されていることを確認（GREEN段階）。"""
+    """Range機能が実装されていることを確認(GREEN段階)。"""
 
     try:
         from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader

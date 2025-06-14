@@ -65,7 +65,7 @@ class TestRangeSpecification:
         return file_path
 
     def test_basic_range_specification(self):
-        """基本的な範囲指定のテスト（未実装機能なので失敗する）。"""
+        """基本的な範囲指定のテスト(未実装機能なので失敗する)。"""
         excel_path = self.create_range_test_excel()
 
         # A1:C3の範囲を指定
@@ -80,7 +80,7 @@ class TestRangeSpecification:
         assert result["columns"] == 3
 
     def test_single_cell_range(self):
-        """単一セル範囲指定のテスト（未実装機能なので失敗する）。"""
+        """単一セル範囲指定のテスト(未実装機能なので失敗する)。"""
         excel_path = self.create_range_test_excel()
 
         # 単一セルB2を指定
@@ -94,10 +94,10 @@ class TestRangeSpecification:
         assert result["columns"] == 1
 
     def test_full_row_range(self):
-        """行全体の範囲指定のテスト（未実装機能なので失敗する）。"""
+        """行全体の範囲指定のテスト(未実装機能なので失敗する)。"""
         excel_path = self.create_range_test_excel()
 
-        # 2行目全体を指定（A2:F2）
+        # 2行目全体を指定(A2:F2)
         result = self.loader.load_from_excel_with_range(excel_path, range_spec="A2:F2")
 
         expected_data = [["1", "2", "3", "4", "5", "6"]]
@@ -108,10 +108,10 @@ class TestRangeSpecification:
         assert result["columns"] == 6
 
     def test_full_column_range(self):
-        """列全体の範囲指定のテスト（未実装機能なので失敗する）。"""
+        """列全体の範囲指定のテスト(未実装機能なので失敗する)。"""
         excel_path = self.create_range_test_excel()
 
-        # B列全体を指定（B1:B6）
+        # B列全体を指定(B1:B6)
         result = self.loader.load_from_excel_with_range(excel_path, range_spec="B1:B6")
 
         expected_data = [["B"], ["2"], ["Y"], ["8"], ["Beta"], ["200"]]
@@ -122,12 +122,12 @@ class TestRangeSpecification:
         assert result["columns"] == 1
 
     def test_invalid_range_format_error(self):
-        """無効な範囲形式指定時のエラーテスト（未実装なので失敗する）。"""
+        """無効な範囲形式指定時のエラーテスト(未実装なので失敗する)。"""
         excel_path = self.create_range_test_excel()
 
         # 無効な範囲形式
         invalid_ranges = [
-            "A1-C3",  # ハイフン形式（コロンが正しい）
+            "A1-C3",  # ハイフン形式(コロンが正しい)
             "1A:3C",  # 逆順
             "A:C3",  # 不完全な形式
             "A1:C",  # 不完全な形式
@@ -141,25 +141,25 @@ class TestRangeSpecification:
                 )
 
     def test_out_of_bounds_range_error(self):
-        """範囲外指定時のエラーテスト（未実装なので失敗する）。"""
+        """範囲外指定時のエラーテスト(未実装なので失敗する)。"""
         excel_path = self.create_range_test_excel()
 
-        # 範囲外の指定（6x6のデータなので、G列やRow7は存在しない）
+        # 範囲外の指定(6x6のデータなので、G列やRow7は存在しない)
         with pytest.raises(ValueError, match="Range is out of bounds"):
             self.loader.load_from_excel_with_range(excel_path, range_spec="A1:G10")
 
     def test_inverted_range_error(self):
-        """逆転範囲指定時のエラーテスト（未実装なので失敗する）。"""
+        """逆転範囲指定時のエラーテスト(未実装なので失敗する)。"""
         excel_path = self.create_range_test_excel()
 
-        # 逆転した範囲（C3:A1は無効）
+        # 逆転した範囲(C3:A1は無効)
         with pytest.raises(
             ValueError, match="Invalid range: end cell must be after start cell"
         ):
             self.loader.load_from_excel_with_range(excel_path, range_spec="C3:A1")
 
     def test_directive_range_option(self):
-        """JsonTableDirectiveの:range:オプションテスト（未実装なので失敗する）。"""
+        """JsonTableDirectiveの:range:オプションテスト(未実装なので失敗する)。"""
         excel_path = self.create_range_test_excel()
 
         # モックSphinx環境
@@ -200,7 +200,7 @@ class TestRangeSpecification:
             assert json_data[2]["A"] == "7"  # 4行目のA列
 
     def test_range_with_sheet_option(self):
-        """範囲指定とシート指定の組み合わせテスト（未実装なので失敗する）。"""
+        """範囲指定とシート指定の組み合わせテスト(未実装なので失敗する)。"""
         excel_path = self.create_range_test_excel()
 
         # シートと範囲の両方を指定
@@ -215,7 +215,7 @@ class TestRangeSpecification:
         assert result["range"] == "B2:D4"
 
     def test_range_specification_validation(self):
-        """範囲指定の検証ロジックテスト（未実装なので失敗する）。"""
+        """範囲指定の検証ロジックテスト(未実装なので失敗する)。"""
         # range_specが文字列でない場合
         with pytest.raises(TypeError, match="Range specification must be a string"):
             self.loader._parse_range_specification(123)

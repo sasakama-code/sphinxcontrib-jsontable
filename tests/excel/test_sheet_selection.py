@@ -4,7 +4,7 @@ Task 2.1: `:sheet:` オプション実装のテスト
 - シート名指定機能
 - シートインデックス指定機能
 - デフォルトシート設定
-- エラーハンドリング（存在しないシート、日本語対応）
+- エラーハンドリング(存在しないシート、日本語対応)
 """
 
 import os
@@ -81,7 +81,7 @@ class TestSheetSelection:
         return file_path
 
     def test_sheet_selection_by_name(self):
-        """シート名による指定のテスト（実装前なので失敗する）。"""
+        """シート名による指定のテスト(実装前なので失敗する)。"""
         excel_path = self.create_multi_sheet_excel()
 
         # Sheet1を明示的に指定
@@ -89,7 +89,7 @@ class TestSheetSelection:
         assert result["sheet_name"] == "Sheet1"
         assert result["data"][0] == ["Alice", "25", "Tokyo"]
 
-        # 営業データシート（日本語名）を指定
+        # 営業データシート(日本語名)を指定
         result = self.loader.load_from_excel(excel_path, sheet_name="営業データ")
         assert result["sheet_name"] == "営業データ"
         assert result["data"][0] == ["商品A", "100000", "田中"]
@@ -100,33 +100,33 @@ class TestSheetSelection:
         assert result["data"][0] == ["Widget", "500", "100"]
 
     def test_sheet_selection_by_index(self):
-        """シートインデックスによる指定のテスト（未実装機能なので失敗する）。"""
+        """シートインデックスによる指定のテスト(未実装機能なので失敗する)。"""
         excel_path = self.create_multi_sheet_excel()
 
-        # インデックス0（最初のシート）
+        # インデックス0(最初のシート)
         result = self.loader.load_from_excel_by_index(excel_path, sheet_index=0)
         assert result["sheet_name"] == "Sheet1"
         assert result["data"][0] == ["Alice", "25", "Tokyo"]
 
-        # インデックス1（2番目のシート）
+        # インデックス1(2番目のシート)
         result = self.loader.load_from_excel_by_index(excel_path, sheet_index=1)
         assert result["sheet_name"] == "営業データ"
         assert result["data"][0] == ["商品A", "100000", "田中"]
 
-        # インデックス2（3番目のシート）
+        # インデックス2(3番目のシート)
         result = self.loader.load_from_excel_by_index(excel_path, sheet_index=2)
         assert result["sheet_name"] == "Data Sheet"
         assert result["data"][0] == ["Widget", "500", "100"]
 
     def test_nonexistent_sheet_name_error(self):
-        """存在しないシート名指定時のエラーテスト（未実装なので失敗する）。"""
+        """存在しないシート名指定時のエラーテスト(未実装なので失敗する)。"""
         excel_path = self.create_multi_sheet_excel()
 
         with pytest.raises(ValueError, match="Sheet 'NonExistentSheet' not found"):
             self.loader.load_from_excel(excel_path, sheet_name="NonExistentSheet")
 
     def test_invalid_sheet_index_error(self):
-        """無効なシートインデックス指定時のエラーテスト（未実装なので失敗する）。"""
+        """無効なシートインデックス指定時のエラーテスト(未実装なので失敗する)。"""
         excel_path = self.create_multi_sheet_excel()
 
         # 範囲外のインデックス
@@ -138,7 +138,7 @@ class TestSheetSelection:
             self.loader.load_from_excel_by_index(excel_path, sheet_index=-1)
 
     def test_directive_sheet_option(self):
-        """JsonTableDirectiveの:sheet:オプションテスト（未実装なので失敗する）。"""
+        """JsonTableDirectiveの:sheet:オプションテスト(未実装なので失敗する)。"""
         excel_path = self.create_multi_sheet_excel()
 
         # モックSphinx環境
@@ -176,7 +176,7 @@ class TestSheetSelection:
             assert json_data[1]["商品"] == "商品B"
 
     def test_directive_sheet_index_option(self):
-        """JsonTableDirectiveのsheet-indexオプションテスト（未実装なので失敗する）。"""
+        """JsonTableDirectiveのsheet-indexオプションテスト(未実装なので失敗する)。"""
         excel_path = self.create_multi_sheet_excel()
 
         class MockConfig:
@@ -213,7 +213,7 @@ class TestSheetSelection:
             assert json_data[1]["Product"] == "Gadget"
 
     def test_directive_sheet_option_priority(self):
-        """sheet名とsheet-indexの両方が指定された場合の優先度テスト（未実装なので失敗する）。"""
+        """sheet名とsheet-indexの両方が指定された場合の優先度テスト(未実装なので失敗する)。"""
         excel_path = self.create_multi_sheet_excel()
 
         class MockConfig:
@@ -227,7 +227,7 @@ class TestSheetSelection:
         env = MockEnv(self.temp_dir)
 
         with docutils_namespace():
-            # sheet名とsheet-indexの両方を指定（sheet名が優先されるべき）
+            # sheet名とsheet-indexの両方を指定(sheet名が優先されるべき)
             directive = JsonTableDirective(
                 name="jsontable",
                 arguments=[os.path.basename(excel_path)],
@@ -244,7 +244,7 @@ class TestSheetSelection:
 
             json_data = directive._load_json_data()
 
-            # sheet名（営業データ）が優先されることを確認
+            # sheet名(営業データ)が優先されることを確認
             assert len(json_data) == 2
             assert json_data[0]["商品"] == "商品A"
 

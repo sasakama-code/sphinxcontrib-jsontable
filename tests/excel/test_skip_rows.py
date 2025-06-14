@@ -1,8 +1,8 @@
 """Phase 2: Skip Rows機能のTDDテスト.
 
 Task 2.4: `:skip-rows:` オプション実装のテスト
-- 行番号リスト指定機能（例: "0,1,2"）
-- 範囲指定対応（例: "0-2,5,7-9"）
+- 行番号リスト指定機能(例: "0,1,2")
+- 範囲指定対応(例: "0-2,5,7-9")
 - 指定行の除外処理
 - データ整合性確保
 - 他オプションとの組み合わせ
@@ -49,7 +49,7 @@ class TestSkipRows:
 
         # スキップ対象の行を含むデータを作成
         data = [
-            ["# コメント行（スキップ対象）", "", "", ""],  # Row 0
+            ["# コメント行(スキップ対象)", "", "", ""],  # Row 0
             ["メタデータ: 作成日 2025-06-13", "", "", ""],  # Row 1
             ["", "", "", ""],  # Row 2: 空行
             ["商品名", "価格", "在庫", "カテゴリ"],  # Row 3: ヘッダー行
@@ -59,7 +59,7 @@ class TestSkipRows:
             ["商品C", "1500", "20", "文具"],  # Row 7: データ行
             ["商品D", "3000", "10", "電子機器"],  # Row 8: データ行
             ["", "", "", ""],  # Row 9: 空行
-            ["合計", "7500", "110", ""],  # Row 10: 集計行（スキップ対象）
+            ["合計", "7500", "110", ""],  # Row 10: 集計行(スキップ対象)
         ]
 
         df = pd.DataFrame(data)
@@ -70,15 +70,15 @@ class TestSkipRows:
         return file_path
 
     def test_skip_rows_by_list(self):
-        """行番号リスト指定でのスキップテスト（未実装機能なので失敗する）。"""
+        """行番号リスト指定でのスキップテスト(未実装機能なので失敗する)。"""
         excel_path = self.create_skip_rows_test_excel()
 
-        # 0,1,2行目をスキップ（コメント、メタデータ、空行をスキップ）
+        # 0,1,2行目をスキップ(コメント、メタデータ、空行をスキップ)
         result = self.loader.load_from_excel_with_skip_rows(
             excel_path, skip_rows="0,1,2"
         )
 
-        # 期待されるデータ（3行目以降、スキップした行は除外）
+        # 期待されるデータ(3行目以降、スキップした行は除外)
         expected_data = [
             ["商品名", "価格", "在庫", "カテゴリ"],  # Row 3
             ["商品A", "1000", "50", "電子機器"],  # Row 4
@@ -95,7 +95,7 @@ class TestSkipRows:
         assert result["skipped_row_count"] == 3
 
     def test_skip_rows_by_range(self):
-        """範囲指定でのスキップテスト（未実装機能なので失敗する）。"""
+        """範囲指定でのスキップテスト(未実装機能なので失敗する)。"""
         excel_path = self.create_skip_rows_test_excel()
 
         # 0-2行目と6行目と9-10行目をスキップ
@@ -103,7 +103,7 @@ class TestSkipRows:
             excel_path, skip_rows="0-2,6,9-10"
         )
 
-        # 期待されるデータ（スキップされた行を除く）
+        # 期待されるデータ(スキップされた行を除く)
         expected_data = [
             ["商品名", "価格", "在庫", "カテゴリ"],  # Row 3
             ["商品A", "1000", "50", "電子機器"],  # Row 4
@@ -117,7 +117,7 @@ class TestSkipRows:
         assert result["skipped_row_count"] == 6  # 0,1,2,6,9,10の6行
 
     def test_skip_rows_with_header_row(self):
-        """Skip Rowsとヘッダー行指定の組み合わせテスト（未実装なので失敗する）。"""
+        """Skip Rowsとヘッダー行指定の組み合わせテスト(未実装なので失敗する)。"""
         excel_path = self.create_skip_rows_test_excel()
 
         # 0-2行目をスキップし、3行目をヘッダーとして使用
@@ -128,9 +128,9 @@ class TestSkipRows:
         # スキップ後のデータでヘッダー処理
         expected_headers = ["商品名", "価格", "在庫", "カテゴリ"]
         assert result["headers"] == expected_headers
-        assert result["has_header"] == True
+        assert result["has_header"]
 
-        # データ部分（ヘッダー行以降、スキップ行は除外）
+        # データ部分(ヘッダー行以降、スキップ行は除外)
         expected_data = [
             ["商品A", "1000", "50", "電子機器"],  # Row 4
             ["商品B", "2000", "30", "家具"],  # Row 5
@@ -140,7 +140,7 @@ class TestSkipRows:
         assert result["data"] == expected_data
 
     def test_skip_rows_with_range(self):
-        """Skip Rowsと範囲指定の組み合わせテスト（未実装なので失敗する）。"""
+        """Skip Rowsと範囲指定の組み合わせテスト(未実装なので失敗する)。"""
         excel_path = self.create_skip_rows_test_excel()
 
         # A3:C8の範囲で、6行目をスキップ
@@ -163,7 +163,7 @@ class TestSkipRows:
         assert result["skip_rows"] == "6"
 
     def test_invalid_skip_rows_format_error(self):
-        """無効なスキップ行形式指定時のエラーテスト（未実装なので失敗する）。"""
+        """無効なスキップ行形式指定時のエラーテスト(未実装なので失敗する)。"""
         excel_path = self.create_skip_rows_test_excel()
 
         # 無効な形式
@@ -182,15 +182,15 @@ class TestSkipRows:
                 )
 
     def test_skip_rows_out_of_range_error(self):
-        """範囲外のスキップ行指定時のエラーテスト（未実装なので失敗する）。"""
+        """範囲外のスキップ行指定時のエラーテスト(未実装なので失敗する)。"""
         excel_path = self.create_skip_rows_test_excel()
 
-        # 範囲外の行番号（データが11行なので11以上は無効）
+        # 範囲外の行番号(データが11行なので11以上は無効)
         with pytest.raises(ValueError, match="Skip row 15 is out of range"):
             self.loader.load_from_excel_with_skip_rows(excel_path, skip_rows="0,1,15")
 
     def test_directive_skip_rows_option(self):
-        """JsonTableDirectiveの:skip-rows:オプションテスト（未実装なので失敗する）。"""
+        """JsonTableDirectiveの:skip-rows:オプションテスト(未実装なので失敗する)。"""
         excel_path = self.create_skip_rows_test_excel()
 
         # モックSphinx環境
@@ -223,7 +223,7 @@ class TestSkipRows:
             json_data = directive._load_json_data()
 
             # スキップ処理された結果を確認
-            assert len(json_data) == 4  # データ行数（ヘッダー除く）
+            assert len(json_data) == 4  # データ行数(ヘッダー除く)
             assert json_data[0]["商品名"] == "商品A"
             assert json_data[1]["商品名"] == "商品B"
             assert (
@@ -232,7 +232,7 @@ class TestSkipRows:
             assert json_data[3]["商品名"] == "商品D"
 
     def test_skip_rows_parsing(self):
-        """Skip Rows指定文字列の解析テスト（未実装なので失敗する）。"""
+        """Skip Rows指定文字列の解析テスト(未実装なので失敗する)。"""
         # 正常な形式のテスト
         result = self.loader._parse_skip_rows_specification("0,1,2")
         assert result == [0, 1, 2]
@@ -252,7 +252,7 @@ class TestSkipRows:
         assert result == [1, 3, 5]
 
     def test_skip_rows_validation(self):
-        """Skip Rows指定の検証テスト（未実装なので失敗する）。"""
+        """Skip Rows指定の検証テスト(未実装なので失敗する)。"""
         # 無効な型
         with pytest.raises(TypeError, match="Skip rows must be a string"):
             self.loader._validate_skip_rows_specification(123)

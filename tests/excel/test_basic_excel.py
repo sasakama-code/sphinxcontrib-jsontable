@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 
-# Excel対応の基本テスト（ImportErrorは内部で処理）
+# Excel対応の基本テスト(ImportErrorは内部で処理)
 def test_excel_support():
     """Excel対応が基本的に動作することをテスト。"""
     try:
@@ -76,7 +76,7 @@ def test_dependency_availability():
     """必要な依存関係の可用性テスト。"""
     # 基本依存関係
 
-    # Excel依存関係（条件付き）
+    # Excel依存関係(条件付き)
     try:
         import pandas as pd
 

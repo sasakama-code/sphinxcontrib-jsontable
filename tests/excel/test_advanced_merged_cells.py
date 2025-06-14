@@ -2,7 +2,7 @@
 
 ユーザーが実際に使用する複雑な結合パターンを想定した品質保証テスト
 - 重なり結合・極端サイズ・データ型混合・エンコーディング問題
-- 実世界の複雑な構造（階層・不規則パターン）
+- 実世界の複雑な構造(階層・不規則パターン)
 - エラー回復・頑健性・メモリ制約
 """
 
@@ -46,7 +46,7 @@ class TestAdvancedMergedCells:
         ws = wb.active
         ws.title = "OverlappingMerges"
 
-        # シナリオ1: 隣接する結合セル（境界を共有）
+        # シナリオ1: 隣接する結合セル(境界を共有)
         ws["A1"] = "結合1"
         ws.merge_cells("A1:B2")
         ws["C1"] = "結合2"
@@ -56,9 +56,9 @@ class TestAdvancedMergedCells:
         ws["A4"] = "L字結合1"
         ws.merge_cells("A4:C4")  # 水平結合
         ws["A5"] = "L字結合2"
-        ws.merge_cells("A5:A7")  # 垂直結合（A4と結合点共有）
+        ws.merge_cells("A5:A7")  # 垂直結合(A4と結合点共有)
 
-        # シナリオ3: 入れ子状の結合（大結合内に小結合）
+        # シナリオ3: 入れ子状の結合(大結合内に小結合)
         ws["F1"] = "大結合範囲"
         ws.merge_cells("F1:J5")  # 5x5の大結合
         # 注意: 入れ子結合は通常Excel上で無効だが、破損ファイルで発生可能
@@ -67,7 +67,7 @@ class TestAdvancedMergedCells:
         ws["A10"] = "水平結合"
         ws.merge_cells("A10:E10")  # 水平結合
         ws["C8"] = "垂直結合"
-        ws.merge_cells("C8:C12")  # 垂直結合（C10で交差）
+        ws.merge_cells("C8:C12")  # 垂直結合(C10で交差)
 
         wb.save(file_path)
         return file_path
@@ -81,21 +81,21 @@ class TestAdvancedMergedCells:
         wb = Workbook()
         ws = wb.active
 
-        # シナリオ1: 巨大結合セル（20x20）
+        # シナリオ1: 巨大結合セル(20x20)
         ws["A1"] = "巨大結合データ: " + "X" * 1000  # 大量テキスト
         end_col = get_column_letter(20)
         ws.merge_cells(f"A1:{end_col}20")
 
-        # シナリオ2: 極細長結合（1x100）
+        # シナリオ2: 極細長結合(1x100)
         ws["A22"] = "極細長結合"
         ws.merge_cells("A22:A122")
 
-        # シナリオ3: 極幅広結合（100x1）
+        # シナリオ3: 極幅広結合(100x1)
         ws["A124"] = "極幅広結合"
         end_col = get_column_letter(100)
         ws.merge_cells(f"A124:{end_col}124")
 
-        # シナリオ4: 多数の小結合（メモリテスト）
+        # シナリオ4: 多数の小結合(メモリテスト)
         for i in range(50):
             cell = f"A{150 + i * 2}"
             ws[cell] = f"小結合{i}"
@@ -224,7 +224,7 @@ class TestAdvancedMergedCells:
         ws["D3"] = "150"
         ws["E3"] = "450"
 
-        # 大阪地域データ（不規則な結合）
+        # 大阪地域データ(不規則な結合)
         ws["A6"] = "大阪"
         ws.merge_cells("A6:A7")  # 2行結合
         ws["B6"] = "80"
@@ -232,7 +232,7 @@ class TestAdvancedMergedCells:
         ws["D6"] = "120"
         ws["E6"] = "360"
 
-        # 名古屋地域（1行のみ）
+        # 名古屋地域(1行のみ)
         ws["A8"] = "名古屋"
         ws["B8"] = "60"
         ws["C8"] = "120"
@@ -252,14 +252,14 @@ class TestAdvancedMergedCells:
 
         # 重なり結合が適切に処理されることを確認
         assert result["merge_mode"] == "expand"
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
         assert len(result["data"]) >= 10  # 十分な行数
 
         # 隣接結合の展開確認
         assert result["data"][0][0] == "結合1"  # A1
-        assert result["data"][0][1] == "結合1"  # B1（展開）
+        assert result["data"][0][1] == "結合1"  # B1(展開)
         assert result["data"][0][2] == "結合2"  # C1
-        assert result["data"][0][3] == "結合2"  # D1（展開）
+        assert result["data"][0][3] == "結合2"  # D1(展開)
 
     def test_extreme_size_merges_performance(self):
         """極端サイズ結合セルのパフォーマンステスト."""
@@ -276,12 +276,12 @@ class TestAdvancedMergedCells:
         end_time = time.time()
         processing_time = end_time - start_time
 
-        # パフォーマンス要件（5秒以内）
+        # パフォーマンス要件(5秒以内)
         assert processing_time < 5.0, f"Processing took {processing_time:.2f} seconds"
 
         # 巨大結合セルが適切に展開されることを確認
         assert result["merge_mode"] == "expand"
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
 
         # 20x20の結合セルが展開されている
         for row in range(20):
@@ -300,7 +300,7 @@ class TestAdvancedMergedCells:
             )
 
             assert result["merge_mode"] == mode
-            assert result["has_merged_cells"] == True
+            assert result["has_merged_cells"]
 
             # データ型が文字列に統一されていることを確認
             for row in result["data"]:
@@ -317,17 +317,17 @@ class TestAdvancedMergedCells:
 
         # 階層構造が適切に展開されることを確認
         assert result["data"][0][0] == "売上高"  # A1
-        assert result["data"][0][1] == "売上高"  # B1（展開）
-        assert result["data"][0][2] == "売上高"  # C1（展開）
-        assert result["data"][0][3] == "売上高"  # D1（展開）
-        assert result["data"][0][4] == "売上高"  # E1（展開）
+        assert result["data"][0][1] == "売上高"  # B1(展開)
+        assert result["data"][0][2] == "売上高"  # C1(展開)
+        assert result["data"][0][3] == "売上高"  # D1(展開)
+        assert result["data"][0][4] == "売上高"  # E1(展開)
 
         # 中項目レベルの展開確認
         assert result["data"][1][0] == "商品売上"  # A2
-        assert result["data"][1][1] == "商品売上"  # B2（展開）
-        assert result["data"][1][2] == "商品売上"  # C2（展開）
+        assert result["data"][1][1] == "商品売上"  # B2(展開)
+        assert result["data"][1][2] == "商品売上"  # C2(展開)
         assert result["data"][1][3] == "サービス売上"  # D2
-        assert result["data"][1][4] == "サービス売上"  # E2（展開）
+        assert result["data"][1][4] == "サービス売上"  # E2(展開)
 
     def test_irregular_pattern_processing(self):
         """不規則パターン結合セル処理テスト."""
@@ -339,18 +339,18 @@ class TestAdvancedMergedCells:
 
         # 不規則な結合パターンが適切に処理されることを確認
         assert result["merge_mode"] == "expand"
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
 
         # 東京地域の3行結合確認
         assert result["data"][2][0] == "東京"  # A3
-        assert result["data"][3][0] == "東京"  # A4（展開）
-        assert result["data"][4][0] == "東京"  # A5（展開）
+        assert result["data"][3][0] == "東京"  # A4(展開)
+        assert result["data"][4][0] == "東京"  # A5(展開)
 
     def test_memory_constraint_handling(self):
         """メモリ制約下での結合セル処理テスト."""
         excel_path = self.create_extreme_size_merges_excel()
 
-        # メモリ使用量の監視（tracemalloc版）
+        # メモリ使用量の監視(tracemalloc版)
         import tracemalloc
 
         tracemalloc.start()
@@ -365,7 +365,7 @@ class TestAdvancedMergedCells:
         # ピークメモリ使用量が50MB以内であることを確認
         assert peak < 50 * 1024 * 1024, f"Peak memory usage: {peak / 1024 / 1024:.1f}MB"
 
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
 
     def test_error_recovery_corrupted_merges(self):
         """破損した結合セル定義でのエラー回復テスト."""

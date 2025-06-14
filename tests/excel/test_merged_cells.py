@@ -54,37 +54,37 @@ class TestMergedCells:
         ws.title = "MergedData"
 
         # データの設定
-        # Row 1: タイトル行（結合セル）
+        # Row 1: タイトル行(結合セル)
         ws["A1"] = "売上レポート 2025年Q1"
         ws.merge_cells("A1:D1")
 
         # Row 2: 空行
 
-        # Row 3: ヘッダー行（一部結合）
+        # Row 3: ヘッダー行(一部結合)
         ws["A3"] = "部門"
         ws["B3"] = "担当者情報"
         ws.merge_cells("B3:C3")  # B3:C3を結合
         ws["D3"] = "売上"
 
-        # Row 4: データ行（結合セルあり）
+        # Row 4: データ行(結合セルあり)
         ws["A4"] = "営業部"
         ws["B4"] = "田中太郎"
         ws.merge_cells("B4:C4")  # 担当者名を結合
         ws["D4"] = "1000000"
 
-        # Row 5: データ行（結合セルあり）
+        # Row 5: データ行(結合セルあり)
         ws["A5"] = "開発部"
         ws["B5"] = "佐藤花子"
         ws.merge_cells("B5:C5")  # 担当者名を結合
         ws["D5"] = "800000"
 
-        # Row 6: データ行（結合なし）
+        # Row 6: データ行(結合なし)
         ws["A6"] = "総務部"
         ws["B6"] = "山田"
         ws["C6"] = "太郎"
         ws["D6"] = "500000"
 
-        # Row 7: 合計行（結合セル）
+        # Row 7: 合計行(結合セル)
         ws["A7"] = "合計"
         ws.merge_cells("A7:C7")  # A7:C7を結合
         ws["D7"] = "2300000"
@@ -126,7 +126,7 @@ class TestMergedCells:
         return file_path
 
     def test_expand_mode_merged_cells(self):
-        """expandモードでの結合セル処理テスト（未実装なので失敗する）."""
+        """expandモードでの結合セル処理テスト(未実装なので失敗する)."""
         excel_path = self.create_merged_cells_excel()
 
         # expandモードで結合セルを展開
@@ -152,11 +152,11 @@ class TestMergedCells:
 
         assert result["data"] == expected_data
         assert result["merge_mode"] == "expand"
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
         assert "merged_cells_info" in result
 
     def test_ignore_mode_merged_cells(self):
-        """ignoreモードでの結合セル処理テスト（未実装なので失敗する）."""
+        """ignoreモードでの結合セル処理テスト(未実装なので失敗する)."""
         excel_path = self.create_merged_cells_excel()
 
         # ignoreモードで結合セルを無視
@@ -177,10 +177,10 @@ class TestMergedCells:
 
         assert result["data"] == expected_data
         assert result["merge_mode"] == "ignore"
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
 
     def test_first_value_mode_merged_cells(self):
-        """first-valueモードでの結合セル処理テスト（未実装なので失敗する）."""
+        """first-valueモードでの結合セル処理テスト(未実装なので失敗する)."""
         excel_path = self.create_merged_cells_excel()
 
         # first-valueモードで結合セルの最初の値のみ使用
@@ -201,10 +201,10 @@ class TestMergedCells:
 
         assert result["data"] == expected_data
         assert result["merge_mode"] == "first-value"
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
 
     def test_merged_cells_detection(self):
-        """結合セル検出機能のテスト（未実装なので失敗する）."""
+        """結合セル検出機能のテスト(未実装なので失敗する)."""
         excel_path = self.create_merged_cells_excel()
 
         # 結合セル情報の取得
@@ -249,7 +249,7 @@ class TestMergedCells:
             },
         ]
 
-        assert merge_info["has_merged_cells"] == True
+        assert merge_info["has_merged_cells"]
         assert len(merge_info["merged_ranges"]) == 5
 
         for expected_merge in expected_merges:
@@ -259,7 +259,7 @@ class TestMergedCells:
             )
 
     def test_merged_cells_with_range_option(self):
-        """結合セル処理と範囲指定の組み合わせテスト（未実装なので失敗する）."""
+        """結合セル処理と範囲指定の組み合わせテスト(未実装なので失敗する)."""
         excel_path = self.create_merged_cells_excel()
 
         # A3:D6の範囲でexpandモード
@@ -280,7 +280,7 @@ class TestMergedCells:
         assert result["merge_mode"] == "expand"
 
     def test_merged_cells_with_header_option(self):
-        """結合セル処理とヘッダー指定の組み合わせテスト（未実装なので失敗する）."""
+        """結合セル処理とヘッダー指定の組み合わせテスト(未実装なので失敗する)."""
         excel_path = self.create_merged_cells_excel()
 
         # ヘッダー行3、expandモード
@@ -301,11 +301,11 @@ class TestMergedCells:
 
         assert result["headers"] == expected_headers
         assert result["data"] == expected_data
-        assert result["has_header"] == True
+        assert result["has_header"]
         assert result["merge_mode"] == "expand"
 
     def test_complex_merged_cells_processing(self):
-        """複雑な結合セル構造の処理テスト（未実装なので失敗する）."""
+        """複雑な結合セル構造の処理テスト(未実装なので失敗する)."""
         excel_path = self.create_complex_merged_excel()
 
         # expandモードで複雑な結合セルを処理
@@ -326,7 +326,7 @@ class TestMergedCells:
         assert result["merge_mode"] == "expand"
 
     def test_directive_merge_cells_option(self):
-        """JsonTableDirectiveの:merge-cells:オプションテスト（未実装なので失敗する）."""
+        """JsonTableDirectiveの:merge-cells:オプションテスト(未実装なので失敗する)."""
         excel_path = self.create_merged_cells_excel()
 
         # モックSphinx環境
@@ -363,12 +363,12 @@ class TestMergedCells:
             json_data = directive._load_json_data()
 
             # 結合セルが展開されたデータを確認
-            assert len(json_data) == 4  # データ行数（ヘッダー除く）
+            assert len(json_data) == 4  # データ行数(ヘッダー除く)
             assert "担当者情報" in json_data[0]  # ヘッダーの結合セルが展開
             assert json_data[0]["担当者情報"] == "田中太郎"
 
     def test_invalid_merge_mode_error(self):
-        """無効な結合セル処理モード指定時のエラーテスト（未実装なので失敗する）."""
+        """無効な結合セル処理モード指定時のエラーテスト(未実装なので失敗する)."""
         excel_path = self.create_merged_cells_excel()
 
         # 無効なモード
@@ -378,8 +378,8 @@ class TestMergedCells:
             )
 
     def test_no_merged_cells_handling(self):
-        """結合セルがないファイルでの処理テスト（未実装なので失敗する）."""
-        # 通常のExcelファイルを作成（結合セルなし）
+        """結合セルがないファイルでの処理テスト(未実装なので失敗する)."""
+        # 通常のExcelファイルを作成(結合セルなし)
         file_path = os.path.join(self.temp_dir, "no_merged.xlsx")
 
         data = [
@@ -398,12 +398,12 @@ class TestMergedCells:
         )
 
         # 期待される結果: 通常のデータとして処理
-        assert result["has_merged_cells"] == False
+        assert not result["has_merged_cells"]
         assert result["merge_mode"] == "expand"
         assert len(result["data"]) == 3
 
     def test_merged_cells_boundary_cases(self):
-        """結合セルの境界ケーステスト（未実装なので失敗する）."""
+        """結合セルの境界ケーステスト(未実装なので失敗する)."""
         excel_path = self.create_merged_cells_excel()
 
         # 境界ケース: 結合セルと通常セルの混在での各処理モード
@@ -416,7 +416,7 @@ class TestMergedCells:
 
             # 各モードで適切に処理されることを確認
             assert result["merge_mode"] == mode
-            assert result["has_merged_cells"] == True
+            assert result["has_merged_cells"]
             assert len(result["data"]) == 7  # 全7行のデータ
             assert len(result["data"][0]) == 4  # 全4列のデータ
 

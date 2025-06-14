@@ -67,7 +67,7 @@ class TestMergedCellsEdgeCases:
             next_cell = f"C{i + 1}"
             ws.merge_cells(f"{cell}:{next_cell}")
 
-        # 制御文字・非表示文字を含む結合セル（openpyxl制限に対応）
+        # 制御文字・非表示文字を含む結合セル(openpyxl制限に対応)
         ws["A10"] = "テスト_制御文字_データ"  # NULL文字の代替
         ws["B10"] = "タブ\tテスト\r\n改行"  # タブ・改行
         ws["C10"] = "\u200b\u200c\u200d隠し文字"  # ゼロ幅文字
@@ -95,14 +95,14 @@ class TestMergedCellsEdgeCases:
         wb = Workbook()
         ws = wb.active
 
-        # 極大・極小数値の結合セル（pandas制限に対応）
+        # 極大・極小数値の結合セル(pandas制限に対応)
         extreme_numbers = [
-            1.7976931348623157e100,  # 大きな数値（pandas制限内）
+            1.7976931348623157e100,  # 大きな数値(pandas制限内)
             2.2250738585072014e-100,  # 小さな数値
             -1.7976931348623157e100,  # 極大負値
-            999999999999999.9,  # 大きな数値（無限大の代替）
+            999999999999999.9,  # 大きな数値(無限大の代替)
             -999999999999999.9,  # 大きな負値
-            # float('nan'),  # NaN（コメントアウト：Excelでの取り扱いが複雑）
+            # float('nan'),  # NaN(コメントアウト：Excelでの取り扱いが複雑)
         ]
 
         for i, num in enumerate(extreme_numbers):
@@ -167,7 +167,7 @@ class TestMergedCellsEdgeCases:
             ws["XFD1"] = "最大列テスト"  # XFD = 16384列目
             ws.merge_cells("XFC1:XFD1")
 
-        # 多数の結合セル（性能テスト）
+        # 多数の結合セル(性能テスト)
         for i in range(100):
             row = i + 5
             ws[f"A{row}"] = f"結合{i}"
@@ -181,7 +181,7 @@ class TestMergedCellsEdgeCases:
         return file_path
 
     def create_corrupted_structure_excel(self) -> str:
-        """破損・異常構造のExcelファイル作成（シミュレーション）.
+        """破損・異常構造のExcelファイル作成(シミュレーション).
 
         品質リスク: 予期しないデータ構造での処理失敗
         """
@@ -208,7 +208,7 @@ class TestMergedCellsEdgeCases:
         ws["C10"] = "正常データ"
         ws.merge_cells("A10:C10")
 
-        # 循環参照の可能性（簡易版）
+        # 循環参照の可能性(簡易版)
         ws["A15"] = "=B15"
         ws["B15"] = "=A15"  # A15とB15の循環参照
         ws.merge_cells("A15:B15")
@@ -227,7 +227,7 @@ class TestMergedCellsEdgeCases:
 
             # Unicode文字が適切に処理されることを確認
             assert result["merge_mode"] == mode
-            assert result["has_merged_cells"] == True
+            assert result["has_merged_cells"]
 
             # 絵文字を含む行の確認
             emoji_row = result["data"][0]
@@ -246,7 +246,7 @@ class TestMergedCellsEdgeCases:
         )
 
         # 極端な数値が適切に文字列化されることを確認
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
 
         # 無限大の処理確認
         for row in result["data"]:
@@ -265,9 +265,9 @@ class TestMergedCellsEdgeCases:
 
         # 最大列数付近での処理が正常に完了することを確認
         assert result["merge_mode"] == "expand"
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
 
-        # 巨大結合セルが処理されることを確認（メモリ制約内で）
+        # 巨大結合セルが処理されることを確認(メモリ制約内で)
         assert len(result["data"]) >= 100  # 十分な行数が処理されている
 
     def test_corrupted_structure_recovery(self):
@@ -346,7 +346,7 @@ class TestMergedCellsEdgeCases:
 
         wb.save(file_path)
 
-        # メモリ使用量を監視しながら処理（psutil代替実装）
+        # メモリ使用量を監視しながら処理(psutil代替実装)
         import tracemalloc
 
         tracemalloc.start()
@@ -359,7 +359,7 @@ class TestMergedCellsEdgeCases:
         tracemalloc.stop()
 
         # 処理が完了し、メモリ使用量が適切であることを確認
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
         assert len(result["data"]) == 1000
 
         # ピークメモリ使用量が100MB以内であることを確認
@@ -387,14 +387,14 @@ class TestMergedCellsEdgeCases:
         assert processing_time < 10.0, (
             f"Processing took too long: {processing_time:.2f} seconds"
         )
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
 
     def test_cross_platform_compatibility(self):
         """クロスプラットフォーム互換性テスト."""
         # 異なるプラットフォームで作成されたファイルの処理を想定
         excel_path = self.create_encoding_edge_cases_excel()
 
-        # 警告を抑制して処理（プラットフォーム固有の警告を無視）
+        # 警告を抑制して処理(プラットフォーム固有の警告を無視)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
 
@@ -404,7 +404,7 @@ class TestMergedCellsEdgeCases:
 
         # プラットフォームに関係なく処理が完了することを確認
         assert result["merge_mode"] == "expand"
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
 
     def test_boundary_value_analysis(self):
         """境界値分析テスト."""
@@ -433,7 +433,7 @@ class TestMergedCellsEdgeCases:
         )
 
         # 境界値ケースが適切に処理されることを確認
-        assert result["has_merged_cells"] == True
+        assert result["has_merged_cells"]
         assert len(result["data"]) >= 9  # 実際のデータ行数に調整
 
         # 単一セル結合の確認

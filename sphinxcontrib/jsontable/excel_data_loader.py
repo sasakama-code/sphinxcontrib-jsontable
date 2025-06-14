@@ -1,15 +1,15 @@
 """Excel Data Loader for JsonTable Directive.
 
-このモジュールはExcelファイル（.xlsx/.xls）の読み込みと
+このモジュールはExcelファイル(.xlsx/.xls)の読み込みと
 JSON形式への変換を担当する。
 
 主な機能:
 - Excelファイルの安全な読み込み
-- 基本的なシート検出（デフォルト: 最初のシート）
-- ヘッダー検出（第1行）
+- 基本的なシート検出(デフォルト: 最初のシート)
+- ヘッダー検出(第1行)
 - データ型の自動変換
 - エラーハンドリング
-- セキュリティ（パストラバーサル対策）
+- セキュリティ(パストラバーサル対策)
 """
 
 import os
@@ -32,12 +32,12 @@ class EnhancedExcelError(Exception):
     def __init__(
         self,
         message: str,
-        error_code: str = None,
-        user_message: str = None,
-        technical_message: str = None,
-        recovery_suggestions: list[str] = None,
-        error_context: dict[str, Any] = None,
-        debug_info: dict[str, Any] = None,
+        error_code: str | None = None,
+        user_message: str | None = None,
+        technical_message: str | None = None,
+        recovery_suggestions: list[str] | None = None,
+        error_context: dict[str, Any] | None = None,
+        debug_info: dict[str, Any] | None = None,
     ):
         super().__init__(message)
         self.error_code = error_code or "GENERIC_ERROR"
@@ -192,7 +192,7 @@ class ExcelDataLoader:
         """ExcelDataLoaderを初期化。
 
         Args:
-            base_path: ベースディレクトリパス（Sphinxソースディレクトリ）
+            base_path: ベースディレクトリパス(Sphinxソースディレクトリ)
         """
         self.base_path = Path(base_path) if base_path else Path.cwd()
 
@@ -253,7 +253,7 @@ class ExcelDataLoader:
         return True
 
     def basic_sheet_detection(self, file_path: str) -> str:
-        """基本的なシート検出（デフォルト: 最初のシート）。
+        """基本的なシート検出(デフォルト: 最初のシート)。
 
         Args:
             file_path: Excelファイルパス
@@ -313,7 +313,7 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            sheet_index: シートインデックス（0ベース）
+            sheet_index: シートインデックス(0ベース)
 
         Returns:
             str: 指定されたインデックスのシート名
@@ -359,8 +359,8 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            sheet_index: シートインデックス（0ベース）
-            header_row: ヘッダー行番号（None=自動検出）
+            sheet_index: シートインデックス(0ベース)
+            header_row: ヘッダー行番号(None=自動検出)
 
         Returns:
             dict[str, Any]: 変換されたJSONデータ
@@ -414,7 +414,7 @@ class ExcelDataLoader:
         # NaN値を空文字列に変換
         df_filled = df.fillna("")
 
-        # 全ての値を文字列に変換（JSON互換性のため）
+        # 全ての値を文字列に変換(JSON互換性のため)
         result = []
         for _, row in df_filled.iterrows():
             converted_row = []
@@ -443,8 +443,8 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            sheet_name: 読み込むシート名（None=自動検出）
-            header_row: ヘッダー行番号（None=自動検出）
+            sheet_name: 読み込むシート名(None=自動検出)
+            header_row: ヘッダー行番号(None=自動検出)
 
         Returns:
             Dict[str, Any]: 変換されたJSONデータ
@@ -527,17 +527,17 @@ class ExcelDataLoader:
             ) from e
 
     def _parse_range_specification(self, range_spec: str) -> dict[str, Any]:
-        """範囲指定文字列（A1:C3形式）をパースして範囲情報を取得。
+        """範囲指定文字列(A1:C3形式)をパースして範囲情報を取得。
 
         Args:
-            range_spec: 範囲指定文字列（例: "A1:C3", "B2"）
+            range_spec: 範囲指定文字列(例: "A1:C3", "B2")
 
         Returns:
             dict: 解析された範囲情報
-                - start_row: 開始行（0ベース）
-                - end_row: 終了行（0ベース、含む）
-                - start_col: 開始列（0ベース）
-                - end_col: 終了列（0ベース、含む）
+                - start_row: 開始行(0ベース)
+                - end_row: 終了行(0ベース、含む)
+                - start_col: 開始列(0ベース)
+                - end_col: 終了列(0ベース、含む)
 
         Raises:
             TypeError: range_specが文字列でない場合
@@ -627,10 +627,10 @@ class ExcelDataLoader:
         """範囲の境界値を検証。
 
         Args:
-            start_row: 開始行（0ベース）
-            start_col: 開始列（0ベース）
-            end_row: 終了行（0ベース）
-            end_col: 終了列（0ベース）
+            start_row: 開始行(0ベース)
+            start_col: 開始列(0ベース)
+            end_row: 終了行(0ベース)
+            end_col: 終了列(0ベース)
             range_spec: 元の範囲指定文字列
 
         Raises:
@@ -659,13 +659,13 @@ class ExcelDataLoader:
             )
 
     def _parse_cell_address(self, cell_address: str) -> tuple[int, int]:
-        """セルアドレス（A1形式）を行・列インデックスに変換。
+        """セルアドレス(A1形式)を行・列インデックスに変換。
 
         Args:
-            cell_address: セルアドレス（例: "A1", "AB123"）
+            cell_address: セルアドレス(例: "A1", "AB123")
 
         Returns:
-            tuple: (行インデックス（0ベース）, 列インデックス（0ベース）)
+            tuple: (行インデックス(0ベース), 列インデックス(0ベース))
 
         Raises:
             RangeSpecificationError: 無効なセルアドレスの場合
@@ -689,7 +689,7 @@ class ExcelDataLoader:
         col_letters, row_str = match.groups()
 
         try:
-            # 行番号の変換（1ベース→0ベース）
+            # 行番号の変換(1ベース→0ベース)
             row_index = int(row_str) - 1
 
             # 行番号の範囲チェック
@@ -699,7 +699,7 @@ class ExcelDataLoader:
                     cell_address,
                 )
 
-            # 列番号の変換（A=0, B=1, ..., Z=25, AA=26, ...）
+            # 列番号の変換(A=0, B=1, ..., Z=25, AA=26, ...)
             col_index = self._convert_column_letters_to_index(col_letters)
 
             # 列番号の範囲チェック
@@ -718,13 +718,13 @@ class ExcelDataLoader:
             ) from e
 
     def _convert_column_letters_to_index(self, col_letters: str) -> int:
-        """列文字（A, B, ..., AA, AB, ...）を0ベースのインデックスに変換。
+        """列文字(A, B, ..., AA, AB, ...)を0ベースのインデックスに変換。
 
         Args:
-            col_letters: 列文字（例: "A", "AB", "ABC"）
+            col_letters: 列文字(例: "A", "AB", "ABC")
 
         Returns:
-            int: 0ベースの列インデックス（A=0, B=1, ..., Z=25, AA=26, ...）
+            int: 0ベースの列インデックス(A=0, B=1, ..., Z=25, AA=26, ...)
 
         Raises:
             RangeSpecificationError: 無効な列文字の場合
@@ -755,12 +755,12 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            range_spec: 範囲指定（例: "A1:C3", "B2"）
-            sheet_name: 読み込むシート名（None=自動検出）
-            header_row: ヘッダー行番号（None=自動検出）
+            range_spec: 範囲指定(例: "A1:C3", "B2")
+            sheet_name: 読み込むシート名(None=自動検出)
+            header_row: ヘッダー行番号(None=自動検出)
 
         Returns:
-            dict[str, Any]: 変換されたJSONデータ（範囲情報付き）
+            dict[str, Any]: 変換されたJSONデータ(範囲情報付き)
 
         Raises:
             RangeSpecificationError: 無効な範囲指定の場合
@@ -896,11 +896,11 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            header_row: ヘッダー行番号（0ベース）
-            sheet_name: 読み込むシート名（None=自動検出）
+            header_row: ヘッダー行番号(0ベース)
+            sheet_name: 読み込むシート名(None=自動検出)
 
         Returns:
-            dict[str, Any]: 変換されたJSONデータ（ヘッダー行情報付き）
+            dict[str, Any]: 変換されたJSONデータ(ヘッダー行情報付き)
 
         Raises:
             ValueError: 無効なヘッダー行指定の場合
@@ -910,7 +910,7 @@ class ExcelDataLoader:
         self._validate_header_row(header_row)
 
         try:
-            # Excel読み込み（明示的なheader_row指定）
+            # Excel読み込み(明示的なheader_row指定)
             excel_data = self.load_from_excel(file_path, sheet_name, header_row)
 
             # データ範囲内でのヘッダー行チェック
@@ -919,7 +919,7 @@ class ExcelDataLoader:
             # ヘッダー行情報を追加
             excel_data["header_row"] = header_row
 
-            # ヘッダー名の正規化（必要に応じて）
+            # ヘッダー名の正規化(必要に応じて)
             if excel_data["has_header"] and excel_data["headers"]:
                 excel_data["headers"] = self._normalize_header_names(
                     excel_data["headers"]
@@ -928,7 +928,7 @@ class ExcelDataLoader:
             return excel_data
 
         except Exception as e:
-            if isinstance(e, (ValueError, TypeError)):
+            if isinstance(e, ValueError | TypeError):
                 raise
             raise ValueError(
                 f"Failed to load Excel with header row {header_row}: {e}"
@@ -945,9 +945,9 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            header_row: ヘッダー行番号（0ベース）
-            range_spec: 範囲指定（例: "A1:C3", "B2"）
-            sheet_name: 読み込むシート名（None=自動検出）
+            header_row: ヘッダー行番号(0ベース)
+            range_spec: 範囲指定(例: "A1:C3", "B2")
+            sheet_name: 読み込むシート名(None=自動検出)
 
         Returns:
             dict[str, Any]: 変換されたJSONデータ
@@ -961,7 +961,7 @@ class ExcelDataLoader:
         self._validate_header_row(header_row)
 
         try:
-            # 範囲指定付きで読み込み（header_rowも考慮）
+            # 範囲指定付きで読み込み(header_rowも考慮)
             excel_data = self.load_from_excel_with_range(
                 file_path, range_spec, sheet_name, header_row
             )
@@ -974,7 +974,7 @@ class ExcelDataLoader:
             # ヘッダー行情報を追加
             excel_data["header_row"] = header_row
 
-            # ヘッダー名の正規化（必要に応じて）
+            # ヘッダー名の正規化(必要に応じて)
             if excel_data["has_header"] and excel_data["headers"]:
                 excel_data["headers"] = self._normalize_header_names(
                     excel_data["headers"]
@@ -995,7 +995,7 @@ class ExcelDataLoader:
         """ヘッダー行と範囲指定の整合性をチェック。
 
         Args:
-            header_row: ヘッダー行番号（0ベース）
+            header_row: ヘッダー行番号(0ベース)
             range_spec: 範囲指定文字列
             excel_data: 読み込まれたExcelデータ
 
@@ -1027,7 +1027,7 @@ class ExcelDataLoader:
         """ヘッダー行の妥当性を検証。
 
         Args:
-            header_row: ヘッダー行番号（None=自動検出モード）
+            header_row: ヘッダー行番号(None=自動検出モード)
 
         Raises:
             TypeError: header_rowが整数でない場合
@@ -1056,9 +1056,9 @@ class ExcelDataLoader:
         """ヘッダー行がデータ範囲内にあるかチェック。
 
         Args:
-            header_row: ヘッダー行番号（0ベース）
+            header_row: ヘッダー行番号(0ベース)
             excel_data: 読み込まれたExcelデータ
-            file_path: Excelファイルパス（エラーメッセージ用）
+            file_path: Excelファイルパス(エラーメッセージ用)
 
         Raises:
             ValueError: ヘッダー行がデータ範囲外の場合
@@ -1112,7 +1112,7 @@ class ExcelDataLoader:
         """Skip Rows指定文字列を解析してリストに変換。
 
         Args:
-            skip_rows: Skip Rows指定文字列（例: "0,1,2", "0-2,5,7-9"）
+            skip_rows: Skip Rows指定文字列(例: "0,1,2", "0-2,5,7-9")
 
         Returns:
             list[int]: ソート済みの一意な行番号リスト
@@ -1141,7 +1141,7 @@ class ExcelDataLoader:
                 )
 
             if SKIP_ROWS_RANGE_SEPARATOR in part:
-                # 範囲形式（例: "0-2", "5-7"）
+                # 範囲形式(例: "0-2", "5-7")
                 try:
                     start_str, end_str = part.split(SKIP_ROWS_RANGE_SEPARATOR, 1)
                     start = int(start_str.strip())
@@ -1233,7 +1233,7 @@ class ExcelDataLoader:
         """Skip Rows指定の妥当性を検証。
 
         Args:
-            skip_rows: Skip Rows指定文字列（None=スキップなし）
+            skip_rows: Skip Rows指定文字列(None=スキップなし)
 
         Raises:
             TypeError: skip_rowsが文字列でない場合
@@ -1255,11 +1255,11 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            skip_rows: Skip Rows指定（例: "0,1,2", "0-2,5"）
-            sheet_name: 読み込むシート名（None=自動検出）
+            skip_rows: Skip Rows指定(例: "0,1,2", "0-2,5")
+            sheet_name: 読み込むシート名(None=自動検出)
 
         Returns:
-            dict[str, Any]: 変換されたJSONデータ（Skip Rows情報付き）
+            dict[str, Any]: 変換されたJSONデータ(Skip Rows情報付き)
 
         Raises:
             ValueError: 無効なSkip Rows指定の場合
@@ -1332,9 +1332,9 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            skip_rows: Skip Rows指定（例: "0,1,2", "0-2,5"）
-            header_row: ヘッダー行番号（0ベース）
-            sheet_name: 読み込むシート名（None=自動検出）
+            skip_rows: Skip Rows指定(例: "0,1,2", "0-2,5")
+            header_row: ヘッダー行番号(0ベース)
+            sheet_name: 読み込むシート名(None=自動検出)
 
         Returns:
             dict[str, Any]: 変換されたJSONデータ
@@ -1361,7 +1361,7 @@ class ExcelDataLoader:
             filtered_data, header_row, skip_row_list
         )
 
-        # 調整後のヘッダー行番号を取得（結果表示用）
+        # 調整後のヘッダー行番号を取得(結果表示用)
         adjusted_header_row = self._adjust_header_row_after_skip(
             header_row, skip_row_list
         )
@@ -1394,9 +1394,9 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            range_spec: 範囲指定（例: "A1:C3", "B2"）
-            skip_rows: Skip Rows指定（例: "0,1,2", "0-2,5"）
-            sheet_name: 読み込むシート名（None=自動検出）
+            range_spec: 範囲指定(例: "A1:C3", "B2")
+            skip_rows: Skip Rows指定(例: "0,1,2", "0-2,5")
+            sheet_name: 読み込むシート名(None=自動検出)
 
         Returns:
             dict[str, Any]: 変換されたJSONデータ
@@ -1521,10 +1521,10 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            skip_rows: Skip Rows指定（例: "0,1,2", "0-2,5"）
-            range_spec: 範囲指定（例: "A1:C3", "B2"）
-            header_row: ヘッダー行番号（0ベース）
-            sheet_name: 読み込むシート名（None=自動検出）
+            skip_rows: Skip Rows指定(例: "0,1,2", "0-2,5")
+            range_spec: 範囲指定(例: "A1:C3", "B2")
+            header_row: ヘッダー行番号(0ベース)
+            sheet_name: 読み込むシート名(None=自動検出)
 
         Returns:
             dict[str, Any]: 変換されたJSONデータ
@@ -1607,14 +1607,14 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            detect_mode: 検出モード（auto, smart, manual）
-            sheet_name: 読み込むシート名（None=自動検出）
-            range_hint: 範囲ヒント（manualモード用）
+            detect_mode: 検出モード(auto, smart, manual)
+            sheet_name: 読み込むシート名(None=自動検出)
+            range_hint: 範囲ヒント(manualモード用)
             ignore_empty_rows: 空行を無視するか
             auto_header: ヘッダー自動判定を行うか
 
         Returns:
-            dict[str, Any]: 変換されたJSONデータ（検出情報付き）
+            dict[str, Any]: 変換されたJSONデータ(検出情報付き)
 
         Raises:
             ValueError: 無効な検出モードの場合
@@ -1661,7 +1661,7 @@ class ExcelDataLoader:
         else:
             raise ValueError(f"Unsupported detect mode: {detect_mode}")
 
-        # ヘッダー自動判定（autoモードでは自動的に有効）
+        # ヘッダー自動判定(autoモードでは自動的に有効)
         should_detect_header = auto_header or (detect_mode == "auto")
         has_header = should_detect_header and self._detect_header_in_range(range_data)
         headers = []
@@ -1715,7 +1715,7 @@ class ExcelDataLoader:
             data: Excelデータ
 
         Returns:
-            str: 検出された範囲（A1形式）
+            str: 検出された範囲(A1形式)
         """
         if not data:
             return "A1:A1"
@@ -1742,19 +1742,19 @@ class ExcelDataLoader:
             data: Excelデータ
 
         Returns:
-            dict: データブロックの境界情報（min_row, max_row, min_col, max_col）
+            dict: データブロックの境界情報(min_row, max_row, min_col, max_col)
         """
         if not data:
             return None
 
-        rows = len(data)
-        cols = len(data[0]) if data else 0
+        len(data)
+        len(data[0]) if data else 0
 
         # 各行の有効セル数をカウント
         row_scores = []
         for i, row in enumerate(data):
             non_empty_count = sum(1 for cell in row if str(cell).strip())
-            # ヘッダー行候補の検出（文字列が多い行）
+            # ヘッダー行候補の検出(文字列が多い行)
             text_count = sum(
                 1
                 for cell in row
@@ -1813,7 +1813,7 @@ class ExcelDataLoader:
         if current_block:
             data_blocks.append(current_block)
 
-        # 最大のデータブロックを選択（セル数とヘッダーの有無で評価）
+        # 最大のデータブロックを選択(セル数とヘッダーの有無で評価)
         if not data_blocks:
             return None
 
@@ -1826,7 +1826,7 @@ class ExcelDataLoader:
             ),
         )
 
-        # 列範囲の検出（選択されたブロック内で）
+        # 列範囲の検出(選択されたブロック内で)
         min_col, max_col = self._detect_column_range(
             data, best_block["start_row"], best_block["end_row"]
         )
@@ -1879,7 +1879,7 @@ class ExcelDataLoader:
     def _detect_multiple_data_blocks(
         self, data: list[list[str]]
     ) -> list[dict[str, Any]]:
-        """複数のデータブロックを検出（改善されたアルゴリズム）。
+        """複数のデータブロックを検出(改善されたアルゴリズム)。
 
         Args:
             data: Excelデータ
@@ -1930,7 +1930,7 @@ class ExcelDataLoader:
         rows: int,
         cols: int,
     ) -> dict[str, Any] | None:
-        """矩形データブロックを検出（改善されたアルゴリズム）。
+        """矩形データブロックを検出(改善されたアルゴリズム)。
 
         Args:
             cell_map: セルの有効性マップ
@@ -2199,7 +2199,7 @@ class ExcelDataLoader:
     def analyze_data_boundaries(
         self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """データ境界の分析（自動検出されたデータブロック基準）。
+        """データ境界の分析(自動検出されたデータブロック基準)。
 
         Args:
             file_path: Excelファイルパス
@@ -2250,7 +2250,7 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            sheet_name: シート名（None=自動検出）
+            sheet_name: シート名(None=自動検出)
 
         Returns:
             dict[str, Any]: 結合セル情報
@@ -2284,7 +2284,7 @@ class ExcelDataLoader:
                 min_col = merged_range.min_col
                 max_col = merged_range.max_col
 
-                # 結合セルの値（左上セルの値）
+                # 結合セルの値(左上セルの値)
                 cell_value = worksheet.cell(min_row, min_col).value
 
                 merged_cells.append(
@@ -2327,12 +2327,12 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            merge_mode: 結合セル処理モード（expand, ignore, first-value）
-            sheet_name: 読み込むシート名（None=自動検出）
-            header_row: ヘッダー行番号（None=自動検出）
+            merge_mode: 結合セル処理モード(expand, ignore, first-value)
+            sheet_name: 読み込むシート名(None=自動検出)
+            header_row: ヘッダー行番号(None=自動検出)
 
         Returns:
-            dict[str, Any]: 変換されたJSONデータ（結合セル処理情報付き）
+            dict[str, Any]: 変換されたJSONデータ(結合セル処理情報付き)
 
         Raises:
             MergedCellsError: 無効な処理モードの場合
@@ -2357,7 +2357,7 @@ class ExcelDataLoader:
             excel_data["data"], merge_info["merged_cells"], merge_mode
         )
 
-        # 結果を構築（DRY原則適用）
+        # 結果を構築(DRY原則適用)
         return self._build_merged_cells_result(
             processed_data, excel_data, file_path, merge_mode, merge_info
         )
@@ -2371,7 +2371,7 @@ class ExcelDataLoader:
         merge_info: dict[str, Any],
         additional_metadata: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """結合セル処理結果の共通構築メソッド（DRY原則適用）。
+        """結合セル処理結果の共通構築メソッド(DRY原則適用)。
 
         Args:
             processed_data: 処理済みデータ
@@ -2482,10 +2482,10 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            range_spec: 範囲指定（例: "A1:C3", "B2"）
-            merge_mode: 結合セル処理モード（expand, ignore, first-value）
-            sheet_name: 読み込むシート名（None=自動検出）
-            header_row: ヘッダー行番号（None=自動検出）
+            range_spec: 範囲指定(例: "A1:C3", "B2")
+            merge_mode: 結合セル処理モード(expand, ignore, first-value)
+            sheet_name: 読み込むシート名(None=自動検出)
+            header_row: ヘッダー行番号(None=自動検出)
 
         Returns:
             dict[str, Any]: 変換されたJSONデータ
@@ -2521,7 +2521,7 @@ class ExcelDataLoader:
             excel_data["data"], filtered_merged_cells, merge_mode
         )
 
-        # 結果を構築（DRY原則適用）
+        # 結果を構築(DRY原則適用)
         # 範囲指定のメタデータを作成
         range_merge_info = {
             "merged_cells": filtered_merged_cells,
@@ -2592,9 +2592,9 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            header_row: ヘッダー行番号（0ベース）
-            merge_mode: 結合セル処理モード（expand, ignore, first-value）
-            sheet_name: 読み込むシート名（None=自動検出）
+            header_row: ヘッダー行番号(0ベース)
+            merge_mode: 結合セル処理モード(expand, ignore, first-value)
+            sheet_name: 読み込むシート名(None=自動検出)
 
         Returns:
             dict[str, Any]: 変換されたJSONデータ
@@ -2614,13 +2614,13 @@ class ExcelDataLoader:
         # ヘッダー行の検証
         self._validate_header_row(header_row)
 
-        # 基本的なExcel読み込み（ヘッダー処理前）
+        # 基本的なExcel読み込み(ヘッダー処理前)
         excel_data_raw = self.load_from_excel(file_path, sheet_name, None)
 
         # 結合セル情報を検出
         merge_info = self.detect_merged_cells(file_path, sheet_name)
 
-        # 全データに結合セル処理を適用（ヘッダー行も含む）
+        # 全データに結合セル処理を適用(ヘッダー行も含む)
         processed_all_data = self._apply_merge_cell_processing(
             excel_data_raw["data"], merge_info["merged_cells"], merge_mode
         )
@@ -2631,8 +2631,8 @@ class ExcelDataLoader:
                 str(cell).strip() if cell else f"Column{i + 1}"
                 for i, cell in enumerate(processed_all_data[header_row])
             ]
-            # 結合セル展開の場合は重複回避をスキップ（同じ値の展開が期待される）
-            # ヘッダー行より後の行のみをデータとして取得（ヘッダー行以前は除外）
+            # 結合セル展開の場合は重複回避をスキップ(同じ値の展開が期待される)
+            # ヘッダー行より後の行のみをデータとして取得(ヘッダー行以前は除外)
             processed_data = [
                 row for i, row in enumerate(processed_all_data) if i > header_row
             ]
@@ -2642,7 +2642,7 @@ class ExcelDataLoader:
             processed_data = processed_all_data
             has_header = False
 
-        # 結果を構築（DRY原則適用）
+        # 結果を構築(DRY原則適用)
         # ヘッダー処理後のExcelデータ構造を作成
         processed_excel_data = {
             "sheet_name": excel_data_raw["sheet_name"],
@@ -2670,12 +2670,12 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            header_rows: ヘッダー行数（2以上）
-            sheet_name: シート名（Noneの場合はデフォルトシート）
+            header_rows: ヘッダー行数(2以上)
+            sheet_name: シート名(Noneの場合はデフォルトシート)
 
         Returns:
             dict[str, Any]: 読み込み結果
-                - data: 2D配列のデータ（ヘッダー除く）
+                - data: 2D配列のデータ(ヘッダー除く)
                 - headers: 結合されたヘッダーリスト
                 - has_header: True
                 - merged_header_levels: ヘッダー行数
@@ -2733,7 +2733,7 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            range_spec: 範囲指定（例: "A1:D10"）
+            range_spec: 範囲指定(例: "A1:D10")
             header_rows: ヘッダー行数
             sheet_name: シート名
 
@@ -2783,7 +2783,7 @@ class ExcelDataLoader:
         """複数行のヘッダーを結合して単一のヘッダーリストを生成。
 
         Args:
-            header_rows_data: ヘッダー行のデータ（2D配列）
+            header_rows_data: ヘッダー行のデータ(2D配列)
 
         Returns:
             list[str]: 結合されたヘッダーリスト
@@ -2813,7 +2813,7 @@ class ExcelDataLoader:
     def _collect_hierarchical_header_parts(
         self, header_rows_data: list[list[str]], col: int
     ) -> list[str]:
-        """指定列の階層的ヘッダー要素を収集（DRY原則適用）。
+        """指定列の階層的ヘッダー要素を収集(DRY原則適用)。
 
         Args:
             header_rows_data: ヘッダー行のデータ
@@ -2844,7 +2844,7 @@ class ExcelDataLoader:
     def _find_inherited_value_for_empty_cell(
         self, row_idx: int, col: int, header_rows_data: list[list[str]]
     ) -> str | None:
-        """空セルの値継承処理（高度階層構造対応）。
+        """空セルの値継承処理(高度階層構造対応)。
 
         Args:
             row_idx: 現在の行インデックス
@@ -2868,7 +2868,7 @@ class ExcelDataLoader:
     def _find_hierarchical_inherited_value(
         self, row_idx: int, col: int, header_rows_data: list[list[str]]
     ) -> str | None:
-        """多層階層継承ロジック（コードエクセレンス：高度アルゴリズム）。
+        """多層階層継承ロジック(コードエクセレンス：高度アルゴリズム)。
 
         Args:
             row_idx: 現在の行インデックス
@@ -2898,7 +2898,7 @@ class ExcelDataLoader:
     def _find_span_inherited_value(
         self, row_idx: int, col: int, header_rows_data: list[list[str]]
     ) -> str | None:
-        """指定行での範囲継承値を探索（結合セル模倣）。
+        """指定行での範囲継承値を探索(結合セル模倣)。
 
         Args:
             row_idx: 探索行インデックス
@@ -2934,7 +2934,7 @@ class ExcelDataLoader:
     def _calculate_value_span_end(
         self, row_idx: int, value_col: int, header_rows_data: list[list[str]]
     ) -> int:
-        """値の影響範囲終端を計算（結合セル模倣）。
+        """値の影響範囲終端を計算(結合セル模倣)。
 
         Args:
             row_idx: 値の行インデックス
@@ -2963,7 +2963,7 @@ class ExcelDataLoader:
         return len(target_row) - 1
 
     def _find_left_non_empty_in_row(self, row: list[str], col: int) -> str | None:
-        """指定行で左側の非空値を探索（SOLID原則：単一責任）。
+        """指定行で左側の非空値を探索(SOLID原則：単一責任)。
 
         Args:
             row: 対象行データ
@@ -2982,17 +2982,17 @@ class ExcelDataLoader:
         return None
 
     def _build_merged_header(self, header_parts: list[str], col: int) -> str:
-        """ヘッダー要素から結合ヘッダーを構築（DRY原則適用）。
+        """ヘッダー要素から結合ヘッダーを構築(DRY原則適用)。
 
         Args:
             header_parts: ヘッダー要素リスト
-            col: 列番号（デフォルト名生成用）
+            col: 列番号(デフォルト名生成用)
 
         Returns:
             str: 結合されたヘッダー名
         """
         if header_parts:
-            # 重複除去（順序保持）+ 正規化
+            # 重複除去(順序保持)+ 正規化
             unique_parts = self._remove_duplicates_preserve_order(header_parts)
             merged_header = "_".join(unique_parts)
             return self._normalize_header_name(merged_header)
@@ -3000,7 +3000,7 @@ class ExcelDataLoader:
             return f"列{col + 1}"  # デフォルト列名
 
     def _remove_duplicates_preserve_order(self, parts: list[str]) -> list[str]:
-        """重複を除去しつつ順序を保持（DRY原則）。
+        """重複を除去しつつ順序を保持(DRY原則)。
 
         Args:
             parts: 元のリスト
@@ -3015,7 +3015,7 @@ class ExcelDataLoader:
         return unique_parts
 
     def _normalize_header_name(self, header_name: str) -> str:
-        """ヘッダー名を正規化（コードエクセレンス：日本語対応強化）。
+        """ヘッダー名を正規化(コードエクセレンス：日本語対応強化)。
 
         Args:
             header_name: 元のヘッダー名
@@ -3029,7 +3029,7 @@ class ExcelDataLoader:
         # 前後の空白を除去
         normalized = header_name.strip()
 
-        # 日本語括弧の特別処理（括弧内容を分離）
+        # 日本語括弧の特別処理(括弧内容を分離)
         normalized = self._process_japanese_parentheses(normalized)
 
         # 特殊文字を置換
@@ -3044,7 +3044,7 @@ class ExcelDataLoader:
         return normalized or "空欄"
 
     def _process_japanese_parentheses(self, text: str) -> str:
-        """日本語括弧の特別処理（コードエクセレンス：SOLID原則）。
+        """日本語括弧の特別処理(コードエクセレンス：SOLID原則)。
 
         Args:
             text: 処理対象テキスト
@@ -3054,16 +3054,16 @@ class ExcelDataLoader:
         """
         import re
 
-        # 日本語括弧パターン「売上高（千円）」→「売上高_千円」
+        # 日本語括弧パターン「売上高(千円)」→「売上高_千円」
         # 全角括弧
-        text = re.sub(r"（([^）]+)）", r"_\1", text)
+        text = re.sub(r"(([^)]+))", r"_\1", text)
         # 半角括弧
         text = re.sub(r"\(([^)]+)\)", r"_\1", text)
 
         return text
 
     def _replace_special_characters(self, text: str) -> str:
-        """特殊文字の置換処理（DRY原則：設定の一元化）。
+        """特殊文字の置換処理(DRY原則：設定の一元化)。
 
         Args:
             text: 処理対象テキスト
@@ -3071,7 +3071,7 @@ class ExcelDataLoader:
         Returns:
             str: 特殊文字置換後のテキスト
         """
-        # 特殊文字マッピング（保守性向上）
+        # 特殊文字マッピング(保守性向上)
         replacements = {
             "/": "_",
             "\\": "_",
@@ -3111,7 +3111,7 @@ class ExcelDataLoader:
         return text
 
     def _clean_consecutive_underscores(self, text: str) -> str:
-        """連続するアンダースコアのクリーンアップ（DRY原則）。
+        """連続するアンダースコアのクリーンアップ(DRY原則)。
 
         Args:
             text: 処理対象テキスト
@@ -3127,7 +3127,7 @@ class ExcelDataLoader:
     # JSON Cache Functions (Task 3.4) - コードエクセレンス適用
     # ============================================================================
 
-    # キャッシュ関連定数（DRY原則：設定の一元化）
+    # キャッシュ関連定数(DRY原則：設定の一元化)
     CACHE_DIR_NAME: ClassVar[str] = ".jsontable_cache"
     CACHE_FILE_EXTENSION: ClassVar[str] = ".json"
     REQUIRED_CACHE_KEYS: ClassVar[list[str]] = [
@@ -3151,7 +3151,7 @@ class ExcelDataLoader:
         merge_headers: str | None = None,
         max_cache_size: int | None = None,
     ) -> dict[str, Any]:
-        """キャッシュを使用してExcelファイルを読み込み（コードエクセレンス：高品質実装）。
+        """キャッシュを使用してExcelファイルを読み込み(コードエクセレンス：高品質実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -3163,12 +3163,12 @@ class ExcelDataLoader:
             auto_header: ヘッダー自動判定
             merge_cells: 結合セル処理モード
             merge_headers: 複数ヘッダー結合指定
-            max_cache_size: 最大キャッシュサイズ（バイト）
+            max_cache_size: 最大キャッシュサイズ(バイト)
 
         Returns:
-            dict[str, Any]: 読み込み結果（cache_hitフラグ付き）
+            dict[str, Any]: 読み込み結果(cache_hitフラグ付き)
         """
-        # キャッシュシステムの処理フロー（SOLID原則：単一責任）
+        # キャッシュシステムの処理フロー(SOLID原則：単一責任)
         cache_context = self._build_cache_context(
             file_path,
             sheet_name,
@@ -3220,13 +3220,13 @@ class ExcelDataLoader:
         merge_cells: str | None,
         merge_headers: str | None,
     ) -> dict[str, str]:
-        """キャッシュコンテキストを構築（DRY原則：情報の一元化）。
+        """キャッシュコンテキストを構築(DRY原則：情報の一元化)。
 
         Args:
             全オプションパラメータ
 
         Returns:
-            dict[str, str]: キャッシュコンテキスト（キー、パス等）
+            dict[str, str]: キャッシュコンテキスト(キー、パス等)
         """
         cache_key = self._generate_cache_key(
             file_path,
@@ -3251,7 +3251,7 @@ class ExcelDataLoader:
     def _try_load_from_cache(
         self, cache_context: dict[str, str]
     ) -> dict[str, Any] | None:
-        """キャッシュからの読み込み試行（SOLID原則：単一責任）。
+        """キャッシュからの読み込み試行(SOLID原則：単一責任)。
 
         Args:
             cache_context: キャッシュコンテキスト
@@ -3324,18 +3324,18 @@ class ExcelDataLoader:
         return hashlib.md5(options_str.encode("utf-8")).hexdigest()
 
     def _get_cache_file_path(self, file_path: str, cache_key: str | None = None) -> str:
-        """キャッシュファイルのパスを生成（DRY原則：定数活用）。
+        """キャッシュファイルのパスを生成(DRY原則：定数活用)。
 
         Args:
             file_path: 元のExcelファイルパス
-            cache_key: キャッシュキー（Noneの場合は基本キーを生成）
+            cache_key: キャッシュキー(Noneの場合は基本キーを生成)
 
         Returns:
             str: キャッシュファイルのパス
         """
         import os
 
-        # キャッシュディレクトリを決定（定数活用）
+        # キャッシュディレクトリを決定(定数活用)
         cache_dir = os.path.join(str(self.base_path), self.CACHE_DIR_NAME)
         os.makedirs(cache_dir, exist_ok=True)
 
@@ -3343,7 +3343,7 @@ class ExcelDataLoader:
         base_name = os.path.basename(file_path)
         name_without_ext = os.path.splitext(base_name)[0]
 
-        # キャッシュキーに基づくファイル名生成（保守性向上）
+        # キャッシュキーに基づくファイル名生成(保守性向上)
         effective_cache_key = cache_key if cache_key else self.DEFAULT_CACHE_KEY
         cache_filename = (
             f"{name_without_ext}_{effective_cache_key}{self.CACHE_FILE_EXTENSION}"
@@ -3383,7 +3383,7 @@ class ExcelDataLoader:
             return False
 
     def _validate_cache_data(self, cache_data: dict) -> bool:
-        """キャッシュデータの整合性を検証（DRY原則：定数活用）。
+        """キャッシュデータの整合性を検証(DRY原則：定数活用)。
 
         Args:
             cache_data: キャッシュデータ
@@ -3391,17 +3391,17 @@ class ExcelDataLoader:
         Returns:
             bool: データが有効な場合True
         """
-        # 必須キーの存在確認（定数活用）
+        # 必須キーの存在確認(定数活用)
         for key in self.REQUIRED_CACHE_KEYS:
             if key not in cache_data:
                 return False
 
-        # データ型の厳密確認（品質向上）
+        # データ型の厳密確認(品質向上)
         return (
             isinstance(cache_data["data"], list)
             and isinstance(cache_data["headers"], list)
             and isinstance(cache_data["source_file"], str)
-            and isinstance(cache_data["cache_timestamp"], (int, float))
+            and isinstance(cache_data["cache_timestamp"], int | float)
         )
 
     def _load_excel_without_cache(
@@ -3511,7 +3511,7 @@ class ExcelDataLoader:
             cache_path: キャッシュファイルパス
             result: 保存するデータ
             source_file: 元ファイルパス
-            max_cache_size: 最大キャッシュサイズ（バイト）
+            max_cache_size: 最大キャッシュサイズ(バイト)
         """
         import json
         import time
@@ -3531,7 +3531,7 @@ class ExcelDataLoader:
                 cache_data[key] = result[key]
 
         try:
-            # JSONエンコード（サイズチェックのため）
+            # JSONエンコード(サイズチェックのため)
             json_str = json.dumps(cache_data, ensure_ascii=False, indent=2)
 
             # サイズ制限チェック
@@ -3548,14 +3548,14 @@ class ExcelDataLoader:
             pass
 
     def clear_cache(self, file_path: str | None = None) -> None:
-        """キャッシュをクリア（DRY原則：定数活用、エラーハンドリング強化）。
+        """キャッシュをクリア(DRY原則：定数活用、エラーハンドリング強化)。
 
         Args:
-            file_path: 特定ファイルのキャッシュをクリア（Noneの場合は全削除）
+            file_path: 特定ファイルのキャッシュをクリア(Noneの場合は全削除)
         """
         import os
 
-        # キャッシュディレクトリ（定数活用）
+        # キャッシュディレクトリ(定数活用)
         cache_dir = os.path.join(str(self.base_path), self.CACHE_DIR_NAME)
 
         if not os.path.exists(cache_dir):
@@ -3569,7 +3569,7 @@ class ExcelDataLoader:
             self._clear_all_cache(cache_dir)
 
     def _clear_specific_file_cache(self, cache_dir: str, file_path: str) -> None:
-        """特定ファイルのキャッシュ削除（SOLID原則：単一責任）。
+        """特定ファイルのキャッシュ削除(SOLID原則：単一責任)。
 
         Args:
             cache_dir: キャッシュディレクトリ
@@ -3586,7 +3586,7 @@ class ExcelDataLoader:
         self._remove_cache_files_by_pattern(pattern)
 
     def _clear_all_cache(self, cache_dir: str) -> None:
-        """全キャッシュ削除（SOLID原則：単一責任）。
+        """全キャッシュ削除(SOLID原則：単一責任)。
 
         Args:
             cache_dir: キャッシュディレクトリ
@@ -3597,7 +3597,7 @@ class ExcelDataLoader:
         self._remove_cache_files_by_pattern(pattern)
 
     def _remove_cache_files_by_pattern(self, pattern: str) -> None:
-        """パターンに基づくキャッシュファイル削除（DRY原則：共通処理化）。
+        """パターンに基づくキャッシュファイル削除(DRY原則：共通処理化)。
 
         Args:
             pattern: ファイルパターン
@@ -3609,7 +3609,7 @@ class ExcelDataLoader:
             try:
                 os.remove(cache_file)
             except OSError:
-                # ファイル削除失敗は無視（並行アクセス等の可能性）
+                # ファイル削除失敗は無視(並行アクセス等の可能性)
                 pass
 
     # ==========================================
@@ -3626,7 +3626,7 @@ class ExcelDataLoader:
     def _measure_performance(
         self, operation: callable, *args, **kwargs
     ) -> tuple[dict[str, Any], dict[str, Any]]:
-        """パフォーマンス測定共通メソッド（DRY原則：重複排除）。
+        """パフォーマンス測定共通メソッド(DRY原則：重複排除)。
 
         Args:
             operation: 測定対象の操作
@@ -3659,7 +3659,7 @@ class ExcelDataLoader:
     def load_from_excel_with_streaming(
         self, file_path: str, chunk_size: int = 1000, sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """大容量ファイルのストリーミング読み込み（最小実装）。
+        """大容量ファイルのストリーミング読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -3688,11 +3688,11 @@ class ExcelDataLoader:
         max_memory_mb: int | None = None,
         sheet_name: str | None = None,
     ) -> dict[str, Any]:
-        """メモリ使用量制限付き読み込み（REFACTOR: DRY原則適用）。
+        """メモリ使用量制限付き読み込み(REFACTOR: DRY原則適用)。
 
         Args:
             file_path: Excelファイルパス
-            max_memory_mb: メモリ制限（MB、Noneの場合はデフォルト値使用）
+            max_memory_mb: メモリ制限(MB、Noneの場合はデフォルト値使用)
             sheet_name: シート名
 
         Returns:
@@ -3721,11 +3721,11 @@ class ExcelDataLoader:
         max_time_seconds: float | None = None,
         sheet_name: str | None = None,
     ) -> dict[str, Any]:
-        """処理時間制限付き読み込み（REFACTOR: DRY原則適用）。
+        """処理時間制限付き読み込み(REFACTOR: DRY原則適用)。
 
         Args:
             file_path: Excelファイルパス
-            max_time_seconds: 時間制限（秒、Noneの場合はデフォルト値使用）
+            max_time_seconds: 時間制限(秒、Noneの場合はデフォルト値使用)
             sheet_name: シート名
 
         Returns:
@@ -3751,7 +3751,7 @@ class ExcelDataLoader:
     def load_from_excel_with_memory_cache(
         self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """メモリキャッシュ付き読み込み（最小実装）。
+        """メモリキャッシュ付き読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -3774,7 +3774,7 @@ class ExcelDataLoader:
         max_entries: int = 5,
         sheet_name: str | None = None,
     ) -> dict[str, Any]:
-        """効率的なキャッシュ戦略付き読み込み（最小実装）。
+        """効率的なキャッシュ戦略付き読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -3800,7 +3800,7 @@ class ExcelDataLoader:
     def load_from_excel_with_benchmark(
         self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """ベンチマーク付き読み込み（REFACTOR: DRY原則適用）。
+        """ベンチマーク付き読み込み(REFACTOR: DRY原則適用)。
 
         Args:
             file_path: Excelファイルパス
@@ -3829,7 +3829,7 @@ class ExcelDataLoader:
     def measure_baseline_performance(
         self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """ベースライン性能測定（REFACTOR: DRY原則適用）。
+        """ベースライン性能測定(REFACTOR: DRY原則適用)。
 
         Args:
             file_path: Excelファイルパス
@@ -3851,7 +3851,7 @@ class ExcelDataLoader:
     def load_from_excel_with_regression_check(
         self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """性能回帰チェック付き読み込み（最小実装）。
+        """性能回帰チェック付き読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -3869,7 +3869,7 @@ class ExcelDataLoader:
     def load_from_excel_with_concurrent_optimization(
         self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """並行処理最適化付き読み込み（最小実装）。
+        """並行処理最適化付き読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -3891,7 +3891,7 @@ class ExcelDataLoader:
         enable_cache: bool = True,
         sheet_name: str | None = None,
     ) -> dict[str, Any]:
-        """ストリーミング処理とキャッシュの組み合わせ（最小実装）。
+        """ストリーミング処理とキャッシュの組み合わせ(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -3946,10 +3946,10 @@ class ExcelDataLoader:
         self,
         file_path: str,
         error: Exception,
-        context: dict[str, Any] = None,
-        debug_info: dict[str, Any] = None,
+        context: dict[str, Any] | None = None,
+        debug_info: dict[str, Any] | None = None,
     ) -> EnhancedExcelError:
-        """強化エラーハンドリング共通メソッド（DRY原則：重複排除）。
+        """強化エラーハンドリング共通メソッド(DRY原則：重複排除)。
 
         Args:
             file_path: Excelファイルパス
@@ -3972,7 +3972,7 @@ class ExcelDataLoader:
     def _create_operation_context(
         self, operation_name: str, file_path: str, **kwargs
     ) -> dict[str, Any]:
-        """操作文脈作成共通メソッド（DRY原則：文脈情報統一）。
+        """操作文脈作成共通メソッド(DRY原則：文脈情報統一)。
 
         Args:
             operation_name: 操作名
@@ -3994,7 +3994,7 @@ class ExcelDataLoader:
     def load_from_excel_with_detailed_errors(
         self, file_path: str, enable_debug: bool = True, sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """詳細エラーメッセージ付き読み込み（REFACTOR: DRY原則適用）。
+        """詳細エラーメッセージ付き読み込み(REFACTOR: DRY原則適用)。
 
         Args:
             file_path: Excelファイルパス
@@ -4020,7 +4020,7 @@ class ExcelDataLoader:
     def load_from_excel_with_user_friendly_errors(
         self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """ユーザーフレンドリーなエラー説明付き読み込み（REFACTOR: DRY原則適用）。
+        """ユーザーフレンドリーなエラー説明付き読み込み(REFACTOR: DRY原則適用)。
 
         Args:
             file_path: Excelファイルパス
@@ -4049,11 +4049,11 @@ class ExcelDataLoader:
         debug_level: str | None = None,
         sheet_name: str | None = None,
     ) -> dict[str, Any]:
-        """デバッグ情報付き読み込み（REFACTOR: DRY原則適用）。
+        """デバッグ情報付き読み込み(REFACTOR: DRY原則適用)。
 
         Args:
             file_path: Excelファイルパス
-            debug_level: デバッグレベル（Noneの場合はデフォルト値使用）
+            debug_level: デバッグレベル(Noneの場合はデフォルト値使用)
             sheet_name: シート名
 
         Returns:
@@ -4099,7 +4099,7 @@ class ExcelDataLoader:
         recovery_strategy: str = "skip_invalid_rows",
         sheet_name: str | None = None,
     ) -> dict[str, Any]:
-        """部分的失敗を許容する読み込み（最小実装）。
+        """部分的失敗を許容する読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -4129,14 +4129,14 @@ class ExcelDataLoader:
     def load_from_excel_with_fallback(
         self,
         file_path: str,
-        fallback_strategies: list[str] = None,
+        fallback_strategies: list[str] | None = None,
         sheet_name: str | None = None,
     ) -> dict[str, Any]:
-        """フォールバック機能付き読み込み（REFACTOR: DRY原則適用）。
+        """フォールバック機能付き読み込み(REFACTOR: DRY原則適用)。
 
         Args:
             file_path: Excelファイルパス
-            fallback_strategies: フォールバック戦略リスト（Noneの場合はデフォルト値使用）
+            fallback_strategies: フォールバック戦略リスト(Noneの場合はデフォルト値使用)
             sheet_name: シート名
 
         Returns:
@@ -4161,10 +4161,10 @@ class ExcelDataLoader:
     def load_from_excel_with_graceful_degradation(
         self,
         file_path: str,
-        degradation_modes: list[str] = None,
+        degradation_modes: list[str] | None = None,
         sheet_name: str | None = None,
     ) -> dict[str, Any]:
-        """グレースフル劣化付き読み込み（最小実装）。
+        """グレースフル劣化付き読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -4194,7 +4194,7 @@ class ExcelDataLoader:
     def load_from_excel_with_enhanced_exceptions(
         self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """強化された例外階層付き読み込み（最小実装）。
+        """強化された例外階層付き読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -4227,7 +4227,7 @@ class ExcelDataLoader:
         sheet_name: str | None = None,
         operation_id: str | None = None,
     ) -> dict[str, Any]:
-        """エラー文脈保持付き読み込み（最小実装）。
+        """エラー文脈保持付き読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -4258,7 +4258,7 @@ class ExcelDataLoader:
     def load_from_excel_with_multilingual_errors(
         self, file_path: str, language: str = "ja", sheet_name: str | None = None
     ) -> dict[str, Any]:
-        """多言語エラーメッセージ付き読み込み（最小実装）。
+        """多言語エラーメッセージ付き読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス
@@ -4281,10 +4281,10 @@ class ExcelDataLoader:
     def load_from_excel_with_recovery_strategies(
         self,
         file_path: str,
-        strategies: list[str] = None,
+        strategies: list[str] | None = None,
         sheet_name: str | None = None,
     ) -> dict[str, Any]:
-        """エラー回復戦略付き読み込み（最小実装）。
+        """エラー回復戦略付き読み込み(最小実装)。
 
         Args:
             file_path: Excelファイルパス

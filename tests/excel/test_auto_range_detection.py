@@ -96,7 +96,7 @@ class TestAutoRangeDetection:
         return file_path
 
     def test_auto_mode_range_detection(self):
-        """autoモードでの自動範囲検出テスト（未実装なので失敗する）."""
+        """autoモードでの自動範囲検出テスト(未実装なので失敗する)."""
         excel_path = self.create_complex_data_excel()
 
         # autoモードで自動範囲検出
@@ -104,7 +104,7 @@ class TestAutoRangeDetection:
             excel_path, detect_mode="auto"
         )
 
-        # 期待される結果: 実際のデータ部分（Row 4-6のみ、ヘッダー除く）
+        # 期待される結果: 実際のデータ部分(Row 4-6のみ、ヘッダー除く)
         expected_data = [
             ["営業部", "5000000", "25", "東京"],
             ["開発部", "3000000", "15", "大阪"],
@@ -116,10 +116,10 @@ class TestAutoRangeDetection:
         assert result["headers"] == expected_headers
         assert result["detected_range"] == "B4:E7"  # 1ベース表記
         assert result["detect_mode"] == "auto"
-        assert result["has_header"] == True
+        assert result["has_header"]
 
     def test_smart_mode_range_detection(self):
-        """smartモードでの高度範囲検出テスト（未実装なので失敗する）."""
+        """smartモードでの高度範囲検出テスト(未実装なので失敗する)."""
         excel_path = self.create_scattered_data_excel()
 
         # smartモードで複数データブロック認識
@@ -140,7 +140,7 @@ class TestAutoRangeDetection:
         assert "detected_blocks" in result  # 複数ブロック情報
 
     def test_manual_mode_range_detection(self):
-        """manualモードでの手動範囲検出テスト（未実装なので失敗する）."""
+        """manualモードでの手動範囲検出テスト(未実装なので失敗する)."""
         excel_path = self.create_complex_data_excel()
 
         # manualモードで範囲ヒント指定
@@ -148,7 +148,7 @@ class TestAutoRangeDetection:
             excel_path, detect_mode="manual", range_hint="B3:E7"
         )
 
-        # 期待される結果: B3:E7範囲（4列）の精密検出（実際の出力に合わせる）
+        # 期待される結果: B3:E7範囲(4列)の精密検出(実際の出力に合わせる)
         expected_data = [
             ["", "", "", ""],  # 空行
             ["部門", "売上", "従業員数", "地域"],  # ヘッダー行
@@ -162,7 +162,7 @@ class TestAutoRangeDetection:
         assert result["detect_mode"] == "manual"
 
     def test_detect_range_with_empty_cells(self):
-        """空セルを含むデータの範囲検出テスト（未実装なので失敗する）."""
+        """空セルを含むデータの範囲検出テスト(未実装なので失敗する)."""
         excel_path = self.create_complex_data_excel()
 
         # 空セル境界の正確な検出
@@ -173,10 +173,10 @@ class TestAutoRangeDetection:
         # 空行・空列を除いた範囲検出
         assert "empty_rows_detected" in result
         assert "empty_cols_detected" in result
-        assert result["ignore_empty_rows"] == True
+        assert result["ignore_empty_rows"]
 
     def test_header_auto_detection(self):
-        """ヘッダー行の自動判定テスト（未実装なので失敗する）."""
+        """ヘッダー行の自動判定テスト(未実装なので失敗する)."""
         excel_path = self.create_complex_data_excel()
 
         # ヘッダー自動判定
@@ -185,12 +185,12 @@ class TestAutoRangeDetection:
         )
 
         # ヘッダー行の自動検出
-        assert result["auto_header"] == True
+        assert result["auto_header"]
         assert result["detected_header_row"] == 3  # 0ベース
         assert result["header_confidence"] > 0.8  # 信頼度
 
     def test_data_block_recognition(self):
-        """データブロック認識テスト（未実装なので失敗する）."""
+        """データブロック認識テスト(未実装なので失敗する)."""
         excel_path = self.create_scattered_data_excel()
 
         # 複数データブロックの認識
@@ -207,7 +207,7 @@ class TestAutoRangeDetection:
             assert 0.0 <= block["confidence_score"] <= 1.0
 
     def test_directive_detect_range_option(self):
-        """JsonTableDirectiveの:detect-range:オプションテスト（未実装なので失敗する）."""
+        """JsonTableDirectiveの:detect-range:オプションテスト(未実装なので失敗する)."""
         excel_path = self.create_complex_data_excel()
 
         # モックSphinx環境
@@ -240,14 +240,14 @@ class TestAutoRangeDetection:
             json_data = directive._load_json_data()
 
             # 自動検出されたデータを確認
-            assert len(json_data) == 3  # データ行数（ヘッダー除く）
+            assert len(json_data) == 3  # データ行数(ヘッダー除く)
             assert "部門" in json_data[0]  # ヘッダーがキーとして使用
             assert json_data[0]["部門"] == "営業部"
             assert json_data[1]["部門"] == "開発部"
             assert json_data[2]["部門"] == "総務部"
 
     def test_invalid_detect_mode_error(self):
-        """無効な検出モード指定時のエラーテスト（未実装なので失敗する）."""
+        """無効な検出モード指定時のエラーテスト(未実装なので失敗する)."""
         excel_path = self.create_complex_data_excel()
 
         # 無効なモード
@@ -257,7 +257,7 @@ class TestAutoRangeDetection:
             )
 
     def test_detect_range_boundary_detection(self):
-        """境界検出アルゴリズムテスト（未実装なので失敗する）."""
+        """境界検出アルゴリズムテスト(未実装なので失敗する)."""
         excel_path = self.create_complex_data_excel()
 
         # 境界検出の詳細情報

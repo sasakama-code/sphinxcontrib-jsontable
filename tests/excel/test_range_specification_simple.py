@@ -7,7 +7,7 @@ import pytest
 
 
 def test_range_functionality_not_implemented():
-    """Range機能が未実装であることを確認するテスト（RED段階）。"""
+    """Range機能が未実装であることを確認するテスト(RED段階)。"""
 
     # ExcelDataLoaderをインポートして未実装メソッドをチェック
     try:

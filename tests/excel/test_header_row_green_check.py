@@ -2,7 +2,7 @@
 
 
 def test_header_row_methods_implemented():
-    """Header Row機能が実装されていることを確認（GREEN段階）。"""
+    """Header Row機能が実装されていることを確認(GREEN段階)。"""
 
     try:
         from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader

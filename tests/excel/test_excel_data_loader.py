@@ -108,7 +108,7 @@ class TestExcelDataLoader:
         )
         assert self.loader.header_detection(df_with_header) is True
 
-        # ヘッダーなしのデータ（全て数値）
+        # ヘッダーなしのデータ(全て数値)
         df_no_header = pd.DataFrame([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         assert self.loader.header_detection(df_no_header) is False
 

@@ -65,18 +65,18 @@ class TestHeaderRowConfiguration:
         return file_path
 
     def test_header_row_specification(self):
-        """指定行をヘッダーとして使用するテスト（未実装機能なので失敗する）。"""
+        """指定行をヘッダーとして使用するテスト(未実装機能なので失敗する)。"""
         excel_path = self.create_header_test_excel()
 
-        # 4行目（0ベースで3）をヘッダーとして指定
+        # 4行目(0ベースで3)をヘッダーとして指定
         result = self.loader.load_from_excel_with_header_row(excel_path, header_row=3)
 
         # 期待されるヘッダー
         expected_headers = ["商品名", "1月売上", "2月売上", "3月売上"]
         assert result["headers"] == expected_headers
-        assert result["has_header"] == True
+        assert result["has_header"]
 
-        # データ部分（5行目以降）
+        # データ部分(5行目以降)
         expected_data = [
             ["商品A", "100000", "120000", "110000"],
             ["商品B", "150000", "180000", "160000"],
@@ -86,7 +86,7 @@ class TestHeaderRowConfiguration:
         assert result["header_row"] == 3
 
     def test_header_row_with_range_combination(self):
-        """ヘッダー行指定と範囲指定の組み合わせテスト（未実装なので失敗する）。"""
+        """ヘッダー行指定と範囲指定の組み合わせテスト(未実装なので失敗する)。"""
         excel_path = self.create_header_test_excel()
 
         # 4行目をヘッダー、A4:C7の範囲を指定
@@ -97,7 +97,7 @@ class TestHeaderRowConfiguration:
         expected_headers = ["商品名", "1月売上", "2月売上"]
         assert result["headers"] == expected_headers
 
-        # データ部分（5-7行目、A-C列）
+        # データ部分(5-7行目、A-C列)
         expected_data = [
             ["商品A", "100000", "120000"],
             ["商品B", "150000", "180000"],
@@ -106,7 +106,7 @@ class TestHeaderRowConfiguration:
         assert result["data"] == expected_data
 
     def test_invalid_header_row_error(self):
-        """無効なヘッダー行指定時のエラーテスト（未実装なので失敗する）。"""
+        """無効なヘッダー行指定時のエラーテスト(未実装なので失敗する)。"""
         excel_path = self.create_header_test_excel()
 
         # 負のヘッダー行番号
@@ -118,19 +118,19 @@ class TestHeaderRowConfiguration:
             self.loader.load_from_excel_with_header_row(excel_path, header_row=100)
 
     def test_empty_header_row_handling(self):
-        """空のヘッダー行の処理テスト（未実装なので失敗する）。"""
+        """空のヘッダー行の処理テスト(未実装なので失敗する)。"""
         excel_path = self.create_header_test_excel()
 
-        # 3行目（空行）をヘッダーとして指定
+        # 3行目(空行)をヘッダーとして指定
         result = self.loader.load_from_excel_with_header_row(excel_path, header_row=2)
 
         # 空のヘッダーは自動生成されるべき
         expected_headers = ["Column1", "Column2", "Column3", "Column4"]
         assert result["headers"] == expected_headers
-        assert result["has_header"] == True
+        assert result["has_header"]
 
     def test_directive_header_row_option(self):
-        """JsonTableDirectiveの:header-row:オプションテスト（未実装なので失敗する）。"""
+        """JsonTableDirectiveの:header-row:オプションテスト(未実装なので失敗する)。"""
         excel_path = self.create_header_test_excel()
 
         # モックSphinx環境
@@ -169,7 +169,7 @@ class TestHeaderRowConfiguration:
             assert json_data[2]["商品名"] == "商品C"
 
     def test_directive_header_row_with_sheet_option(self):
-        """ヘッダー行とシート指定の組み合わせテスト（未実装なので失敗する）。"""
+        """ヘッダー行とシート指定の組み合わせテスト(未実装なので失敗する)。"""
         excel_path = self.create_header_test_excel()
 
         class MockConfig:
@@ -205,7 +205,7 @@ class TestHeaderRowConfiguration:
             assert json_data[0]["商品名"] == "商品A"
 
     def test_header_row_normalization(self):
-        """ヘッダー名の正規化テスト（未実装なので失敗する）。"""
+        """ヘッダー名の正規化テスト(未実装なので失敗する)。"""
         excel_path = self.create_header_test_excel()
 
         # ヘッダー名に空白や特殊文字が含まれる場合の正規化
@@ -214,12 +214,12 @@ class TestHeaderRowConfiguration:
         # ヘッダー名が適切に正規化されることを確認
         normalized_headers = self.loader._normalize_header_names(result["headers"])
 
-        # 期待される正規化（例：空白トリム、重複回避）
+        # 期待される正規化(例：空白トリム、重複回避)
         expected_normalized = ["商品名", "1月売上", "2月売上", "3月売上"]
         assert normalized_headers == expected_normalized
 
     def test_header_row_validation(self):
-        """ヘッダー行の検証ロジックテスト（未実装なので失敗する）。"""
+        """ヘッダー行の検証ロジックテスト(未実装なので失敗する)。"""
         # ヘッダー行番号が数値でない場合
         with pytest.raises(TypeError, match="Header row must be an integer"):
             self.loader._validate_header_row("invalid")

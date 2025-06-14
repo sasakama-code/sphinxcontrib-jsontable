@@ -67,13 +67,13 @@ class TestJSONCache:
         return file_path
 
     def test_cache_file_creation(self):
-        """キャッシュファイル作成テスト（未実装なので失敗する）."""
+        """キャッシュファイル作成テスト(未実装なので失敗する)."""
         excel_path = self.create_test_excel()
 
         # 最初の読み込みでキャッシュファイルが作成される
         result = self.loader.load_from_excel_with_cache(excel_path)
 
-        # キャッシュファイルの存在確認（実際に使用されたパスを取得）
+        # キャッシュファイルの存在確認(実際に使用されたパスを取得)
         cache_path = result["cache_path"]
         assert os.path.exists(cache_path)
 
@@ -89,15 +89,15 @@ class TestJSONCache:
         assert cache_data["headers"] == result["headers"]
 
     def test_cache_hit_performance(self):
-        """キャッシュヒット時のパフォーマンステスト（未実装なので失敗する）."""
+        """キャッシュヒット時のパフォーマンステスト(未実装なので失敗する)."""
         excel_path = self.create_test_excel()
 
-        # 最初の読み込み（キャッシュ作成）
+        # 最初の読み込み(キャッシュ作成)
         start_time = time.time()
         result1 = self.loader.load_from_excel_with_cache(excel_path)
         first_load_time = time.time() - start_time
 
-        # 二回目の読み込み（キャッシュからの読み込み）
+        # 二回目の読み込み(キャッシュからの読み込み)
         start_time = time.time()
         result2 = self.loader.load_from_excel_with_cache(excel_path)
         cache_load_time = time.time() - start_time
@@ -108,13 +108,13 @@ class TestJSONCache:
         # データが同一であることを確認
         assert result1["data"] == result2["data"]
         assert result1["headers"] == result2["headers"]
-        assert result2["cache_hit"] == True
+        assert result2["cache_hit"]
 
     def test_cache_invalidation_on_file_change(self):
-        """ファイル変更時のキャッシュ無効化テスト（未実装なので失敗する）."""
+        """ファイル変更時のキャッシュ無効化テスト(未実装なので失敗する)."""
         excel_path = self.create_test_excel()
 
-        # 最初の読み込み（キャッシュ作成）
+        # 最初の読み込み(キャッシュ作成)
         result1 = self.loader.load_from_excel_with_cache(excel_path)
         cache_path = result1["cache_path"]
 
@@ -135,19 +135,19 @@ class TestJSONCache:
         ws["C2"] = "15"
         wb.save(excel_path)
 
-        # 再読み込み（キャッシュ無効化・再作成）
+        # 再読み込み(キャッシュ無効化・再作成)
         result2 = self.loader.load_from_excel_with_cache(excel_path)
 
         # キャッシュが更新されていることを確認
         cache_mtime_2 = os.path.getmtime(cache_path)
         assert cache_mtime_2 > cache_mtime_1
 
-        # 変更されたデータが反映されていることを確認（data[1][0]は最初のデータ行の1列目）
+        # 変更されたデータが反映されていることを確認(data[1][0]は最初のデータ行の1列目)
         assert result2["data"][1][0] == "新商品"
-        assert result2["cache_hit"] == False
+        assert not result2["cache_hit"]
 
     def test_cache_with_options(self):
-        """オプション付きでのキャッシュテスト（未実装なので失敗する）."""
+        """オプション付きでのキャッシュテスト(未実装なので失敗する)."""
         excel_path = self.create_test_excel()
 
         # ヘッダー行指定でキャッシュ
@@ -159,13 +159,13 @@ class TestJSONCache:
         # 異なるオプションで別キャッシュ
         result3 = self.loader.load_from_excel_with_cache(excel_path, header_row=None)
 
-        assert result2["cache_hit"] == True
-        assert result3["cache_hit"] == False  # 別オプションなのでキャッシュミス
+        assert result2["cache_hit"]
+        assert not result3["cache_hit"]  # 別オプションなのでキャッシュミス
         assert result1["headers"] == result2["headers"]
         assert result1["headers"] != result3.get("headers", [])
 
     def test_cache_file_path_generation(self):
-        """キャッシュファイルパス生成テスト（未実装なので失敗する）."""
+        """キャッシュファイルパス生成テスト(未実装なので失敗する)."""
         excel_path = self.create_test_excel()
 
         # キャッシュファイルパスの生成
@@ -181,7 +181,7 @@ class TestJSONCache:
         assert excel_basename.replace(".xlsx", "") in cache_path
 
     def test_cache_with_range_option(self):
-        """範囲指定オプションでのキャッシュテスト（未実装なので失敗する）."""
+        """範囲指定オプションでのキャッシュテスト(未実装なので失敗する)."""
         excel_path = self.create_test_excel()
 
         # 範囲指定でキャッシュ
@@ -193,13 +193,13 @@ class TestJSONCache:
         # 異なる範囲指定で別キャッシュ
         result3 = self.loader.load_from_excel_with_cache(excel_path, range_spec="A1:C3")
 
-        assert result2["cache_hit"] == True
-        assert result3["cache_hit"] == False
+        assert result2["cache_hit"]
+        assert not result3["cache_hit"]
         assert len(result1["data"][0]) == 2  # A:B列
         assert len(result3["data"][0]) == 3  # A:C列
 
     def test_cache_cleanup(self):
-        """キャッシュクリーンアップテスト（未実装なので失敗する）."""
+        """キャッシュクリーンアップテスト(未実装なので失敗する)."""
         excel_path = self.create_test_excel()
 
         # キャッシュファイル作成
@@ -212,7 +212,7 @@ class TestJSONCache:
         assert not os.path.exists(cache_path)
 
     def test_cache_corruption_recovery(self):
-        """キャッシュファイル破損時の回復テスト（未実装なので失敗する）."""
+        """キャッシュファイル破損時の回復テスト(未実装なので失敗する)."""
         excel_path = self.create_test_excel()
 
         # 正常なキャッシュ作成
@@ -227,16 +227,16 @@ class TestJSONCache:
         result2 = self.loader.load_from_excel_with_cache(excel_path)
 
         # 新しいキャッシュが作成されることを確認
-        assert result2["cache_hit"] == False
+        assert not result2["cache_hit"]
         assert result1["data"] == result2["data"]
 
     def test_concurrent_cache_access(self):
-        """並行キャッシュアクセステスト（未実装なので失敗する）."""
+        """並行キャッシュアクセステスト(未実装なので失敗する)."""
         excel_path = self.create_test_excel()
 
         # 事前にキャッシュファイルを作成しておく
         initial_result = self.loader.load_from_excel_with_cache(excel_path)
-        assert initial_result["cache_hit"] == False
+        assert not initial_result["cache_hit"]
 
         import concurrent.futures
         import threading
@@ -268,7 +268,7 @@ class TestJSONCache:
         assert all(cache_hits), f"All cache hits expected, but got: {cache_hits}"
 
     def test_cache_size_limit(self):
-        """キャッシュサイズ制限テスト（未実装なので失敗する）."""
+        """キャッシュサイズ制限テスト(未実装なので失敗する)."""
         # 大きなExcelファイルを作成
         file_path = os.path.join(self.temp_dir, "large_cache_test.xlsx")
         wb = Workbook()
@@ -283,9 +283,7 @@ class TestJSONCache:
 
         # キャッシュサイズ制限の設定
         max_cache_size = 1024 * 1024  # 1MB
-        result = self.loader.load_from_excel_with_cache(
-            file_path, max_cache_size=max_cache_size
-        )
+        self.loader.load_from_excel_with_cache(file_path, max_cache_size=max_cache_size)
 
         cache_path = self.loader._get_cache_file_path(file_path)
         if os.path.exists(cache_path):

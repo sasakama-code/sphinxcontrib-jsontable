@@ -43,7 +43,7 @@ class TestPerformanceOptimization:
         """大容量テスト用のExcelファイルを作成.
 
         Args:
-            rows: 作成する行数（デフォルト: 1000行）
+            rows: 作成する行数(デフォルト: 1000行)
 
         Returns:
             str: 作成されたファイルのパス
@@ -72,22 +72,22 @@ class TestPerformanceOptimization:
         return file_path
 
     def test_large_file_streaming_load(self):
-        """大容量ファイルのストリーミング読み込みテスト（未実装なので失敗する）."""
+        """大容量ファイルのストリーミング読み込みテスト(未実装なので失敗する)."""
         excel_path = self.create_large_excel(rows=5000)  # 5000行の大容量ファイル
 
         # ストリーミング読み込みの実行
         result = self.loader.load_from_excel_with_streaming(excel_path, chunk_size=1000)
 
         # ストリーミング処理の確認
-        assert result["streaming"] == True
+        assert result["streaming"]
         assert result["chunk_size"] == 1000
         assert result["total_rows"] == 5001  # ヘッダー行含む
         assert len(result["data"]) == 5001  # ヘッダー行 + データ行
         assert len(result["headers"]) == 7  # 7列のヘッダー
-        assert result["has_header"] == True
+        assert result["has_header"]
 
     def test_memory_usage_limit(self):
-        """メモリ使用量制限テスト（未実装なので失敗する）."""
+        """メモリ使用量制限テスト(未実装なので失敗する)."""
         excel_path = self.create_large_excel(rows=2000)
 
         # メモリ使用量監視開始
@@ -106,11 +106,11 @@ class TestPerformanceOptimization:
         # メモリ使用量が制限以下であることを確認
         peak_mb = peak / 1024 / 1024
         assert peak_mb <= max_memory_mb * 1.2  # 20%のマージンを許容
-        assert result["memory_limit_applied"] == True
+        assert result["memory_limit_applied"]
         assert result["peak_memory_mb"] <= max_memory_mb * 1.2
 
     def test_processing_time_limit(self):
-        """処理時間制限テスト（未実装なので失敗する）."""
+        """処理時間制限テスト(未実装なので失敗する)."""
         excel_path = self.create_large_excel(rows=3000)
 
         # 処理時間制限設定
@@ -124,19 +124,19 @@ class TestPerformanceOptimization:
 
         # 時間制限が適用されていることを確認
         assert elapsed_time <= max_time_seconds * 1.2  # 20%のマージンを許容
-        assert result["time_limit_applied"] == True
+        assert result["time_limit_applied"]
         assert result["elapsed_time"] <= max_time_seconds * 1.2
 
     def test_memory_cache_implementation(self):
-        """メモリキャッシュ実装テスト（未実装なので失敗する）."""
+        """メモリキャッシュ実装テスト(未実装なので失敗する)."""
         excel_path = self.create_large_excel(rows=1000)
 
-        # 最初の読み込み（メモリキャッシュ作成）
+        # 最初の読み込み(メモリキャッシュ作成)
         start_time = time.time()
         result1 = self.loader.load_from_excel_with_memory_cache(excel_path)
         first_load_time = time.time() - start_time
 
-        # 二回目の読み込み（メモリキャッシュからの読み込み）
+        # 二回目の読み込み(メモリキャッシュからの読み込み)
         start_time = time.time()
         result2 = self.loader.load_from_excel_with_memory_cache(excel_path)
         cache_load_time = time.time() - start_time
@@ -145,13 +145,13 @@ class TestPerformanceOptimization:
         assert cache_load_time < first_load_time * 0.5  # 50%以上高速化
         assert result1["data"] == result2["data"]
         assert result1["headers"] == result2["headers"]
-        assert result2["memory_cache_hit"] == True
+        assert result2["memory_cache_hit"]
 
     def test_efficient_cache_strategy(self):
-        """効率的なキャッシュ戦略テスト（未実装なので失敗する）."""
+        """効率的なキャッシュ戦略テスト(未実装なので失敗する)."""
         excel_path = self.create_large_excel(rows=1500)
 
-        # LRU（Least Recently Used）キャッシュ戦略
+        # LRU(Least Recently Used)キャッシュ戦略
         cache_strategy = "lru"
         max_cache_entries = 5
 
@@ -162,10 +162,10 @@ class TestPerformanceOptimization:
         # キャッシュ戦略の確認
         assert result["cache_strategy"] == cache_strategy
         assert result["max_cache_entries"] == max_cache_entries
-        assert result["cache_applied"] == True
+        assert result["cache_applied"]
 
     def test_benchmark_performance(self):
-        """ベンチマークパフォーマンステスト（未実装なので失敗する）."""
+        """ベンチマークパフォーマンステスト(未実装なので失敗する)."""
         # 異なるサイズのファイルでのベンチマーク
         sizes = [100, 500, 1000, 2000]
         benchmark_results = []
@@ -177,7 +177,7 @@ class TestPerformanceOptimization:
             start_time = time.time()
             tracemalloc.start()
 
-            result = self.loader.load_from_excel_with_benchmark(excel_path)
+            self.loader.load_from_excel_with_benchmark(excel_path)
 
             current, peak = tracemalloc.get_traced_memory()
             tracemalloc.stop()
@@ -204,7 +204,7 @@ class TestPerformanceOptimization:
                 assert benchmark["peak_memory_mb"] <= 50.0
 
     def test_performance_regression_protection(self):
-        """性能回帰テスト（未実装なので失敗する）."""
+        """性能回帰テスト(未実装なので失敗する)."""
         excel_path = self.create_large_excel(rows=1000)
 
         # ベースライン性能測定
@@ -221,12 +221,12 @@ class TestPerformanceOptimization:
         elapsed_time = time.time() - start_time
 
         # 回帰チェック
-        assert result["regression_check"] == True
+        assert result["regression_check"]
         assert elapsed_time <= baseline_result["baseline_time"] * 1.2  # 20%劣化まで許容
         assert peak / 1024 / 1024 <= baseline_result["baseline_memory_mb"] * 1.2
 
     def test_concurrent_performance(self):
-        """並行処理パフォーマンステスト（未実装なので失敗する）."""
+        """並行処理パフォーマンステスト(未実装なので失敗する)."""
         excel_path = self.create_large_excel(rows=1000)
 
         import concurrent.futures
@@ -247,7 +247,7 @@ class TestPerformanceOptimization:
                 with lock:
                     errors.append(e)
 
-        # 並行実行（5つのスレッド）
+        # 並行実行(5つのスレッド)
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             futures = [executor.submit(load_with_performance) for _ in range(5)]
             concurrent.futures.wait(futures)
@@ -263,7 +263,7 @@ class TestPerformanceOptimization:
             assert result["headers"] == first_result["headers"]
 
     def test_streaming_with_cache_combination(self):
-        """ストリーミング処理とキャッシュの組み合わせテスト（未実装なので失敗する）."""
+        """ストリーミング処理とキャッシュの組み合わせテスト(未実装なので失敗する)."""
         excel_path = self.create_large_excel(rows=2000)
 
         # ストリーミング + キャッシュ
@@ -272,11 +272,11 @@ class TestPerformanceOptimization:
         )
 
         # 組み合わせ機能の確認
-        assert result["streaming"] == True
+        assert result["streaming"]
         assert result["chunk_size"] == 500
-        assert result["cache_enabled"] == True
+        assert result["cache_enabled"]
         assert len(result["data"]) == 2001  # ヘッダー行含む
-        assert result["performance_optimized"] == True
+        assert result["performance_optimized"]
 
 
 if __name__ == "__main__":

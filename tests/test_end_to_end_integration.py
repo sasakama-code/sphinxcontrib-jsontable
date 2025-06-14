@@ -241,7 +241,7 @@ Employees Sheet:
         excel_path = self.data_dir / "large_data.xlsx"
         df.to_excel(excel_path, index=False)
 
-        # RSTコンテンツ作成（範囲指定）
+        # RSTコンテンツ作成(範囲指定)
         rst_content = """
 Test Excel Range Specification
 ==============================
@@ -264,11 +264,11 @@ First 5 rows only:
 
     def test_backward_compatibility_integration(self):
         """後方互換性の統合テスト."""
-        # JSON機能（既存）
+        # JSON機能(既存)
         test_data = [{"id": 1, "name": "Test User"}, {"id": 2, "name": "Another User"}]
         self.create_test_json("legacy.json", test_data)
 
-        # RSTコンテンツ（従来の記法）
+        # RSTコンテンツ(従来の記法)
         rst_content = """
 Test Backward Compatibility
 ===========================
@@ -305,7 +305,7 @@ Non-existent file:
         success, content = self.build_docs(rst_content)
 
         # エラーが適切に処理されることを確認
-        # （ビルドは失敗してもよいが、クラッシュしてはいけない）
+        # (ビルドは失敗してもよいが、クラッシュしてはいけない)
         if not success:
             assert "not found" in content.lower() or "error" in content.lower()
         else:
@@ -328,7 +328,7 @@ Non-existent file:
 
         self.create_test_json("large.json", large_data)
 
-        # RSTコンテンツ（制限付き）
+        # RSTコンテンツ(制限付き)
         rst_content = """
 Test Performance
 ===============
@@ -340,7 +340,7 @@ Large dataset with limit:
    :limit: 50
 """
 
-        # ビルド実行（時間測定）
+        # ビルド実行(時間測定)
         import time
 
         start_time = time.time()
@@ -386,10 +386,9 @@ class TestSphinxCompatibility:
     def test_required_dependencies(self):
         """必要な依存関係のテスト."""
         # 必須依存関係をインポートテスト
-        try:
-            import docutils
-            import openpyxl
-            import pandas
-            import sphinx
-        except ImportError as e:
-            pytest.fail(f"Required dependency missing: {e}")
+        import importlib.util
+
+        required_modules = ["docutils", "openpyxl", "pandas", "sphinx"]
+        for module_name in required_modules:
+            if importlib.util.find_spec(module_name) is None:
+                pytest.fail(f"Required dependency missing: {module_name}")

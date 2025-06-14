@@ -744,7 +744,7 @@ class JsonTableDirective(SphinxDirective):
                     file_path, sheet_name, sheet_index
                 )
 
-                # Excelファイルを読み込み（オプションの組み合わせ処理）
+                # Excelファイルを読み込み(オプションの組み合わせ処理)
                 # JSONキャッシュ処理
                 if json_cache:
                     excel_data = self._load_excel_with_cache(
@@ -822,7 +822,7 @@ class JsonTableDirective(SphinxDirective):
             sheet_index: 指定されたシートインデックス
 
         Returns:
-            str | None: 解決されたシート名（None=デフォルトシート）
+            str | None: 解決されたシート名(None=デフォルトシート)
         """
         if sheet_name:
             # sheet名が優先
@@ -856,7 +856,7 @@ class JsonTableDirective(SphinxDirective):
             skip_rows: スキップ行指定
             detect_range: 自動範囲検出モード
             auto_header: ヘッダー自動判定
-            merge_cells: 結合セル処理モード（expand, ignore, first-value）
+            merge_cells: 結合セル処理モード(expand, ignore, first-value)
 
         Returns:
             dict[str, Any]: 読み込み結果
@@ -864,7 +864,7 @@ class JsonTableDirective(SphinxDirective):
         # Detect Range機能を最優先で処理
         if detect_range:
             if merge_cells:
-                # Detect Range + Merge Cells（将来実装予定）
+                # Detect Range + Merge Cells(将来実装予定)
                 # 現在は基本のDetect Rangeで処理
                 return self.excel_loader.load_from_excel_with_detect_range(
                     file_path,
@@ -906,7 +906,7 @@ class JsonTableDirective(SphinxDirective):
                     file_path, skip_rows, sheet_name
                 )
         else:
-            # 従来の処理（Skip Rowsなし）+ Merge Cells対応
+            # 従来の処理(Skip Rowsなし)+ Merge Cells対応
             if range_spec and header_row is not None:
                 # 範囲指定 + ヘッダー行指定
                 if merge_cells:
@@ -943,7 +943,7 @@ class JsonTableDirective(SphinxDirective):
                         file_path, header_row, sheet_name
                     )
             else:
-                # 従来の処理（オプション指定なし）
+                # 従来の処理(オプション指定なし)
                 if merge_cells:
                     # 結合セル処理のみ
                     return self.excel_loader.load_from_excel_with_merge_cells(
@@ -985,7 +985,7 @@ class JsonTableDirective(SphinxDirective):
         if not self.excel_loader:
             raise JsonTableError("Excel loader not initialized")
 
-        # キャッシュサイズ制限の取得（設定から）
+        # キャッシュサイズ制限の取得(設定から)
         max_cache_size = getattr(
             self.env.config,
             "jsontable_cache_size_limit",
