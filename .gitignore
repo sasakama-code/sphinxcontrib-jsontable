@@ -70,3 +70,4 @@ CLAUDE.md
 uv.lock
 memo.md
 .claude/
+.claude/settings.local.json
