@@ -25,10 +25,6 @@ except ImportError:
     EXCEL_AVAILABLE = False
 
 
-@pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
-@pytest.mark.skip(
-    reason="Phase 4 feature: Error Handling Enhancement not fully implemented yet"
-)
 class TestErrorHandlingEnhancement:
     """Phase 4: Error Handling Enhancement機能のテスト."""
 

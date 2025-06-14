@@ -68,8 +68,6 @@ def create_mock_state_machine(srcdir="/tmp"):
     return MockStateMachine(), MockState(srcdir)
 
 
-@pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
-@pytest.mark.skip(reason="Phase 3 feature: Merged Cells not fully implemented yet")
 class TestMergedCells:
     """Phase 3: Merged Cells Processing機能のテスト."""
 

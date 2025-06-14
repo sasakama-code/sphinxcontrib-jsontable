@@ -67,10 +67,6 @@ def create_mock_state_machine(srcdir="/tmp"):
     return MockStateMachine(), MockState(srcdir)
 
 
-@pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
-@pytest.mark.skip(
-    reason="Phase 3 feature: Auto Range Detection not fully implemented yet"
-)
 class TestAutoRangeDetection:
     """Phase 3: Automatic Range Detection機能のテスト."""
 

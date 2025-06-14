@@ -25,8 +25,6 @@ except ImportError:
     EXCEL_AVAILABLE = False
 
 
-@pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
-@pytest.mark.skip(reason="Phase 3 feature: JSON Cache not fully implemented yet")
 class TestJSONCache:
     """Phase 3: JSON Caching機能のテスト."""
 

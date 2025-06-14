@@ -24,8 +24,6 @@ except ImportError:
     EXCEL_AVAILABLE = False
 
 
-@pytest.mark.skipif(not EXCEL_AVAILABLE, reason="Excel support not available")
-@pytest.mark.skip(reason="Phase 3 feature: Multiple Headers not fully implemented yet")
 class TestMultipleHeaders:
     """Phase 3: Multiple Headers Support機能のテスト."""
 
