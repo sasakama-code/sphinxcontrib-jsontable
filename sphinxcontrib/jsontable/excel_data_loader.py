@@ -12,6 +12,7 @@ JSON形式への変換を担当する。
 - セキュリティ(パストラバーサル対策)
 """
 
+import contextlib
 import os
 import re
 from datetime import datetime
@@ -1780,7 +1781,7 @@ class ExcelDataLoader:
         data_blocks = []
         current_block = None
 
-        for i, score in enumerate(valid_rows):
+        for _i, score in enumerate(valid_rows):
             row_idx = score["index"]
 
             if current_block is None:
@@ -1895,9 +1896,9 @@ class ExcelDataLoader:
 
         # 各セルの有効性をマップ化
         cell_map = []
-        for i, row in enumerate(data):
+        for _i, row in enumerate(data):
             row_map = []
-            for j, cell in enumerate(row):
+            for _j, cell in enumerate(row):
                 is_valid = str(cell).strip() != ""
                 row_map.append(is_valid)
             # 行の長さを統一
@@ -2026,18 +2027,21 @@ class ExcelDataLoader:
         for row in range(start_row, rows):
             found_in_row = False
             for col in range(cols):
-                if cell_map[row][col] and not visited[row][col]:
-                    # 同じ行で連続する範囲を検出
-                    if self._is_connected_region(
+                # 同じ行で連続する範囲を検出
+                if (
+                    cell_map[row][col]
+                    and not visited[row][col]
+                    and self._is_connected_region(
                         cell_map, visited, row, col, min_row, max_row, min_col, max_col
-                    ):
-                        visited[row][col] = True
-                        min_row = min(min_row, row)
-                        max_row = max(max_row, row)
-                        min_col = min(min_col, col)
-                        max_col = max(max_col, col)
-                        total_cells += 1
-                        found_in_row = True
+                    )
+                ):
+                    visited[row][col] = True
+                    min_row = min(min_row, row)
+                    max_row = max(max_row, row)
+                    min_col = min(min_col, col)
+                    max_col = max(max_col, col)
+                    total_cells += 1
+                    found_in_row = True
 
             # 行に有効セルがない場合、ブロック終了の可能性
             if not found_in_row and row > start_row:
@@ -3606,11 +3610,9 @@ class ExcelDataLoader:
         import os
 
         for cache_file in glob.glob(pattern):
-            try:
+            # ファイル削除失敗は無視(並行アクセス等の可能性)
+            with contextlib.suppress(OSError):
                 os.remove(cache_file)
-            except OSError:
-                # ファイル削除失敗は無視(並行アクセス等の可能性)
-                pass
 
     # ==========================================
     # Phase 4: Performance Optimization Methods
