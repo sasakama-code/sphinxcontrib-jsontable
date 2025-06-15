@@ -141,8 +141,8 @@ class TestJSONCache:
         cache_mtime_2 = os.path.getmtime(cache_path)
         assert cache_mtime_2 > cache_mtime_1
 
-        # 変更されたデータが反映されていることを確認(data[1][0]は最初のデータ行の1列目)
-        assert result2["data"][1][0] == "新商品"
+        # 変更されたデータが反映されていることを確認(data[0][0]は最初のデータ行の1列目)
+        assert result2["data"][0][0] == "新商品"
         assert not result2["cache_hit"]
 
     def test_cache_with_options(self):

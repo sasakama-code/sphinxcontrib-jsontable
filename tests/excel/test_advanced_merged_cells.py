@@ -269,7 +269,7 @@ class TestAdvancedMergedCells:
         start_time = time.time()
 
         result = self.loader.load_from_excel_with_merge_cells(
-            excel_path, merge_mode="expand"
+            excel_path, merge_mode="expand", header_row=-1
         )
 
         end_time = time.time()
@@ -283,10 +283,15 @@ class TestAdvancedMergedCells:
         assert result["has_merged_cells"]
 
         # 20x20の結合セルが展開されている
-        for row in range(20):
-            for col in range(20):
+        for row in range(min(20, len(result["data"]))):
+            for col in range(
+                min(20, len(result["data"][row]) if row < len(result["data"]) else 0)
+            ):
                 if row < len(result["data"]) and col < len(result["data"][row]):
-                    assert "巨大結合データ" in str(result["data"][row][col])
+                    cell_value = str(result["data"][row][col])
+                    assert "巨大結合データ" in cell_value, (
+                        f"Expected '巨大結合データ' in cell at [{row}][{col}], got: '{cell_value[:50]}...'"
+                    )
 
     def test_mixed_datatype_merges_handling(self):
         """データ型混合結合セルの処理テスト."""

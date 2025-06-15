@@ -156,7 +156,7 @@ class TestExcelDataLoader:
         result = self.loader.load_from_excel(excel_path)
 
         assert result["has_header"] is False
-        assert result["headers"] is None
+        assert result["headers"] == []
         assert result["rows"] == 2
         assert result["columns"] == 3
         assert len(result["data"]) == 2

@@ -285,7 +285,7 @@ class TestMergedCellsWithRange:
         self.base_path = Path("/tmp")
         self.loader = ExcelDataLoader(self.base_path)
 
-    def test_load_from_excel_with_merged_cells_and_range_expand_mode(self):
+    def test_load_from_excel_with_merge_cells_and_range_expand_mode(self):
         """expandモードでの結合セル処理テスト."""
         with (
             patch.object(self.loader, "_validate_excel_file"),
@@ -306,7 +306,7 @@ class TestMergedCellsWithRange:
             mock_filter.return_value = [{"range": "A1:B1"}]
             mock_process.return_value = [["A1", "A1"], ["A2", "B2"]]
 
-            result = self.loader.load_from_excel_with_merged_cells_and_range(
+            result = self.loader.load_from_excel_with_merge_cells_and_range(
                 "test.xlsx", "A1:B2", merge_mode="expand"
             )
 
@@ -318,7 +318,7 @@ class TestMergedCellsWithRange:
         """無効なマージモードでのエラーテスト."""
         with patch.object(self.loader, "_validate_excel_file"):
             with pytest.raises((Exception, ValueError)):  # MergedCellsError
-                self.loader.load_from_excel_with_merged_cells_and_range(
+                self.loader.load_from_excel_with_merge_cells_and_range(
                     "test.xlsx", "A1:B2", merge_mode="invalid_mode"
                 )
 
@@ -342,7 +342,7 @@ class TestMergedCellsWithRange:
             mock_filter.return_value = []
             mock_process.return_value = [["Header1", "Header2"], ["Data1", ""]]
 
-            result = self.loader.load_from_excel_with_merged_cells_and_range(
+            result = self.loader.load_from_excel_with_merge_cells_and_range(
                 "test.xlsx", "A1:B2", merge_mode="expand", header_row=0
             )
 

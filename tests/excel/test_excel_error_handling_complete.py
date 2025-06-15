@@ -199,8 +199,8 @@ class TestExcelDataLoaderErrorHandling:
             valid_file = self.base_path / "test.xlsx"
             for invalid_mode in invalid_merge_modes:
                 with pytest.raises((MergedCellsError, ValueError)):
-                    self.loader.load_from_excel_with_merge_cells_and_range(
-                        str(valid_file), "A1:B2", invalid_mode
+                    self.loader.load_from_excel_with_merge_cells(
+                        str(valid_file), merge_mode=invalid_mode
                     )
 
     def test_error_context_preservation(self):

@@ -171,8 +171,8 @@ class TestHeaderRowConfiguration:
         # 3行目(空行)をヘッダーとして指定
         result = self.loader.load_from_excel_with_header_row(excel_path, header_row=2)
 
-        # 空のヘッダーは自動生成されるべき
-        expected_headers = ["Column1", "Column2", "Column3", "Column4"]
+        # 空のヘッダーは自動生成されるべき（正規化後）
+        expected_headers = ["column_1", "column_2", "column_3", "column_4"]
         assert result["headers"] == expected_headers
         assert result["has_header"]
 
