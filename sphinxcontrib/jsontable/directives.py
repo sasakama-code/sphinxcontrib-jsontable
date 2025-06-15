@@ -15,6 +15,14 @@ from docutils.parsers.rst import directives
 from sphinx.util import logging
 from sphinx.util.docutils import SphinxDirective
 
+# Excel対応のインポート
+try:
+    from .excel_data_loader import ExcelDataLoader
+
+    EXCEL_SUPPORT = True
+except ImportError:
+    EXCEL_SUPPORT = False
+
 logger = logging.getLogger(__name__)
 
 JsonData = list[Any] | dict[str, Any]
@@ -593,6 +601,41 @@ class JsonTableDirective(SphinxDirective):
         header: Flag to include the first row of JSON objects as table header.
         encoding: Character encoding for JSON file reading.
         limit: Positive integer to limit the number of rows, or 0 for unlimited.
+        sheet: Excel sheet name to read from (Excel files only).
+        sheet-index: Excel sheet index to read from (0-based, Excel files only).
+        range: Cell range specification for Excel files (e.g., "A1:C10", "B2").
+        header-row: Row number to use as header (0-based, Excel files only).
+        skip-rows: Row numbers to skip (e.g., "0,1,2" or "0-2,5,7-9", Excel files only).
+
+    Excel-specific Options:
+        - sheet: Specify the Excel sheet by name (e.g., "営業データ", "Sheet1")
+        - sheet-index: Specify the Excel sheet by index (0-based, e.g., 0, 1, 2)
+        - range: Specify cell range in A1:C10 format (e.g., "A1:D5", "B2:F10")
+        - header-row: Specify which row to use as header (0-based, e.g., 0, 3, 5)
+        - skip-rows: Skip specified rows (e.g., "0,1,2", "0-2,5", "1,3,5-7")
+        - Priority: If both sheet and sheet-index are provided, sheet name takes precedence
+        - Default: If neither is provided, the first sheet (index 0) is used
+
+    Examples:
+        .. jsontable:: data.xlsx
+           :header:
+           :sheet: 営業データ
+
+        .. jsontable:: data.xlsx
+           :header:
+           :sheet-index: 1
+
+        .. jsontable:: data.xlsx
+           :header:
+           :range: A1:D10
+
+        .. jsontable:: data.xlsx
+           :header:
+           :header-row: 3
+
+        .. jsontable:: data.xlsx
+           :header:
+           :skip-rows: 0-2,6
     """
 
     has_content = True
@@ -602,6 +645,16 @@ class JsonTableDirective(SphinxDirective):
         "header": directives.flag,
         "encoding": directives.unchanged,
         "limit": directives.nonnegative_int,  # Accept 0 or positive integers
+        "sheet": directives.unchanged,
+        "sheet-index": directives.nonnegative_int,
+        "range": directives.unchanged,
+        "header-row": directives.nonnegative_int,
+        "skip-rows": directives.unchanged,
+        "detect-range": directives.unchanged,
+        "auto-header": directives.flag,
+        "merge-cells": directives.unchanged,
+        "merge-headers": directives.unchanged,
+        "json-cache": directives.flag,
     }
 
     def __init__(self, *args, **kwargs):
@@ -617,6 +670,11 @@ class JsonTableDirective(SphinxDirective):
         )
 
         self.loader = JsonDataLoader(encoding)
+        # Excel対応のローダーを初期化
+        if EXCEL_SUPPORT:
+            self.excel_loader = ExcelDataLoader(str(self.env.srcdir))
+        else:
+            self.excel_loader = None
         self.converter = TableConverter(default_max_rows)
         self.builder = TableBuilder()
 
@@ -645,6 +703,7 @@ class JsonTableDirective(SphinxDirective):
     def _load_json_data(self) -> JsonData:
         """
         Determine JSON source: file (argument) or inline content.
+        Supports both JSON and Excel files.
 
         Returns:
             Parsed JSON data (object or list).
@@ -653,10 +712,86 @@ class JsonTableDirective(SphinxDirective):
             JsonTableError: If no JSON source provided.
         """
         if self.arguments:
-            return self.loader.load_from_file(
-                self.arguments[0],
-                Path(self.env.srcdir),
-            )
+            file_path = self.arguments[0]
+            file_ext = Path(file_path).suffix.lower()
+
+            # Excel形式の判定と処理
+            if file_ext in {".xlsx", ".xls"}:
+                # Excelファイルの場合、ソースディレクトリからの絶対パスに変換
+                if not Path(file_path).is_absolute():
+                    file_path = str(Path(self.env.srcdir) / file_path)
+                if not EXCEL_SUPPORT:
+                    raise JsonTableError(
+                        "Excel support not available. Install with: pip install 'sphinxcontrib-jsontable[excel]'"
+                    )
+                if not self.excel_loader:
+                    raise JsonTableError("Excel loader not initialized")
+
+                # オプションの取得
+                sheet_name = self.options.get("sheet")
+                sheet_index = self.options.get("sheet-index")
+                range_spec = self.options.get("range")
+                header_row = self.options.get("header-row")
+                skip_rows = self.options.get("skip-rows")
+                detect_range = self.options.get("detect-range")
+                auto_header = "auto-header" in self.options
+                merge_cells = self.options.get("merge-cells")
+                merge_headers = self.options.get("merge-headers")
+                json_cache = "json-cache" in self.options
+
+                # シート名の解決
+                resolved_sheet_name = self._resolve_sheet_name(
+                    file_path, sheet_name, sheet_index
+                )
+
+                # Excelファイルを読み込み(オプションの組み合わせ処理)
+                # JSONキャッシュ処理
+                if json_cache:
+                    excel_data = self._load_excel_with_cache(
+                        file_path,
+                        resolved_sheet_name,
+                        range_spec,
+                        header_row,
+                        skip_rows,
+                        detect_range,
+                        auto_header,
+                        merge_cells,
+                        merge_headers,
+                    )
+                else:
+                    excel_data = self._load_excel_with_options(
+                        file_path,
+                        resolved_sheet_name,
+                        range_spec,
+                        header_row,
+                        skip_rows,
+                        detect_range,
+                        auto_header,
+                        merge_cells,
+                        merge_headers,
+                    )
+
+                # Excel形式からJSON形式に変換
+                if excel_data["has_header"]:
+                    # ヘッダーがある場合: オブジェクトの配列形式
+                    headers = excel_data["headers"]
+                    json_data = []
+                    for row in excel_data["data"]:
+                        row_obj = {}
+                        for i, value in enumerate(row):
+                            if i < len(headers):
+                                row_obj[str(headers[i])] = value
+                        json_data.append(row_obj)
+                    return json_data
+                else:
+                    # ヘッダーなし: 2D配列形式
+                    return excel_data["data"]
+            else:
+                # 従来のJSON処理
+                return self.loader.load_from_file(
+                    file_path,
+                    Path(self.env.srcdir),
+                )
         elif self.content:
             return self.loader.parse_inline(self.content)
         else:
@@ -675,3 +810,200 @@ class JsonTableDirective(SphinxDirective):
         error_node = nodes.error()
         error_node += nodes.paragraph(text=message)
         return error_node
+
+    def _resolve_sheet_name(
+        self, file_path: str, sheet_name: str | None, sheet_index: int | None
+    ) -> str | None:
+        """シート名とシートインデックスからシート名を解決。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_name: 指定されたシート名
+            sheet_index: 指定されたシートインデックス
+
+        Returns:
+            str | None: 解決されたシート名(None=デフォルトシート)
+        """
+        if sheet_name:
+            # sheet名が優先
+            return sheet_name
+        elif sheet_index is not None:
+            # sheet-indexからsheet名を取得
+            return self.excel_loader.get_sheet_name_by_index(file_path, sheet_index)
+        else:
+            # デフォルトシート
+            return None
+
+    def _load_excel_with_options(
+        self,
+        file_path: str,
+        sheet_name: str | None,
+        range_spec: str | None,
+        header_row: int | None,
+        skip_rows: str | None,
+        detect_range: str | None,
+        auto_header: bool,
+        merge_cells: str | None = None,
+        merge_headers: str | None = None,
+    ) -> dict[str, Any]:
+        """オプションの組み合わせに応じてExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_name: 解決されたシート名
+            range_spec: 範囲指定
+            header_row: ヘッダー行番号
+            skip_rows: スキップ行指定
+            detect_range: 自動範囲検出モード
+            auto_header: ヘッダー自動判定
+            merge_cells: 結合セル処理モード(expand, ignore, first-value)
+
+        Returns:
+            dict[str, Any]: 読み込み結果
+        """
+        # Detect Range機能を最優先で処理
+        if detect_range:
+            if merge_cells:
+                # Detect Range + Merge Cells(将来実装予定)
+                # 現在は基本のDetect Rangeで処理
+                return self.excel_loader.load_from_excel_with_detect_range(
+                    file_path,
+                    detect_mode=detect_range,
+                    sheet_name=sheet_name,
+                    auto_header=auto_header,
+                )
+            else:
+                return self.excel_loader.load_from_excel_with_detect_range(
+                    file_path,
+                    detect_mode=detect_range,
+                    sheet_name=sheet_name,
+                    auto_header=auto_header,
+                )
+
+        # Skip Rows機能を次に処理
+        if skip_rows:
+            # Skip Rows + その他オプションの組み合わせ
+            if range_spec and header_row is not None:
+                # Skip Rows + 範囲指定 + ヘッダー行指定
+                return (
+                    self.excel_loader.load_from_excel_with_skip_rows_range_and_header(
+                        file_path, skip_rows, range_spec, header_row, sheet_name
+                    )
+                )
+            elif range_spec:
+                # Skip Rows + 範囲指定
+                return self.excel_loader.load_from_excel_with_skip_rows_and_range(
+                    file_path, range_spec, skip_rows, sheet_name
+                )
+            elif header_row is not None:
+                # Skip Rows + ヘッダー行指定
+                return self.excel_loader.load_from_excel_with_skip_rows_and_header(
+                    file_path,
+                    skip_rows=skip_rows,
+                    header_row=header_row,
+                    sheet_name=sheet_name,
+                )
+            else:
+                # Skip Rowsのみ
+                return self.excel_loader.load_from_excel_with_skip_rows(
+                    file_path, skip_rows, sheet_name
+                )
+        else:
+            # 従来の処理(Skip Rowsなし)+ Merge Cells対応
+            if range_spec and header_row is not None:
+                # 範囲指定 + ヘッダー行指定
+                if merge_cells:
+                    # 範囲 + ヘッダー + 結合セル
+                    return self.excel_loader.load_from_excel_with_merge_cells_and_range(
+                        file_path, range_spec, merge_cells, sheet_name
+                    )
+                else:
+                    return self.excel_loader.load_from_excel_with_header_row_and_range(
+                        file_path, header_row, range_spec, sheet_name
+                    )
+            elif range_spec:
+                # 範囲指定のみ
+                if merge_cells:
+                    # 範囲 + 結合セル
+                    return self.excel_loader.load_from_excel_with_merge_cells_and_range(
+                        file_path, range_spec, merge_cells, sheet_name
+                    )
+                else:
+                    return self.excel_loader.load_from_excel_with_range(
+                        file_path, range_spec, sheet_name, header_row
+                    )
+            elif header_row is not None:
+                # ヘッダー行指定のみ
+                if merge_cells:
+                    # ヘッダー + 結合セル
+                    return (
+                        self.excel_loader.load_from_excel_with_merge_cells_and_header(
+                            file_path, header_row, merge_cells, sheet_name
+                        )
+                    )
+                else:
+                    return self.excel_loader.load_from_excel_with_header_row(
+                        file_path, header_row, sheet_name
+                    )
+            else:
+                # 従来の処理(オプション指定なし)
+                if merge_cells:
+                    # 結合セル処理のみ
+                    return self.excel_loader.load_from_excel_with_merge_cells(
+                        file_path, merge_cells, sheet_name, header_row
+                    )
+                else:
+                    return self.excel_loader.load_from_excel(
+                        file_path, sheet_name, header_row
+                    )
+
+    def _load_excel_with_cache(
+        self,
+        file_path: str,
+        sheet_name: str | None,
+        range_spec: str | None,
+        header_row: int | None,
+        skip_rows: str | None,
+        detect_range: str | None,
+        auto_header: bool,
+        merge_cells: str | None,
+        merge_headers: str | None,
+    ) -> dict[str, Any]:
+        """キャッシュ機能を使用してExcelファイルを読み込み。
+
+        Args:
+            file_path: Excelファイルパス
+            sheet_name: 解決されたシート名
+            range_spec: 範囲指定
+            header_row: ヘッダー行番号
+            skip_rows: スキップ行指定
+            detect_range: 自動範囲検出モード
+            auto_header: ヘッダー自動判定
+            merge_cells: 結合セル処理モード
+            merge_headers: 複数ヘッダー結合指定
+
+        Returns:
+            dict[str, Any]: キャッシュされた読み込み結果
+        """
+        if not self.excel_loader:
+            raise JsonTableError("Excel loader not initialized")
+
+        # キャッシュサイズ制限の取得(設定から)
+        max_cache_size = getattr(
+            self.env.config,
+            "jsontable_cache_size_limit",
+            1024 * 1024,  # デフォルト1MB
+        )
+
+        return self.excel_loader.load_from_excel_with_cache(
+            file_path=file_path,
+            sheet_name=sheet_name,
+            header_row=header_row,
+            range_spec=range_spec,
+            skip_rows=skip_rows,
+            detect_range=detect_range,
+            auto_header=auto_header,
+            merge_cells=merge_cells,
+            merge_headers=merge_headers,
+            max_cache_size=max_cache_size,
+        )
