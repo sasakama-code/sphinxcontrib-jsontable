@@ -72,15 +72,18 @@ class TestJsonTableDirectiveAdvanced:
 
     def create_mock_env(self):
         """Mock環境を作成。"""
-        env_file = os.path.join(self.temp_dir, "conf.py")
+        from pathlib import Path
+
+        env_file = str(Path(self.temp_dir) / "conf.py")
         with open(env_file, "w") as f:
             f.write('extensions = ["sphinxcontrib.jsontable"]\\n')
 
     def create_test_json(self, filename: str, data: list) -> str:
         """テスト用JSONファイルを作成。"""
         import json
+        from pathlib import Path
 
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = str(Path(self.temp_dir) / filename)
         with open(file_path, "w") as f:
             json.dump(data, f)
         return file_path
@@ -89,7 +92,9 @@ class TestJsonTableDirectiveAdvanced:
         self, filename: str, data: list, has_header: bool = True
     ) -> str:
         """テスト用Excelファイルを作成。"""
-        file_path = os.path.join(self.temp_dir, filename)
+        from pathlib import Path
+
+        file_path = str(Path(self.temp_dir) / filename)
 
         if has_header:
             df = pd.DataFrame(data[1:], columns=data[0])

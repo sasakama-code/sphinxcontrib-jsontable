@@ -1,6 +1,5 @@
 """Excel Data Loader関連のテスト."""
 
-import os
 import tempfile
 from pathlib import Path
 
@@ -44,7 +43,7 @@ class TestExcelDataLoader:
         Returns:
             str: 作成されたファイルのパス
         """
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = str(Path(self.temp_dir) / filename)
 
         if has_header:
             df = pd.DataFrame(data[1:], columns=data[0])
@@ -57,7 +56,7 @@ class TestExcelDataLoader:
     def test_init(self):
         """初期化のテスト。"""
         loader = ExcelDataLoader("/test/path")
-        assert str(loader.base_path) == "/test/path"
+        assert loader.base_path == Path("/test/path")
 
         loader = ExcelDataLoader()
         assert loader.base_path == Path.cwd()
@@ -65,11 +64,11 @@ class TestExcelDataLoader:
     def test_is_safe_path(self):
         """パス安全性チェックのテスト。"""
         # 安全なパス
-        safe_path = os.path.join(self.temp_dir, "test.xlsx")
+        safe_path = str(Path(self.temp_dir) / "test.xlsx")
         assert self.loader.is_safe_path(safe_path) is True
 
         # 危険なパス (パストラバーサル)
-        dangerous_path = os.path.join(self.temp_dir, "../../../etc/passwd")
+        dangerous_path = str(Path(self.temp_dir) / "../../../etc/passwd")
         assert self.loader.is_safe_path(dangerous_path) is False
 
     def test_validate_excel_file(self):
@@ -84,7 +83,7 @@ class TestExcelDataLoader:
         assert self.loader.validate_excel_file(excel_path) is True
 
         # 不正な拡張子
-        txt_path = os.path.join(self.temp_dir, "test.txt")
+        txt_path = str(Path(self.temp_dir) / "test.txt")
         with open(txt_path, "w") as f:
             f.write("test")
 
@@ -187,7 +186,9 @@ class TestExcelDataLoader:
             self.loader.load_from_excel("../../../etc/passwd")
 
         # 存在しないファイル(絶対パスを使用)
-        nonexistent_path = os.path.join(self.temp_dir, "nonexistent.xlsx")
+        from pathlib import Path
+
+        nonexistent_path = str(Path(self.temp_dir) / "nonexistent.xlsx")
         with pytest.raises(FileNotFoundError):
             self.loader.load_from_excel(nonexistent_path)
 
@@ -195,7 +196,9 @@ class TestExcelDataLoader:
         """空のExcelファイルのテスト。"""
         # 空のDataFrameを作成
         df_empty = pd.DataFrame()
-        empty_path = os.path.join(self.temp_dir, "empty.xlsx")
+        from pathlib import Path
+
+        empty_path = str(Path(self.temp_dir) / "empty.xlsx")
         df_empty.to_excel(empty_path, index=False)
 
         with pytest.raises(ValueError, match="Empty data"):

@@ -121,12 +121,16 @@ class TestExcelDataLoaderErrors:
         nonexistent_dir = "/nonexistent/directory/path"
         loader = ExcelDataLoader(nonexistent_dir)
         # 初期化は成功するが、パスは設定される
-        assert str(loader.base_path) == nonexistent_dir
+        from pathlib import Path
+
+        assert loader.base_path == Path(nonexistent_dir)
 
     def test_path_validation_methods(self):
         """パス検証メソッドのテスト。"""
         # 正常なパス
-        safe_path = os.path.join(self.temp_dir, "test.xlsx")
+        from pathlib import Path
+
+        safe_path = str(Path(self.temp_dir) / "test.xlsx")
         assert self.loader.is_safe_path(safe_path) is True
 
         # パストラバーサル攻撃のテスト
@@ -143,14 +147,18 @@ class TestExcelDataLoaderErrors:
     def test_file_validation_errors(self):
         """ファイル検証エラーのテスト。"""
         # 存在しないファイル
-        nonexistent_file = os.path.join(self.temp_dir, "nonexistent.xlsx")
+        from pathlib import Path
+
+        nonexistent_file = str(Path(self.temp_dir) / "nonexistent.xlsx")
         with pytest.raises(FileNotFoundError):
             self.loader.validate_excel_file(nonexistent_file)
 
         # 不正な拡張子
         invalid_extensions = [".txt", ".csv", ".json", ".pdf", ".exe"]
         for ext in invalid_extensions:
-            invalid_file = os.path.join(self.temp_dir, f"test{ext}")
+            from pathlib import Path
+
+            invalid_file = str(Path(self.temp_dir) / f"test{ext}")
             with open(invalid_file, "w") as f:
                 f.write("test content")
 

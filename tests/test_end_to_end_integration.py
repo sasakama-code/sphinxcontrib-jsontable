@@ -109,7 +109,7 @@ jsontable_max_rows = 10000
             # ビルド成功の確認
             index_html = self.build_dir / "index.html"
             if index_html.exists():
-                return True, index_html.read_text()
+                return True, index_html.read_text(encoding="utf-8")
             else:
                 return False, "HTML file not generated"
 
