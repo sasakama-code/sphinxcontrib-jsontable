@@ -1497,7 +1497,7 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            *args: 位置引数（後方互換性用）
+            *args: 位置引数(後方互換性用)
             skip_rows: Skip Rows指定(例: "0,1,2", "0-2,5")
             header_row: ヘッダー行番号
             range_spec: 範囲指定(例: "A1:C3")
@@ -1506,9 +1506,9 @@ class ExcelDataLoader:
         Returns:
             dict[str, Any]: 変換されたJSONデータ
         """
-        # 引数の処理（位置引数とキーワード引数の両方をサポート）
+        # 引数の処理(位置引数とキーワード引数の両方をサポート)
         if args:
-            # 位置引数での呼び出し（後方互換性）
+            # 位置引数での呼び出し(後方互換性)
             if len(args) == 3:
                 # 4引数パターン: file_path, range_spec, skip_rows, header_row
                 range_spec_arg, skip_rows_arg, header_row_arg = args
@@ -2315,7 +2315,7 @@ class ExcelDataLoader:
             range_info = self._parse_range_specification(range_spec)
             return self._extract_range_data(data, range_info)
         except ValueError:
-            # ValueError（無効な範囲指定）は再発生させる
+            # ValueError(無効な範囲指定)は再発生させる
             raise
         except Exception:
             # その他の例外の場合は全データを返す
@@ -4760,7 +4760,7 @@ class ExcelDataLoader:
         return False
 
     def _detect_header_row(self, data) -> int:
-        """ヘッダー行検出（テスト互換性のため）"""
+        """ヘッダー行検出(テスト互換性のため)"""
         # リストの場合はDataFrameに変換
         if isinstance(data, list):
             if not data:
@@ -4815,7 +4815,7 @@ class ExcelDataLoader:
 
         Args:
             data: データリスト
-            header_row: ヘッダー行のインデックス（0ベース）
+            header_row: ヘッダー行のインデックス(0ベース)
 
         Returns:
             list[str]: ヘッダーリスト
@@ -4899,20 +4899,20 @@ class ExcelDataLoader:
         return row_num, col_num
 
     def _validate_excel_file(self, file_path: str) -> bool:
-        """Excelファイルの妥当性を検証（テスト互換性のため）"""
+        """Excelファイルの妥当性を検証(テスト互換性のため)"""
         return self.validate_excel_file(file_path)
 
     def _detect_manual_range(
         self, data: list[list[str]], sheet_name: str | None = None
     ) -> str:
-        """手動範囲検出機能（ユーザー入力シミュレーション）。
+        """手動範囲検出機能(ユーザー入力シミュレーション)。
 
         Args:
             data: Excelデータ
             sheet_name: シート名
 
         Returns:
-            str: 検出された範囲（例："A1:C3"）
+            str: 検出された範囲(例:"A1:C3")
         """
         if not data:
             return "A1:A1"
@@ -4932,8 +4932,8 @@ class ExcelDataLoader:
 
         Args:
             data: Excelデータ
-            start_row: 開始行（0ベース）
-            end_row: 終了行（0ベース、含む）
+            start_row: 開始行(0ベース)
+            end_row: 終了行(0ベース、含む)
 
         Returns:
             tuple[int, int]: (最小列番号, 最大列番号) 0ベース
@@ -4966,7 +4966,7 @@ class ExcelDataLoader:
 
         return int(min_col), max_col
 
-    def load_from_excel_with_merge_cells(
+    def load_from_excel_with_merge_cells(  # noqa: F811
         self,
         file_path: str,
         merge_mode: str = "expand",
@@ -4977,7 +4977,7 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            merge_mode: 結合セルモード（"expand", "ignore", "first-value"）
+            merge_mode: 結合セルモード("expand", "ignore", "first-value")
             sheet_name: シート名
             header_row: ヘッダー行番号
 
@@ -4993,7 +4993,7 @@ class ExcelDataLoader:
                 f"Invalid merge mode: {merge_mode}. Valid modes: {valid_modes}"
             )
 
-        # 基本データの読み込み（ヘッダー行指定を渡す）
+        # 基本データの読み込み(ヘッダー行指定を渡す)
         base_result = self.load_from_excel(file_path, sheet_name, header_row)
 
         # 結合セル検出
@@ -5035,7 +5035,7 @@ class ExcelDataLoader:
             "sheet_name": base_result["sheet_name"],
         }
 
-    def detect_merged_cells(
+    def detect_merged_cells(  # noqa: F811
         self, file_path: str, sheet_name: str | None = None
     ) -> dict[str, Any]:
         """Excelファイルの結合セルを検出。
@@ -5066,7 +5066,7 @@ class ExcelDataLoader:
                 )  # 0ベースに変換
                 end_cell = merged_range.max_row - 1, merged_range.max_col - 1
 
-                # 結合セルの値を取得（左上セルの値）
+                # 結合セルの値を取得(左上セルの値)
                 cell_value = ws.cell(merged_range.min_row, merged_range.min_col).value
 
                 merged_ranges.append(
@@ -5144,7 +5144,7 @@ class ExcelDataLoader:
             start_row, end_row = merge_range["min_row"], merge_range["max_row"]
             start_col, end_col = merge_range["min_col"], merge_range["max_col"]
 
-            # 結合セルの値を取得（最初のセルから）
+            # 結合セルの値を取得(最初のセルから)
             if start_row < len(processed_data) and start_col < len(
                 processed_data[start_row]
             ):
@@ -5170,7 +5170,7 @@ class ExcelDataLoader:
 
         return processed_data
 
-    def load_from_excel_with_merge_cells_and_range(
+    def load_from_excel_with_merge_cells_and_range(  # noqa: F811
         self,
         file_path: str,
         range_spec: str,
@@ -5182,7 +5182,7 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            range_spec: 範囲指定(例："A1:C3")
+            range_spec: 範囲指定(例:"A1:C3")
             merge_mode: 結合セルモード
             sheet_name: シート名
             header_row: ヘッダー行番号
@@ -5195,7 +5195,7 @@ class ExcelDataLoader:
         # 基本的な範囲読み込み
         base_result = self.load_from_excel_with_range(file_path, range_spec, sheet_name)
 
-        # 結合セル検出（範囲内のみ）
+        # 結合セル検出(範囲内のみ)
         merge_info = self.detect_merged_cells(file_path, sheet_name)
 
         # 範囲内の結合セルをフィルタリング
@@ -5267,7 +5267,7 @@ class ExcelDataLoader:
         except Exception:
             return []
 
-    def load_from_excel_with_merge_cells_and_header(
+    def load_from_excel_with_merge_cells_and_header(  # noqa: F811
         self,
         file_path: str,
         header_row: int,
@@ -5278,7 +5278,7 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            header_row: ヘッダー行番号（0ベース）
+            header_row: ヘッダー行番号(0ベース)
             merge_mode: 結合セルモード
             sheet_name: シート名
 
@@ -5291,7 +5291,7 @@ class ExcelDataLoader:
         result["header_row"] = header_row
         return result
 
-    def load_from_excel_with_multiple_headers(
+    def load_from_excel_with_multiple_headers(  # noqa: F811
         self,
         file_path: str,
         header_rows: int,
@@ -5313,7 +5313,7 @@ class ExcelDataLoader:
         if header_rows <= 0:
             raise ValueError("header_rows must be positive")
 
-        # 基本データの読み込み（ヘッダーなしで全行取得）
+        # 基本データの読み込み(ヘッダーなしで全行取得)
         base_result = self.load_from_excel(file_path, sheet_name, header_row=-1)
 
         # ヘッダー行数が利用可能行数を超えていないかチェック
@@ -5404,7 +5404,7 @@ class ExcelDataLoader:
         normalized = re.sub(r"/", "_", normalized)
         # 括弧とその内容を除去・置換
         normalized = re.sub(r"\([^\)]*\)", "", normalized)
-        normalized = re.sub(r"（[^）]*）", "", normalized)
+        normalized = re.sub(r"([^)]*)", "", normalized)
         # パーセント記号を除去
         normalized = re.sub(r"%", "", normalized)
         # 連続する"_"を単一にする
@@ -5414,7 +5414,7 @@ class ExcelDataLoader:
 
         return normalized
 
-    def load_from_excel_with_multiple_headers_and_range(
+    def load_from_excel_with_multiple_headers_and_range(  # noqa: F811
         self,
         file_path: str,
         range_spec: str,
@@ -5466,7 +5466,7 @@ class ExcelDataLoader:
 
         return result
 
-    def load_from_excel_with_cache(
+    def load_from_excel_with_cache(  # noqa: F811
         self,
         file_path: str,
         sheet_name: str | None = None,
@@ -5608,7 +5608,7 @@ class ExcelDataLoader:
 
         return os.path.join(cache_dir, cache_filename)
 
-    def clear_cache(self, file_path: str) -> None:
+    def clear_cache(self, file_path: str) -> None:  # noqa: F811
         """指定されたファイルのキャッシュをクリア。
 
         Args:
@@ -5624,10 +5624,8 @@ class ExcelDataLoader:
         for cache_file in os.listdir(cache_dir):
             if cache_file.startswith(excel_basename) and cache_file.endswith(".json"):
                 cache_path = os.path.join(cache_dir, cache_file)
-                try:
+                with contextlib.suppress(OSError):
                     os.remove(cache_path)
-                except OSError:
-                    pass
 
     def load_from_excel_with_range_and_header_row(
         self,
@@ -5640,8 +5638,8 @@ class ExcelDataLoader:
 
         Args:
             file_path: Excelファイルパス
-            range_spec: 範囲指定（例："A1:C3"）
-            header_row: ヘッダー行番号（0ベース）
+            range_spec: 範囲指定(例:"A1:C3")
+            header_row: ヘッダー行番号(0ベース)
             sheet_name: シート名
 
         Returns:

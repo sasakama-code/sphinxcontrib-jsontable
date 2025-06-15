@@ -253,7 +253,7 @@ class TestExcelDataLoaderRangeSkip:
             "0-9",  # 最初の10行をスキップ
         )
         assert isinstance(skip_result, dict)
-        assert len(skip_result["data"]) == 90  # 100行 - 10行 = 90行（ヘッダー除く）
+        assert len(skip_result["data"]) == 90  # 100行 - 10行 = 90行(ヘッダー除く)
 
     def test_range_validation_methods(self):
         """範囲検証メソッドのテスト。"""

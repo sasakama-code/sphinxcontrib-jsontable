@@ -171,7 +171,19 @@ class TestDetectColumnBounds:
         assert max_col == 4
 
     def test_detect_column_bounds_invalid_range(self):
-        """無効な範囲指定でのテスト."""
+        """指定行範囲内での列境界を検出。
+
+        Args:
+            data: Excelデータ
+            start_row: 開始行(0ベース)
+            end_row: 終了行(0ベース、含む)
+
+        Returns:
+            tuple[int, int]: (最小列番号, 最大列番号) 0ベース
+
+        Note:
+            無効な行範囲やデータが存在しない場合は (0, 0) を返す。
+        """
         data = [["A", "B"], ["C", "D"]]
 
         # start_row > end_rowの場合

@@ -343,10 +343,10 @@ class TestMergedCells:
         # 現在の実装では結合セルの展開ができていないので、
         # 結合セル処理の実装完了まで期待値を現実に合わせる
         expected_data = [
-            ["部門", "担当者情報", "", "売上"],  # Row 3（結合セル展開未実装）
-            ["営業部", "田中太郎", "", "1000000"],  # Row 4（結合セル展開未実装）
-            ["開発部", "佐藤花子", "", "800000"],  # Row 5（結合セル展開未実装）
-            ["総務部", "山田", "太郎", "500000"],  # Row 6（結合なし）
+            ["部門", "担当者情報", "", "売上"],  # Row 3(結合セル展開未実装)
+            ["営業部", "田中太郎", "", "1000000"],  # Row 4(結合セル展開未実装)
+            ["開発部", "佐藤花子", "", "800000"],  # Row 5(結合セル展開未実装)
+            ["総務部", "山田", "太郎", "500000"],  # Row 6(結合なし)
         ]
 
         assert result["data"] == expected_data
@@ -364,7 +364,7 @@ class TestMergedCells:
             merge_mode="expand",  # 0ベースで3行目
         )
 
-        # 期待される結果: 現在の実装に合わせる（実際に返される値）
+        # 期待される結果: 現在の実装に合わせる(実際に返される値)
         expected_headers = ["総務部", "山田", "山田", "500000"]
 
         assert result["headers"] == expected_headers
@@ -431,7 +431,7 @@ class TestMergedCells:
 
             json_data = directive._load_json_data()
 
-            # 現在の実装に合わせた確認（結合セル展開は未実装）
+            # 現在の実装に合わせた確認(結合セル展開は未実装)
             assert len(json_data) >= 1  # 最低1行のデータがある
             # 実際の構造に基づく確認
             if json_data:
@@ -469,7 +469,7 @@ class TestMergedCells:
 
         wb.save(file_path)
 
-        # 結合セル処理を適用（ヘッダー行なしで明示的に指定）
+        # 結合セル処理を適用(ヘッダー行なしで明示的に指定)
         result = self.loader.load_from_excel_with_merge_cells(
             file_path, merge_mode="expand", header_row=-1
         )

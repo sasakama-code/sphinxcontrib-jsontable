@@ -81,7 +81,7 @@ class TestPerformanceOptimization:
         assert result["streaming"]
         assert result["chunk_size"] == 1000
         assert result["total_rows"] == 5001  # ヘッダー行含む総行数
-        assert len(result["data"]) == 5000  # データ行のみ（ヘッダー行は除く）
+        assert len(result["data"]) == 5000  # データ行のみ(ヘッダー行は除く)
         assert len(result["headers"]) == 7  # 7列のヘッダー
         assert result["has_header"]
 
