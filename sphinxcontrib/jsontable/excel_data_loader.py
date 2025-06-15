@@ -3258,8 +3258,8 @@ class ExcelDataLoader:
         import re
 
         # 日本語括弧パターン「売上高(千円)」→「売上高_千円」
-        # 全角括弧
-        text = re.sub(r"(([^)]+))", r"_\1", text)
+        # 全角括弧(修正)
+        text = re.sub(r"\uff08([^\uff09]+)\uff09", r"_\1", text)
         # 半角括弧
         text = re.sub(r"\(([^)]+)\)", r"_\1", text)
 
@@ -5402,9 +5402,10 @@ class ExcelDataLoader:
         # 特殊文字を置換
         # スラッシュを"_"に置換
         normalized = re.sub(r"/", "_", normalized)
-        # 括弧とその内容を除去・置換
+        # 括弧とその内容を除去・置換(半角括弧のみ)
         normalized = re.sub(r"\([^\)]*\)", "", normalized)
-        normalized = re.sub(r"([^)]*)", "", normalized)
+        # 全角括弧とその内容を除去・置換(修正)
+        normalized = re.sub(r"\uff08([^\uff09]*)\uff09", "", normalized)
         # パーセント記号を除去
         normalized = re.sub(r"%", "", normalized)
         # 連続する"_"を単一にする
