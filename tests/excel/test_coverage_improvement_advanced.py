@@ -130,7 +130,8 @@ class TestAdvancedCoverageImprovement:
 
         assert "data" in result
         assert "merged_cells_info" in result
-        assert result["merged_cells_info"]["has_merged_cells"] is True
+        assert "has_merged_cells" in result
+        assert result["has_merged_cells"] is True
 
     def test_load_from_excel_with_multiple_headers(self):
         """複数ヘッダー機能テスト."""
