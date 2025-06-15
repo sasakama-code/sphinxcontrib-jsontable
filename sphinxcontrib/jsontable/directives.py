@@ -898,7 +898,10 @@ class JsonTableDirective(SphinxDirective):
             elif header_row is not None:
                 # Skip Rows + ヘッダー行指定
                 return self.excel_loader.load_from_excel_with_skip_rows_and_header(
-                    file_path, skip_rows, header_row, sheet_name
+                    file_path,
+                    skip_rows=skip_rows,
+                    header_row=header_row,
+                    sheet_name=sheet_name,
                 )
             else:
                 # Skip Rowsのみ

@@ -302,7 +302,10 @@ class TestMergedCellsWithRange:
                 "headers": [],
             }
 
-            mock_detect.return_value = {"merged_cells": [{"range": "A1:B1"}]}
+            mock_detect.return_value = {
+                "has_merged_cells": True,
+                "merged_ranges": [{"range": "A1:B1"}],
+            }
             mock_filter.return_value = [{"range": "A1:B1"}]
             mock_process.return_value = [["A1", "A1"], ["A2", "B2"]]
 
@@ -338,7 +341,7 @@ class TestMergedCellsWithRange:
                 "headers": ["Header1", "Header2"],
             }
 
-            mock_detect.return_value = {"merged_cells": []}
+            mock_detect.return_value = {"has_merged_cells": False, "merged_ranges": []}
             mock_filter.return_value = []
             mock_process.return_value = [["Header1", "Header2"], ["Data1", ""]]
 

@@ -1487,37 +1487,54 @@ class ExcelDataLoader:
     def load_from_excel_with_skip_rows_and_header(
         self,
         file_path: str,
-        range_spec_or_skip_rows: str,
-        skip_rows_or_header_row: str | int,
+        *args,
+        skip_rows: str | None = None,
         header_row: int | None = None,
+        range_spec: str | None = None,
         sheet_name: str | None = None,
     ) -> dict[str, Any]:
         """Skip Rowsとヘッダー行指定の組み合わせでExcelファイルを読み込み。
 
         Args:
             file_path: Excelファイルパス
-            range_spec_or_skip_rows: 範囲指定またはSkip Rows指定
-            skip_rows_or_header_row: Skip Rowsまたはヘッダー行番号
-            header_row: ヘッダー行番号(4引数の場合)
+            *args: 位置引数（後方互換性用）
+            skip_rows: Skip Rows指定(例: "0,1,2", "0-2,5")
+            header_row: ヘッダー行番号
+            range_spec: 範囲指定(例: "A1:C3")
             sheet_name: 読み込むシート名(None=自動検出)
 
         Returns:
             dict[str, Any]: 変換されたJSONデータ
         """
-        # 引数パターンの判定
-        if header_row is not None:
-            # 4引数パターン: range_spec, skip_rows, header_row, [sheet_name]
-            range_spec = range_spec_or_skip_rows
-            skip_rows = skip_rows_or_header_row
-            header_row_val = header_row
-            # 範囲指定付きのメソッドを呼び出し
-            return self.load_from_excel_with_skip_rows_range_and_header(
-                file_path, skip_rows, range_spec, header_row_val, sheet_name
-            )
+        # 引数の処理（位置引数とキーワード引数の両方をサポート）
+        if args:
+            # 位置引数での呼び出し（後方互換性）
+            if len(args) == 3:
+                # 4引数パターン: file_path, range_spec, skip_rows, header_row
+                range_spec_arg, skip_rows_arg, header_row_arg = args
+                # 範囲指定付きのメソッドを呼び出し
+                return self.load_from_excel_with_skip_rows_range_and_header(
+                    file_path, skip_rows_arg, range_spec_arg, header_row_arg, sheet_name
+                )
+            elif len(args) == 2:
+                # 3引数パターン: file_path, skip_rows, header_row
+                skip_rows, header_row_val = args
+            else:
+                raise ValueError(f"Invalid number of positional arguments: {len(args)}")
         else:
-            # 3引数パターン: skip_rows, header_row, [sheet_name]
-            skip_rows = range_spec_or_skip_rows
-            header_row_val = skip_rows_or_header_row
+            # キーワード引数での呼び出し
+            if skip_rows is None:
+                raise ValueError("skip_rows parameter is required")
+            if header_row is None:
+                raise ValueError("header_row parameter is required")
+
+            header_row_val = header_row
+
+            # 範囲指定がある場合は範囲指定付きメソッドを呼び出し
+            if range_spec is not None:
+                return self.load_from_excel_with_skip_rows_range_and_header(
+                    file_path, skip_rows, range_spec, header_row_val, sheet_name
+                )
 
         # 事前検証
         self._validate_skip_rows_specification(skip_rows)
@@ -3853,15 +3870,21 @@ class ExcelDataLoader:
         Returns:
             dict: ストリーミング読み込み結果
         """
-        # 最小実装: 基本の読み込みを使用
-        result = self.load_from_excel(file_path, sheet_name)
+        # 最小実装: ヘッダー行ありで読み込み
+        result = self.load_from_excel_with_header_row(
+            file_path, header_row=0, sheet_name=sheet_name
+        )
 
         # ストリーミング用の追加情報
+        total_rows = len(result["data"]) if result["data"] else 0
+        if result.get("has_header", False):
+            total_rows += 1  # ヘッダー行を含む総行数
+
         result.update(
             {
                 "streaming": True,
                 "chunk_size": chunk_size,
-                "total_rows": len(result["data"]) if result["data"] else 0,
+                "total_rows": total_rows,
             }
         )
         return result
@@ -5605,3 +5628,50 @@ class ExcelDataLoader:
                     os.remove(cache_path)
                 except OSError:
                     pass
+
+    def load_from_excel_with_range_and_header_row(
+        self,
+        file_path: str,
+        range_spec: str,
+        header_row: int,
+        sheet_name: str | None = None,
+    ) -> dict[str, Any]:
+        """範囲指定とヘッダー行指定の組み合わせ。
+
+        Args:
+            file_path: Excelファイルパス
+            range_spec: 範囲指定（例："A1:C3"）
+            header_row: ヘッダー行番号（0ベース）
+            sheet_name: シート名
+
+        Returns:
+            dict[str, Any]: 読み込み結果
+        """
+        # まず範囲指定で読み込み
+        range_result = self.load_from_excel_with_range(
+            file_path, range_spec, sheet_name
+        )
+
+        # 範囲内でのヘッダー行処理
+        if header_row < len(range_result["data"]):
+            headers = range_result["data"][header_row]
+            data_rows = range_result["data"][header_row + 1 :]
+
+            # ヘッダー正規化
+            normalized_headers = self._normalize_header_names(headers)
+
+            result = range_result.copy()
+            result.update(
+                {
+                    "headers": normalized_headers,
+                    "data": data_rows,
+                    "has_header": True,
+                    "header_row": header_row,
+                }
+            )
+            return result
+        else:
+            # ヘッダー行が範囲外の場合
+            range_result["has_header"] = False
+            range_result["headers"] = []
+            return range_result

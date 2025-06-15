@@ -150,15 +150,12 @@ class TestExcelDataLoaderRangeSkip:
         ]
         excel_path = self.create_test_excel("header_spec.xlsx", test_data, False)
 
-        try:
-            # 1行目をヘッダーとして指定
-            result = self.loader.load_from_excel_with_header_row(excel_path, 1)
-            assert isinstance(result, dict)
-            assert result["has_header"] is True
-            assert result["headers"] == ["Name", "Age", "City"]
-            assert len(result["data"]) == 2
-        except Exception as e:
-            pytest.skip(f"Header row specification not implemented: {e}")
+        # 1行目をヘッダーとして指定
+        result = self.loader.load_from_excel_with_header_row(excel_path, 1)
+        assert isinstance(result, dict)
+        assert result["has_header"] is True
+        assert result["headers"] == ["name", "age", "city"]  # ヘッダー正規化済み
+        assert len(result["data"]) == 2
 
     def test_range_with_header_row(self):
         """範囲指定とヘッダー行指定の組み合わせテスト。"""
@@ -171,16 +168,13 @@ class TestExcelDataLoaderRangeSkip:
         ]
         excel_path = self.create_test_excel("range_header.xlsx", test_data, False)
 
-        try:
-            # B1:D4の範囲でヘッダー行1を指定
-            result = self.loader.load_from_excel_with_range_and_header_row(
-                excel_path, range_spec="B1:D4", header_row=1
-            )
-            assert isinstance(result, dict)
-            assert result["has_header"] is True
-            assert result["headers"] == ["Age", "City", "Score"]
-        except Exception as e:
-            pytest.skip(f"Range with header row not implemented: {e}")
+        # B1:D4の範囲でヘッダー行1を指定
+        result = self.loader.load_from_excel_with_range_and_header_row(
+            excel_path, range_spec="B1:D4", header_row=1
+        )
+        assert isinstance(result, dict)
+        assert result["has_header"] is True
+        assert result["headers"] == ["age", "city", "score"]  # ヘッダー正規化済み
 
     def test_skip_rows_with_header_row(self):
         """Skip Rowsとヘッダー行指定の組み合わせテスト。"""
@@ -193,17 +187,14 @@ class TestExcelDataLoaderRangeSkip:
         ]
         excel_path = self.create_test_excel("skip_header.xlsx", test_data, False)
 
-        try:
-            # コメント行(0,3)をスキップ、1行目をヘッダーとして指定
-            result = self.loader.load_from_excel_with_skip_rows_and_header(
-                excel_path, skip_rows="0,3", header_row=1
-            )
-            assert isinstance(result, dict)
-            assert result["has_header"] is True
-            assert result["headers"] == ["Name", "Age", "City"]
-            assert len(result["data"]) == 2
-        except Exception as e:
-            pytest.skip(f"Skip rows with header row not implemented: {e}")
+        # コメント行(0,3)をスキップ、1行目をヘッダーとして指定
+        result = self.loader.load_from_excel_with_skip_rows_and_header(
+            excel_path, skip_rows="0,3", header_row=1
+        )
+        assert isinstance(result, dict)
+        assert result["has_header"] is True
+        assert result["headers"] == ["name", "age", "city"]  # ヘッダー正規化済み
+        assert len(result["data"]) == 2
 
     def test_error_handling_range_specification(self):
         """範囲指定のエラーハンドリングテスト。"""
@@ -245,27 +236,24 @@ class TestExcelDataLoaderRangeSkip:
         """大きなデータセットの処理テスト。"""
         excel_path = self.create_large_test_excel()
 
-        try:
-            # 大きなファイルの読み込み
-            result = self.loader.load_from_excel(excel_path)
-            assert isinstance(result, dict)
-            assert result["rows"] == 100
-            assert result["columns"] == 4
+        # 大きなファイルの読み込み
+        result = self.loader.load_from_excel(excel_path)
+        assert isinstance(result, dict)
+        assert result["rows"] == 100
+        assert result["columns"] == 4
 
-            # 範囲指定での読み込み
-            range_result = self.loader.load_from_excel_with_range(excel_path, "A1:C50")
-            assert isinstance(range_result, dict)
-            assert len(range_result["data"]) == 50
+        # 範囲指定での読み込み
+        range_result = self.loader.load_from_excel_with_range(excel_path, "A1:C50")
+        assert isinstance(range_result, dict)
+        assert len(range_result["data"]) == 50
 
-            # Skip Rowsでの読み込み
-            skip_result = self.loader.load_from_excel_with_skip_rows(
-                excel_path,
-                "0-9",  # 最初の10行をスキップ
-            )
-            assert isinstance(skip_result, dict)
-            assert len(skip_result["data"]) == 91  # 100行 - 10行 + 1行(ヘッダー)
-        except Exception as e:
-            pytest.skip(f"Large dataset handling not implemented: {e}")
+        # Skip Rowsでの読み込み
+        skip_result = self.loader.load_from_excel_with_skip_rows(
+            excel_path,
+            "0-9",  # 最初の10行をスキップ
+        )
+        assert isinstance(skip_result, dict)
+        assert len(skip_result["data"]) == 90  # 100行 - 10行 = 90行（ヘッダー除く）
 
     def test_range_validation_methods(self):
         """範囲検証メソッドのテスト。"""

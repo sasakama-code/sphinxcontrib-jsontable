@@ -155,13 +155,16 @@ class TestJSONCache:
         # 同じオプションでキャッシュヒット
         result2 = self.loader.load_from_excel_with_cache(excel_path, header_row=0)
 
-        # 異なるオプションで別キャッシュ
-        result3 = self.loader.load_from_excel_with_cache(excel_path, header_row=None)
+        # 異なるオプションで別キャッシュ (header_row=-1でヘッダーなし)
+        result3 = self.loader.load_from_excel_with_cache(excel_path, header_row=-1)
 
         assert result2["cache_hit"]
         assert not result3["cache_hit"]  # 別オプションなのでキャッシュミス
         assert result1["headers"] == result2["headers"]
+
+        # ヘッダーありとヘッダーなしで異なる結果になることを確認
         assert result1["headers"] != result3.get("headers", [])
+        assert result3.get("headers", []) == []  # ヘッダーなしの場合は空配列
 
     def test_cache_file_path_generation(self):
         """キャッシュファイルパス生成テスト(未実装なので失敗する)."""
