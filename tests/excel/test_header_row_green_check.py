@@ -90,13 +90,13 @@ def test_basic_header_row_validation():
         # 無効なヘッダー行の検証
         try:
             loader._validate_header_row(-1)
-            assert False, "Negative header row should raise ValueError"
+            raise AssertionError("Negative header row should raise ValueError")
         except ValueError:
             pass  # 期待されるエラー
 
         try:
             loader._validate_header_row("invalid")
-            assert False, "String header row should raise TypeError"
+            raise AssertionError("String header row should raise TypeError")
         except TypeError:
             pass  # 期待されるエラー
 

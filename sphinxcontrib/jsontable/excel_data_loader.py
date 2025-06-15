@@ -342,7 +342,6 @@ class ExcelDataLoader:
             ValueError: 危険な外部リンクが検出された場合（strictモード）
         """
         try:
-
             from openpyxl import load_workbook
 
             workbook = load_workbook(file_path, read_only=True, data_only=False)

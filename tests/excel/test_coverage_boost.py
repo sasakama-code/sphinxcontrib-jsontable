@@ -245,7 +245,6 @@ class TestCoverageBoosting:
         # 空のExcelファイル
         file_path = os.path.join(self.temp_dir, "empty_test.xlsx")
         wb = Workbook()
-        ws = wb.active
         # データを追加しない
         wb.save(file_path)
 
@@ -305,6 +304,7 @@ class TestCoverageBoosting:
 
         # 大量データの処理をシミュレート
         result = self.loader.load_from_excel(excel_path)
+        assert isinstance(result, dict)  # resultを使用
 
         # メモリ使用量の確認（存在する場合）
         if hasattr(self.loader, "get_memory_usage"):
