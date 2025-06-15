@@ -364,8 +364,8 @@ class TestMergedCells:
             merge_mode="expand",  # 0ベースで3行目
         )
 
-        # 期待される結果: 現在の実装に合わせる(実際に返される値)
-        expected_headers = ["総務部", "山田", "山田", "500000"]
+        # 期待される結果: header_row=2 (0ベース、つまり3行目のヘッダー)
+        expected_headers = ["部門", "担当者情報", "担当者情報", "売上"]
 
         assert result["headers"] == expected_headers
         assert len(result["data"]) >= 1  # 最低1行のデータがあることを確認

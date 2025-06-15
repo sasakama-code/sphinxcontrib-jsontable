@@ -58,9 +58,7 @@ class TestEdgeCaseCoverageImprovement:
         import numpy as np
 
         # 約10MB程度のデータを作成
-        large_data = {
-            f"column_{i}": np.random.random(50000) for i in range(20)
-        }
+        large_data = {f"column_{i}": np.random.random(50000) for i in range(20)}
         df = pd.DataFrame(large_data)
         df.to_excel(file_path, index=False)
 
@@ -69,14 +67,14 @@ class TestEdgeCaseCoverageImprovement:
     def test_file_path_resolution_error_handling(self):
         """ファイルパス解決エラーハンドリングテスト(行217-218)."""
         # 無効なパスでOSErrorを発生させる
-        with patch('pathlib.Path.resolve') as mock_resolve:
+        with patch("pathlib.Path.resolve") as mock_resolve:
             mock_resolve.side_effect = OSError("Path resolution failed")
 
             result = self.loader.is_safe_path("invalid_path")
             assert result is False
 
         # ValueError を発生させる
-        with patch('pathlib.Path.resolve') as mock_resolve:
+        with patch("pathlib.Path.resolve") as mock_resolve:
             mock_resolve.side_effect = ValueError("Invalid path format")
 
             result = self.loader.is_safe_path("invalid_path")
@@ -87,7 +85,7 @@ class TestEdgeCaseCoverageImprovement:
         test_file = self.create_test_excel("test.xlsx")
 
         # ファイルサイズを超過させるモック
-        with patch('pathlib.Path.stat') as mock_stat:
+        with patch("pathlib.Path.stat") as mock_stat:
             mock_stat_result = Mock()
             mock_stat_result.st_size = self.loader.MAX_FILE_SIZE + 1
             mock_stat.return_value = mock_stat_result
@@ -99,7 +97,7 @@ class TestEdgeCaseCoverageImprovement:
         """空のシート名リスト処理テスト(行275付近)."""
         test_file = self.create_test_excel("test.xlsx")
 
-        with patch('pandas.ExcelFile') as mock_excel_file:
+        with patch("pandas.ExcelFile") as mock_excel_file:
             mock_instance = Mock()
             mock_instance.sheet_names = []  # 空のシート名リスト
             mock_excel_file.return_value = mock_instance
@@ -112,7 +110,7 @@ class TestEdgeCaseCoverageImprovement:
         test_file = self.create_test_excel("test.xlsx")
 
         # pd.read_excelでエラーを発生させる
-        with patch('pandas.read_excel') as mock_read_excel:
+        with patch("pandas.read_excel") as mock_read_excel:
             mock_read_excel.side_effect = ValueError("Failed to read Excel file")
 
             with pytest.raises(ValueError):
@@ -137,11 +135,11 @@ class TestEdgeCaseCoverageImprovement:
         test_file = self.create_test_excel("merged.xlsx")
 
         # 結合セル情報が空の場合
-        with patch.object(self.loader, 'detect_merged_cells') as mock_detect:
+        with patch.object(self.loader, "detect_merged_cells") as mock_detect:
             mock_detect.return_value = {
                 "has_merged_cells": False,
                 "merged_ranges": [],
-                "merged_count": 0
+                "merged_count": 0,
             }
 
             result = self.loader.load_from_excel_with_merge_cells(
@@ -181,14 +179,16 @@ class TestEdgeCaseCoverageImprovement:
         test_file = self.create_test_excel("types.xlsx")
 
         # 特殊なデータ型を含むExcelファイルをモック
-        with patch('pandas.read_excel') as mock_read_excel:
+        with patch("pandas.read_excel") as mock_read_excel:
             import numpy as np
 
-            mock_df = pd.DataFrame({
-                'mixed_col': [1, 'text', None, np.nan, True, 0.5],
-                'date_col': pd.date_range('2023-01-01', periods=6),
-                'numeric_col': [1, 2, 3, 4, 5, 6]
-            })
+            mock_df = pd.DataFrame(
+                {
+                    "mixed_col": [1, "text", None, np.nan, True, 0.5],
+                    "date_col": pd.date_range("2023-01-01", periods=6),
+                    "numeric_col": [1, 2, 3, 4, 5, 6],
+                }
+            )
             mock_read_excel.return_value = mock_df
 
             result = self.loader.load_from_excel(test_file)
@@ -213,7 +213,7 @@ class TestEdgeCaseCoverageImprovement:
         test_file = self.create_test_excel("perf_test.xlsx")
 
         # メモリ使用量が取得できない場合のモック
-        with patch('psutil.Process') as mock_process:
+        with patch("psutil.Process") as mock_process:
             mock_process.side_effect = ImportError("psutil not available")
 
             # psutilが利用できない環境でも動作することを確認
@@ -246,14 +246,13 @@ class TestEdgeCaseCoverageImprovement:
 
         # 無効なskip_rows指定
         with pytest.raises((ValueError, TypeError)):
-            self.loader.load_from_excel_with_skip_rows(
-                test_file, skip_rows="invalid"
-            )
+            self.loader.load_from_excel_with_skip_rows(test_file, skip_rows="invalid")
 
         # データ行数より多いスキップ行数(エラーが発生する)
         with pytest.raises(ValueError, match="Skip row .* is out of range"):
             self.loader.load_from_excel_with_skip_rows(
-                test_file, skip_rows="10"  # データより多い行数
+                test_file,
+                skip_rows="10",  # データより多い行数
             )
 
     def test_multiple_header_rows_edge_cases(self):
@@ -263,14 +262,13 @@ class TestEdgeCaseCoverageImprovement:
         # データ行数より多いヘッダー行数
         with pytest.raises((ValueError, IndexError)):
             self.loader.load_from_excel_with_multiple_headers(
-                test_file, header_rows=10  # データより多い行数
+                test_file,
+                header_rows=10,  # データより多い行数
             )
 
         # 負のヘッダー行数
         with pytest.raises(ValueError):
-            self.loader.load_from_excel_with_multiple_headers(
-                test_file, header_rows=-1
-            )
+            self.loader.load_from_excel_with_multiple_headers(test_file, header_rows=-1)
 
     def test_auto_range_detection_edge_cases(self):
         """自動範囲検出のエッジケーステスト."""
@@ -283,7 +281,7 @@ class TestEdgeCaseCoverageImprovement:
             )
 
         # 空のExcelファイル(エラーが発生する)
-        with patch('pandas.read_excel') as mock_read_excel:
+        with patch("pandas.read_excel") as mock_read_excel:
             mock_read_excel.return_value = pd.DataFrame()  # 空のDataFrame
 
             with pytest.raises(ValueError, match="Empty data in sheet"):

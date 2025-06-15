@@ -188,15 +188,23 @@ class ExcelDataLoader:
 
     # セキュリティ設定
     MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".xlsx", ".xls"}
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".xlsx", ".xls", ".xlsm", ".xltm"}
 
-    def __init__(self, base_path: str | None = None):
+    # マクロセキュリティ設定
+    MACRO_ENABLED_EXTENSIONS: ClassVar[set[str]] = {".xlsm", ".xltm"}
+    MACRO_SECURITY_STRICT = "strict"  # マクロ含有ファイルを拒否
+    MACRO_SECURITY_WARN = "warn"  # マクロ含有ファイルで警告
+    MACRO_SECURITY_ALLOW = "allow"  # マクロ含有ファイルを許可
+
+    def __init__(self, base_path: str | None = None, macro_security: str = "warn"):
         """ExcelDataLoaderを初期化。
 
         Args:
             base_path: ベースディレクトリパス(Sphinxソースディレクトリ)
+            macro_security: マクロセキュリティレベル ("strict", "warn", "allow")
         """
         self.base_path = Path(base_path) if base_path else Path.cwd()
+        self.macro_security = macro_security
 
     def is_safe_path(self, file_path: str) -> bool:
         """パストラバーサル攻撃を防ぐためのパス検証。
@@ -252,7 +260,185 @@ class ExcelDataLoader:
                 f"({self.MAX_FILE_SIZE} bytes)"
             )
 
+        # マクロセキュリティ検証
+        self._validate_macro_security(file_path)
+
+        # 外部リンクセキュリティ検証
+        self._validate_external_links(file_path)
+
         return True
+
+    def _validate_macro_security(self, file_path: str) -> None:
+        """マクロセキュリティ検証。
+
+        Args:
+            file_path: 検証するファイルパス
+
+        Raises:
+            ValueError: マクロが検出され、セキュリティレベルでブロックされた場合
+        """
+        file_path_obj = Path(file_path)
+
+        # 拡張子によるマクロ検出（第一段階）
+        if file_path_obj.suffix.lower() in self.MACRO_ENABLED_EXTENSIONS:
+            self._handle_macro_detection(
+                file_path, "Macro-enabled file format detected"
+            )
+            return
+
+        # ファイル内容によるマクロ検出（第二段階）
+        try:
+            from openpyxl import load_workbook
+
+            workbook = load_workbook(file_path, read_only=True, data_only=True)
+
+            # VBAプロジェクトの検出
+            if hasattr(workbook, "vba_archive") and workbook.vba_archive is not None:
+                self._handle_macro_detection(
+                    file_path, "VBA macros detected in file content"
+                )
+
+            workbook.close()
+
+        except Exception:
+            # ファイル読み込みエラーは後続の処理で処理される
+            pass
+
+    def _handle_macro_detection(self, file_path: str, reason: str) -> None:
+        """マクロ検出時の処理。
+
+        Args:
+            file_path: ファイルパス
+            reason: 検出理由
+
+        Raises:
+            ValueError: strict モードでマクロが検出された場合
+        """
+        import warnings
+
+        if self.macro_security == self.MACRO_SECURITY_STRICT:
+            raise ValueError(
+                f"Macro-enabled Excel file blocked for security: {file_path}. "
+                f"Reason: {reason}. "
+                "Set macro_security='allow' to override this restriction."
+            )
+        elif self.macro_security == self.MACRO_SECURITY_WARN:
+            warnings.warn(
+                f"Security Warning: Macro-enabled Excel file detected: {file_path}. "
+                f"Reason: {reason}. "
+                "Consider verifying file integrity before processing.",
+                UserWarning,
+                stacklevel=3,
+            )
+        # MACRO_SECURITY_ALLOW の場合は何もしない
+
+    def _validate_external_links(self, file_path: str) -> None:
+        """外部リンクセキュリティ検証。
+
+        Args:
+            file_path: 検証するファイルパス
+
+        Raises:
+            ValueError: 危険な外部リンクが検出された場合（strictモード）
+        """
+        try:
+
+            from openpyxl import load_workbook
+
+            workbook = load_workbook(file_path, read_only=True, data_only=False)
+
+            dangerous_links = []
+            dangerous_protocols = {
+                "file://",
+                "ftp://",
+                "ldap://",
+                "javascript:",
+                "vbscript:",
+            }
+
+            for sheet_name in workbook.sheetnames:
+                sheet = workbook[sheet_name]
+
+                # セル内のハイパーリンクチェック
+                for row in sheet.iter_rows():
+                    for cell in row:
+                        if cell.hyperlink:
+                            target = str(cell.hyperlink.target).lower()
+                            if any(proto in target for proto in dangerous_protocols):
+                                dangerous_links.append(
+                                    {
+                                        "type": "hyperlink",
+                                        "location": f"{sheet_name}!{cell.coordinate}",
+                                        "target": cell.hyperlink.target,
+                                    }
+                                )
+
+                        # セル値内のURLパターンチェック（簡易）
+                        if cell.value and isinstance(cell.value, str):
+                            cell_value = cell.value.lower()
+                            if any(
+                                proto in cell_value for proto in dangerous_protocols
+                            ):
+                                dangerous_links.append(
+                                    {
+                                        "type": "cell_content",
+                                        "location": f"{sheet_name}!{cell.coordinate}",
+                                        "content": cell.value[
+                                            :100
+                                        ],  # 最初の100文字のみ
+                                    }
+                                )
+
+            workbook.close()
+
+            # 外部リンクが検出された場合の処理
+            if dangerous_links:
+                self._handle_external_link_detection(file_path, dangerous_links)
+
+        except Exception:
+            # 外部リンク検証エラーは無視（ファイル処理は続行）
+            pass
+
+    def _handle_external_link_detection(
+        self, file_path: str, dangerous_links: list
+    ) -> None:
+        """外部リンク検出時の処理。
+
+        Args:
+            file_path: ファイルパス
+            dangerous_links: 検出された危険なリンクのリスト
+
+        Raises:
+            ValueError: strict モードで危険なリンクが検出された場合
+        """
+        import warnings
+
+        link_summary = (
+            f"Found {len(dangerous_links)} potentially dangerous external links"
+        )
+
+        if self.macro_security == self.MACRO_SECURITY_STRICT:
+            # strictモードでは危険な外部リンクをブロック
+            link_details = "; ".join(
+                [
+                    f"{link['type']} at {link['location']}"
+                    for link in dangerous_links[:3]  # 最初の3件のみ表示
+                ]
+            )
+            raise ValueError(
+                f"Dangerous external links detected in Excel file: {file_path}. "
+                f"{link_summary}. Details: {link_details}. "
+                "Set macro_security='allow' to override this restriction."
+            )
+        elif self.macro_security == self.MACRO_SECURITY_WARN:
+            # warnモードでは警告を表示
+            warnings.warn(
+                f"Security Warning: Potentially dangerous external links detected in Excel file: {file_path}. "
+                f"{link_summary}. "
+                "Please verify file integrity and external link safety before processing.",
+                UserWarning,
+                stacklevel=3,
+            )
 
     def basic_sheet_detection(self, file_path: str) -> str:
         """基本的なシート検出(デフォルト: 最初のシート)。
@@ -2728,6 +2914,7 @@ class ExcelDataLoader:
         # 範囲指定のメタデータを作成
         range_merge_info = {
             "merged_cells": filtered_merged_cells,
+            "merged_ranges": filtered_merged_cells,  # エイリアス
             "merged_count": len(filtered_merged_cells),
         }
         additional_metadata = {"range": range_spec}
@@ -3741,6 +3928,10 @@ class ExcelDataLoader:
             if max_cache_size and len(json_str.encode("utf-8")) > max_cache_size:
                 # サイズ制限を超える場合はキャッシュしない
                 return
+
+            # キャッシュディレクトリを作成（存在しない場合）
+            cache_dir = Path(cache_path).parent
+            cache_dir.mkdir(parents=True, exist_ok=True)
 
             # ファイルに保存
             with open(cache_path, "w", encoding="utf-8") as f:
@@ -4966,8 +5157,6 @@ class ExcelDataLoader:
 
         return int(min_col), max_col
 
-
-
     def _apply_merge_cell_processing(
         self, data: list[list[str]], merged_ranges: list[dict], mode: str
     ) -> list[list[str]]:
@@ -5036,7 +5225,6 @@ class ExcelDataLoader:
 
         return processed_data
 
-
     def _filter_merged_cells_in_range(
         self, merged_ranges: list[dict], range_spec: str
     ) -> list[dict]:
@@ -5079,8 +5267,6 @@ class ExcelDataLoader:
             return filtered
         except Exception:
             return []
-
-
 
     def _merge_multiple_headers(self, header_data: list[list[str]]) -> list[str]:
         """複数行のヘッダーデータを結合して単一のヘッダーリストを生成。
@@ -5157,8 +5343,6 @@ class ExcelDataLoader:
 
         return normalized
 
-
-
     def _get_cache_file_path(
         self,
         file_path: str,
@@ -5190,7 +5374,6 @@ class ExcelDataLoader:
         cache_filename = f"{excel_basename}_{options_hash}.json"
 
         return os.path.join(cache_dir, cache_filename)
-
 
     def load_from_excel_with_range_and_header_row(
         self,

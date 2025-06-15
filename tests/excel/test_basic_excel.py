@@ -19,7 +19,7 @@ def test_excel_support():
             loader = ExcelDataLoader(temp_dir)
             assert loader.base_path == Path(temp_dir)
             assert loader.MAX_FILE_SIZE == 100 * 1024 * 1024
-            assert {".xlsx", ".xls"} == loader.SUPPORTED_EXTENSIONS
+            assert {".xlsx", ".xls", ".xlsm", ".xltm"} == loader.SUPPORTED_EXTENSIONS
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)
 

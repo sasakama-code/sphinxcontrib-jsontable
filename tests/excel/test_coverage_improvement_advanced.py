@@ -198,8 +198,9 @@ class TestAdvancedCoverageImprovement:
 
         assert result1["data"] == result2["data"]
         # キャッシュ関連の情報があることを確認
-        assert "file_path" in result1
-        assert "file_path" in result2
+        assert "cache_path" in result1
+        assert "cache_path" in result2
+        assert result2["cache_hit"] is True
 
     def test_memory_usage_tracking(self):
         """メモリ使用量追跡機能テスト(カバレッジ向上)."""

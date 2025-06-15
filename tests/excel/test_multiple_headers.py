@@ -323,7 +323,7 @@ class TestMultipleHeaders:
             self.loader.load_from_excel_with_multiple_headers(excel_path, header_rows=0)
 
         # 過大な値
-        with pytest.raises(ValueError, match="header_rows .* exceeds available rows"):
+        with pytest.raises(ValueError, match=".*header_rows exceeds available rows"):
             self.loader.load_from_excel_with_multiple_headers(
                 excel_path, header_rows=100
             )
