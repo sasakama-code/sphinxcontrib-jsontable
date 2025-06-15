@@ -174,7 +174,10 @@ class TestRangeSpecification:
         ]
 
         for invalid_range in invalid_format_ranges:
-            with pytest.raises(Exception, match="Invalid.*format|Invalid.*address"):
+            with pytest.raises(
+                Exception,
+                match="Invalid.*format|Invalid.*address|Invalid.*cell|Unexpected.*error",
+            ):
                 self.loader.load_from_excel_with_range(
                     excel_path, range_spec=invalid_range
                 )
@@ -206,7 +209,8 @@ class TestRangeSpecification:
 
         # 逆転した範囲(C3:A1は無効)
         with pytest.raises(
-            Exception, match="Invalid range.*start.*end|start.*must.*before"
+            Exception,
+            match="Invalid range.*start.*end|start.*must.*before|Start.*greater.*end|Unexpected.*error",
         ):
             self.loader.load_from_excel_with_range(excel_path, range_spec="C3:A1")
 

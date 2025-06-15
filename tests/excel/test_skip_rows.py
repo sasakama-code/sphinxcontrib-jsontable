@@ -162,7 +162,7 @@ class TestSkipRows:
 
         # 0-2行目をスキップし、3行目をヘッダーとして使用
         result = self.loader.load_from_excel_with_skip_rows_and_header(
-            excel_path, skip_rows="0-2,6,9-10", header_row=3
+            excel_path, "0-2,6,9-10", 3
         )
 
         # スキップ後のデータでヘッダー処理
