@@ -7,9 +7,9 @@ Task 2.1: `:sheet:` オプション実装のテスト
 - エラーハンドリング(存在しないシート、日本語対応)
 """
 
-import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -84,7 +84,7 @@ class TestSheetSelection:
         Returns:
             str: 作成されたファイルのパス
         """
-        file_path = os.path.join(self.temp_dir, "multi_sheet_test.xlsx")
+        file_path = Path(self.temp_dir) / "multi_sheet_test.xlsx"
 
         # 複数のシートを作成
         with pd.ExcelWriter(file_path, engine="openpyxl") as writer:
@@ -198,7 +198,7 @@ class TestSheetSelection:
 
             directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(excel_path)],
+                arguments=[Path(excel_path).name],
                 options={"header": True, "sheet": "営業データ"},
                 content=[],
                 lineno=1,
@@ -236,7 +236,7 @@ class TestSheetSelection:
 
             directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(excel_path)],
+                arguments=[Path(excel_path).name],
                 options={"header": True, "sheet-index": 2},
                 content=[],
                 lineno=1,
@@ -274,7 +274,7 @@ class TestSheetSelection:
 
             directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(excel_path)],
+                arguments=[Path(excel_path).name],
                 options={"header": True, "sheet": "営業データ", "sheet-index": 2},
                 content=[],
                 lineno=1,

@@ -13,7 +13,6 @@ JSON形式への変換を担当する。
 """
 
 import contextlib
-import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -3722,15 +3721,14 @@ class ExcelDataLoader:
         Returns:
             str: キャッシュファイルのパス
         """
-        import os
 
         # キャッシュディレクトリを決定(定数活用)
-        cache_dir = os.path.join(str(self.base_path), self.CACHE_DIR_NAME)
-        os.makedirs(cache_dir, exist_ok=True)
+        cache_dir = self.base_path / self.CACHE_DIR_NAME
+        cache_dir.mkdir(exist_ok=True)
 
         # ファイル名からキャッシュファイル名を生成
-        base_name = os.path.basename(file_path)
-        name_without_ext = os.path.splitext(base_name)[0]
+        file_path_obj = Path(file_path)
+        name_without_ext = file_path_obj.stem
 
         # キャッシュキーに基づくファイル名生成(保守性向上)
         effective_cache_key = cache_key if cache_key else self.DEFAULT_CACHE_KEY
@@ -3738,7 +3736,7 @@ class ExcelDataLoader:
             f"{name_without_ext}_{effective_cache_key}{self.CACHE_FILE_EXTENSION}"
         )
 
-        return os.path.join(cache_dir, cache_filename)
+        return cache_dir / cache_filename
 
     def _is_cache_valid(self, file_path: str, cache_path: str) -> bool:
         """キャッシュの有効性をチェック。
@@ -3750,20 +3748,21 @@ class ExcelDataLoader:
         Returns:
             bool: キャッシュが有効な場合True
         """
-        import os
 
         # キャッシュファイルの存在確認
-        if not os.path.exists(cache_path):
+        cache_path_obj = Path(cache_path)
+        if not cache_path_obj.exists():
             return False
 
         # 元ファイルの存在確認
-        if not os.path.exists(file_path):
+        file_path_obj = Path(file_path)
+        if not file_path_obj.exists():
             return False
 
         try:
             # ファイルの更新時刻を比較
-            excel_mtime = os.path.getmtime(file_path)
-            cache_mtime = os.path.getmtime(cache_path)
+            excel_mtime = file_path_obj.stat().st_mtime
+            cache_mtime = cache_path_obj.stat().st_mtime
 
             # Excelファイルがキャッシュより新しい場合は無効
             return cache_mtime >= excel_mtime
@@ -3948,12 +3947,11 @@ class ExcelDataLoader:
         Args:
             file_path: 特定ファイルのキャッシュをクリア(Noneの場合は全削除)
         """
-        import os
 
         # キャッシュディレクトリ(定数活用)
-        cache_dir = os.path.join(str(self.base_path), self.CACHE_DIR_NAME)
+        cache_dir = self.base_path / self.CACHE_DIR_NAME
 
-        if not os.path.exists(cache_dir):
+        if not cache_dir.exists():
             return
 
         if file_path:
@@ -3970,13 +3968,10 @@ class ExcelDataLoader:
             cache_dir: キャッシュディレクトリ
             file_path: 対象ファイルパス
         """
-        import os
 
-        base_name = os.path.basename(file_path)
-        name_without_ext = os.path.splitext(base_name)[0]
-        pattern = os.path.join(
-            cache_dir, f"{name_without_ext}_*{self.CACHE_FILE_EXTENSION}"
-        )
+        file_path_obj = Path(file_path)
+        name_without_ext = file_path_obj.stem
+        pattern = cache_dir / f"{name_without_ext}_*{self.CACHE_FILE_EXTENSION}"
 
         self._remove_cache_files_by_pattern(pattern)
 
@@ -3986,9 +3981,8 @@ class ExcelDataLoader:
         Args:
             cache_dir: キャッシュディレクトリ
         """
-        import os
 
-        pattern = os.path.join(cache_dir, f"*{self.CACHE_FILE_EXTENSION}")
+        pattern = cache_dir / f"*{self.CACHE_FILE_EXTENSION}"
         self._remove_cache_files_by_pattern(pattern)
 
     def _remove_cache_files_by_pattern(self, pattern: str) -> None:
@@ -3998,12 +3992,11 @@ class ExcelDataLoader:
             pattern: ファイルパターン
         """
         import glob
-        import os
 
-        for cache_file in glob.glob(pattern):
+        for cache_file in glob.glob(str(pattern)):
             # ファイル削除失敗は無視(並行アクセス等の可能性)
             with contextlib.suppress(OSError):
-                os.remove(cache_file)
+                Path(cache_file).unlink()
 
     # ==========================================
     # Phase 4: Performance Optimization Methods
@@ -4359,7 +4352,7 @@ class ExcelDataLoader:
         Returns:
             EnhancedExcelError: 適切な強化エラー
         """
-        if isinstance(error, FileNotFoundError) or not os.path.exists(file_path):
+        if isinstance(error, FileNotFoundError) or not Path(file_path).exists():
             return ExcelFileNotFoundError(
                 file_path, error_context=context, debug_info=debug_info
             )
@@ -4472,8 +4465,8 @@ class ExcelDataLoader:
             debug_info = {
                 "operation_context": "load_from_excel",
                 "file_analysis": {
-                    "size_bytes": os.path.getsize(file_path)
-                    if os.path.exists(file_path)
+                    "size_bytes": Path(file_path).stat().st_size
+                    if Path(file_path).exists()
                     else 0,
                     "format_detected": "xlsx",
                 },
@@ -4609,7 +4602,7 @@ class ExcelDataLoader:
         Raises:
             EnhancedExcelError: 強化された例外
         """
-        if not os.path.exists(file_path):
+        if not Path(file_path).exists():
             raise ExcelFileNotFoundError(file_path)
 
         try:
@@ -5389,16 +5382,16 @@ class ExcelDataLoader:
         import hashlib
 
         # ファイル名からキャッシュパスを生成
-        excel_basename = os.path.splitext(os.path.basename(file_path))[0]
+        excel_basename = Path(file_path).stem
 
         # オプションを含むハッシュを生成
         options_str = f"{sheet_name}_{header_row}_{range_spec}"
         options_hash = hashlib.md5(options_str.encode("utf-8")).hexdigest()[:8]
 
-        cache_dir = os.path.join(self.base_path, ".jsontable_cache")
+        cache_dir = Path(self.base_path) / ".jsontable_cache"
         cache_filename = f"{excel_basename}_{options_hash}.json"
 
-        return os.path.join(cache_dir, cache_filename)
+        return cache_dir / cache_filename
 
     def load_from_excel_with_range_and_header_row(
         self,

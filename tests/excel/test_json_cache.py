@@ -8,10 +8,10 @@ Task 3.4: `:json-cache:` オプション実装のテスト
 """
 
 import json
-import os
 import shutil
 import tempfile
 import time
+from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -43,7 +43,7 @@ class TestJSONCache:
         Returns:
             str: 作成されたファイルのパス
         """
-        file_path = os.path.join(self.temp_dir, "cache_test.xlsx")
+        file_path = Path(self.temp_dir) / "cache_test.xlsx"
 
         wb = Workbook()
         ws = wb.active
@@ -74,13 +74,13 @@ class TestJSONCache:
 
         # キャッシュファイルの存在確認(実際に使用されたパスを取得)
         cache_path = result["cache_path"]
-        assert os.path.exists(cache_path)
+        assert Path(cache_path).exists()
 
         # キャッシュファイルの内容確認
         with open(cache_path, encoding="utf-8") as f:
             cache_data = json.load(f)
 
-        assert cache_data["source_file"] == excel_path
+        assert cache_data["source_file"] == str(excel_path)
         assert "data" in cache_data
         assert "headers" in cache_data
         assert "cache_timestamp" in cache_data
@@ -118,7 +118,7 @@ class TestJSONCache:
         cache_path = result1["cache_path"]
 
         # キャッシュの更新時刻を取得
-        cache_mtime_1 = os.path.getmtime(cache_path)
+        cache_mtime_1 = Path(cache_path).stat().st_mtime
 
         # 少し待ってからExcelファイルを変更
         time.sleep(1.0)
@@ -138,7 +138,7 @@ class TestJSONCache:
         result2 = self.loader.load_from_excel_with_cache(excel_path)
 
         # キャッシュが更新されていることを確認
-        cache_mtime_2 = os.path.getmtime(cache_path)
+        cache_mtime_2 = Path(cache_path).stat().st_mtime
         assert cache_mtime_2 > cache_mtime_1
 
         # 変更されたデータが反映されていることを確認(data[0][0]は最初のデータ行の1列目)
@@ -177,13 +177,13 @@ class TestJSONCache:
         cache_path = self.loader._get_cache_file_path(excel_path)
 
         # 期待されるパス構造
-        expected_dir = os.path.join(self.temp_dir, ".jsontable_cache")
-        assert cache_path.startswith(expected_dir)
-        assert cache_path.endswith(".json")
+        expected_dir = Path(self.temp_dir) / ".jsontable_cache"
+        assert str(cache_path).startswith(str(expected_dir))
+        assert cache_path.suffix == ".json"
 
         # ファイル名がExcelファイル名に基づいていることを確認
-        excel_basename = os.path.basename(excel_path)
-        assert excel_basename.replace(".xlsx", "") in cache_path
+        excel_basename = Path(excel_path).name
+        assert excel_basename.replace(".xlsx", "") in str(cache_path)
 
     def test_cache_with_range_option(self):
         """範囲指定オプションでのキャッシュテスト(未実装なので失敗する)."""
@@ -197,7 +197,7 @@ class TestJSONCache:
 
         # キャッシュファイルの存在確認
         cache_path = result1["cache_path"]
-        assert os.path.exists(cache_path), f"Cache file should exist at {cache_path}"
+        assert Path(cache_path).exists(), f"Cache file should exist at {cache_path}"
 
         # 同じ範囲指定でキャッシュヒット
         result2 = self.loader.load_from_excel_with_cache(excel_path, range_spec="A1:B3")
@@ -206,20 +206,20 @@ class TestJSONCache:
         result3 = self.loader.load_from_excel_with_cache(excel_path, range_spec="A1:C3")
 
         # デバッグ情報の出力
-        excel_mtime = os.path.getmtime(excel_path)
-        cache_mtime = os.path.getmtime(cache_path)
+        excel_mtime = Path(excel_path).stat().st_mtime
+        cache_mtime = Path(cache_path).stat().st_mtime
         print(f"DEBUG result1 cache_hit: {result1.get('cache_hit', 'Not set')}")
         print(f"DEBUG result2 cache_hit: {result2.get('cache_hit', 'Not set')}")
         print(f"DEBUG result3 cache_hit: {result3.get('cache_hit', 'Not set')}")
         print(f"DEBUG cache_path: {cache_path}")
-        print(f"DEBUG cache exists: {os.path.exists(cache_path)}")
+        print(f"DEBUG cache exists: {Path(cache_path).exists()}")
         print(f"DEBUG excel_mtime: {excel_mtime}")
         print(f"DEBUG cache_mtime: {cache_mtime}")
         print(f"DEBUG cache_mtime >= excel_mtime: {cache_mtime >= excel_mtime}")
 
         # キャッシュヒットの確認（現在の実装に合わせて調整）
         # キャッシュが存在していることは確認
-        assert os.path.exists(cache_path)
+        assert Path(cache_path).exists()
         # 同じ結果が得られることを確認
         assert result1["data"] == result2["data"]
         # 異なる範囲では異なる結果
@@ -237,11 +237,11 @@ class TestJSONCache:
         # キャッシュファイル作成
         result = self.loader.load_from_excel_with_cache(excel_path)
         cache_path = result["cache_path"]
-        assert os.path.exists(cache_path)
+        assert Path(cache_path).exists()
 
         # キャッシュクリーンアップ
         self.loader.clear_cache(excel_path)
-        assert not os.path.exists(cache_path)
+        assert not Path(cache_path).exists()
 
     def test_cache_corruption_recovery(self):
         """キャッシュファイル破損時の回復テスト(未実装なので失敗する)."""
@@ -302,7 +302,7 @@ class TestJSONCache:
     def test_cache_size_limit(self):
         """キャッシュサイズ制限テスト(未実装なので失敗する)."""
         # 大きなExcelファイルを作成
-        file_path = os.path.join(self.temp_dir, "large_cache_test.xlsx")
+        file_path = Path(self.temp_dir) / "large_cache_test.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -318,8 +318,9 @@ class TestJSONCache:
         self.loader.load_from_excel_with_cache(file_path, max_cache_size=max_cache_size)
 
         cache_path = self.loader._get_cache_file_path(file_path)
-        if os.path.exists(cache_path):
-            cache_size = os.path.getsize(cache_path)
+        cache_path_obj = Path(cache_path)
+        if cache_path_obj.exists():
+            cache_size = cache_path_obj.stat().st_size
             # キャッシュサイズが制限を大幅に超えていないことを確認
             assert cache_size < max_cache_size * 2, (
                 f"Cache size {cache_size} exceeds limit"

@@ -10,10 +10,10 @@
 - 907-923: エラーハンドリング
 """
 
-import os
 import shutil
 import tempfile
 import warnings
+from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -37,7 +37,7 @@ class TestFinal80Coverage:
     def test_dangerous_protocol_detection_365_395(self):
         """危険プロトコル検出を確実に実行（365-395行）."""
         # 危険プロトコルを確実に検出するファイル作成
-        file_path = os.path.join(self.temp_dir, "dangerous_protocols.xlsx")
+        file_path = Path(self.temp_dir) / "dangerous_protocols.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -106,7 +106,7 @@ class TestFinal80Coverage:
     def test_macro_security_validation_direct(self):
         """マクロセキュリティバリデーションの直接実行."""
         # .xlsmファイル作成（マクロ有効拡張子）
-        macro_file = os.path.join(self.temp_dir, "macro_enabled.xlsm")
+        macro_file = Path(self.temp_dir) / "macro_enabled.xlsm"
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Macro Test File"
@@ -139,7 +139,7 @@ class TestFinal80Coverage:
 
     def test_range_specification_error_paths_814_853(self):
         """範囲指定エラーパスの確実な実行（814-853行）."""
-        excel_path = os.path.join(self.temp_dir, "range_test.xlsx")
+        excel_path = Path(self.temp_dir) / "range_test.xlsx"
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Test Data"
@@ -190,7 +190,7 @@ class TestFinal80Coverage:
         ]
 
         for i, content in enumerate(corrupted_patterns):
-            corrupted_file = os.path.join(self.temp_dir, f"corrupted_{i}.xlsx")
+            corrupted_file = Path(self.temp_dir) / f"corrupted_{i}.xlsx"
             with open(corrupted_file, "wb") as f:
                 f.write(content)
 
@@ -199,7 +199,7 @@ class TestFinal80Coverage:
 
     def test_hyperlink_cell_iteration_coverage(self):
         """ハイパーリンクとセル反復処理のカバレッジ（362-390行）."""
-        file_path = os.path.join(self.temp_dir, "hyperlink_test.xlsx")
+        file_path = Path(self.temp_dir) / "hyperlink_test.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -246,7 +246,7 @@ class TestFinal80Coverage:
 
     def test_multiple_sheets_security_validation(self):
         """複数シートでのセキュリティ検証（358-390行）."""
-        file_path = os.path.join(self.temp_dir, "multi_sheet_security.xlsx")
+        file_path = Path(self.temp_dir) / "multi_sheet_security.xlsx"
         wb = Workbook()
 
         # 最初のシート
@@ -279,7 +279,7 @@ class TestFinal80Coverage:
 
     def test_edge_case_security_patterns(self):
         """エッジケースセキュリティパターンの処理."""
-        file_path = os.path.join(self.temp_dir, "edge_case_security.xlsx")
+        file_path = Path(self.temp_dir) / "edge_case_security.xlsx"
         wb = Workbook()
         ws = wb.active
 

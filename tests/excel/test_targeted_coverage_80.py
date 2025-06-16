@@ -10,9 +10,9 @@
 - 907-923: エラーハンドリング
 """
 
-import os
 import shutil
 import tempfile
+from pathlib import Path
 
 from openpyxl import Workbook
 
@@ -34,7 +34,7 @@ class TestTargetedCoverage80:
     def test_hyperlink_security_detection_365_381(self):
         """ハイパーリンクセキュリティ検出の直接テスト（365-381行）."""
         # ハイパーリンクを含むExcelファイル作成
-        file_path = os.path.join(self.temp_dir, "dangerous_hyperlinks.xlsx")
+        file_path = Path(self.temp_dir) / "dangerous_hyperlinks.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -85,7 +85,7 @@ class TestTargetedCoverage80:
 
     def test_cell_content_security_detection_376_381(self):
         """セル内容セキュリティ検出の直接テスト（376-381行）."""
-        file_path = os.path.join(self.temp_dir, "dangerous_content.xlsx")
+        file_path = Path(self.temp_dir) / "dangerous_content.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -124,7 +124,7 @@ class TestTargetedCoverage80:
 
     def test_range_specification_error_814_853(self):
         """範囲指定エラーハンドリングの直接テスト（814-853行）."""
-        excel_path = os.path.join(self.temp_dir, "test.xlsx")
+        excel_path = Path(self.temp_dir) / "test.xlsx"
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Test"
@@ -157,7 +157,7 @@ class TestTargetedCoverage80:
             pass
 
         # 破損ファイルでのエラーハンドリング
-        corrupted_file = os.path.join(self.temp_dir, "corrupted.xlsx")
+        corrupted_file = Path(self.temp_dir) / "corrupted.xlsx"
         with open(corrupted_file, "wb") as f:
             f.write(b"This is not an Excel file")
 
@@ -169,7 +169,7 @@ class TestTargetedCoverage80:
     def test_macro_security_validation_413_434(self):
         """マクロセキュリティバリデーションの直接テスト（413-434行）."""
         # .xlsmファイル作成
-        macro_file = os.path.join(self.temp_dir, "macro_test.xlsm")
+        macro_file = Path(self.temp_dir) / "macro_test.xlsm"
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Macro test"
@@ -189,7 +189,7 @@ class TestTargetedCoverage80:
 
     def test_additional_uncovered_paths(self):
         """その他の未カバーパスのテスト."""
-        excel_path = os.path.join(self.temp_dir, "test.xlsx")
+        excel_path = Path(self.temp_dir) / "test.xlsx"
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Data"
@@ -226,7 +226,7 @@ class TestTargetedCoverage80:
     def test_security_edge_cases(self):
         """セキュリティ機能のエッジケースをテスト."""
         # data: URLのテスト
-        file_path = os.path.join(self.temp_dir, "data_url_test.xlsx")
+        file_path = Path(self.temp_dir) / "data_url_test.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -244,7 +244,7 @@ class TestTargetedCoverage80:
 
     def test_protocol_variations(self):
         """プロトコルバリエーションのテスト."""
-        file_path = os.path.join(self.temp_dir, "protocol_variations.xlsx")
+        file_path = Path(self.temp_dir) / "protocol_variations.xlsx"
         wb = Workbook()
         ws = wb.active
 

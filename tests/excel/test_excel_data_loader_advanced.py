@@ -1,6 +1,5 @@
 """Excel Data Loader 高度機能のテスト."""
 
-import os
 import tempfile
 from pathlib import Path
 
@@ -69,7 +68,7 @@ class TestExcelDataLoaderAdvanced:
         # 有効な拡張子(小文字のみ対応)
         valid_extensions = [".xlsx"]
         for ext in valid_extensions:
-            test_file = os.path.join(self.temp_dir, f"test{ext}")
+            test_file = Path(self.temp_dir) / f"test{ext}"
             # 実際のファイルを作成
             pd.DataFrame([["A", "B"], ["1", "2"]]).to_excel(test_file, index=False)
             assert self.loader.validate_excel_file(test_file) is True
@@ -77,7 +76,7 @@ class TestExcelDataLoaderAdvanced:
         # 無効な拡張子
         invalid_extensions = [".txt", ".csv", ".json", ".xml", ".pdf"]
         for ext in invalid_extensions:
-            test_file = os.path.join(self.temp_dir, f"test{ext}")
+            test_file = Path(self.temp_dir) / f"test{ext}"
             with open(test_file, "w") as f:
                 f.write("dummy content")
             with pytest.raises(ValueError, match="Unsupported file format"):
@@ -182,7 +181,7 @@ class TestExcelDataLoaderAdvanced:
         assert sheet_name in ["Sheet1", "シート1"]  # 環境により異なる可能性
 
         # 複数シートを持つファイル(最初のシートが検出される)
-        with pd.ExcelWriter(os.path.join(self.temp_dir, "multi_sheet.xlsx")) as writer:
+        with pd.ExcelWriter(Path(self.temp_dir) / "multi_sheet.xlsx") as writer:
             pd.DataFrame([["A", "B"], ["1", "2"]]).to_excel(
                 writer, sheet_name="FirstSheet", index=False
             )
@@ -190,7 +189,7 @@ class TestExcelDataLoaderAdvanced:
                 writer, sheet_name="SecondSheet", index=False
             )
 
-        multi_sheet_path = os.path.join(self.temp_dir, "multi_sheet.xlsx")
+        multi_sheet_path = Path(self.temp_dir) / "multi_sheet.xlsx"
         detected_sheet = self.loader.basic_sheet_detection(multi_sheet_path)
         assert detected_sheet == "FirstSheet"
 
@@ -203,13 +202,13 @@ class TestExcelDataLoaderAdvanced:
 
         # 空のExcelファイル
         empty_df = pd.DataFrame()
-        empty_path = os.path.join(self.temp_dir, "empty.xlsx")
+        empty_path = Path(self.temp_dir) / "empty.xlsx"
         empty_df.to_excel(empty_path, index=False)
         # 空ファイルでも形式的には有効
         assert self.loader.validate_excel_file(empty_path) is True
 
         # 破損したファイル(Excelファイルとして認識されない)
-        corrupted_path = os.path.join(self.temp_dir, "corrupted.xlsx")
+        corrupted_path = Path(self.temp_dir) / "corrupted.xlsx"
         with open(corrupted_path, "w") as f:
             f.write("This is not an Excel file")
         # 破損ファイルは読み込み時にエラーになる可能性があるが、

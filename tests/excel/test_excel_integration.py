@@ -1,6 +1,5 @@
 """JsonTableDirectiveのExcel統合テスト."""
 
-import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -125,7 +124,7 @@ class TestExcelIntegration:
 
             directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(excel_path)],
+                arguments=[Path(excel_path).name],
                 options={"header": True},
                 content=[],
                 lineno=1,
@@ -157,7 +156,7 @@ class TestExcelIntegration:
 
             directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(excel_path)],
+                arguments=[Path(excel_path).name],
                 options={},
                 content=[],
                 lineno=1,
@@ -193,7 +192,7 @@ class TestExcelIntegration:
             {"Name": "Alice", "Age": "25", "City": "Tokyo"},
             {"Name": "Bob", "Age": "30", "City": "Osaka"},
         ]
-        json_path = os.path.join(self.temp_dir, "test.json")
+        json_path = Path(self.temp_dir) / "test.json"
         import json as json_module
 
         with open(json_path, "w") as f:
@@ -207,7 +206,7 @@ class TestExcelIntegration:
 
             excel_directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(excel_path)],
+                arguments=[Path(excel_path).name],
                 options={"header": True},
                 content=[],
                 lineno=1,
@@ -226,7 +225,7 @@ class TestExcelIntegration:
 
             json_directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(json_path)],
+                arguments=[Path(json_path).name],
                 options={"header": True},
                 content=[],
                 lineno=1,
@@ -280,7 +279,7 @@ class TestExcelIntegration:
 
             directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(xlsx_path)],
+                arguments=[Path(xlsx_path).name],
                 options={"header": True},
                 content=[],
                 lineno=1,
@@ -297,7 +296,7 @@ class TestExcelIntegration:
 
         # .xls ファイルのテスト(xlwtエンジンがサポートされている場合)
         try:
-            xls_path = os.path.join(self.temp_dir, "test.xls")
+            xls_path = Path(self.temp_dir) / "test.xls"
             df = pd.DataFrame(test_data[1:], columns=test_data[0])
             df.to_excel(xls_path, index=False, engine="xlwt")
 
@@ -308,7 +307,7 @@ class TestExcelIntegration:
 
                 directive = JsonTableDirective(
                     name="jsontable",
-                    arguments=[os.path.basename(xls_path)],
+                    arguments=[Path(xls_path).name],
                     options={"header": True},
                     content=[],
                     lineno=1,

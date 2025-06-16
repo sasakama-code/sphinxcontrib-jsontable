@@ -8,9 +8,9 @@ Task 3.3: `:merge-headers:` オプション実装のテスト
 - 結合ヘッダー名生成
 """
 
-import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -42,7 +42,7 @@ class TestMultipleHeaders:
         Returns:
             str: 作成されたファイルのパス
         """
-        file_path = os.path.join(self.temp_dir, "multiple_headers_test.xlsx")
+        file_path = Path(self.temp_dir) / "multiple_headers_test.xlsx"
 
         # Workbookを作成
         wb = Workbook()
@@ -89,7 +89,7 @@ class TestMultipleHeaders:
         Returns:
             str: 作成されたファイルのパス
         """
-        file_path = os.path.join(self.temp_dir, "three_level_headers.xlsx")
+        file_path = Path(self.temp_dir) / "three_level_headers.xlsx"
 
         wb = Workbook()
         ws = wb.active
@@ -183,7 +183,7 @@ class TestMultipleHeaders:
     def test_header_name_normalization(self):
         """ヘッダー名の正規化テスト."""
         # 空白・特殊文字を含むヘッダー
-        file_path = os.path.join(self.temp_dir, "special_headers.xlsx")
+        file_path = Path(self.temp_dir) / "special_headers.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -218,7 +218,7 @@ class TestMultipleHeaders:
 
     def test_empty_cells_in_headers(self):
         """ヘッダー内の空セル処理テスト."""
-        file_path = os.path.join(self.temp_dir, "empty_headers.xlsx")
+        file_path = Path(self.temp_dir) / "empty_headers.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -253,7 +253,7 @@ class TestMultipleHeaders:
 
     def test_duplicate_header_handling(self):
         """重複ヘッダー名の処理テスト."""
-        file_path = os.path.join(self.temp_dir, "duplicate_headers.xlsx")
+        file_path = Path(self.temp_dir) / "duplicate_headers.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -345,7 +345,7 @@ class TestMultipleHeaders:
 
     def test_japanese_header_processing(self):
         """日本語ヘッダーの処理テスト."""
-        file_path = os.path.join(self.temp_dir, "japanese_headers.xlsx")
+        file_path = Path(self.temp_dir) / "japanese_headers.xlsx"
         wb = Workbook()
         ws = wb.active
 

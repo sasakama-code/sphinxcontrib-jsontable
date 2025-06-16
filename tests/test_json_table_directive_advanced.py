@@ -1,7 +1,7 @@
 """JsonTableDirective 高度機能のテスト."""
 
-import os
 import tempfile
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -143,7 +143,7 @@ class TestJsonTableDirectiveAdvanced:
             # 複数オプション付きディレクティブ
             directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(json_path)],
+                arguments=[Path(json_path).name],
                 options={
                     "header": True,
                     "width": "100%",
@@ -249,7 +249,7 @@ class TestJsonTableDirectiveAdvanced:
             for invalid_option in invalid_options:
                 directive = JsonTableDirective(
                     name="jsontable",
-                    arguments=[os.path.basename(json_path)],
+                    arguments=[Path(json_path).name],
                     options=invalid_option,
                     content=[],
                     lineno=1,
@@ -283,7 +283,7 @@ class TestJsonTableDirectiveAdvanced:
             # ExcelファイルでのディレクティブTest
             directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(excel_path)],
+                arguments=[Path(excel_path).name],
                 options={"header": True},
                 content=[],
                 lineno=1,
@@ -319,7 +319,7 @@ class TestJsonTableDirectiveAdvanced:
 
             directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(json_path)],
+                arguments=[Path(json_path).name],
                 options={},
                 content=[],
                 lineno=1,
@@ -357,7 +357,7 @@ class TestJsonTableDirectiveAdvanced:
 
             directive = JsonTableDirective(
                 name="jsontable",
-                arguments=[os.path.basename(json_path)],
+                arguments=[Path(json_path).name],
                 options={"header": True},
                 content=[],
                 lineno=1,
@@ -411,7 +411,7 @@ class TestJsonTableDirectiveAdvanced:
 
                 directive = JsonTableDirective(
                     name="jsontable",
-                    arguments=[os.path.basename(json_path)],
+                    arguments=[Path(json_path).name],
                     options={},
                     content=[],
                     lineno=1,

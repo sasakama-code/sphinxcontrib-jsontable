@@ -241,7 +241,7 @@ class TestCoverageBoosting:
 
         # キャッシュパス生成
         cache_path = self.loader._get_cache_file_path(excel_path)
-        assert cache_path.endswith(".json")
+        assert cache_path.suffix == ".json"
 
     def test_edge_case_coverage(self):
         """エッジケースのカバレッジ向上."""

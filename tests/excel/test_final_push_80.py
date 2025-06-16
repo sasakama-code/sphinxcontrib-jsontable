@@ -1,8 +1,8 @@
 """80%目標達成のための最終プッシュテスト."""
 
-import os
 import shutil
 import tempfile
+from pathlib import Path
 
 from openpyxl import Workbook
 
@@ -23,7 +23,7 @@ class TestFinalPush80:
 
     def test_comprehensive_excel_file_operations(self):
         """包括的なExcelファイル操作."""
-        excel_path = os.path.join(self.temp_dir, "comprehensive.xlsx")
+        excel_path = Path(self.temp_dir) / "comprehensive.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -81,7 +81,7 @@ class TestFinalPush80:
 
     def test_data_type_edge_cases(self):
         """データ型のエッジケース処理."""
-        excel_path = os.path.join(self.temp_dir, "data_types.xlsx")
+        excel_path = Path(self.temp_dir) / "data_types.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -115,7 +115,7 @@ class TestFinalPush80:
     def test_excel_file_validation_comprehensive(self):
         """Excelファイル検証の包括的テスト."""
         # 有効なExcelファイル
-        valid_excel = os.path.join(self.temp_dir, "valid.xlsx")
+        valid_excel = Path(self.temp_dir) / "valid.xlsx"
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Valid"
@@ -137,7 +137,7 @@ class TestFinalPush80:
 
     def test_sheet_operations_comprehensive(self):
         """シート操作の包括的テスト."""
-        excel_path = os.path.join(self.temp_dir, "multi_sheet.xlsx")
+        excel_path = Path(self.temp_dir) / "multi_sheet.xlsx"
         wb = Workbook()
 
         # 複数シートの作成
@@ -177,7 +177,7 @@ class TestFinalPush80:
 
     def test_range_operations_comprehensive(self):
         """範囲操作の包括的テスト."""
-        excel_path = os.path.join(self.temp_dir, "ranges.xlsx")
+        excel_path = Path(self.temp_dir) / "ranges.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -207,7 +207,7 @@ class TestFinalPush80:
 
     def test_header_operations_comprehensive(self):
         """ヘッダー操作の包括的テスト."""
-        excel_path = os.path.join(self.temp_dir, "headers.xlsx")
+        excel_path = Path(self.temp_dir) / "headers.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -243,7 +243,7 @@ class TestFinalPush80:
 
     def test_skip_rows_operations(self):
         """スキップ行操作のテスト."""
-        excel_path = os.path.join(self.temp_dir, "skip_rows.xlsx")
+        excel_path = Path(self.temp_dir) / "skip_rows.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -274,7 +274,7 @@ class TestFinalPush80:
 
     def test_merged_cells_operations(self):
         """結合セル操作のテスト."""
-        excel_path = os.path.join(self.temp_dir, "merged.xlsx")
+        excel_path = Path(self.temp_dir) / "merged.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -314,7 +314,7 @@ class TestFinalPush80:
 
     def test_cache_operations_comprehensive(self):
         """キャッシュ操作の包括的テスト."""
-        excel_path = os.path.join(self.temp_dir, "cache_test.xlsx")
+        excel_path = Path(self.temp_dir) / "cache_test.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -343,7 +343,7 @@ class TestFinalPush80:
 
     def test_performance_related_methods(self):
         """パフォーマンス関連メソッドのテスト."""
-        excel_path = os.path.join(self.temp_dir, "performance.xlsx")
+        excel_path = Path(self.temp_dir) / "performance.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -373,7 +373,7 @@ class TestFinalPush80:
 
     def test_all_combination_methods(self):
         """全ての組み合わせメソッドのテスト."""
-        excel_path = os.path.join(self.temp_dir, "combination.xlsx")
+        excel_path = Path(self.temp_dir) / "combination.xlsx"
         wb = Workbook()
         ws = wb.active
 

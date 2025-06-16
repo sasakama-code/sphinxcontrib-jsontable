@@ -8,12 +8,12 @@
 - セキュリティ関連エッジケース
 """
 
-import os
 import shutil
 import tempfile
 import warnings
 from datetime import datetime
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -45,7 +45,7 @@ class TestMergedCellsEdgeCases:
 
         品質リスク: 文字化け・データ欠損・エンコーディングエラー
         """
-        file_path = os.path.join(self.temp_dir, "encoding_edge_cases.xlsx")
+        file_path = Path(self.temp_dir) / "encoding_edge_cases.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -90,7 +90,7 @@ class TestMergedCellsEdgeCases:
 
         品質リスク: 精度欠損・オーバーフロー・型変換エラー
         """
-        file_path = os.path.join(self.temp_dir, "numeric_precision_edge.xlsx")
+        file_path = Path(self.temp_dir) / "numeric_precision_edge.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -149,7 +149,7 @@ class TestMergedCellsEdgeCases:
 
         品質リスク: Excel仕様限界での予期しない動作
         """
-        file_path = os.path.join(self.temp_dir, "excel_format_limits.xlsx")
+        file_path = Path(self.temp_dir) / "excel_format_limits.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -184,7 +184,7 @@ class TestMergedCellsEdgeCases:
 
         品質リスク: 予期しないデータ構造での処理失敗
         """
-        file_path = os.path.join(self.temp_dir, "corrupted_structure.xlsx")
+        file_path = Path(self.temp_dir) / "corrupted_structure.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -293,7 +293,7 @@ class TestMergedCellsEdgeCases:
     def test_security_edge_cases(self):
         """セキュリティ関連エッジケースのテスト."""
         # 悪意のある文字列を含む結合セル
-        file_path = os.path.join(self.temp_dir, "security_edge.xlsx")
+        file_path = Path(self.temp_dir) / "security_edge.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -332,7 +332,7 @@ class TestMergedCellsEdgeCases:
     def test_memory_stress_merged_cells(self):
         """メモリストレステスト用の結合セル処理."""
         # 大量の結合セルを含むファイルを作成
-        file_path = os.path.join(self.temp_dir, "memory_stress.xlsx")
+        file_path = Path(self.temp_dir) / "memory_stress.xlsx"
         wb = Workbook()
         ws = wb.active
 
@@ -407,7 +407,7 @@ class TestMergedCellsEdgeCases:
 
     def test_boundary_value_analysis(self):
         """境界値分析テスト."""
-        file_path = os.path.join(self.temp_dir, "boundary_values.xlsx")
+        file_path = Path(self.temp_dir) / "boundary_values.xlsx"
         wb = Workbook()
         ws = wb.active
 
