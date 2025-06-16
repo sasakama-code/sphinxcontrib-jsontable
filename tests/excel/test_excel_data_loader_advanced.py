@@ -40,7 +40,7 @@ class TestExcelDataLoaderAdvanced:
         else:
             df = pd.DataFrame(data)
 
-        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+        with pd.ExcelWriter(file_path, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, header=has_header)
         return file_path
 
@@ -71,7 +71,7 @@ class TestExcelDataLoaderAdvanced:
         for ext in valid_extensions:
             test_file = Path(self.temp_dir) / f"test{ext}"
             # 実際のファイルを作成
-            with pd.ExcelWriter(test_file, engine='openpyxl') as writer:
+            with pd.ExcelWriter(test_file, engine="openpyxl") as writer:
                 pd.DataFrame([["A", "B"], ["1", "2"]]).to_excel(writer, index=False)
             assert self.loader.validate_excel_file(test_file) is True
 
@@ -205,7 +205,7 @@ class TestExcelDataLoaderAdvanced:
         # 空のExcelファイル
         empty_df = pd.DataFrame()
         empty_path = Path(self.temp_dir) / "empty.xlsx"
-        with pd.ExcelWriter(empty_path, engine='openpyxl') as writer:
+        with pd.ExcelWriter(empty_path, engine="openpyxl") as writer:
             empty_df.to_excel(writer, index=False)
         # 空ファイルでも形式的には有効
         assert self.loader.validate_excel_file(empty_path) is True

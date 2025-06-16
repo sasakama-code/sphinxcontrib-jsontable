@@ -50,7 +50,7 @@ class TestExcelDataLoader:
         else:
             df = pd.DataFrame(data)
 
-        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+        with pd.ExcelWriter(file_path, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, header=has_header)
         return file_path
 
@@ -200,7 +200,7 @@ class TestExcelDataLoader:
         from pathlib import Path
 
         empty_path = str(Path(self.temp_dir) / "empty.xlsx")
-        with pd.ExcelWriter(empty_path, engine='openpyxl') as writer:
+        with pd.ExcelWriter(empty_path, engine="openpyxl") as writer:
             df_empty.to_excel(writer, index=False)
 
         with pytest.raises(ValueError, match="Empty data"):

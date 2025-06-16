@@ -169,7 +169,7 @@ class TestExcelDataLoaderErrors:
         """シート検出のエッジケースのテスト。"""
         # 空のExcelファイルを作成
         empty_file = os.path.join(self.temp_dir, "empty.xlsx")
-        with pd.ExcelWriter(empty_file, engine='openpyxl') as writer:
+        with pd.ExcelWriter(empty_file, engine="openpyxl") as writer:
             pd.DataFrame().to_excel(writer, index=False)
 
         # 空ファイルでのシート検出
@@ -232,7 +232,7 @@ class TestExcelDataLoaderErrors:
         test_data = [["Name", "Age"], ["Alice", "25"]]
         df = pd.DataFrame(test_data)
         excel_path = os.path.join(self.temp_dir, "test_range.xlsx")
-        with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
+        with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
             df.to_excel(writer, index=False)
 
         for invalid_range in invalid_ranges:
@@ -260,7 +260,7 @@ class TestExcelDataLoaderErrors:
         test_data = [["Name", "Age"], ["Alice", "25"], ["Bob", "30"]]
         df = pd.DataFrame(test_data)
         excel_path = os.path.join(self.temp_dir, "test_skip.xlsx")
-        with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
+        with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
             df.to_excel(writer, index=False)
 
         for invalid_skip in invalid_skip_specs:

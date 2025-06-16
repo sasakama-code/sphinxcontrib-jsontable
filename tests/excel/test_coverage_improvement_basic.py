@@ -34,7 +34,7 @@ class TestBasicExcelDataLoader:
         """テスト用Excelファイルを作成."""
         file_path = self.temp_dir / filename
         df = pd.DataFrame(data)
-        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+        with pd.ExcelWriter(file_path, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, header=False)
         return file_path
 
