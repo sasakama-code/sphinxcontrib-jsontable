@@ -5028,30 +5028,52 @@ class ExcelDataLoader:
         """
         # 型チェック
         if not isinstance(range_spec, str):
-            raise TypeError("Range specification must be a string")
-
-        # 空文字列チェック
-        if not range_spec.strip():
-            raise ValueError("Range specification cannot be empty")
-
-        # 無効なフォーマットのチェック
-        if "-" in range_spec:
-            raise ValueError(
-                f"Invalid range format: {range_spec}. Use ':' instead of '-'"
+            raise TypeError(
+                f"Range specification must be a string, got {type(range_spec).__name__}"
             )
 
-        # 不完全な形式のチェック
-        if ":" in range_spec and range_spec.count(":") != 1:
-            raise ValueError(f"Invalid range format: {range_spec}")
+        # 前後の空白を除去
+        range_spec_clean = range_spec.strip()
 
-        if ":" in range_spec:
-            # 範囲指定(例: A1:C3)
-            start_cell, end_cell = range_spec.split(":")
-            start_row, start_col = self._parse_cell_reference(start_cell)
-            end_row, end_col = self._parse_cell_reference(end_cell)
+        # 空文字列チェック (エラーの型をより具体的に変更)
+        if not range_spec_clean:
+            raise RangeSpecificationError("Range specification cannot be empty")
+
+        # 4. 【最重要修正箇所】正規表現による厳密なフォーマット検証
+        #    この検証により、これまでの手動でのフォーマットチェックは不要になります。
+        range_spec_upper = range_spec_clean.upper()
+
+        # パターン解説：
+        # ^                               : 文字列の先頭
+        # ([A-Z]+[1-9][0-9]*)             : グループ1 (開始セル, 例: A1, AB123)
+        # (                               : グループ2 (範囲指定部分、オプショナル)
+        #   :                             :   コロン
+        #   ([A-Z]+[1-9][0-9]*)          :   グループ3 (終了セル)
+        # )?                              : グループ2が0回または1回出現
+        # $                               : 文字列の末尾
+        valid_range_pattern = re.compile(r'^([A-Z]+[1-9][0-9]*)(:([A-Z]+[1-9][0-9]*))?$')
+        
+        match = valid_range_pattern.fullmatch(range_spec_upper)
+
+        if not match:
+            # パターンに一致しない場合、不正な文字が含まれていると判断しエラーを発生させる
+            raise RangeSpecificationError(
+                f"Invalid range format: '{range_spec}'. "
+                "Expected format is like 'A1' or 'A1:B10'."
+            )
+
+        # 5. 正規表現のマッチ結果を用いてセル情報を抽出 (splitを使わない、より安全な方法)
+        start_cell_str = match.group(1)
+        end_cell_str = match.group(3)  # 終了セルがない場合は None になる
+
+        # 6. セル参照をパース
+        start_row, start_col = self._parse_cell_reference(start_cell_str)
+
+        if end_cell_str:
+            # 範囲指定 ("A1:C3") の場合
+            end_row, end_col = self._parse_cell_reference(end_cell_str)
         else:
-            # 単一セル指定(例: B2)
-            start_row, start_col = self._parse_cell_reference(range_spec)
+            # 単一セル指定 ("B2") の場合
             end_row, end_col = start_row, start_col
 
         # 範囲境界の検証

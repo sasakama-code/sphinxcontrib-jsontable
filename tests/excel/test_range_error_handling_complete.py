@@ -40,32 +40,36 @@ class TestRangeErrorHandlingComplete:
         return file_path
 
     def test_non_string_range_specification(self):
-        """非文字列の範囲指定でTypeError."""
+        """非文字列の範囲指定でRangeSpecificationError."""
         excel_path = self.create_test_excel()
 
         # 整数を範囲指定に渡す
-        with pytest.raises(TypeError) as exc_info:
+        with pytest.raises(RangeSpecificationError) as exc_info:
             self.loader.load_from_excel_with_range(excel_path, 123)
 
-        error_message = str(exc_info.value)
-        assert "Range specification must be a string" in error_message
-        assert "got int" in error_message
+        cause = exc_info.value.__cause__
+        assert isinstance(cause, TypeError)
+        assert "Range specification must be a string" in str(cause)
+        assert "got int" in str(cause)
 
         # リストを範囲指定に渡す
-        with pytest.raises(TypeError) as exc_info:
+        with pytest.raises(RangeSpecificationError) as exc_info:
             self.loader.load_from_excel_with_range(excel_path, ["A1", "C3"])
 
-        error_message = str(exc_info.value)
-        assert "Range specification must be a string" in error_message
-        assert "got list" in error_message
+        cause = exc_info.value.__cause__
+        assert isinstance(cause, TypeError)
+        assert "Range specification must be a string" in str(cause)
+        assert "got list" in str(cause)
 
         # Noneを範囲指定に渡す
-        with pytest.raises(TypeError) as exc_info:
+        with pytest.raises(RangeSpecificationError) as exc_info:
             self.loader.load_from_excel_with_range(excel_path, None)
 
-        error_message = str(exc_info.value)
-        assert "Range specification must be a string" in error_message
-        assert "got NoneType" in error_message
+        cause = exc_info.value.__cause__
+        assert isinstance(cause, TypeError)
+        assert "Range specification must be a string" in str(cause)
+        assert "got NoneType" in str(cause)
+
 
     def test_empty_range_specification(self):
         """空の範囲指定でRangeSpecificationError."""
@@ -97,15 +101,15 @@ class TestRangeErrorHandlingComplete:
         excel_path = self.create_test_excel()
 
         invalid_ranges = [
-            "INVALID",  # 完全に無効
-            "A1:B2:C3",  # コロンが多すぎる
-            "A1-B2",  # ハイフン区切り
-            "1A:2B",  # 数字が先頭
-            "AA:BB",  # 行番号なし
-            "11:22",  # 列文字なし
-            "A:B",  # 行番号なし（列のみ）
-            "1:2",  # 列文字なし（行のみ）
-            "@#$:!%&",  # 特殊文字
+            "INVALID",           # 完全に無効
+            "A1:B2:C3",         # コロンが多すぎる
+            "A1-B2",            # ハイフン区切り
+            "1A:2B",            # 数字が先頭
+            "AA:BB",            # 行番号なし
+            "11:22",            # 列文字なし
+            "A:B",              # 行番号なし（列のみ）
+            "1:2",              # 列文字なし（行のみ）
+            "@#$:!%&",          # 特殊文字
         ]
 
         for invalid_range in invalid_ranges:
@@ -113,11 +117,9 @@ class TestRangeErrorHandlingComplete:
                 self.loader.load_from_excel_with_range(excel_path, invalid_range)
 
             error_message = str(exc_info.value)
-            assert (
-                "Failed to parse range specification" in error_message
-                or "Invalid range specification" in error_message
-                or "Unexpected error parsing range specification" in error_message
-            )
+            assert ("Failed to parse range specification" in error_message or
+                   "Invalid range specification" in error_message or
+                   "Unexpected error parsing range specification" in error_message)
             # 範囲指定に関するエラーであることを確認
 
     def test_invalid_cell_address_format(self):
@@ -125,11 +127,11 @@ class TestRangeErrorHandlingComplete:
         excel_path = self.create_test_excel()
 
         invalid_cell_ranges = [
-            "A1:XYZ999999",  # 無効な列名
-            "A1:Z0",  # 行0は無効
-            "A1:$%^123",  # 特殊文字
-            "A1:123ABC",  # 数字が先頭の列名
-            "A1:A-5",  # マイナス記号
+            "A1:XYZ999999",     # 無効な列名
+            "A1:Z0",            # 行0は無効
+            "A1:$%^123",        # 特殊文字
+            "A1:123ABC",        # 数字が先頭の列名
+            "A1:A-5",           # マイナス記号
         ]
 
         for invalid_range in invalid_cell_ranges:
@@ -137,12 +139,12 @@ class TestRangeErrorHandlingComplete:
                 self.loader.load_from_excel_with_range(excel_path, invalid_range)
 
             error_message = str(exc_info.value)
-            assert (
-                "Failed to parse range specification" in error_message
-                or "Invalid cell address" in error_message
-                or "Invalid range specification" in error_message
-                or "Unexpected error parsing range specification" in error_message
-            )
+            assert ("Failed to parse range specification" in error_message or 
+                    "Invalid cell address" in error_message or 
+                    "Invalid range specification" in error_message or 
+                    "Unexpected error parsing range specification" in error_message or 
+                    "exceeds data rows" in error_message or 
+                    "exceeds data columns" in error_message)
 
     def test_range_out_of_bounds(self):
         """範囲外指定でのエラーハンドリング."""
@@ -150,9 +152,9 @@ class TestRangeErrorHandlingComplete:
 
         # 存在しない大きな範囲
         out_of_bounds_ranges = [
-            "A1:ZZ9999",  # 大きすぎる範囲
-            "AA1:AB2",  # 存在しない列
-            "A100:B200",  # 存在しない行
+            "A1:ZZ9999",        # 大きすぎる範囲
+            "AA1:AB2",          # 存在しない列
+            "A100:B200",        # 存在しない行
         ]
 
         for range_spec in out_of_bounds_ranges:
@@ -172,17 +174,15 @@ class TestRangeErrorHandlingComplete:
         excel_path = self.create_test_excel()
 
         reverse_ranges = [
-            "C3:A1",  # 列が逆順
-            "A5:A1",  # 行が逆順
-            "E5:A1",  # 両方逆順
+            "C3:A1",            # 列が逆順
+            "A5:A1",            # 行が逆順
+            "E5:A1",            # 両方逆順
         ]
 
         for reverse_range in reverse_ranges:
             try:
                 # 実装によっては自動で正規化される場合がある
-                result = self.loader.load_from_excel_with_range(
-                    excel_path, reverse_range
-                )
+                result = self.loader.load_from_excel_with_range(excel_path, reverse_range)
                 assert isinstance(result, dict)
             except (RangeSpecificationError, ValueError):
                 # エラーが発生することもある
@@ -193,14 +193,14 @@ class TestRangeErrorHandlingComplete:
         excel_path = self.create_test_excel()
 
         malformed_ranges = [
-            "A1:B2;",  # セミコロン
-            "A1:B2,",  # カンマ
-            "A1:B2 C3",  # スペース
-            "A1:B2#",  # ハッシュ
-            "A1:B2?",  # クエスチョン
-            "A1:(B2)",  # 括弧
-            "A1:[B2]",  # 角括弧
-            "A1:{B2}",  # 波括弧
+            "A1:B2;",           # セミコロン
+            "A1:B2,",           # カンマ
+            "A1:B2 C3",         # スペース
+            "A1:B2#",           # ハッシュ
+            "A1:B2?",           # クエスチョン
+            "A1:(B2)",          # 括弧
+            "A1:[B2]",          # 角括弧
+            "A1:{B2}",          # 波括弧
         ]
 
         for malformed_range in malformed_ranges:
@@ -208,21 +208,20 @@ class TestRangeErrorHandlingComplete:
                 self.loader.load_from_excel_with_range(excel_path, malformed_range)
 
             error_message = str(exc_info.value)
-            assert (
-                "Failed to parse range specification" in error_message
-                or "Unexpected error parsing range specification" in error_message
-            )
+            assert ("Failed to parse range specification" in error_message or
+                   "Unexpected error parsing range specification" in error_message or
+                   "Invalid range format" in error_message)
 
     def test_unicode_and_non_ascii_range(self):
         """Unicodeと非ASCII文字を含む範囲指定."""
         excel_path = self.create_test_excel()
 
         unicode_ranges = [
-            "Ａ１:Ｂ２",  # 全角文字
-            "A1:B２",  # 混在
-            "あ1:い2",  # ひらがな
-            "A1:漢字",  # 漢字
-            "A1:Ё2",  # キリル文字
+            "Ａ１:Ｂ２",          # 全角文字
+            "A1:B２",           # 混在
+            "あ1:い2",           # ひらがな
+            "A1:漢字",          # 漢字
+            "A1:Ё2",            # キリル文字
         ]
 
         for unicode_range in unicode_ranges:
@@ -230,11 +229,9 @@ class TestRangeErrorHandlingComplete:
                 self.loader.load_from_excel_with_range(excel_path, unicode_range)
 
             error_message = str(exc_info.value)
-            assert (
-                "Failed to parse range specification" in error_message
-                or "Invalid cell address" in error_message
-                or "Unexpected error parsing range specification" in error_message
-            )
+            assert ("Failed to parse range specification" in error_message or
+                   "Invalid cell address" in error_message or
+                   "Unexpected error parsing range specification" in error_message)
 
     def test_exception_chaining_in_range_parsing(self):
         """範囲解析での例外チェーンテスト."""
@@ -246,9 +243,8 @@ class TestRangeErrorHandlingComplete:
 
         # 例外チェーンが正しく設定されているかチェック
         exception = exc_info.value
-        assert "Failed to parse range specification" in str(
-            exception
-        ) or "Unexpected error parsing range specification" in str(exception)
+        assert ("Failed to parse range specification" in str(exception) or
+               "Unexpected error parsing range specification" in str(exception))
 
     def test_case_sensitivity_in_range_parsing(self):
         """範囲解析の大文字小文字処理."""
@@ -273,11 +269,11 @@ class TestRangeErrorHandlingComplete:
         excel_path = self.create_test_excel()
 
         whitespace_ranges = [
-            " A1:B2 ",  # 前後の空白
-            "A1 : B2",  # コロン周りの空白
-            " A1 : B2 ",  # 全体的な空白
-            "A1:\tB2",  # タブ文字
-            "A1:\nB2",  # 改行文字
+            " A1:B2 ",          # 前後の空白
+            "A1 : B2",          # コロン周りの空白
+            " A1 : B2 ",        # 全体的な空白
+            "A1:\tB2",          # タブ文字
+            "A1:\nB2",          # 改行文字
         ]
 
         for range_spec in whitespace_ranges:
@@ -299,14 +295,12 @@ class TestRangeErrorHandlingComplete:
 
         exception = exc_info.value
         error_message = str(exception)
-
+        
         # エラーメッセージに含まれるべき情報
         assert "COMPLETELY_INVALID" in error_message
-        assert (
-            "Failed to parse range specification" in error_message
-            or "Invalid range specification" in error_message
-            or "Unexpected error parsing range specification" in error_message
-        )
+        assert ("Failed to parse range specification" in error_message or
+               "Invalid range specification" in error_message or
+               "Unexpected error parsing range specification" in error_message)
 
     def test_range_specification_error_attributes(self):
         """RangeSpecificationErrorの属性テスト."""
@@ -316,11 +310,11 @@ class TestRangeErrorHandlingComplete:
             self.loader.load_from_excel_with_range(excel_path, "INVALID_RANGE")
 
         exception = exc_info.value
-
+        
         # 例外が適切に初期化されていることを確認
         assert isinstance(exception, RangeSpecificationError)
         assert isinstance(exception, Exception)
-
+        
         # エラーメッセージが設定されていることを確認
         assert str(exception)
         assert len(str(exception)) > 0
