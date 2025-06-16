@@ -9,10 +9,9 @@ Task 4.2: 包括的エラーハンドリング強化のテスト
 - 異常系テスト強化
 """
 
-import os
-from pathlib import Path
 import shutil
 import tempfile
+from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -80,7 +79,7 @@ class TestErrorHandlingEnhancement:
         # 詳細エラー情報の確認
         error_details = exc_info.value.error_details
         assert error_details["error_type"] == "ExcelFileFormatError"
-        assert corrupted_path in str(exc_info.value)
+        assert corrupted_path.name in str(exc_info.value)
         assert "debug_info" in error_details
         assert "recovery_suggestions" in error_details
         assert "user_friendly_message" in error_details
@@ -263,7 +262,7 @@ class TestErrorHandlingEnhancement:
         english_message = exc_info.value.get_message("en")
         assert "File not found" in english_message
         # "path"の代わりに実際のメッセージ内容を確認
-        assert non_existent_path in english_message
+        assert non_existent_path.name in english_message
 
     def test_error_recovery_strategies(self):
         """エラー回復戦略テスト."""

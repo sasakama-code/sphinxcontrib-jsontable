@@ -3891,7 +3891,7 @@ class ExcelDataLoader:
         self,
         cache_path: str,
         result: dict[str, Any],
-        source_file: str,
+        source_file: str | Path,
         max_cache_size: int | None = None,
     ) -> None:
         """結果をキャッシュに保存。
@@ -3904,6 +3904,8 @@ class ExcelDataLoader:
         """
         import json
         import time
+
+        source_file = str(source_file) if isinstance(source_file, Path) else source_file
 
         # キャッシュデータを構築
         cache_data = {
