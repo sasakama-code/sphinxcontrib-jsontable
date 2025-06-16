@@ -8,6 +8,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
+import pandas as pd
 import pytest
 from openpyxl import Workbook
 
@@ -160,7 +161,7 @@ class TestImplementedFeaturesCoverage:
         excel_path = self.create_basic_excel()
 
         try:
-            result = self.loader.load_from_excel_with_skip_rows(excel_path, skip_rows=1)
+            result = self.loader.load_from_excel_with_skip_rows(excel_path, skip_rows="1")
             assert isinstance(result, dict)
             assert "data" in result
         except Exception:
@@ -233,8 +234,17 @@ class TestImplementedFeaturesCoverage:
         """データ型変換機能のテスト."""
         excel_path = self.create_basic_excel()
 
+        # 2. ファイルパスからDataFrameを読み込む
+        # header=0で1行目をヘッダーとして読み込む
+        # dtype=strを指定することで、Pandasが勝手に型推論するのを防ぎ、
+        # 後続のdata_type_conversionで正確な変換をテストできるようにします。
+        # ただし、このテストではDataFrameの読み込み後のDataFrameのデータ型が重要なので、
+        # pandasのデフォルトの型推論に任せるか、テストの目的に応じて調整してください。
+        # 今回のdata_type_conversionでは数値はstrに変換されるので、
+        # pandasが数値として読み込んでも問題ありません。
+        df_from_excel = pd.read_excel(excel_path, header=0)
         try:
-            converted_data = self.loader.data_type_conversion(excel_path)
+            converted_data = self.loader.data_type_conversion(df_from_excel)
             assert isinstance(converted_data, (dict, list))
         except Exception:
             pytest.skip("Data type conversion not implemented")
@@ -242,9 +252,9 @@ class TestImplementedFeaturesCoverage:
     def test_header_detection(self):
         """ヘッダー検出機能のテスト."""
         excel_path = self.create_basic_excel()
-
+        df_from_excel = pd.read_excel(excel_path, header=0)
         try:
-            header_info = self.loader.header_detection(excel_path)
+            header_info = self.loader.header_detection(df_from_excel)
             assert isinstance(header_info, (dict, list, int))
         except Exception:
             pytest.skip("Header detection not implemented")
@@ -328,7 +338,7 @@ class TestImplementedFeaturesCoverage:
         # スキップ行 + 範囲指定
         try:
             result = self.loader.load_from_excel_with_skip_rows_and_range(
-                excel_path, skip_rows=0, range_spec="A1:C3"
+                excel_path, skip_rows="0", range_spec="A1:C3"
             )
             assert isinstance(result, dict)
         except Exception:
