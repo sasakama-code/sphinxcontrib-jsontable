@@ -3,6 +3,7 @@
 import os
 import shutil
 import tempfile
+from pathlib import Path
 
 from openpyxl import Workbook
 
@@ -24,7 +25,8 @@ class TestCriticalCoverageBoost:
     def test_file_size_validation(self):
         """ファイルサイズ検証の実行."""
         # 通常サイズのファイル
-        file_path = os.path.join(self.temp_dir, "normal.xlsx")
+        filename = "normal.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Test"
@@ -40,7 +42,8 @@ class TestCriticalCoverageBoost:
     def test_supported_extensions_validation(self):
         """サポートされる拡張子の検証."""
         # .xlsx形式
-        xlsx_file = os.path.join(self.temp_dir, "test.xlsx")
+        filename = "test.xlsx"
+        xlsx_file = Path(self.temp_dir) / filename
         wb = Workbook()
         wb.save(xlsx_file)
 
@@ -51,7 +54,7 @@ class TestCriticalCoverageBoost:
             pass
 
         # 無効な拡張子
-        invalid_file = os.path.join(self.temp_dir, "test.txt")
+        invalid_file = Path(self.temp_dir) / filename
         with open(invalid_file, "w") as f:
             f.write("Not an Excel file")
 
@@ -63,7 +66,8 @@ class TestCriticalCoverageBoost:
     def test_path_security_validation(self):
         """パスセキュリティ検証の実行."""
         # 安全なパス
-        safe_path = os.path.join(self.temp_dir, "safe.xlsx")
+        filename = "safe.xlsx"
+        safe_path = Path(self.temp_dir) / filename
         wb = Workbook()
         wb.save(safe_path)
 
@@ -83,7 +87,8 @@ class TestCriticalCoverageBoost:
     def test_macro_security_validation(self):
         """マクロセキュリティ検証の実行."""
         # 通常のExcelファイル
-        normal_file = os.path.join(self.temp_dir, "normal.xlsx")
+        filename = "normal.xlsx"
+        normal_file = Path(self.temp_dir) / filename
         wb = Workbook()
         wb.save(normal_file)
 
@@ -94,7 +99,8 @@ class TestCriticalCoverageBoost:
             pass
 
         # .xlsmファイル（マクロ有効）の作成
-        macro_file = os.path.join(self.temp_dir, "macro.xlsm")
+        filename = "macro_test.xlsm"
+        macro_file = Path(self.temp_dir) / filename
         wb = Workbook()
         wb.save(macro_file)
 
@@ -106,7 +112,8 @@ class TestCriticalCoverageBoost:
     def test_external_links_validation(self):
         """外部リンクセキュリティ検証の実行."""
         # 通常のExcelファイル
-        normal_file = os.path.join(self.temp_dir, "normal.xlsx")
+        filename = "normal.xlsx"
+        normal_file = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Normal content"
@@ -120,7 +127,8 @@ class TestCriticalCoverageBoost:
 
     def test_sheet_validation_methods(self):
         """シート検証メソッドの実行."""
-        excel_path = os.path.join(self.temp_dir, "sheets.xlsx")
+        filename = "sheets.xlsx"
+        excel_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws1 = wb.active
         ws1.title = "Sheet1"
@@ -179,7 +187,8 @@ class TestCriticalCoverageBoost:
 
     def test_data_processing_methods(self):
         """データ処理メソッドの実行."""
-        excel_path = os.path.join(self.temp_dir, "data.xlsx")
+        filename = "data.xlsx"
+        excel_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -216,7 +225,8 @@ class TestCriticalCoverageBoost:
             pass  # エラーハンドリングの実行
 
         # 無効なファイルでのエラーハンドリング
-        invalid_file = os.path.join(self.temp_dir, "invalid.xlsx")
+        filename = "invalid.xlsx"
+        invalid_file = Path(self.temp_dir) / filename
         with open(invalid_file, "w") as f:
             f.write("Not a valid Excel file")
 
@@ -227,7 +237,8 @@ class TestCriticalCoverageBoost:
 
     def test_utility_methods_comprehensive(self):
         """ユーティリティメソッドの包括的テスト."""
-        excel_path = os.path.join(self.temp_dir, "utility.xlsx")
+        filename = "utility.xlsx"
+        excel_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Test"
@@ -250,7 +261,8 @@ class TestCriticalCoverageBoost:
 
     def test_advanced_features_methods(self):
         """高度な機能メソッドの実行."""
-        excel_path = os.path.join(self.temp_dir, "advanced.xlsx")
+        filename = "advanced.xlsx"
+        excel_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -287,7 +299,8 @@ class TestCriticalCoverageBoost:
 
     def test_performance_methods(self):
         """パフォーマンス関連メソッドの実行."""
-        excel_path = os.path.join(self.temp_dir, "performance.xlsx")
+        filename = "performance.xlsx"
+        excel_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -316,7 +329,8 @@ class TestCriticalCoverageBoost:
 
     def test_error_recovery_methods(self):
         """エラー回復メソッドの実行."""
-        excel_path = os.path.join(self.temp_dir, "recovery.xlsx")
+        filename = "recovery.xlsx"
+        excel_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Recovery Test"
@@ -342,7 +356,8 @@ class TestCriticalCoverageBoost:
 
     def test_cache_strategy_methods(self):
         """キャッシュ戦略メソッドの実行."""
-        excel_path = os.path.join(self.temp_dir, "cache.xlsx")
+        filename = "cache.xlsx"
+        excel_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Cache Test"
@@ -364,7 +379,8 @@ class TestCriticalCoverageBoost:
 
     def test_exception_handling_methods(self):
         """例外ハンドリングメソッドの実行."""
-        excel_path = os.path.join(self.temp_dir, "exception.xlsx")
+        filename = "exception.xlsx"
+        excel_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Exception Test"

@@ -4,9 +4,9 @@
 特に未カバー行が多い領域に焦点を当てる。
 """
 
-import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -32,7 +32,7 @@ class TestInternalMethodsCoverage:
 
     def create_complex_excel(self, filename="complex.xlsx"):
         """複雑なExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -63,7 +63,7 @@ class TestInternalMethodsCoverage:
 
     def create_hyperlink_excel(self, filename="hyperlinks.xlsx"):
         """ハイパーリンクを含むExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -89,7 +89,7 @@ class TestInternalMethodsCoverage:
 
     def create_range_test_excel(self, filename="range_test.xlsx"):
         """範囲指定テスト用Excelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 

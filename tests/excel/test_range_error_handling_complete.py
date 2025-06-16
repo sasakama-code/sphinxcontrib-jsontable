@@ -1,8 +1,8 @@
 """範囲指定エラーハンドリングの包括的テスト."""
 
-import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -27,7 +27,7 @@ class TestRangeErrorHandlingComplete:
 
     def create_test_excel(self, filename="test_range.xlsx"):
         """テスト用Excelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 

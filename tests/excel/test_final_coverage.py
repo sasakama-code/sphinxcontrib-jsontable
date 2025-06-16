@@ -3,6 +3,7 @@
 import os
 import shutil
 import tempfile
+from pathlib import Path
 
 from openpyxl import Workbook
 
@@ -23,7 +24,7 @@ class TestFinalCoverageBoost:
 
     def create_test_excel(self, filename="test.xlsx", rows=5, cols=3):
         """テスト用Excelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 

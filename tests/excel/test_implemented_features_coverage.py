@@ -33,7 +33,7 @@ class TestImplementedFeaturesCoverage:
 
     def create_basic_excel(self, filename="basic.xlsx"):
         """基本的なExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -56,7 +56,7 @@ class TestImplementedFeaturesCoverage:
 
     def create_external_link_excel(self, filename="external_links.xlsx"):
         """外部リンクを含むExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 

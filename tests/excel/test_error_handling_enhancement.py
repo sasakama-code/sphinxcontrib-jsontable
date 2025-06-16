@@ -10,6 +10,7 @@ Task 4.2: 包括的エラーハンドリング強化のテスト
 """
 
 import os
+from pathlib import Path
 import shutil
 import tempfile
 
@@ -43,7 +44,8 @@ class TestErrorHandlingEnhancement:
         Returns:
             str: 作成されたファイルのパス
         """
-        file_path = os.path.join(self.temp_dir, "corrupted.xlsx")
+        filename = "corrupted.xlsx"
+        file_path = Path(self.temp_dir) / filename
 
         # 不正なファイル内容を書き込み
         with open(file_path, "w") as f:
@@ -57,7 +59,8 @@ class TestErrorHandlingEnhancement:
         Returns:
             str: 作成されたファイルのパス
         """
-        file_path = os.path.join(self.temp_dir, "empty.xlsx")
+        filename = "empty.xlsx"
+        file_path = Path(self.temp_dir) / filename
 
         wb = Workbook()
         # 何もデータを入れずに保存
@@ -84,7 +87,8 @@ class TestErrorHandlingEnhancement:
 
     def test_user_friendly_error_explanations(self):
         """ユーザーフレンドリーなエラー説明テスト(未実装なので失敗する)."""
-        non_existent_path = os.path.join(self.temp_dir, "non_existent.xlsx")
+        filename = "non_existent.xlsx"
+        non_existent_path = Path(self.temp_dir) / filename
 
         # ユーザーフレンドリーなエラー説明付きで読み込み
         with pytest.raises(Exception) as exc_info:
@@ -122,7 +126,8 @@ class TestErrorHandlingEnhancement:
     def test_partial_failure_recovery(self):
         """部分的失敗への対応テスト(未実装なので失敗する)."""
         # 一部データが不正なExcelファイルを作成
-        file_path = os.path.join(self.temp_dir, "partial_corrupt.xlsx")
+        filename = "partial_corrupt.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -168,7 +173,8 @@ class TestErrorHandlingEnhancement:
 
     def test_graceful_degradation(self):
         """グレースフル劣化機能テスト(未実装なので失敗する)."""
-        file_path = os.path.join(self.temp_dir, "degradation_test.xlsx")
+        filename = "degradation_test.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -197,7 +203,7 @@ class TestErrorHandlingEnhancement:
         # 各種エラーケースをテスト
         test_cases = [
             (
-                os.path.join(self.temp_dir, "non_existent.xlsx"),
+                Path(self.temp_dir) / "non_existent.xlsx",
                 "ExcelFileNotFoundError",
             ),
             (self.create_corrupted_excel(), "ExcelFileFormatError"),
@@ -238,8 +244,9 @@ class TestErrorHandlingEnhancement:
         assert context["operation_stack"] is not None
 
     def test_multilingual_error_messages(self):
-        """多言語エラーメッセージテスト(未実装なので失敗する)."""
-        non_existent_path = os.path.join(self.temp_dir, "存在しない.xlsx")
+        """多言語エラーメッセージテスト."""
+        filename = "存在しない.xlsx"
+        non_existent_path = Path(self.temp_dir) / filename
 
         # 日本語エラーメッセージで読み込み
         with pytest.raises(Exception) as exc_info:
@@ -259,9 +266,10 @@ class TestErrorHandlingEnhancement:
         assert non_existent_path in english_message
 
     def test_error_recovery_strategies(self):
-        """エラー回復戦略テスト(未実装なので失敗する)."""
+        """エラー回復戦略テスト."""
         # 複数の問題があるファイルを作成
-        file_path = os.path.join(self.temp_dir, "multi_problem.xlsx")
+        filename = "multi_problem.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 

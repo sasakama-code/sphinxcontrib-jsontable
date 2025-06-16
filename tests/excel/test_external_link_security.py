@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 import warnings
+from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -27,7 +28,7 @@ class TestExternalLinkSecurity:
 
     def create_excel_with_dangerous_hyperlinks(self, filename="dangerous_links.xlsx"):
         """危険なハイパーリンクを含むExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -54,7 +55,7 @@ class TestExternalLinkSecurity:
         self, filename="dangerous_content.xlsx"
     ):
         """危険なセル内容を含むExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -73,7 +74,7 @@ class TestExternalLinkSecurity:
 
     def create_excel_with_mixed_dangerous_links(self, filename="mixed_dangerous.xlsx"):
         """ハイパーリンクとセル内容両方に危険要素を含むExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 

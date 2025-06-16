@@ -4,10 +4,10 @@
 80%カバレッジ目標を達成する。
 """
 
-import os
 import shutil
 import tempfile
 import warnings
+from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -34,7 +34,7 @@ class TestCoverageFinal80Target:
 
     def create_security_test_excel(self, filename="security_test.xlsx"):
         """セキュリティテスト用Excelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -64,7 +64,7 @@ class TestCoverageFinal80Target:
 
     def create_range_error_excel(self, filename="range_error.xlsx"):
         """範囲エラーテスト用Excelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -78,7 +78,7 @@ class TestCoverageFinal80Target:
 
     def create_complex_data_excel(self, filename="complex_data.xlsx"):
         """複雑なデータ構造のExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 

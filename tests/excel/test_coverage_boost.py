@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 import warnings
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -34,7 +35,7 @@ class TestCoverageBoosting:
 
     def create_test_excel(self, filename="test.xlsx"):
         """テスト用Excelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Header1"
@@ -130,7 +131,8 @@ class TestCoverageBoosting:
 
     def test_unicode_header_processing(self):
         """Unicode文字を含むヘッダー処理のテスト."""
-        file_path = os.path.join(self.temp_dir, "unicode_test.xlsx")
+        filename = "unicode_test.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -208,7 +210,8 @@ class TestCoverageBoosting:
     def test_data_type_conversion_coverage(self):
         """データ型変換のカバレッジ向上."""
         # 各種データ型の変換テスト
-        file_path = os.path.join(self.temp_dir, "datatypes_test.xlsx")
+        filename = "datatypes_test.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -243,7 +246,8 @@ class TestCoverageBoosting:
     def test_edge_case_coverage(self):
         """エッジケースのカバレッジ向上."""
         # 空のExcelファイル
-        file_path = os.path.join(self.temp_dir, "empty_test.xlsx")
+        filename = "empty_test.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         # データを追加しない
         wb.save(file_path)
@@ -259,7 +263,8 @@ class TestCoverageBoosting:
     def test_warning_generation_coverage(self):
         """警告生成のカバレッジ向上."""
         # マクロファイルでのwarn警告をテスト
-        file_path = os.path.join(self.temp_dir, "macro_warn_test.xlsm")
+        filename = "macro_warn_test.xlsm"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Test"

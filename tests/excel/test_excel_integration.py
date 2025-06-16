@@ -3,6 +3,7 @@
 import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -84,7 +85,7 @@ class TestExcelIntegration:
         Returns:
             str: 作成されたファイルのパス
         """
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
 
         if has_header:
             df = pd.DataFrame(data[1:], columns=data[0])

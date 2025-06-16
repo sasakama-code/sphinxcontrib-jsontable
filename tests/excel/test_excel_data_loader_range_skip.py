@@ -37,7 +37,7 @@ class TestExcelDataLoaderRangeSkip:
         self, filename: str, data: list, has_header: bool = True
     ) -> str:
         """テスト用Excelファイルを作成。"""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
 
         if has_header:
             df = pd.DataFrame(data[1:], columns=data[0])

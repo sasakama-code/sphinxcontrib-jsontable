@@ -6,9 +6,9 @@
 - エラー回復・頑健性・メモリ制約
 """
 
-import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -40,7 +40,8 @@ class TestAdvancedMergedCells:
 
         品質リスク: 結合範囲の衝突・重複での予期しない動作
         """
-        file_path = os.path.join(self.temp_dir, "overlapping_merges.xlsx")
+        filename = "overlapping_merges.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws.title = "OverlappingMerges"
@@ -76,7 +77,8 @@ class TestAdvancedMergedCells:
 
         品質リスク: メモリ使用量・処理時間の異常増大
         """
-        file_path = os.path.join(self.temp_dir, "extreme_size_merges.xlsx")
+        filename = "extreme_size_merges.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -109,7 +111,8 @@ class TestAdvancedMergedCells:
 
         品質リスク: 型変換・値の欠損・フォーマット破損
         """
-        file_path = os.path.join(self.temp_dir, "mixed_datatype_merges.xlsx")
+        filename = "mixed_datatype_merges.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -148,7 +151,8 @@ class TestAdvancedMergedCells:
 
         実世界想定: 組織図・会計レポート・統計表の複雑構造
         """
-        file_path = os.path.join(self.temp_dir, "hierarchical_structure.xlsx")
+        filename = "hierarchical_structure.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -197,7 +201,8 @@ class TestAdvancedMergedCells:
 
         実世界想定: ピボットテーブル風・統計レポート風の不規則構造
         """
-        file_path = os.path.join(self.temp_dir, "irregular_pattern.xlsx")
+        filename = "irregular_pattern.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 

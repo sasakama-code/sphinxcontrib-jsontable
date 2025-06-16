@@ -34,7 +34,7 @@ class TestExcelDataLoaderAdvanced:
         self, filename: str, data: list, has_header: bool = True
     ) -> str:
         """テスト用Excelファイルを作成。"""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
 
         if has_header:
             df = pd.DataFrame(data[1:], columns=data[0])
@@ -47,7 +47,7 @@ class TestExcelDataLoaderAdvanced:
     def test_path_validation_comprehensive(self):
         """包括的なパス検証のテスト。"""
         # 絶対パスでの安全性チェック
-        abs_safe_path = os.path.abspath(os.path.join(self.temp_dir, "test.xlsx"))
+        abs_safe_path = (Path(self.temp_dir) / "test.xlsx").resolve()
         assert self.loader.is_safe_path(abs_safe_path) is True
 
         # 相対パスでの安全性チェック

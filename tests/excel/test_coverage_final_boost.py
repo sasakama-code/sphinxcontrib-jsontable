@@ -3,6 +3,7 @@
 import os
 import shutil
 import tempfile
+from pathlib import Path
 
 from openpyxl import Workbook
 
@@ -23,7 +24,7 @@ class TestCoverageFinalBoost:
 
     def create_test_excel(self, filename="test.xlsx", rows=5, cols=3):
         """テスト用Excelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -37,7 +38,8 @@ class TestCoverageFinalBoost:
     def test_file_validation_edge_cases(self):
         """ファイル検証のエッジケース."""
         # 存在しないファイル
-        non_existent = os.path.join(self.temp_dir, "non_existent.xlsx")
+        filename = "non_existent.xlsx"
+        non_existent = Path(self.temp_dir) / filename
 
         try:
             self.loader.load_from_excel(non_existent)
@@ -45,7 +47,8 @@ class TestCoverageFinalBoost:
             pass  # 例外発生は想定内
 
         # 空のディレクトリ
-        empty_dir = os.path.join(self.temp_dir, "empty_dir")
+        filename = "empty_dir.xlsx"
+        empty_dir = Path(self.temp_dir) / filename
         os.makedirs(empty_dir, exist_ok=True)
 
         try:
@@ -87,7 +90,8 @@ class TestCoverageFinalBoost:
 
     def test_data_type_conversion_edge_cases(self):
         """データ型変換のエッジケース."""
-        file_path = os.path.join(self.temp_dir, "data_types.xlsx")
+        filename = "data_types.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -127,7 +131,8 @@ class TestCoverageFinalBoost:
             pass  # セキュリティエラーが発生することを想定
 
         # 長いパス
-        long_path = os.path.join(self.temp_dir, "a" * 255 + ".xlsx")
+        filename = "a" * 255 + ".xlsx"
+        long_path = Path(self.temp_dir) / filename
         try:
             self.loader.load_from_excel(long_path)
         except Exception:
@@ -136,7 +141,8 @@ class TestCoverageFinalBoost:
     def test_encoding_edge_cases(self):
         """エンコーディングのエッジケース."""
         # 日本語ファイル名
-        japanese_filename = os.path.join(self.temp_dir, "テスト.xlsx")
+        filename = "テスト.xlsx"
+        japanese_filename = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "テストデータ"
@@ -151,7 +157,8 @@ class TestCoverageFinalBoost:
     def test_various_file_extensions(self):
         """様々なファイル拡張子のテスト."""
         # .xls形式（対応している場合）
-        xls_path = os.path.join(self.temp_dir, "test.xls")
+        filename = "test.xls"
+        xls_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "XLS Test"
@@ -217,7 +224,8 @@ class TestCoverageFinalBoost:
 
     def test_complex_data_structures(self):
         """複雑なデータ構造のテスト."""
-        file_path = os.path.join(self.temp_dir, "complex.xlsx")
+        filename = "complex_data.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -250,7 +258,8 @@ class TestCoverageFinalBoost:
     def test_boundary_conditions(self):
         """境界条件のテスト."""
         # 最小データ（1x1）
-        minimal_file = os.path.join(self.temp_dir, "minimal.xlsx")
+        filename = "minimal.xlsx"
+        minimal_file = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Single"

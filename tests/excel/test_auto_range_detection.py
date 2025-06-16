@@ -9,6 +9,7 @@ Task 3.1: `:detect-range:` オプション実装のテスト
 """
 
 import os
+from pathlib import Path
 import shutil
 import tempfile
 
@@ -85,7 +86,8 @@ class TestAutoRangeDetection:
         Returns:
             str: 作成されたファイルのパス
         """
-        file_path = os.path.join(self.temp_dir, "complex_data.xlsx")
+        filename = "complex_data.xlsx"
+        file_path = Path(self.temp_dir) / filename
 
         # 複雑なデータ構造を作成
         data = [
@@ -114,7 +116,8 @@ class TestAutoRangeDetection:
         Returns:
             str: 作成されたファイルのパス
         """
-        file_path = os.path.join(self.temp_dir, "scattered_data.xlsx")
+        filename = "scattered_data.xlsx"
+        file_path = Path(self.temp_dir) / filename
 
         # 散在するデータ構造
         data = [

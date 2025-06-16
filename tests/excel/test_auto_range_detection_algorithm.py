@@ -1,8 +1,9 @@
 """自動範囲検出アルゴリズムの包括的テスト."""
 
-import os
+
 import shutil
 import tempfile
+from pathlib import Path
 
 from openpyxl import Workbook
 
@@ -23,7 +24,7 @@ class TestAutoRangeDetectionAlgorithm:
 
     def create_sparse_data_excel(self, filename="sparse_data.xlsx"):
         """スパースデータ（まばらなデータ）を含むExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -49,7 +50,7 @@ class TestAutoRangeDetectionAlgorithm:
 
     def create_complex_connected_region(self, filename="complex_connected.xlsx"):
         """複雑な連続領域を含むExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -84,7 +85,7 @@ class TestAutoRangeDetectionAlgorithm:
 
     def create_fragmented_blocks(self, filename="fragmented_blocks.xlsx"):
         """分離されたブロックを含むExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -111,7 +112,7 @@ class TestAutoRangeDetectionAlgorithm:
 
     def create_large_grid_with_holes(self, filename="grid_with_holes.xlsx"):
         """穴のある大きなグリッドを含むExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -127,7 +128,7 @@ class TestAutoRangeDetectionAlgorithm:
 
     def create_edge_cases_excel(self, filename="edge_cases.xlsx"):
         """エッジケースを含むExcelファイル作成."""
-        file_path = os.path.join(self.temp_dir, filename)
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -247,7 +248,8 @@ class TestAutoRangeDetectionAlgorithm:
 
     def test_connected_region_algorithm(self):
         """連続領域判定アルゴリズムのテスト."""
-        file_path = os.path.join(self.temp_dir, "connected_test.xlsx")
+        filename = "connected_test.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -280,7 +282,8 @@ class TestAutoRangeDetectionAlgorithm:
 
     def test_region_boundary_calculation(self):
         """領域境界計算のテスト."""
-        file_path = os.path.join(self.temp_dir, "boundary_test.xlsx")
+        filename = "boundary_test.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -327,7 +330,8 @@ class TestAutoRangeDetectionAlgorithm:
 
     def test_algorithm_performance_patterns(self):
         """アルゴリズムのパフォーマンステストパターン."""
-        file_path = os.path.join(self.temp_dir, "performance_test.xlsx")
+        filename = "performance_test.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
@@ -367,7 +371,8 @@ class TestAutoRangeDetectionAlgorithm:
 
     def test_empty_regions_handling(self):
         """空領域の処理テスト."""
-        file_path = os.path.join(self.temp_dir, "empty_regions.xlsx")
+        filename = "empty_regions.xlsx"
+        file_path = Path(self.temp_dir) / filename
         wb = Workbook()
         ws = wb.active
 
