@@ -55,7 +55,7 @@ html_static_path = []
 jsontable_max_rows = 10000
 """
         conf_path = self.src_dir / "conf.py"
-        conf_path.write_text(conf_content)
+        conf_path.write_text(conf_content, encoding='utf-8')
         return conf_path
 
     def create_test_json(self, filename: str, data: dict) -> Path:
@@ -63,7 +63,7 @@ jsontable_max_rows = 10000
         import json
 
         json_path = self.data_dir / filename
-        json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+        json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding='utf-8')
         return json_path
 
     def create_test_excel(
@@ -83,14 +83,15 @@ jsontable_max_rows = 10000
             # dict形式
             df = pd.DataFrame(data)
 
-        df.to_excel(excel_path, sheet_name=sheet_name, index=False)
+        with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
         return excel_path
 
     def build_docs(self, rst_content: str) -> tuple[bool, str]:
         """ドキュメントをビルドして結果を返す."""
         # index.rstファイル作成
         index_path = self.src_dir / "index.rst"
-        index_path.write_text(rst_content)
+        index_path.write_text(rst_content, encoding='utf-8')
 
         # conf.py作成
         self.create_conf_py()
@@ -239,7 +240,8 @@ Employees Sheet:
         # ヘッダー付きでExcel作成
         df = pd.DataFrame(data, columns=["Item", "Value", "Category"])
         excel_path = self.data_dir / "large_data.xlsx"
-        df.to_excel(excel_path, index=False)
+        with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False)
 
         # RSTコンテンツ作成(範囲指定)
         rst_content = """

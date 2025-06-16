@@ -60,7 +60,8 @@ class TestEdgeCaseCoverageImprovement:
         # 約10MB程度のデータを作成
         large_data = {f"column_{i}": np.random.random(50000) for i in range(20)}
         df = pd.DataFrame(large_data)
-        df.to_excel(file_path, index=False)
+        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False)
 
         return file_path
 

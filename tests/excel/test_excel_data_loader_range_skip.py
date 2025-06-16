@@ -45,7 +45,8 @@ class TestExcelDataLoaderRangeSkip:
         else:
             df = pd.DataFrame(data)
 
-        df.to_excel(file_path, index=False, header=has_header)
+        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, header=has_header)
         return file_path
 
     def create_large_test_excel(self) -> str:

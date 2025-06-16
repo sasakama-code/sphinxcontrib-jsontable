@@ -101,7 +101,8 @@ class TestJsonTableDirectiveAdvanced:
         else:
             df = pd.DataFrame(data)
 
-        df.to_excel(file_path, index=False, header=has_header)
+        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, header=has_header)
         return file_path
 
     def test_directive_initialization(self):

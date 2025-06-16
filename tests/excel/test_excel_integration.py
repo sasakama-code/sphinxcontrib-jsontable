@@ -91,7 +91,8 @@ class TestExcelIntegration:
         else:
             df = pd.DataFrame(data)
 
-        df.to_excel(file_path, index=False, header=has_header)
+        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, header=has_header)
         return file_path
 
     def create_mock_env(self):
@@ -298,7 +299,8 @@ class TestExcelIntegration:
         try:
             xls_path = Path(self.temp_dir) / "test.xls"
             df = pd.DataFrame(test_data[1:], columns=test_data[0])
-            df.to_excel(xls_path, index=False, engine="xlwt")
+            with pd.ExcelWriter(xls_path, engine="xlwt") as writer:
+                df.to_excel(writer, index=False)
 
             with docutils_namespace():
                 mock_state_machine, mock_state = create_mock_state_machine(

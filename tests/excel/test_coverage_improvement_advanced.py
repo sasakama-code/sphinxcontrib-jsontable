@@ -63,7 +63,8 @@ class TestAdvancedCoverageImprovement:
         """空のExcelファイルを作成."""
         file_path = str(Path(self.temp_dir) / filename)
         df_empty = pd.DataFrame()
-        df_empty.to_excel(file_path, index=False)
+        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+            df_empty.to_excel(writer, index=False)
         return file_path
 
     def test_excel_data_not_found_error(self):

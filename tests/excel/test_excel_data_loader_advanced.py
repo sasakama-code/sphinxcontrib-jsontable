@@ -40,7 +40,8 @@ class TestExcelDataLoaderAdvanced:
         else:
             df = pd.DataFrame(data)
 
-        df.to_excel(file_path, index=False, header=has_header)
+        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, header=has_header)
         return file_path
 
     def test_path_validation_comprehensive(self):
@@ -70,7 +71,8 @@ class TestExcelDataLoaderAdvanced:
         for ext in valid_extensions:
             test_file = Path(self.temp_dir) / f"test{ext}"
             # 実際のファイルを作成
-            pd.DataFrame([["A", "B"], ["1", "2"]]).to_excel(test_file, index=False)
+            with pd.ExcelWriter(test_file, engine='openpyxl') as writer:
+                pd.DataFrame([["A", "B"], ["1", "2"]]).to_excel(writer, index=False)
             assert self.loader.validate_excel_file(test_file) is True
 
         # 無効な拡張子
@@ -203,7 +205,8 @@ class TestExcelDataLoaderAdvanced:
         # 空のExcelファイル
         empty_df = pd.DataFrame()
         empty_path = Path(self.temp_dir) / "empty.xlsx"
-        empty_df.to_excel(empty_path, index=False)
+        with pd.ExcelWriter(empty_path, engine='openpyxl') as writer:
+            empty_df.to_excel(writer, index=False)
         # 空ファイルでも形式的には有効
         assert self.loader.validate_excel_file(empty_path) is True
 

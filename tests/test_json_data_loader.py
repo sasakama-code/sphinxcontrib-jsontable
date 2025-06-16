@@ -354,7 +354,7 @@ def temp_json_file(tmp_path):
     """Create a temporary JSON file for testing."""
     json_file = tmp_path / "test.json"
     test_data = {"test": "data", "numbers": [1, 2, 3]}
-    json_file.write_text(json.dumps(test_data))
+    json_file.write_text(json.dumps(test_data), encoding='utf-8')
     return json_file, test_data
 
 
