@@ -28,7 +28,7 @@ class TestBasicExcelDataLoader:
         import shutil
 
         if self.temp_dir.exists():
-            shutil.rmtree(self.temp_dir)
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def create_test_excel_file(self, filename: str, data: list[list]) -> Path:
         """テスト用Excelファイルを作成."""
