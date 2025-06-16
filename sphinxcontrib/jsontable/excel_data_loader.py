@@ -5051,8 +5051,10 @@ class ExcelDataLoader:
         #   ([A-Z]+[1-9][0-9]*)          :   グループ3 (終了セル)
         # )?                              : グループ2が0回または1回出現
         # $                               : 文字列の末尾
-        valid_range_pattern = re.compile(r'^([A-Z]+[1-9][0-9]*)(:([A-Z]+[1-9][0-9]*))?$')
-        
+        valid_range_pattern = re.compile(
+            r"^([A-Z]+[1-9][0-9]*)(:([A-Z]+[1-9][0-9]*))?$"
+        )
+
         match = valid_range_pattern.fullmatch(range_spec_upper)
 
         if not match:
