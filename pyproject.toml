@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sphinxcontrib-jsontable"
-version = "0.2.0"
-description = "Sphinx extension to render JSON data as tables"
+version = "0.3.0"
+description = "Sphinx extension to render JSON and Excel data as tables with advanced processing features"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

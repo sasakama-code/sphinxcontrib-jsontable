@@ -9,7 +9,7 @@
 
 A powerful Sphinx extension that renders **JSON and Excel data** (from files or inline content) as beautifully formatted reStructuredText tables. Perfect for documentation that needs to display structured data, API examples, configuration references, and data-driven content.
 
-✨ **New Excel Support**: Directly render Excel files (.xlsx/.xls) with advanced features like sheet selection, range specification, merged cell processing, and automatic range detection.
+✨ **Complete Excel Support**: Render Excel files (.xlsx/.xls) with 36+ advanced processing methods including sheet selection, range specification, merged cell processing, automatic range detection, hierarchical headers, and performance caching.
 
 ## Background / Motivation
 
@@ -60,6 +60,31 @@ Against this backdrop, sphinxcontrib-jsontable was developed to directly embed s
 * User-friendly warnings for large data
 
 ## Installation
+
+### Using UV (Recommended)
+
+**UV Installation:**
+```bash
+# Install UV package manager
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# For new projects
+uv init my-sphinx-project
+cd my-sphinx-project
+uv add sphinxcontrib-jsontable
+
+# With Excel support
+uv add "sphinxcontrib-jsontable[excel]"
+```
+
+**Development Environment:**
+```bash
+# Clone and setup development environment
+git clone https://github.com/sasakama-code/sphinxcontrib-jsontable.git
+cd sphinxcontrib-jsontable
+uv sync
+uv run pytest
+```
 
 ### From PyPI
 
@@ -143,13 +168,29 @@ User Database
 
 **Excel Example in reStructuredText (.rst):**
 ```rst
-Sales Report
-============
+Sales Data Analysis
+==================
 
 .. jsontable:: data/sales_report.xlsx
    :header:
-   :sheet: Q1 Sales
-   :range: A1:E20
+   :sheet: "Q1 Data"
+   :range: A1:E50
+   :skip-rows: 2,4
+   :merge-cells: expand
+   :json-cache:
+```
+
+**Advanced Excel Processing:**
+```rst
+Financial Report
+===============
+
+.. jsontable:: reports/financial.xlsx
+   :sheet-index: 1
+   :header-row: 2
+   :detect-range: auto
+   :merge-headers: 
+   :limit: 100
 ```
 
 **In Markdown (with myst-parser):**
@@ -292,6 +333,28 @@ sphinxcontrib-jsontable provides comprehensive Excel file support with advanced 
 | `merge-cells` | string | Merged cell handling | `:merge-cells: expand` |
 | `merge-headers` | string | Multi-row header merging | `:merge-headers: true` |
 | `json-cache` | flag | Enable caching | `:json-cache:` |
+| `auto-header` | flag | Auto header detection | `:auto-header:` |
+
+### Complete Directive Options
+
+The `jsontable` directive supports all these options for maximum flexibility:
+
+```rst
+.. jsontable:: data.xlsx
+   :header:              # Include header row
+   :encoding: utf-8      # File encoding specification  
+   :limit: 1000          # Row limit for display
+   :sheet: "Data Sheet"  # Sheet name selection
+   :sheet-index: 0       # Sheet index selection (0-based)
+   :range: A1:E50        # Cell range (Excel format)
+   :header-row: 1        # Header row number (0-based)
+   :skip-rows: 2,4,6-10  # Skip specific rows
+   :detect-range: auto   # Auto-detect data range (auto/smart/manual)
+   :auto-header:         # Automatic header detection
+   :merge-cells: expand  # Merged cell processing (expand/ignore/first-value)
+   :merge-headers:       # Hierarchical header merging
+   :json-cache:          # Enable JSON caching for performance
+```
 
 ## Comprehensive Usage Guide
 
