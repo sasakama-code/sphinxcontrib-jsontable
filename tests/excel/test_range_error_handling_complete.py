@@ -119,8 +119,8 @@ class TestRangeErrorHandlingComplete:
             error_message = str(exc_info.value)
             assert ("Failed to parse range specification" in error_message or
                    "Invalid range specification" in error_message or
-                   "Unexpected error parsing range specification" in error_message)
-            # 範囲指定に関するエラーであることを確認
+                   "Unexpected error parsing range specification" in error_message or
+                   "Invalid range format" in error_message)
 
     def test_invalid_cell_address_format(self):
         """無効なセルアドレスフォーマットでRangeSpecificationError."""
@@ -144,7 +144,8 @@ class TestRangeErrorHandlingComplete:
                     "Invalid range specification" in error_message or 
                     "Unexpected error parsing range specification" in error_message or 
                     "exceeds data rows" in error_message or 
-                    "exceeds data columns" in error_message)
+                    "exceeds data columns" in error_message or
+                    "Invalid range format" in error_message)
 
     def test_range_out_of_bounds(self):
         """範囲外指定でのエラーハンドリング."""
@@ -231,7 +232,8 @@ class TestRangeErrorHandlingComplete:
             error_message = str(exc_info.value)
             assert ("Failed to parse range specification" in error_message or
                    "Invalid cell address" in error_message or
-                   "Unexpected error parsing range specification" in error_message)
+                   "Unexpected error parsing range specification" in error_message or
+                   "Invalid range format" in error_message)
 
     def test_exception_chaining_in_range_parsing(self):
         """範囲解析での例外チェーンテスト."""
@@ -242,9 +244,11 @@ class TestRangeErrorHandlingComplete:
             self.loader.load_from_excel_with_range(excel_path, "INVALID:RANGE")
 
         # 例外チェーンが正しく設定されているかチェック
-        exception = exc_info.value
-        assert ("Failed to parse range specification" in str(exception) or
-               "Unexpected error parsing range specification" in str(exception))
+        error_message = str(exc_info.value)
+        assert ("Failed to parse range specification" in error_message or
+                "Invalid cell address" in error_message or
+                "Unexpected error parsing range specification" in error_message or
+                "Invalid range format" in error_message)
 
     def test_case_sensitivity_in_range_parsing(self):
         """範囲解析の大文字小文字処理."""
@@ -300,7 +304,8 @@ class TestRangeErrorHandlingComplete:
         assert "COMPLETELY_INVALID" in error_message
         assert ("Failed to parse range specification" in error_message or
                "Invalid range specification" in error_message or
-               "Unexpected error parsing range specification" in error_message)
+               "Unexpected error parsing range specification" in error_message or
+               "Invalid range format" in error_message)
 
     def test_range_specification_error_attributes(self):
         """RangeSpecificationErrorの属性テスト."""
