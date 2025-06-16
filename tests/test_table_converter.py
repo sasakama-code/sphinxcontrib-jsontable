@@ -861,11 +861,9 @@ class TestTableConverterExtractHeaders:
 class TestExtractHeadersPerformance:
     """pytest-benchmarkベースの安定的なパフォーマンステスト。"""
 
-    @pytest.mark.benchmark
-    def test_extract_headers_benchmark(self, converter, benchmark):
+    def test_extract_headers_benchmark(self, converter):
         """
-        pytest-benchmarkを使用した安定的なパフォーマンステスト。
-        CI環境でも安定して動作。
+        大きなデータセットでのヘッダー抽出パフォーマンステスト。
         """
         # Arrange
         large_objects = [
@@ -873,17 +871,16 @@ class TestExtractHeadersPerformance:
         ]
 
         # Act & Assert
-        result = benchmark(converter._extract_headers, large_objects)
+        result = converter._extract_headers(large_objects)
 
         # 機能確認(時間に依存しない)
         assert len(result) <= 1000
         assert isinstance(result, list)
         assert all(isinstance(key, str) for key in result)
 
-    @pytest.mark.benchmark
-    def test_scalability_benchmark_stable(self, converter, benchmark):
+    def test_scalability_benchmark_stable(self, converter):
         """
-        スケーラビリティのbenchmarkテスト(安定版)。
+        スケーラビリティのテスト(安定版)。
         """
         # Arrange
         very_large_objects = [
@@ -891,8 +888,10 @@ class TestExtractHeadersPerformance:
         ]
 
         # Act & Assert
-        result = benchmark(converter._extract_headers, very_large_objects)
+        result = converter._extract_headers(very_large_objects)
         assert len(result) <= 1000
+        assert isinstance(result, list)
+        assert all(isinstance(key, str) for key in result)
 
     @pytest.mark.performance
     def test_extract_headers_performance_reference_only(self, converter):

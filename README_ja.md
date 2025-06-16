@@ -7,7 +7,9 @@
 
 **言語:** [English](README.md) | [日本語](README_ja.md)
 
-JSONデータ（ファイルまたはインラインコンテンツ）を美しくフォーマットされたreStructuredTextテーブルとしてレンダリングする強力なSphinx拡張機能です。構造化データ、APIサンプル、設定リファレンス、データ駆動型コンテンツを表示するドキュメントに最適です。
+**JSONデータおよびExcelファイル**（ファイルまたはインラインコンテンツ）を美しくフォーマットされたreStructuredTextテーブルとしてレンダリングする強力なSphinx拡張機能です。構造化データ、APIサンプル、設定リファレンス、データ駆動型コンテンツを表示するドキュメントに最適です。
+
+✨ **完全なExcel対応**: Excelファイル（.xlsx/.xls）を36+の高度な処理メソッドでレンダリング。シート選択、範囲指定、結合セル処理、自動範囲検出、階層ヘッダー、パフォーマンスキャッシュを含みます。
 
 ## 背景・動機
 
@@ -19,14 +21,25 @@ JSONデータ（ファイルまたはインラインコンテンツ）を美し�
 
 ✨ **柔軟なデータソース**
 * Sphinxプロジェクト内のJSONファイルの読み込み
+* **Excelファイル（.xlsx/.xls）の高度な処理による直接読み込み**
 * ドキュメントに直接JSONを埋め込み
 * 安全なパス解決機能付きの相対ファイルパス対応
 
 📊 **複数のデータ形式**
 * JSONオブジェクト（単一または配列）
 * オプションヘッダー付きの2次元配列
+* **複雑な構造を持つExcelスプレッドシート**
 * 自動文字列変換機能付きの混合データ型
 * ネストされたデータ構造（適切にフラット化）
+
+📋 **Excel専用機能**
+* **シート選択**: 名前またはインデックスで特定のシートを指定
+* **範囲指定**: 特定のセル範囲からデータを抽出（A1:D10）
+* **スマートヘッダー検出**: 自動ヘッダー行識別
+* **結合セル処理**: 様々な戦略で結合セルを処理
+* **行スキップ**: 柔軟なパターンで不要な行をスキップ
+* **自動範囲検出**: インテリジェントなデータ境界検出
+* **JSONキャッシュ**: パフォーマンス向上のためにデータをキャッシュ
 
 🎛️ **カスタマイズ可能な出力**
 * 自動キー抽出機能付きのオプションヘッダー行
@@ -48,17 +61,60 @@ JSONデータ（ファイルまたはインラインコンテンツ）を美し�
 
 ## インストール
 
+### UV使用（推奨）
+
+**UVインストール:**
+```bash
+# UVパッケージマネージャーのインストール
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 新しいプロジェクト用
+uv init my-sphinx-project
+cd my-sphinx-project
+uv add sphinxcontrib-jsontable
+
+# Excel対応付き
+uv add "sphinxcontrib-jsontable[excel]"
+```
+
+**開発環境:**
+```bash
+# リポジトリのクローンと開発環境セットアップ
+git clone https://github.com/sasakama-code/sphinxcontrib-jsontable.git
+cd sphinxcontrib-jsontable
+uv sync
+uv run pytest
+```
+
 ### PyPIから
+
+**基本インストール（JSON対応のみ）:**
 ```bash
 pip install sphinxcontrib-jsontable
+```
+
+**Excel対応付き:**
+```bash
+pip install sphinxcontrib-jsontable[excel]
+```
+
+**完全インストール（全機能）:**
+```bash
+pip install sphinxcontrib-jsontable[all]
 ```
 
 ### ソースから
 ```bash
 git clone https://github.com/sasakama-code/sphinxcontrib-jsontable.git
 cd sphinxcontrib-jsontable
-pip install -e .
+pip install -e .[excel]  # Excel対応付き
 ```
+
+### 依存関係
+
+**コア:** Python 3.10+、Sphinx 3.0+、docutils 0.18+
+
+**Excel対応:** pandas 2.0+、openpyxl 3.1+
 
 ## クイックスタート
 
@@ -100,7 +156,7 @@ jsontable_max_rows = 5000  # デフォルト: 10000
 
 ### 3. ドキュメントに追加
 
-**reStructuredText (.rst) の場合：**
+**reStructuredText (.rst) でのJSON例：**
 ```rst
 ユーザーデータベース
 ==================
@@ -110,6 +166,33 @@ jsontable_max_rows = 5000  # デフォルト: 10000
    :limit: 10
 ```
 
+**reStructuredText (.rst) でのExcel例：**
+```rst
+売上データ分析
+==============
+
+.. jsontable:: data/sales_report.xlsx
+   :header:
+   :sheet: "Q1データ"
+   :range: A1:E50
+   :skip-rows: 2,4
+   :merge-cells: expand
+   :json-cache:
+```
+
+**高度なExcel処理:**
+```rst
+財務レポート
+============
+
+.. jsontable:: reports/financial.xlsx
+   :sheet-index: 1
+   :header-row: 2
+   :detect-range: auto
+   :merge-headers: 
+   :limit: 100
+```
+
 **Markdown（myst-parser使用）の場合：**
 ````markdown
 # ユーザーデータベース
@@ -117,6 +200,14 @@ jsontable_max_rows = 5000  # デフォルト: 10000
 ```{jsontable} data/users.json
 :header:
 :limit: 10
+```
+
+# Excelセールスデータ
+
+```{jsontable} data/quarterly_sales.xlsx
+:header:
+:sheet: サマリー
+:header-row: 2
 ```
 ````
 
@@ -206,6 +297,147 @@ CSV形式のデータ、レポート、マトリックスに最適：
 ```
 
 **出力：** キーが1つの列、値が別の列になります。
+
+## Excel対応ガイド
+
+### Excelファイル処理
+
+sphinxcontrib-jsontableは、複雑なスプレッドシート構造を処理する高度な機能を備えた包括的なExcelファイル対応を提供します。
+
+#### 基本的なExcel使用
+
+```rst
+.. jsontable:: data/employees.xlsx
+   :header:
+```
+
+#### シート選択
+
+**シート名による選択:**
+```rst
+.. jsontable:: data/financial_report.xlsx
+   :header:
+   :sheet: 四半期結果
+```
+
+**シートインデックスによる選択（0ベース）:**
+```rst
+.. jsontable:: data/financial_report.xlsx
+   :header:
+   :sheet-index: 2
+```
+
+#### 範囲指定
+
+**特定のセル範囲:**
+```rst
+.. jsontable:: data/large_dataset.xlsx
+   :header:
+   :range: A1:F25
+```
+
+**特定のセルから開始:**
+```rst
+.. jsontable:: data/data_with_headers.xlsx
+   :header:
+   :range: B3:H50
+```
+
+#### 高度なヘッダー設定
+
+**カスタムヘッダー行:**
+```rst
+.. jsontable:: data/complex_report.xlsx
+   :header:
+   :header-row: 3
+```
+
+**不要な行をスキップ:**
+```rst
+.. jsontable:: data/messy_data.xlsx
+   :header:
+   :skip-rows: 0-2,5,7-9
+```
+
+#### 結合セル処理
+
+**結合セルを展開:**
+```rst
+.. jsontable:: data/formatted_report.xlsx
+   :header:
+   :merge-cells: expand
+```
+
+**結合セルを無視:**
+```rst
+.. jsontable:: data/formatted_report.xlsx
+   :header:
+   :merge-cells: ignore
+```
+
+#### 自動範囲検出
+
+**スマートデータ検出:**
+```rst
+.. jsontable:: data/unstructured.xlsx
+   :header:
+   :detect-range: auto
+```
+
+**手動オーバーライド:**
+```rst
+.. jsontable:: data/complex_layout.xlsx
+   :header:
+   :detect-range: manual
+   :range: C5:J30
+```
+
+#### パフォーマンス最適化
+
+**JSONキャッシュを有効化:**
+```rst
+.. jsontable:: data/large_workbook.xlsx
+   :header:
+   :json-cache:
+```
+
+### Excelオプション一覧
+
+| オプション | 型 | 説明 | 例 |
+|-----------|----|-----------|---------|
+| `sheet` | 文字列 | 読み取るシート名 | `:sheet: セールスデータ` |
+| `sheet-index` | 整数 | シートインデックス（0ベース） | `:sheet-index: 1` |
+| `range` | 文字列 | セル範囲（A1:D10） | `:range: B2:F20` |
+| `header-row` | 整数 | ヘッダー行番号（0ベース） | `:header-row: 2` |
+| `skip-rows` | 文字列 | スキップする行 | `:skip-rows: 0-2,5,7-9` |
+| `detect-range` | 文字列 | 自動検出モード | `:detect-range: auto` |
+| `merge-cells` | 文字列 | 結合セル処理 | `:merge-cells: expand` |
+| `merge-headers` | 文字列 | 複数行ヘッダー結合 | `:merge-headers: true` |
+| `json-cache` | フラグ | キャッシュ有効化 | `:json-cache:` |
+| `auto-header` | フラグ | 自動ヘッダー検出 | `:auto-header:` |
+
+### 完全ディレクティブオプション
+
+`jsontable`ディレクティブは最大限の柔軟性のため以下すべてのオプションをサポートします：
+
+```rst
+.. jsontable:: data.xlsx
+   :header:              # ヘッダー行を含める
+   :encoding: utf-8      # ファイルエンコーディング指定  
+   :limit: 1000          # 表示行数制限
+   :sheet: "データシート"  # シート名選択
+   :sheet-index: 0       # シートインデックス選択（0ベース）
+   :range: A1:E50        # セル範囲（Excel形式）
+   :header-row: 1        # ヘッダー行番号（0ベース）
+   :skip-rows: 2,4,6-10  # 特定行をスキップ
+   :detect-range: auto   # データ範囲を自動検出（auto/smart/manual）
+   :auto-header:         # 自動ヘッダー検出
+   :merge-cells: expand  # 結合セル処理（expand/ignore/first-value）
+   :merge-headers:       # 階層ヘッダー結合
+   :json-cache:          # パフォーマンス向上のためJSONキャッシュ有効化
+```
+
+## 包括的な使用ガイド
 
 ### ディレクティブオプション一覧
 
@@ -586,6 +818,49 @@ jsontable_max_rows = 5000  # ニーズに応じて調整
 - 末尾カンマ、引用符なしキーをチェック
 - 特殊文字の適切なエスケープを確認
 
+**Excel固有エラー:**
+
+**エラー：「Excel file not found」**
+```rst
+# ❌ 間違ったパス
+.. jsontable:: data/missing_file.xlsx
+
+# ✅ 正しいパスでファイルが存在
+.. jsontable:: data/actual_file.xlsx
+```
+
+**エラー：「Invalid Excel file format」**
+- ファイルに.xlsxまたは.xls拡張子があることを確認
+- ファイルが破損していないことを確認
+- ファイルが実際にExcelファイルかチェック（リネームされたCSVでない）
+
+**エラー：「Sheet not found」**
+```rst
+# ❌ 存在しないシート名
+.. jsontable:: data/report.xlsx
+   :sheet: NonExistentSheet
+
+# ✅ 有効なシート名またはインデックス
+.. jsontable:: data/report.xlsx
+   :sheet: Sheet1
+```
+
+**エラー：「Invalid range specification」**
+```rst
+# ❌ 無効な範囲形式
+.. jsontable:: data/report.xlsx
+   :range: Z99:AA1000
+
+# ✅ 有効な範囲形式
+.. jsontable:: data/report.xlsx
+   :range: A1:F25
+```
+
+**エラー：「No data found in specified range」**
+- 指定した範囲にデータが含まれているかチェック
+- 範囲座標がシート境界内にあることを確認
+- 範囲指定形式が正しいことを確認（A1:D10）
+
 **パフォーマンス警告**
 ```
 WARNING: 大量データセット検出（25,000行）。パフォーマンスのため最初の10,000行を表示。
@@ -670,11 +945,13 @@ jsontable_max_rows = 1000  # デバッグ用低制限
 - `.. jsonschema::`を`.. jsontable::`に置換
 - スキーマ検証オプションを削除
 - 必要に応じて`:header:`オプションを追加
+- 自動パフォーマンス保護とキー順序保持の恩恵を享受
 
 **カスタムソリューションから：**
-- データをJSON形式にエクスポート
+- データをJSON形式またはExcel形式にエクスポート
 - カスタムテーブル生成を`.. jsontable::`に置換
 - ファイルパスをソースディレクトリ相対に更新
+- Excelファイル用の高度な処理機能を活用
 
 #### バージョン互換性
 
@@ -682,38 +959,129 @@ jsontable_max_rows = 1000  # デバッグ用低制限
 - **Python：** 3.10+（推奨：3.11+）
 - **Docutils：** 0.14+
 
+## 開発者ドキュメント
+
+### アーキテクチャ概要
+
+sphinxcontrib-jsontableは、拡張性と保守性のために設計されたモジュラー、階層化アーキテクチャに従います：
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Sphinx統合                               │
+├─────────────────────────────────────────────────────────────┤
+│              JsonTableDirective (メインエントリ)            │
+├─────────────────────┬───────────────────────────────────────┤
+│   JsonDataLoader    │        ExcelDataLoader               │
+│   (JSON対応)        │        (Excel対応)                   │
+├─────────────────────┴───────────────────────────────────────┤
+│                   TableConverter                            │
+│              (フォーマット非依存処理)                        │
+├─────────────────────────────────────────────────────────────┤
+│                    TableBuilder                             │
+│                (Docutils統合)                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ### APIリファレンス
 
 #### コアクラス
 
-**`JsonTableDirective`**
+**`JsonTableDirective`** (`sphinxcontrib/jsontable/directives.py:596`)
 - メインのSphinxディレクティブクラス
 - オプション解析と実行を処理
 - データ読み込み、変換、レンダリングを調整
+- **オプション**: Excel専用機能を含む13の総オプション
 
-**`JsonDataLoader`**  
+**`JsonDataLoader`** (`sphinxcontrib/jsontable/directives.py:112`)
 - ファイルまたはインラインコンテンツからJSONを読み込み
 - エンコーディングとファイルパスを検証
-- 安全なファイルアクセスを提供
+- パストラバーサル防止による安全なファイルアクセスを提供
 
-**`TableConverter`**
-- JSON構造を2次元テーブルデータに変換
+**`ExcelDataLoader`** (`sphinxcontrib/jsontable/excel_data_loader.py`)
+- 包括的なExcelファイル処理
+- **メソッド**: `load_from_excel()`, `validate_excel_file()`, `header_detection()`
+- **機能**: シート選択、範囲指定、結合セル処理
+- **エラーハンドリング**: 多言語対応による強化されたエラークラス
+
+**`TableConverter`** (`sphinxcontrib/jsontable/directives.py:204`)
+- JSON/ExcelデータをJ2Dテーブル形式に変換
 - 異なるデータ形式を処理（オブジェクト、配列、混合）
 - ヘッダー抽出と行制限を管理
-- 自動パフォーマンス制限を適用
+- 自動パフォーマンス制限を適用（デフォルト10,000行）
 
-**`TableBuilder`**
-- Docutilsテーブルノードを生成
+**`TableBuilder`** (`sphinxcontrib/jsontable/directives.py:403`)
+- Sphinxレンダリング用のDocutilsテーブルノードを生成
 - ヘッダー/ボディ付きの適切なテーブル構造を作成
 - セルフォーマットとパディングを処理
 
+#### Excel専用クラス
+
+**強化されたエラークラス** (`excel_data_loader.py:29-143`)
+```python
+class EnhancedExcelError(Exception):
+    """多言語対応による強化されたExcelエラーのベースクラス"""
+    
+class ExcelFileNotFoundError(EnhancedExcelError):
+    """復旧提案付きのExcelファイル見つからないエラー"""
+    
+class ExcelFileFormatError(EnhancedExcelError):
+    """ユーザーフレンドリーなガイダンス付きの無効なExcel形式エラー"""
+```
+
+#### オプション仕様
+
+```python
+option_spec = {
+    # コアオプション
+    "header": directives.flag,
+    "encoding": directives.unchanged,
+    "limit": directives.nonnegative_int,
+    
+    # Excel専用オプション  
+    "sheet": directives.unchanged,
+    "sheet-index": directives.nonnegative_int,
+    "range": directives.unchanged,
+    "header-row": directives.nonnegative_int,
+    "skip-rows": directives.unchanged,
+    "detect-range": directives.unchanged,
+    "auto-header": directives.flag,
+    "merge-cells": directives.unchanged,
+    "merge-headers": directives.unchanged,
+    "json-cache": directives.flag,
+}
+```
+
+### テストフレームワーク
+
+**テスト構成**:
+```
+tests/
+├── excel/              # Excel専用テスト（18ファイル）
+├── unit/               # コアコンポーネント単体テスト  
+├── integration/        # コンポーネント間統合テスト
+├── performance/        # パフォーマンス・ベンチマークテスト
+└── coverage/           # カバレッジ専用テスト
+```
+
+**テスト実行**:
+```bash
+# 標準テスト実行
+uv run python -m pytest
+
+# Excel専用テスト
+uv run python -m pytest tests/excel/
+
+# パフォーマンステスト
+uv run python -m pytest --benchmark-only
+```
+
 #### エラーハンドリング
 
-すべてのエラーは`JsonTableError`から継承：
-- ファイルアクセスエラー
-- JSON解析エラー  
-- 無効なデータ構造エラー
-- パストラバーサル試行
+すべてのエラーはドメイン固有のベースクラスから継承：
+- `JsonTableError`：ベースエラークラス
+- `EnhancedExcelError`：Excel専用強化エラー
+- 復旧提案付きファイルアクセスエラー
+- ユーザーガイダンス付き入力検証エラー
 
 ### コントリビューション
 
@@ -744,6 +1112,50 @@ pytest --cov=sphinxcontrib.jsontable
 # 特定テスト実行
 pytest tests/test_directives.py::test_json_table_basic
 ```
+
+### 拡張開発
+
+#### 新しいデータソースの追加
+
+新しいデータ形式のサポートを追加するには、このパターンに従ってください：
+
+1. **データローダークラスの作成**:
+```python
+class NewFormatDataLoader:
+    def __init__(self, source_dir: str):
+        self.source_dir = source_dir
+        
+    def load_from_format(self, file_path: str, **options) -> dict:
+        """ロードしてJSON互換形式に変換"""
+        # ここに実装
+        return {"data": converted_data, "headers": headers}
+```
+
+2. **JsonTableDirectiveの更新**:
+```python
+def run(self) -> list[nodes.Node]:
+    # 形式検出の追加
+    if file_path.endswith('.newformat'):
+        loader = NewFormatDataLoader(self.env.srcdir)
+        result = loader.load_from_format(file_path, **options)
+```
+
+3. **オプション仕様の追加**:
+```python
+option_spec["new-option"] = directives.unchanged
+```
+
+#### パフォーマンス考慮事項
+
+**メモリ管理**:
+- 大規模データセットは自動的に制限（設定可能）
+- Excelファイルのストリーミング処理
+- パフォーマンス向上のためのJSONキャッシュ
+
+**セキュリティ機能**:
+- `is_safe_path()`によるパストラバーサル防止
+- ソースディレクトリに制限されたファイルアクセス
+- 全オプションの入力検証
 
 ### サンプルリポジトリ
 
@@ -776,6 +1188,19 @@ python scripts/performance_benchmark.py
 
 # CI環境検証
 python scripts/validate_ci_tests.py
+```
+
+### サンプルリポジトリ
+
+[`examples/`](examples/)ディレクトリで以下を参照：
+- 完全なSphinxプロジェクトセットアップ
+- 様々なデータ形式の例（JSON、Excel） 
+- 他の拡張機能との統合
+- 高度な設定例
+
+```bash
+cd examples/
+sphinx-build -b html . _build/html/
 ```
 
 ### 変更履歴
