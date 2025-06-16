@@ -3,9 +3,7 @@
 import os
 import shutil
 import tempfile
-from pathlib import Path
 
-import pytest
 from openpyxl import Workbook
 
 from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
@@ -40,7 +38,7 @@ class TestCoverageFinalBoost:
         """ファイル検証のエッジケース."""
         # 存在しないファイル
         non_existent = os.path.join(self.temp_dir, "non_existent.xlsx")
-        
+
         try:
             self.loader.load_from_excel(non_existent)
         except Exception:
@@ -49,7 +47,7 @@ class TestCoverageFinalBoost:
         # 空のディレクトリ
         empty_dir = os.path.join(self.temp_dir, "empty_dir")
         os.makedirs(empty_dir, exist_ok=True)
-        
+
         try:
             self.loader.load_from_excel(empty_dir)
         except Exception:
@@ -58,7 +56,7 @@ class TestCoverageFinalBoost:
     def test_sheet_detection_edge_cases(self):
         """シート検出のエッジケース."""
         excel_path = self.create_test_excel()
-        
+
         # 存在しないシート名
         try:
             self.loader.load_from_excel(excel_path, sheet_name="NonExistentSheet")
@@ -74,7 +72,7 @@ class TestCoverageFinalBoost:
     def test_header_detection_edge_cases(self):
         """ヘッダー検出のエッジケース."""
         excel_path = self.create_test_excel()
-        
+
         # 負の値のヘッダー行
         try:
             self.loader.load_from_excel_with_header_row(excel_path, -2)
@@ -97,9 +95,9 @@ class TestCoverageFinalBoost:
         ws["A1"] = None
         ws["B1"] = ""
         ws["C1"] = 0
-        ws["A2"] = float('inf')
-        ws["B2"] = float('-inf')
-        ws["C2"] = float('nan')
+        ws["A2"] = float("inf")
+        ws["B2"] = float("-inf")
+        ws["C2"] = float("nan")
 
         wb.save(file_path)
 
@@ -113,7 +111,7 @@ class TestCoverageFinalBoost:
         """メモリ管理のエッジケース."""
         # 大きなファイル（メモリ制限テスト）
         large_excel = self.create_test_excel("large.xlsx", 100, 20)
-        
+
         try:
             result = self.loader.load_from_excel(large_excel)
             assert isinstance(result, dict)
@@ -168,7 +166,7 @@ class TestCoverageFinalBoost:
     def test_cache_edge_cases(self):
         """キャッシュのエッジケース."""
         excel_path = self.create_test_excel()
-        
+
         # キャッシュディレクトリが存在しない場合
         try:
             result = self.loader.load_from_excel_with_cache(excel_path)
@@ -187,7 +185,7 @@ class TestCoverageFinalBoost:
     def test_error_recovery_edge_cases(self):
         """エラー回復のエッジケース."""
         excel_path = self.create_test_excel()
-        
+
         # 無効なオプション組み合わせ
         try:
             self.loader.load_from_excel_with_range(excel_path, "A1:Z999")
@@ -203,7 +201,7 @@ class TestCoverageFinalBoost:
     def test_utility_methods_coverage(self):
         """ユーティリティメソッドのカバレッジ."""
         excel_path = self.create_test_excel()
-        
+
         # 基本ユーティリティメソッド
         try:
             sheets = self.loader.detect_sheets(excel_path)
@@ -227,9 +225,10 @@ class TestCoverageFinalBoost:
         ws["A1"] = "Header1"
         ws["B1"] = "Header2"
         ws["C1"] = "Header3"
-        
+
         # 日付データ
         from datetime import datetime
+
         ws["A2"] = datetime.now()
         ws["B2"] = "Text Data"
         ws["C2"] = 123.456
@@ -265,24 +264,22 @@ class TestCoverageFinalBoost:
 
         # 最大列（Excel制限に近い）
         try:
-            large_range_result = self.loader.load_from_excel_with_range(
-                minimal_file, "A1:XFD1048576"
-            )
+            self.loader.load_from_excel_with_range(minimal_file, "A1:XFD1048576")
         except Exception:
             pass  # 大きすぎる範囲でエラーが発生することを想定
 
     def test_concurrent_access_simulation(self):
         """並行アクセスのシミュレーション."""
         excel_path = self.create_test_excel()
-        
+
         # 複数のローダーで同じファイルにアクセス
         try:
             loader1 = ExcelDataLoader(self.temp_dir)
             loader2 = ExcelDataLoader(self.temp_dir)
-            
+
             result1 = loader1.load_from_excel(excel_path)
             result2 = loader2.load_from_excel(excel_path)
-            
+
             assert isinstance(result1, dict)
             assert isinstance(result2, dict)
         except Exception:
@@ -291,11 +288,11 @@ class TestCoverageFinalBoost:
     def test_performance_edge_cases(self):
         """パフォーマンスエッジケース."""
         excel_path = self.create_test_excel("performance.xlsx", 50, 10)
-        
+
         # パフォーマンス関連のメソッド
         try:
             # ベンチマークメソッド（存在する場合）
-            if hasattr(self.loader, 'load_from_excel_with_benchmark'):
+            if hasattr(self.loader, "load_from_excel_with_benchmark"):
                 result = self.loader.load_from_excel_with_benchmark(excel_path)
                 assert isinstance(result, dict)
         except Exception:
@@ -303,7 +300,7 @@ class TestCoverageFinalBoost:
 
         # ストリーミング読み込み（存在する場合）
         try:
-            if hasattr(self.loader, 'load_from_excel_with_streaming'):
+            if hasattr(self.loader, "load_from_excel_with_streaming"):
                 result = self.loader.load_from_excel_with_streaming(excel_path)
                 assert isinstance(result, dict)
         except Exception:

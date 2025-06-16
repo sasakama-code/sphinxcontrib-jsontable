@@ -4,7 +4,6 @@ import os
 import shutil
 import tempfile
 import warnings
-from pathlib import Path
 
 import pytest
 from openpyxl import Workbook
@@ -51,7 +50,9 @@ class TestExternalLinkSecurity:
         wb.save(file_path)
         return file_path
 
-    def create_excel_with_dangerous_cell_content(self, filename="dangerous_content.xlsx"):
+    def create_excel_with_dangerous_cell_content(
+        self, filename="dangerous_content.xlsx"
+    ):
         """危険なセル内容を含むExcelファイル作成."""
         file_path = os.path.join(self.temp_dir, filename)
         wb = Workbook()
@@ -101,12 +102,15 @@ class TestExternalLinkSecurity:
 
         # デバッグ: 実際に何が起こるかを確認
         try:
-            result = self.loader_strict.load_from_excel(excel_path)
+            self.loader_strict.load_from_excel(excel_path)
             # もし例外が発生しなかった場合、スキップする
             pytest.skip("External link security not implemented or not triggered")
         except ValueError as e:
             error_message = str(e)
-            assert "Dangerous external links detected" in error_message or "dangerous" in error_message.lower()
+            assert (
+                "Dangerous external links detected" in error_message
+                or "dangerous" in error_message.lower()
+            )
         except Exception as e:
             # 他の例外の場合もスキップ
             pytest.skip(f"Unexpected exception: {e}")
@@ -116,11 +120,14 @@ class TestExternalLinkSecurity:
         excel_path = self.create_excel_with_dangerous_cell_content()
 
         try:
-            result = self.loader_strict.load_from_excel(excel_path)
+            self.loader_strict.load_from_excel(excel_path)
             pytest.skip("External link security not implemented or not triggered")
         except ValueError as e:
             error_message = str(e)
-            assert "Dangerous external links detected" in error_message or "dangerous" in error_message.lower()
+            assert (
+                "Dangerous external links detected" in error_message
+                or "dangerous" in error_message.lower()
+            )
         except Exception as e:
             pytest.skip(f"Unexpected exception: {e}")
 
@@ -129,11 +136,14 @@ class TestExternalLinkSecurity:
         excel_path = self.create_excel_with_mixed_dangerous_links()
 
         try:
-            result = self.loader_strict.load_from_excel(excel_path)
+            self.loader_strict.load_from_excel(excel_path)
             pytest.skip("External link security not implemented or not triggered")
         except ValueError as e:
             error_message = str(e)
-            assert "Dangerous external links detected" in error_message or "dangerous" in error_message.lower()
+            assert (
+                "Dangerous external links detected" in error_message
+                or "dangerous" in error_message.lower()
+            )
         except Exception as e:
             pytest.skip(f"Unexpected exception: {e}")
 
@@ -145,16 +155,19 @@ class TestExternalLinkSecurity:
             warnings.simplefilter("always")
             try:
                 result = self.loader_warn.load_from_excel(excel_path)
-                
+
                 # データが正常に読み込まれることを確認
                 assert isinstance(result, dict)
                 assert "data" in result
-                
+
                 # 警告が発生したか確認(空でもテストは通す)
                 if warning_list:
                     warning_message = str(warning_list[0].message)
-                    assert "Security Warning" in warning_message or "dangerous" in warning_message.lower()
-                    
+                    assert (
+                        "Security Warning" in warning_message
+                        or "dangerous" in warning_message.lower()
+                    )
+
             except Exception as e:
                 pytest.skip(f"Unexpected exception in warn mode: {e}")
 
@@ -166,16 +179,19 @@ class TestExternalLinkSecurity:
             warnings.simplefilter("always")
             try:
                 result = self.loader_warn.load_from_excel(excel_path)
-                
+
                 # データは正常に読み込まれることを確認
                 assert isinstance(result, dict)
                 assert "data" in result
-                
+
                 # 警告が発生したか確認(空でもテストは通す)
                 if warning_list:
                     warning_message = str(warning_list[0].message)
-                    assert "Security Warning" in warning_message or "dangerous" in warning_message.lower()
-                    
+                    assert (
+                        "Security Warning" in warning_message
+                        or "dangerous" in warning_message.lower()
+                    )
+
             except Exception as e:
                 pytest.skip(f"Unexpected exception in warn mode: {e}")
 
@@ -190,8 +206,7 @@ class TestExternalLinkSecurity:
 
         # セキュリティ警告が発生しないことを確認
         security_warnings = [
-            w for w in warning_list 
-            if "Security Warning" in str(w.message)
+            w for w in warning_list if "Security Warning" in str(w.message)
         ]
         assert len(security_warnings) == 0
 
@@ -224,8 +239,7 @@ class TestExternalLinkSecurity:
 
             # セキュリティ警告が発生しないことを確認
             security_warnings = [
-                w for w in warning_list 
-                if "Security Warning" in str(w.message)
+                w for w in warning_list if "Security Warning" in str(w.message)
             ]
             assert len(security_warnings) == 0
 
@@ -252,18 +266,21 @@ class TestExternalLinkSecurity:
         ws["B1"] = "Content"
 
         for i, protocol in enumerate(dangerous_protocols, start=2):
-            ws[f"A{i}"] = f"Protocol {i-1}"
+            ws[f"A{i}"] = f"Protocol {i - 1}"
             ws[f"B{i}"] = f"Content with {protocol}malicious-content"
 
         wb.save(file_path)
 
         # strictモードでブロックされることを確認
         try:
-            result = self.loader_strict.load_from_excel(file_path)
+            self.loader_strict.load_from_excel(file_path)
             pytest.skip("External link security not implemented")
         except ValueError as e:
             error_message = str(e)
-            assert "Dangerous external links detected" in error_message or "dangerous" in error_message.lower()
+            assert (
+                "Dangerous external links detected" in error_message
+                or "dangerous" in error_message.lower()
+            )
         except Exception as e:
             pytest.skip(f"Unexpected exception: {e}")
 
@@ -271,10 +288,13 @@ class TestExternalLinkSecurity:
         with warnings.catch_warnings(record=True) as warning_list:
             warnings.simplefilter("always")
             try:
-                result = self.loader_warn.load_from_excel(file_path)
+                self.loader_warn.load_from_excel(file_path)
                 if warning_list:
                     warning_message = str(warning_list[0].message)
-                    assert "Security Warning" in warning_message or "dangerous" in warning_message.lower()
+                    assert (
+                        "Security Warning" in warning_message
+                        or "dangerous" in warning_message.lower()
+                    )
             except Exception as e:
                 pytest.skip(f"Unexpected exception in warn mode: {e}")
 
@@ -283,12 +303,15 @@ class TestExternalLinkSecurity:
         excel_path = self.create_excel_with_mixed_dangerous_links()
 
         try:
-            result = self.loader_strict.load_from_excel(excel_path)
+            self.loader_strict.load_from_excel(excel_path)
             pytest.skip("External link security not implemented")
         except ValueError as e:
             error_message = str(e)
             # エラーメッセージに含まれるべき情報
-            assert "Dangerous external links detected" in error_message or "dangerous" in error_message.lower()
+            assert (
+                "Dangerous external links detected" in error_message
+                or "dangerous" in error_message.lower()
+            )
         except Exception as e:
             pytest.skip(f"Unexpected exception: {e}")
 
@@ -299,22 +322,25 @@ class TestExternalLinkSecurity:
         ws = wb.active
 
         ws["A1"] = "Data"
-        
+
         # ハイパーリンクによる危険要素
         ws["A2"] = "Link Cell"
         ws["A2"].hyperlink = "file:///dangerous"
-        
+
         # セル内容による危険要素
         ws["A3"] = "Text with javascript:alert('test')"
 
         wb.save(file_path)
 
         try:
-            result = self.loader_strict.load_from_excel(file_path)
+            self.loader_strict.load_from_excel(file_path)
             pytest.skip("External link security not implemented")
         except ValueError as e:
             error_message = str(e)
             # 両方のタイプが検出されることを確認
-            assert "Dangerous external links detected" in error_message or "dangerous" in error_message.lower()
+            assert (
+                "Dangerous external links detected" in error_message
+                or "dangerous" in error_message.lower()
+            )
         except Exception as e:
             pytest.skip(f"Unexpected exception: {e}")

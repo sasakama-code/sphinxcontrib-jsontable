@@ -4,7 +4,6 @@ import os
 import shutil
 import tempfile
 
-import pytest
 from openpyxl import Workbook
 
 from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
@@ -57,15 +56,20 @@ class TestAutoRangeDetectionAlgorithm:
         # L字型のデータ配置
         for i in range(1, 6):  # A1:A5
             ws[f"A{i}"] = f"A{i}"
-        
+
         for i in range(1, 8):  # A1:G1
-            ws[f"{chr(65+i-1)}1"] = f"{chr(65+i-1)}1"
+            ws[f"{chr(65 + i - 1)}1"] = f"{chr(65 + i - 1)}1"
 
         # 中央に空白がある矩形
         positions = [
-            "C3", "D3", "E3",
-            "C4",       "E4",  # D4は空白
-            "C5", "D5", "E5",
+            "C3",
+            "D3",
+            "E3",
+            "C4",
+            "E4",  # D4は空白
+            "C5",
+            "D5",
+            "E5",
         ]
         for pos in positions:
             ws[pos] = f"Data_{pos}"
@@ -251,7 +255,7 @@ class TestAutoRangeDetectionAlgorithm:
         connected_patterns = [
             # 縦に連続
             [(1, 1), (2, 1), (3, 1), (4, 1)],
-            # 横に連続  
+            # 横に連続
             [(6, 1), (6, 2), (6, 3), (6, 4)],
             # 矩形領域
             [(8, 1), (8, 2), (9, 1), (9, 2)],
@@ -282,11 +286,11 @@ class TestAutoRangeDetectionAlgorithm:
 
         # 境界テストパターン
         boundary_positions = [
-            (1, 1),   # 左上
+            (1, 1),  # 左上
             (1, 10),  # 右上
             (10, 1),  # 左下
-            (10, 10), # 右下
-            (5, 5),   # 中央
+            (10, 10),  # 右下
+            (5, 5),  # 中央
         ]
 
         for row, col in boundary_positions:
@@ -332,7 +336,12 @@ class TestAutoRangeDetectionAlgorithm:
             # チェッカーボードパターン
             [(i, j) for i in range(1, 11) for j in range(1, 11) if (i + j) % 2 == 0],
             # 格子パターン
-            [(i, j) for i in range(12, 22) for j in range(1, 11) if i % 2 == 0 or j % 2 == 0],
+            [
+                (i, j)
+                for i in range(12, 22)
+                for j in range(1, 11)
+                if i % 2 == 0 or j % 2 == 0
+            ],
             # ランダムスパースパターン
             [(i, j) for i in range(1, 25) for j in range(12, 22) if (i * j) % 7 == 0],
         ]
@@ -394,4 +403,4 @@ class TestAutoRangeDetectionAlgorithm:
                 # 各モードで何らかの結果が得られることを確認
             except Exception as e:
                 # 一部のモードでは例外が発生する可能性もある
-                pass
+                print(f"Mode {mode} failed with exception: {e}")
