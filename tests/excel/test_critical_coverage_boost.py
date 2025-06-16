@@ -1,6 +1,5 @@
 """クリティカルなカバレッジ向上のための補完テスト."""
 
-import os
 import shutil
 import tempfile
 from pathlib import Path

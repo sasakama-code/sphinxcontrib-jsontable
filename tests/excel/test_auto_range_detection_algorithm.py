@@ -1,6 +1,5 @@
 """自動範囲検出アルゴリズムの包括的テスト."""
 
-
 import shutil
 import tempfile
 from pathlib import Path

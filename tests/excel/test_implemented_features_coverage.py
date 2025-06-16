@@ -161,7 +161,9 @@ class TestImplementedFeaturesCoverage:
         excel_path = self.create_basic_excel()
 
         try:
-            result = self.loader.load_from_excel_with_skip_rows(excel_path, skip_rows="1")
+            result = self.loader.load_from_excel_with_skip_rows(
+                excel_path, skip_rows="1"
+            )
             assert isinstance(result, dict)
             assert "data" in result
         except Exception:

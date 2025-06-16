@@ -9,9 +9,9 @@ Task 3.1: `:detect-range:` オプション実装のテスト
 """
 
 import os
-from pathlib import Path
 import shutil
 import tempfile
+from pathlib import Path
 
 import pandas as pd
 import pytest
