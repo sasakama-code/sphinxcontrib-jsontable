@@ -9,6 +9,7 @@ import tempfile
 import warnings
 from pathlib import Path
 
+import pandas as pd
 import pytest
 from openpyxl import Workbook
 
@@ -471,10 +472,11 @@ class TestCoverageFinal80Target:
     def test_data_type_and_conversion_operations(self):
         """データ型変換操作テスト."""
         excel_path = self.create_complex_data_excel()
+        df_from_excel = pd.read_excel(excel_path, header=0)
 
         # データ型変換機能をテスト
         try:
-            converted_data = self.loader.data_type_conversion(excel_path)
+            converted_data = self.loader.data_type_conversion(df_from_excel)
             assert converted_data is not None
         except Exception:
             pytest.skip("Data type conversion not implemented")
