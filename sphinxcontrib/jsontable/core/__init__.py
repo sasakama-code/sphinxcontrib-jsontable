@@ -5,10 +5,15 @@ This module provides core functionality that was previously
 embedded within the monolithic ExcelDataLoader class.
 """
 
+from .data_converter import ConversionResult, DataConverter, HeaderDetectionResult, IDataConverter
 from .range_parser import IRangeParser, RangeInfo, RangeParser
 
 __all__ = [
     'IRangeParser',
     'RangeParser',
-    'RangeInfo'
+    'RangeInfo',
+    'IDataConverter',
+    'DataConverter',
+    'ConversionResult',
+    'HeaderDetectionResult'
 ]
