@@ -760,6 +760,16 @@ class ExcelDataLoaderFacade:
             # Add range information if provided
             if range_info:
                 result["range_info"] = range_info.to_dict()
+                result["range"] = (
+                    range_info.original_spec
+                )  # Add range key for compatibility
+            elif (
+                "range_spec" in read_result.metadata
+                and read_result.metadata["range_spec"]
+            ):
+                result["range"] = read_result.metadata[
+                    "range_spec"
+                ]  # Add range from metadata
 
             # Add skip_rows information if available in metadata
             if (

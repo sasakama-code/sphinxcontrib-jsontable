@@ -238,20 +238,41 @@ class ExcelReader(IExcelReader):
                 **kwargs,
             }
 
-            # Add skip_rows if specified
-            if skip_rows is not None:
-                read_kwargs["skiprows"] = skip_rows
-
-            # Add range/usecols if specified
-            if range_spec:
-                # Basic range parsing - could be enhanced with RangeParser
-                usecols = self._parse_range_to_usecols(range_spec)
-                if usecols:
-                    read_kwargs["usecols"] = usecols
-
-            # Read Excel file using pandas
+            # Read Excel file using pandas with proper try/except
             try:
-                dataframe = pd.read_excel(file_path, **read_kwargs)
+                # Handle range+skip_rows combination specially
+                if range_spec and skip_rows is not None:
+                    # For range+skip_rows combination, handle separately
+                    range_info = self._parse_range_specification(range_spec)
+                    if range_info:
+                        # Read the range first
+                        read_kwargs["usecols"] = range_info["usecols"]
+                        if range_info["nrows"] is not None:
+                            read_kwargs["nrows"] = range_info["nrows"]
+                        if range_info["skiprows"] is not None:
+                            read_kwargs["skiprows"] = range_info["skiprows"]
+
+                        # Read dataframe and then apply within-range skip_rows
+                        dataframe = pd.read_excel(file_path, **read_kwargs)
+                        dataframe = self._apply_within_range_skip_rows(
+                            dataframe, skip_rows
+                        )
+                    else:
+                        # Fallback to standard processing
+                        dataframe = pd.read_excel(file_path, **read_kwargs)
+                else:
+                    # Standard processing for individual options
+                    if skip_rows is not None:
+                        read_kwargs["skiprows"] = skip_rows
+
+                    if range_spec:
+                        # Basic range parsing - could be enhanced with RangeParser
+                        usecols = self._parse_range_to_usecols(range_spec)
+                        if usecols:
+                            read_kwargs["usecols"] = usecols
+
+                    # Read Excel file using pandas
+                    dataframe = pd.read_excel(file_path, **read_kwargs)
 
                 # Build metadata
                 metadata = {
@@ -486,6 +507,124 @@ class ExcelReader(IExcelReader):
             return None
         except (IndexError, ValueError):
             return None
+
+    def _parse_range_specification(self, range_spec: str) -> Optional[Dict[str, Any]]:
+        """Parse range specification to extract row/column information.
+
+        Args:
+            range_spec: Range specification like 'A3:C8'
+
+        Returns:
+            Dict with range information or None if cannot parse
+        """
+        try:
+            if ":" not in range_spec:
+                return None
+
+            parts = range_spec.split(":")
+            if len(parts) != 2:
+                return None
+
+            start_cell, end_cell = parts
+
+            # Extract start row/column
+            start_col_str = ""
+            start_row_str = ""
+            for char in start_cell:
+                if char.isalpha():
+                    start_col_str += char
+                elif char.isdigit():
+                    start_row_str += char
+
+            # Extract end row/column
+            end_col_str = ""
+            end_row_str = ""
+            for char in end_cell:
+                if char.isalpha():
+                    end_col_str += char
+                elif char.isdigit():
+                    end_row_str += char
+
+            # Convert to indices
+            start_col = self._column_letter_to_index(start_col_str)
+            end_col = self._column_letter_to_index(end_col_str)
+
+            result = {
+                "usecols": list(range(start_col, end_col + 1))
+                if start_col is not None and end_col is not None
+                else None,
+                "skiprows": None,
+                "nrows": None,
+            }
+
+            # Handle row ranges if specified
+            if start_row_str and end_row_str:
+                start_row = int(start_row_str) - 1  # Convert to 0-based
+                end_row = int(end_row_str) - 1  # Convert to 0-based
+                result["skiprows"] = start_row
+                result["nrows"] = end_row - start_row + 1
+
+            return result
+
+        except (ValueError, IndexError):
+            return None
+
+    def _apply_within_range_skip_rows(
+        self, dataframe: pd.DataFrame, skip_rows: Any
+    ) -> pd.DataFrame:
+        """Apply skip_rows within the already-read range dataframe.
+
+        Args:
+            dataframe: DataFrame read from the range
+            skip_rows: Rows to skip (relative to range)
+
+        Returns:
+            DataFrame with specified rows skipped
+        """
+        try:
+            if isinstance(skip_rows, (int, str)):
+                # Convert string to list of integers
+                if isinstance(skip_rows, str):
+                    skip_indices = self._parse_skip_rows_string(skip_rows)
+                else:
+                    skip_indices = [skip_rows]
+            elif isinstance(skip_rows, list):
+                skip_indices = skip_rows
+            else:
+                return dataframe
+
+            # Filter out rows based on index
+            valid_indices = [i for i in range(len(dataframe)) if i not in skip_indices]
+            return dataframe.iloc[valid_indices].reset_index(drop=True)
+
+        except Exception:
+            # If any error occurs, return original dataframe
+            return dataframe
+
+    def _parse_skip_rows_string(self, skip_rows: str) -> List[int]:
+        """Parse skip_rows string format like '0,1,2' or '0-2,5,7-9'.
+
+        Args:
+            skip_rows: String representation of rows to skip
+
+        Returns:
+            List of row indices to skip
+        """
+        result = []
+
+        for part in skip_rows.split(","):
+            part = part.strip()
+            if "-" in part:
+                # Range format: "0-2" -> [0, 1, 2]
+                range_parts = part.split("-")
+                if len(range_parts) == 2:
+                    start, end = int(range_parts[0]), int(range_parts[1])
+                    result.extend(range(start, end + 1))
+            else:
+                # Single number: "5" -> [5]
+                result.append(int(part))
+
+        return sorted(list(set(result)))  # Remove duplicates and sort
 
     def _column_letter_to_index(self, letter: str) -> Optional[int]:
         """Convert column letter to zero-based index.
