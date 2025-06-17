@@ -5,7 +5,6 @@ Tests the structured error classes that were extracted from the
 monolithic ExcelDataLoader to improve error handling and testability.
 """
 
-
 from sphinxcontrib.jsontable.errors.excel_errors import (
     DataConversionError,
     # Legacy error classes

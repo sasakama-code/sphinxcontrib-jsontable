@@ -15,15 +15,15 @@ from .excel_reader import ExcelReader, IExcelReader, ReadResult, WorkbookInfo
 from .range_parser import IRangeParser, RangeInfo, RangeParser
 
 __all__ = [
-    'IRangeParser',
-    'RangeParser',
-    'RangeInfo',
-    'IDataConverter',
-    'DataConverter',
-    'ConversionResult',
-    'HeaderDetectionResult',
-    'IExcelReader',
-    'ExcelReader',
-    'ReadResult',
-    'WorkbookInfo'
+    "IRangeParser",
+    "RangeParser",
+    "RangeInfo",
+    "IDataConverter",
+    "DataConverter",
+    "ConversionResult",
+    "HeaderDetectionResult",
+    "IExcelReader",
+    "ExcelReader",
+    "ReadResult",
+    "WorkbookInfo",
 ]

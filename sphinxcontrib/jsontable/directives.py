@@ -17,7 +17,7 @@ from sphinx.util.docutils import SphinxDirective
 
 # Excel対応のインポート
 try:
-    from .excel_data_loader import ExcelDataLoader
+    from .facade.excel_data_loader_facade import ExcelDataLoaderFacade
 
     EXCEL_SUPPORT = True
 except ImportError:
@@ -672,7 +672,7 @@ class JsonTableDirective(SphinxDirective):
         self.loader = JsonDataLoader(encoding)
         # Excel対応のローダーを初期化
         if EXCEL_SUPPORT:
-            self.excel_loader = ExcelDataLoader(str(self.env.srcdir))
+            self.excel_loader = ExcelDataLoaderFacade()
         else:
             self.excel_loader = None
         self.converter = TableConverter(default_max_rows)
