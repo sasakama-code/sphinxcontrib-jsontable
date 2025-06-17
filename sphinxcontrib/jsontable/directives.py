@@ -772,7 +772,7 @@ class JsonTableDirective(SphinxDirective):
                     )
 
                 # Excel形式からJSON形式に変換
-                if excel_data["has_header"]:
+                if excel_data.get("has_header", False):
                     # ヘッダーがある場合: オブジェクトの配列形式
                     headers = excel_data["headers"]
                     json_data = []
@@ -893,7 +893,7 @@ class JsonTableDirective(SphinxDirective):
             elif range_spec:
                 # Skip Rows + 範囲指定
                 return self.excel_loader.load_from_excel_with_skip_rows_and_range(
-                    file_path, range_spec, skip_rows, sheet_name
+                    file_path, skip_rows, range_spec, sheet_name
                 )
             elif header_row is not None:
                 # Skip Rows + ヘッダー行指定
@@ -906,7 +906,7 @@ class JsonTableDirective(SphinxDirective):
             else:
                 # Skip Rowsのみ
                 return self.excel_loader.load_from_excel_with_skip_rows(
-                    file_path, skip_rows, sheet_name
+                    file_path, skip_rows, sheet_name=sheet_name
                 )
         else:
             # 従来の処理(Skip Rowsなし)+ Merge Cells対応
