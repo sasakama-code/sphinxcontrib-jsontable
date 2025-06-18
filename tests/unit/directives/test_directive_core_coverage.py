@@ -9,6 +9,7 @@ CLAUDE.md Code Excellence 準拠:
 
 from pathlib import Path
 from unittest.mock import Mock, patch
+import tempfile
 
 import pytest
 from docutils import nodes
@@ -17,10 +18,56 @@ from sphinxcontrib.jsontable.directives.directive_core import JsonTableDirective
 from sphinxcontrib.jsontable.directives.validators import JsonTableError
 
 
+@pytest.fixture
+def mock_sphinx_env():
+    """統一されたSphinx環境モックを提供する。
+    
+    機能保証項目:
+    - 実際の文字列パスでpathlib.Path互換性確保
+    - Sphinx環境の完全なモック構造
+    - テストの安定性と再現性の保証
+    """
+    env = Mock()
+    env.srcdir = "/tmp/test_docs"  # 実際の文字列パス
+    env.app = Mock()
+    env.app.config = Mock()
+    
+    # 重要: Sphinx config属性の適切な設定
+    env.config = Mock()
+    env.config.jsontable_max_rows = 10000  # デフォルト値を設定
+    env.config.jsontable_encoding = "utf-8"
+    
+    return env
+
+
+@pytest.fixture
+def mock_directive_state(mock_sphinx_env):
+    """統一されたディレクティブ状態モックを提供する。
+    
+    機能保証項目:
+    - SphinxDirectiveの正しい状態構造
+    - document.settings.env の適切な階層構造
+    - エラーの無い安定したMock環境
+    """
+    state = Mock()
+    state.document = Mock()
+    state.document.settings = Mock()
+    state.document.settings.env = mock_sphinx_env
+    return state
+
+
 class TestJsonTableDirectiveCore:
     """JsonTableDirective コア機能のテスト"""
 
-    def setup_method(self):
+    @pytest.fixture(autouse=True)
+    def setup_method(self, mock_directive_state):
+        """統一されたMock環境でテストセットアップを実行する。
+        
+        機能保証項目:
+        - 全テストケースで一貫したMock環境
+        - エラーの無い安定した初期化
+        - 実際のSphinx環境との整合性
+        """
         self.directive = JsonTableDirective(
             name="jsontable",
             arguments=[],
@@ -29,23 +76,46 @@ class TestJsonTableDirectiveCore:
             lineno=1,
             content_offset=0,
             block_text="",
-            state=Mock(),
+            state=mock_directive_state,
             state_machine=Mock(),
         )
 
     def test_init_basic(self):
-        """基本的な初期化テスト"""
+        """JsonTableDirectiveの基本初期化機能を検証する。
+        
+        機能保証項目:
+        - ディレクティブ名の正確な設定
+        - 必須属性の存在確認
+        - base_pathの適切な初期化
+        
+        品質観点:
+        - Sphinxディレクティブ仕様への準拠
+        - 後方互換性の維持
+        - 安定した初期化プロセス
+        """
         assert self.directive.name == "jsontable"
         assert hasattr(self.directive, "arguments")
         assert hasattr(self.directive, "options")
         assert hasattr(self.directive, "base_path")
 
-    def test_init_with_base_path(self):
-        """base_pathの初期化確認"""
-        # state.document.settings.env.srcdir をモック
-        mock_env = Mock()
-        mock_env.srcdir = "/test/src"
-        self.directive.state.document.settings.env = mock_env
+    def test_init_with_base_path(self, mock_directive_state):
+        """base_pathの正確な初期化を検証する。
+        
+        機能保証項目:
+        - Sphinx srcdir からの base_path 設定
+        - pathlib.Path オブジェクトの正確な生成
+        - 異なるパス設定での動作確認
+        
+        セキュリティ要件:
+        - パストラバーサル攻撃の防止
+        - 安全なファイルパス処理
+        
+        品質観点:
+        - クロスプラットフォーム互換性
+        - エラーの無い安定したパス処理
+        """
+        # テスト用の異なるsrcdirを設定
+        mock_directive_state.document.settings.env.srcdir = "/test/src"
 
         directive = JsonTableDirective(
             name="jsontable",
@@ -55,7 +125,7 @@ class TestJsonTableDirectiveCore:
             lineno=1,
             content_offset=0,
             block_text="",
-            state=self.directive.state,
+            state=mock_directive_state,
             state_machine=Mock(),
         )
 

@@ -88,14 +88,17 @@ class JsonTableDirective(BaseDirective):
             self.env.config, "jsontable_max_rows", DEFAULT_MAX_ROWS
         )
 
+        # Set base path for compatibility
+        self.base_path = Path(self.env.srcdir)
+
         logger.debug(
             f"Initializing JsonTableDirective: encoding={encoding}, "
-            f"max_rows={default_max_rows}"
+            f"max_rows={default_max_rows}, base_path={self.base_path}"
         )
 
         # Initialize JSON processor
         self.json_processor = JsonProcessor(
-            base_path=Path(self.env.srcdir), encoding=encoding
+            base_path=self.base_path, encoding=encoding
         )
 
         # Initialize Excel processor if available
@@ -103,7 +106,7 @@ class JsonTableDirective(BaseDirective):
             try:
                 from .excel_processor import ExcelProcessor
 
-                self.excel_processor = ExcelProcessor(base_path=Path(self.env.srcdir))
+                self.excel_processor = ExcelProcessor(base_path=self.base_path)
                 logger.debug("Excel processor initialized successfully")
             except ImportError:
                 self.excel_processor = None
