@@ -4,6 +4,9 @@ Tests the data conversion logic that addresses Excel data processing
 requirements through focused, testable functionality.
 """
 
+import re
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -437,6 +440,77 @@ class TestHeaderNormalization:
         # Should still handle basic normalization
         assert len(result) == 2
         assert result[1] == "Age"
+
+
+class TestExceptionHandling:
+    """Test suite for exception handling in data conversion."""
+
+    def setup_method(self):
+        """Set up test fixtures."""
+        self.converter = DataConverter()
+
+    def test_convert_dataframe_to_json_with_exception(self):
+        """Test exception handling in convert_dataframe_to_json."""
+        # Create a DataFrame that might cause conversion issues
+        with patch('pandas.DataFrame.iterrows') as mock_iterrows:
+            mock_iterrows.side_effect = RuntimeError("Mock pandas error")
+            
+            df = pd.DataFrame({"col1": [1, 2], "col2": [3, 4]})
+            
+            with pytest.raises(DataConversionError) as exc_info:
+                self.converter.convert_dataframe_to_json(df)
+            
+            assert "Failed to convert DataFrame to JSON" in str(exc_info.value)
+            assert "Mock pandas error" in str(exc_info.value)
+
+    def test_detect_header_with_exception(self):
+        """Test exception handling in detect_header."""
+        with patch.object(self.converter, '_calculate_string_ratio') as mock_calc:
+            mock_calc.side_effect = ValueError("Mock calculation error")
+            
+            df = pd.DataFrame({"col1": ["header1", 1], "col2": ["header2", 2]})
+            
+            with pytest.raises(DataConversionError) as exc_info:
+                self.converter.detect_header(df)
+            
+            assert "Failed to detect headers" in str(exc_info.value)
+
+    def test_normalize_headers_with_exception(self):
+        """Test exception handling in normalize_headers."""
+        # Test with problematic header data
+        with patch('re.sub') as mock_sub:
+            mock_sub.side_effect = re.error("Mock regex error")
+            
+            headers = ["valid_header"]
+            
+            with pytest.raises(DataConversionError) as exc_info:
+                self.converter.normalize_headers(headers)
+            
+            assert "Failed to normalize headers" in str(exc_info.value)
+
+    def test_empty_dataframe_edge_case(self):
+        """Test handling of completely empty DataFrames."""
+        # Create empty DataFrame
+        df = pd.DataFrame()
+        
+        # Should handle empty DataFrame gracefully
+        result = self.converter.detect_header(df)
+        assert result.has_header is False
+        assert result.confidence == 0.0
+
+    def test_single_row_dataframe_edge_case(self):
+        """Test handling of single-row DataFrames."""
+        df = pd.DataFrame({"col1": [1], "col2": [2]})
+        
+        # Single row should be treated as data, not header
+        result = self.converter.detect_header(df)
+        assert result.has_header is False
+
+    def test_zero_length_row_in_calculations(self):
+        """Test _calculate_numeric_ratio with zero-length row."""
+        empty_series = pd.Series([])
+        result = self.converter._calculate_numeric_ratio(empty_series)
+        assert result == 0.0
 
 
 class TestUtilityMethods:

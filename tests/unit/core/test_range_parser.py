@@ -4,6 +4,8 @@ Tests the functional composition-based range parsing that addresses
 the 814-853 line complexity problem through small, testable functions.
 """
 
+from unittest.mock import patch
+
 import pytest
 
 from sphinxcontrib.jsontable.core.range_parser import (
@@ -419,6 +421,30 @@ class TestRangeParserIntegration:
         # Bounds error should propagate
         with pytest.raises(RangeValidationError):
             self.parser.parse("A10:A1")  # Reversed bounds
+
+    def test_generic_exception_handling_in_parse_specification(self):
+        """Test generic exception handling in _parse_format method."""
+        # Mock internal re.match to raise generic exception that isn't RangeSpecificationError
+        with patch('re.match') as mock_match:
+            mock_match.side_effect = RuntimeError("Mock regex error")
+            
+            with pytest.raises(RangeSpecificationError) as exc_info:
+                self.parser.parse("A1:B2")
+            
+            assert "Failed to parse range specification" in str(exc_info.value)
+            assert "Mock regex error" in str(exc_info.value)
+
+    def test_generic_exception_handling_in_validate_bounds(self):
+        """Test generic exception handling in _validate_bounds method."""
+        # Mock internal method to raise generic exception
+        with patch.object(self.parser, '_parse_cell_address') as mock_parse:
+            mock_parse.side_effect = RuntimeError("Mock cell parsing error")
+            
+            with pytest.raises(RangeSpecificationError) as exc_info:
+                self.parser.parse("A1:B2")
+            
+            assert "Failed to parse cell addresses in range" in str(exc_info.value)
+            assert "Mock cell parsing error" in str(exc_info.value)
 
 
 class TestMockRangeParser:
