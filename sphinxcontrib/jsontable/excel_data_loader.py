@@ -140,3 +140,18 @@ class ExcelDataLoader:
     def read_excel(self, file_path: Union[str, Path], **kwargs) -> Dict[str, Any]:
         """Legacy method alias."""
         return self.load_from_excel(file_path, **kwargs)
+
+    def load_from_excel_with_merge_cells(
+        self, file_path: Union[str, Path], merge_mode: str = "expand", **kwargs
+    ) -> Dict[str, Any]:
+        """Load Excel file with merged cells handling.
+
+        Args:
+            file_path: Path to Excel file
+            merge_mode: How to handle merged cells ('expand', 'first', 'skip')
+            **kwargs: Additional parameters
+        """
+        resolved_path = self._resolve_path(file_path)
+        # Delegate to facade with merge cells handling
+        kwargs["merge_mode"] = merge_mode
+        return self.facade.load_from_excel(resolved_path, **kwargs)

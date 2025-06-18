@@ -86,6 +86,8 @@ class ExcelDataLoaderFacadeRefactored:
         sheet_index: Optional[int] = None,
         range_spec: Optional[str] = None,
         header_row: Optional[int] = None,
+        merge_mode: Optional[str] = None,
+        **kwargs,
     ) -> Dict[str, Any]:
         """Load Excel data using processing pipeline.
 
@@ -97,16 +99,23 @@ class ExcelDataLoaderFacadeRefactored:
             sheet_index: Target sheet index (0-based)
             range_spec: Excel range specification (e.g., "A1:C10")
             header_row: Header row number (0-based)
+            merge_mode: How to handle merged cells ('expand', 'first', 'skip')
+            **kwargs: Additional parameters
 
         Returns:
             Processing result with data and metadata
         """
+        # Handle merge_mode and additional parameters
+        if merge_mode:
+            kwargs["merge_mode"] = merge_mode
+
         result = self.processing_pipeline.process_excel_file(
             file_path=file_path,
             sheet_name=sheet_name,
             sheet_index=sheet_index,
             range_spec=range_spec,
             header_row=header_row,
+            **kwargs,
         )
 
         # Update internal state if successful
