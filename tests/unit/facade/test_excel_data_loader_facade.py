@@ -69,7 +69,7 @@ class TestExcelDataLoaderFacade:
         mock_instance.process_excel_file.return_value = {"success": True, "data": []}
 
         file_path = Path("test.xlsx")
-        result = self.facade.load_from_excel(file_path, sheet_name="Sheet2")
+        self.facade.load_from_excel(file_path, sheet_name="Sheet2")
 
         mock_instance.process_excel_file.assert_called_with(
             file_path=file_path,
@@ -88,7 +88,7 @@ class TestExcelDataLoaderFacade:
         mock_instance.process_excel_file.return_value = {"success": True, "data": []}
 
         file_path = Path("test.xlsx")
-        result = self.facade.load_from_excel(file_path, range_spec="A1:C10")
+        self.facade.load_from_excel(file_path, range_spec="A1:C10")
 
         mock_instance.process_excel_file.assert_called_with(
             file_path=file_path,
@@ -107,7 +107,7 @@ class TestExcelDataLoaderFacade:
         mock_instance.process_excel_file.return_value = {"success": True, "data": []}
 
         file_path = Path("test.xlsx")
-        result = self.facade.load_from_excel(
+        self.facade.load_from_excel(
             file_path,
             sheet_name="Data",
             sheet_index=1,

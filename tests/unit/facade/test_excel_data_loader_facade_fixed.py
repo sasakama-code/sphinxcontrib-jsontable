@@ -85,7 +85,7 @@ class TestExcelDataLoaderFacadeFixed:
 
             facade = ExcelDataLoaderFacade()
             file_path = Path("test.xlsx")
-            result = facade.load_from_excel(file_path, sheet_name="Sheet2")
+            facade.load_from_excel(file_path, sheet_name="Sheet2")
 
             mock_pipeline.process_excel_file.assert_called_with(
                 file_path=file_path,
@@ -111,7 +111,7 @@ class TestExcelDataLoaderFacadeFixed:
 
             facade = ExcelDataLoaderFacade()
             file_path = Path("test.xlsx")
-            result = facade.load_from_excel(file_path, range_spec="A1:C10")
+            facade.load_from_excel(file_path, range_spec="A1:C10")
 
             mock_pipeline.process_excel_file.assert_called_with(
                 file_path=file_path,
