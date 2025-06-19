@@ -88,14 +88,16 @@ class JsonTableDirective(BaseDirective):
             self.env.config, "jsontable_max_rows", DEFAULT_MAX_ROWS
         )
         # Ensure default_max_rows is an integer, not a Mock object
-        if hasattr(default_max_rows, '_mock_name') or not isinstance(default_max_rows, int):
+        if hasattr(default_max_rows, "_mock_name") or not isinstance(
+            default_max_rows, int
+        ):
             default_max_rows = DEFAULT_MAX_ROWS
 
         # Set base path for compatibility (safe for Mock objects in tests)
-        srcdir = getattr(self.env, 'srcdir', '/tmp/test_docs')
+        srcdir = getattr(self.env, "srcdir", "/tmp/test_docs")
         # Ensure srcdir is a string, not a Mock object
-        if hasattr(srcdir, '_mock_name'):  # Mock object detection
-            srcdir = '/tmp/test_docs'
+        if hasattr(srcdir, "_mock_name"):  # Mock object detection
+            srcdir = "/tmp/test_docs"
         self.base_path = Path(srcdir)
 
         logger.debug(
@@ -104,9 +106,7 @@ class JsonTableDirective(BaseDirective):
         )
 
         # Initialize JSON processor
-        self.json_processor = JsonProcessor(
-            base_path=self.base_path, encoding=encoding
-        )
+        self.json_processor = JsonProcessor(base_path=self.base_path, encoding=encoding)
 
         # Initialize Excel processor if available
         if EXCEL_SUPPORT:

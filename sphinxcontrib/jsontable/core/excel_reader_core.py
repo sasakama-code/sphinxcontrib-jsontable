@@ -233,8 +233,7 @@ class ExcelReader(IExcelReader):
         if sheet_name:
             if sheet_name not in available_sheets:
                 raise WorksheetNotFoundError(
-                    sheet_name=sheet_name,
-                    available_sheets=available_sheets
+                    sheet_name=sheet_name, available_sheets=available_sheets
                 )
             return sheet_name
 
@@ -244,7 +243,7 @@ class ExcelReader(IExcelReader):
                     sheet_name=f"index_{sheet_index}",
                     available_sheets=available_sheets,
                     message=f"Sheet index {sheet_index} out of range. "
-                           f"Available indices: 0-{len(available_sheets) - 1}"
+                    f"Available indices: 0-{len(available_sheets) - 1}",
                 )
             return available_sheets[sheet_index]
 

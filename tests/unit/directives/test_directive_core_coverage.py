@@ -9,7 +9,6 @@ CLAUDE.md Code Excellence 準拠:
 
 from pathlib import Path
 from unittest.mock import Mock, patch
-import tempfile
 
 import pytest
 from docutils import nodes
@@ -21,7 +20,7 @@ from sphinxcontrib.jsontable.directives.validators import JsonTableError
 @pytest.fixture
 def mock_sphinx_env():
     """統一されたSphinx環境モックを提供する。
-    
+
     機能保証項目:
     - 実際の文字列パスでpathlib.Path互換性確保
     - Sphinx環境の完全なモック構造
@@ -31,19 +30,19 @@ def mock_sphinx_env():
     env.srcdir = "/tmp/test_docs"  # 実際の文字列パス
     env.app = Mock()
     env.app.config = Mock()
-    
+
     # 重要: Sphinx config属性の適切な設定
     env.config = Mock()
     env.config.jsontable_max_rows = 10000  # デフォルト値を設定
     env.config.jsontable_encoding = "utf-8"
-    
+
     return env
 
 
 @pytest.fixture
 def mock_directive_state(mock_sphinx_env):
     """統一されたディレクティブ状態モックを提供する。
-    
+
     機能保証項目:
     - SphinxDirectiveの正しい状態構造
     - document.settings.env の適切な階層構造
@@ -62,7 +61,7 @@ class TestJsonTableDirectiveCore:
     @pytest.fixture(autouse=True)
     def setup_method(self, mock_directive_state):
         """統一されたMock環境でテストセットアップを実行する。
-        
+
         機能保証項目:
         - 全テストケースで一貫したMock環境
         - エラーの無い安定した初期化
@@ -82,12 +81,12 @@ class TestJsonTableDirectiveCore:
 
     def test_init_basic(self):
         """JsonTableDirectiveの基本初期化機能を検証する。
-        
+
         機能保証項目:
         - ディレクティブ名の正確な設定
         - 必須属性の存在確認
         - base_pathの適切な初期化
-        
+
         品質観点:
         - Sphinxディレクティブ仕様への準拠
         - 後方互換性の維持
@@ -100,16 +99,16 @@ class TestJsonTableDirectiveCore:
 
     def test_init_with_base_path(self, mock_directive_state):
         """base_pathの正確な初期化を検証する。
-        
+
         機能保証項目:
         - Sphinx srcdir からの base_path 設定
         - pathlib.Path オブジェクトの正確な生成
         - 異なるパス設定での動作確認
-        
+
         セキュリティ要件:
         - パストラバーサル攻撃の防止
         - 安全なファイルパス処理
-        
+
         品質観点:
         - クロスプラットフォーム互換性
         - エラーの無い安定したパス処理
@@ -150,12 +149,12 @@ class TestJsonTableDirectiveOptionsProcessing:
 
     def test_process_options_empty(self):
         """空のオプションの処理
-        
+
         機能保証項目:
         - デフォルト値の正確な設定
         - オプション辞書の適切な初期化
         - 後方互換性の維持
-        
+
         品質観点:
         - 内部実装変更への適応性
         - API設計の一貫性
@@ -170,12 +169,12 @@ class TestJsonTableDirectiveOptionsProcessing:
 
     def test_process_options_with_header(self):
         """headerオプションの処理
-        
+
         機能保証項目:
         - headerフラグオプションの正確な処理
         - ブールーン値への適切な変換
         - オプション設定の確実な反映
-        
+
         品質観点:
         - フラグオプションの標準的な処理
         - 型安全性の確保
@@ -188,12 +187,12 @@ class TestJsonTableDirectiveOptionsProcessing:
 
     def test_process_options_with_limit(self):
         """limitオプションの処理
-        
+
         機能保証項目:
         - 数値文字列の適切なinteger変換
         - limit値の正確な設定
         - 入力検証の実行
-        
+
         品質観点:
         - 型変換の安全性
         - エラーハンドリングの適切性
@@ -206,12 +205,12 @@ class TestJsonTableDirectiveOptionsProcessing:
 
     def test_process_options_with_encoding(self):
         """encodingオプションの処理
-        
+
         機能保証項目:
         - エンコーディング文字列の正確な保持
         - 文字エンコーディングの設定確認
         - 国際化対応の検証
-        
+
         品質観点:
         - 文字エンコーディングの適切な処理
         - 多言語環境での動作保証
@@ -224,12 +223,12 @@ class TestJsonTableDirectiveOptionsProcessing:
 
     def test_process_options_excel_specific(self):
         """Excel関連オプションの処理
-        
+
         機能保証項目:
         - Excel固有オプションの正確な処理
         - シート名・範囲指定の設定確認
         - ヘッダー行指定の数値変換
-        
+
         品質観点:
         - Excel統合機能の動作保証
         - オプション名の一貫性確保
@@ -247,16 +246,16 @@ class TestJsonTableDirectiveOptionsProcessing:
 
     def test_process_options_invalid_limit(self):
         """不正なlimit値の処理
-        
+
         機能保証項目:
         - 無効な数値文字列の適切な検出
         - エラーメッセージの明確性
         - 防御的プログラミングの実装
-        
+
         セキュリティ要件:
         - 入力値検証の徹底
         - 不正入力への適切な対応
-        
+
         品質観点:
         - エラーハンドリングの適切性
         - ユーザビリティの向上
@@ -269,16 +268,16 @@ class TestJsonTableDirectiveOptionsProcessing:
 
     def test_process_options_negative_limit(self):
         """負のlimit値の処理
-        
+
         機能保証項目:
         - 負の数値の適切な検出と拒否
         - 境界値テストの実行
         - データ制約の強制
-        
+
         セキュリティ要件:
         - 不正な制限値の防止
         - DoS攻撃の防止
-        
+
         品質観点:
         - 入力値検証の徹底
         - システム安定性の確保
