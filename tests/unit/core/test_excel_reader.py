@@ -94,13 +94,11 @@ class TestReadResult:
         result = ReadResult(
             dataframe=df,
             workbook_info=workbook_info,
-            sheet_name="Sheet1",
             metadata=metadata,
         )
 
         assert result.dataframe.equals(df)
         assert result.workbook_info == workbook_info
-        assert result.sheet_name == "Sheet1"
         assert result.metadata == metadata
 
     def test_to_dict_conversion(self):
@@ -118,14 +116,13 @@ class TestReadResult:
         result = ReadResult(
             dataframe=df,
             workbook_info=workbook_info,
-            sheet_name="Sheet1",
             metadata={"rows": 3},
         )
 
         result_dict = result.to_dict()
 
-        assert result_dict["dataframe_shape"] == (3, 2)
-        assert result_dict["sheet_name"] == "Sheet1"
+        assert result_dict["data_shape"] == (3, 2)
+        assert result_dict["columns"] == ["A", "B"]
         assert result_dict["metadata"] == {"rows": 3}
         assert "workbook_info" in result_dict
 

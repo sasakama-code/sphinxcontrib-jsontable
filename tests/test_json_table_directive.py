@@ -36,7 +36,7 @@ class TestJsonTableDirective:
     def directive_instance(self, mock_state):
         """Create a JsonTableDirective instance with mocked dependencies."""
         with (
-            patch("sphinxcontrib.jsontable.directives.SphinxDirective.__init__"),
+            patch("sphinx.util.docutils.SphinxDirective.__init__"),
             patch(
                 "sphinxcontrib.jsontable.directives.JsonDataLoader"
             ) as mock_loader_class,
@@ -55,11 +55,15 @@ class TestJsonTableDirective:
             directive.arguments = []
             directive.content = []
             directive.options = {}
+            directive.base_path = Path("/tmp/test_docs")
 
             # Set up mock instances
             directive.loader = mock_loader_class.return_value
             directive.converter = mock_converter_class.return_value
             directive.builder = mock_builder_class.return_value
+            directive.json_processor = mock_loader_class.return_value
+            directive.table_converter = mock_converter_class.return_value
+            directive.table_builder = mock_builder_class.return_value
 
             # Store mock classes for verification
             directive._mock_loader_class = mock_loader_class
@@ -157,7 +161,7 @@ class TestJsonTableDirective:
 
     # Tests for run method
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
     def test_run_with_file_argument_no_options(self, mock_logger, directive_instance):
         """Test run method with file argument and no options."""
         # Arrange
@@ -170,7 +174,7 @@ class TestJsonTableDirective:
 
         directive_instance.loader.load_from_file.return_value = mock_json_data
         directive_instance.converter.convert.return_value = mock_table_data
-        directive_instance.builder.build.return_value = mock_table_node
+        directive_instance.builder.build_table.return_value = [mock_table_node]
 
         # Act
         result = directive_instance.run()
@@ -178,7 +182,7 @@ class TestJsonTableDirective:
         # Assert
         assert result == [mock_table_node]
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
     def test_run_with_file_argument_and_header_option(
         self, mock_logger, directive_instance
     ):
@@ -200,7 +204,7 @@ class TestJsonTableDirective:
             mock_json_data, True, None
         )
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
     def test_run_with_file_argument_and_limit_option(
         self, mock_logger, directive_instance
     ):
@@ -222,7 +226,7 @@ class TestJsonTableDirective:
             mock_json_data, False, 10
         )
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
     def test_run_with_inline_content_no_options(self, mock_logger, directive_instance):
         """Test run method with inline content and no options."""
         # Arrange
@@ -241,7 +245,7 @@ class TestJsonTableDirective:
         # Assert
         assert len(result) == 1
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
     def test_run_with_inline_content_and_header_option(
         self, mock_logger, directive_instance
     ):
@@ -264,7 +268,7 @@ class TestJsonTableDirective:
             [["name"], ["test"]], True
         )
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
     def test_run_with_all_options(self, mock_logger, directive_instance):
         """Test run method with all options provided."""
         # Arrange
@@ -284,7 +288,7 @@ class TestJsonTableDirective:
             mock_json_data, True, 5
         )
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
     def test_run_handles_json_table_error(self, mock_logger, directive_instance):
         """Test run method handles JsonTableError and returns error node."""
         # Arrange
@@ -305,7 +309,7 @@ class TestJsonTableDirective:
             # Assert
             assert result == [mock_error_node]
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
     def test_run_handles_file_not_found_error(self, mock_logger, directive_instance):
         """Test run method handles FileNotFoundError and returns error node."""
         # Arrange
@@ -425,7 +429,7 @@ class TestJsonTableDirective:
 
     # Additional edge case tests
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
     def test_run_processes_limit_option_correctly(
         self, mock_logger, directive_instance
     ):
