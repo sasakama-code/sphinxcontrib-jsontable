@@ -15,6 +15,9 @@ from .excel_reader_interface import IExcelReader
 from .excel_reader_mock import MockExcelReader
 from .excel_workbook_info import ReadResult, WorkbookInfo
 
+# Import openpyxl components for external access
+from openpyxl import load_workbook
+
 # Re-export for backward compatibility
 __all__ = [
     "IExcelReader",
@@ -22,6 +25,7 @@ __all__ = [
     "MockExcelReader",
     "WorkbookInfo",
     "ReadResult",
+    "load_workbook",  # Critical: 追加でインポートエラー解消
 ]
 
 # Backward compatibility aliases

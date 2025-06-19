@@ -57,7 +57,7 @@ class ExcelProcessor:
             # ExcelDataLoaderFacadeの動的インポートと初期化
             from ..facade.excel_data_loader_facade import ExcelDataLoaderFacade
 
-            self.excel_loader = ExcelDataLoaderFacade(self.base_path)
+            self.excel_loader = ExcelDataLoaderFacade()
             logger.info(
                 f"ExcelProcessor initialized successfully with base_path: {self.base_path}"
             )
@@ -276,6 +276,12 @@ class ExcelProcessor:
 
             # 通常の読み込み処理
             result = self.excel_loader.load_from_excel(file_path, **validated_options)
+            
+            # Check for error result
+            if result.get("error"):
+                error_msg = result.get("error_message", "Unknown error")
+                raise JsonTableError(f"Excel processing error: {error_msg}")
+            
             return result.get("data", [])
 
         except Exception as e:

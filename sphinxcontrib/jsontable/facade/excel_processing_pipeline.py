@@ -92,16 +92,32 @@ class ExcelProcessingPipeline:
                 file_path, sheet_name, sheet_index, context
             )
 
+            # Stage 3.5: Apply range to raw DataFrame (if specified)
+            # This ensures range operates on Excel's 1-based row numbering
+            if range_info:
+                read_result.dataframe = self._apply_range_to_dataframe(
+                    read_result.dataframe, range_info, context
+                )
+                
+                # Adjust header_row index to be relative to the range
+                if header_row is not None:
+                    header_row = self._adjust_header_row_for_range(
+                        header_row, range_info, context
+                    )
+
             # Stage 4: Data conversion
             conversion_result = self._convert_data_to_json(
                 read_result.dataframe, header_row, context
             )
 
-            # Stage 5: Result integration
+            # Stage 5: Result integration (header processing only)
             return self._build_integrated_result(
-                conversion_result, read_result, range_info, context
+                conversion_result, read_result, range_info, context, header_row
             )
 
+        except ValueError as e:
+            # Re-raise ValueError directly for proper test behavior
+            raise
         except Exception as e:
             return self._handle_processing_error(e, context)
 
@@ -114,8 +130,9 @@ class ExcelProcessingPipeline:
 
         try:
             security_result = self.security_validator.validate_file(Path(file_path))
-            if not security_result.get("is_safe", True):
-                threats = security_result.get("threats", [])
+            # ValidationResultはdataclassなので属性アクセスを使用
+            if not security_result.is_valid:
+                threats = security_result.security_issues
                 threat_summary = ", ".join([t.get("type", "Unknown") for t in threats])
                 raise SecurityError(f"Security threats detected: {threat_summary}")
 
@@ -163,10 +180,16 @@ class ExcelProcessingPipeline:
     def _convert_data_to_json(
         self, dataframe: pd.DataFrame, header_row: Optional[int], context: str
     ) -> Any:
-        """Stage 4: Convert data to JSON format."""
+        """Stage 4: Convert data to JSON format.
+        
+        Note: header_row processing is handled separately in _apply_header_row_processing
+        to avoid double-processing. DataConverter should use auto-detection only.
+        """
         try:
+            # Pass header_row=None to avoid double-processing
+            # Header row processing is handled separately in Stage 5
             return self.data_converter.convert_dataframe_to_json(
-                dataframe, header_row=header_row
+                dataframe, header_row=None
             )
         except Exception as e:
             if self.enable_error_handling and self.error_handler:
@@ -183,23 +206,50 @@ class ExcelProcessingPipeline:
         read_result: Any,
         range_info: Optional[RangeInfo],
         context: str,
+        header_row: Optional[int] = None,
     ) -> Dict[str, Any]:
-        """Stage 5: Build integrated result."""
+        """Stage 5: Build integrated result with header processing only.
+        
+        Note: Range application is now handled in Stage 3.5 on raw DataFrame.
+        """
         try:
+            # Get converted data (range already applied if specified)
+            data = conversion_result.data
+            actual_rows = len(data) if data else 0
+            actual_cols = len(data[0]) if data else 0
+
+            # Process header row if specified
+            headers = conversion_result.headers
+            has_header = conversion_result.has_header
+            if header_row is not None:
+                data, headers, has_header = self._apply_header_row_processing(
+                    data, header_row
+                )
+                actual_rows = len(data)
+
             result = {
                 "success": True,
-                "data": conversion_result.data,
+                "data": data,
+                "rows": actual_rows,
+                "columns": actual_cols,
+                "headers": headers,  # Add headers to top level
+                "has_header": has_header,  # Add has_header to top level
                 "metadata": {
-                    "has_header": conversion_result.has_header,
-                    "headers": conversion_result.headers,
+                    "has_header": has_header,
+                    "headers": headers,
                     "workbook_info": read_result.workbook_info.to_dict(),
                     "processing_timestamp": pd.Timestamp.now().isoformat(),
                 },
                 "components_used": self._get_components_info(),
             }
 
+            # Add header row information if specified
+            if header_row is not None:
+                result["header_row"] = header_row
+
             # Add range information if available
             if range_info:
+                result["range"] = range_info.original_spec
                 result["metadata"]["range_info"] = {
                     "original_spec": range_info.original_spec,
                     "normalized_spec": range_info.normalized_spec,
@@ -209,6 +259,9 @@ class ExcelProcessingPipeline:
 
             return result
 
+        except ValueError as e:
+            # Re-raise ValueError directly for proper test behavior
+            raise
         except Exception as e:
             if self.enable_error_handling and self.error_handler:
                 error_response = self.error_handler.create_error_response(e, context)
@@ -234,6 +287,221 @@ class ExcelProcessingPipeline:
                 },
                 "data": None,
             }
+
+    def _apply_range_to_dataframe(
+        self, dataframe: pd.DataFrame, range_info: RangeInfo, context: str
+    ) -> pd.DataFrame:
+        """Apply range specification to raw DataFrame.
+        
+        Operates on Excel's 1-based row/column numbering for accurate range selection.
+        
+        Args:
+            dataframe: Original pandas DataFrame
+            range_info: Range specification with 1-based indices
+            context: Processing context for error reporting
+            
+        Returns:
+            DataFrame subset matching the specified range
+        """
+        try:
+            # Convert 1-based Excel indices to 0-based DataFrame indices
+            start_row = range_info.start_row - 1
+            end_row = range_info.end_row - 1
+            start_col = range_info.start_col - 1
+            end_col = range_info.end_col - 1
+            
+            # Validate range bounds against DataFrame
+            max_df_rows = len(dataframe)
+            max_df_cols = len(dataframe.columns)
+            
+            if start_row >= max_df_rows or end_row >= max_df_rows:
+                raise ProcessingError(
+                    f"Range row indices ({range_info.start_row}-{range_info.end_row}) "
+                    f"exceed DataFrame rows (1-{max_df_rows})"
+                )
+                
+            if start_col >= max_df_cols or end_col >= max_df_cols:
+                raise ProcessingError(
+                    f"Range column indices ({range_info.start_col}-{range_info.end_col}) "
+                    f"exceed DataFrame columns (1-{max_df_cols})"
+                )
+            
+            # Apply range selection to DataFrame
+            range_df = dataframe.iloc[start_row:end_row + 1, start_col:end_col + 1]
+            
+            # Reset index to maintain 0-based indexing
+            return range_df.reset_index(drop=True)
+            
+        except Exception as e:
+            if self.enable_error_handling and self.error_handler:
+                error_response = self.error_handler.create_error_response(e, context)
+                raise ProcessingError(f"DataFrame range application failed: {error_response}") from e
+            else:
+                raise
+
+    def _adjust_header_row_for_range(
+        self, header_row: int, range_info: RangeInfo, context: str
+    ) -> int:
+        """Adjust header_row index to be relative to the applied range.
+        
+        Args:
+            header_row: Original header row index (0-based)
+            range_info: Range specification with 1-based indices
+            context: Processing context for error reporting
+            
+        Returns:
+            Adjusted header row index relative to the range (0-based)
+            
+        Raises:
+            ProcessingError: If header_row is outside the specified range
+        """
+        try:
+            # Convert 1-based Excel range to 0-based DataFrame indices
+            range_start_row = range_info.start_row - 1
+            range_end_row = range_info.end_row - 1
+            
+            # Check if header_row is within the range
+            if header_row < range_start_row or header_row > range_end_row:
+                raise ProcessingError(
+                    f"Header row {header_row} is outside the specified range "
+                    f"({range_info.start_row}-{range_info.end_row})"
+                )
+            
+            # Calculate relative index within the range
+            relative_header_row = header_row - range_start_row
+            
+            return relative_header_row
+            
+        except Exception as e:
+            if self.enable_error_handling and self.error_handler:
+                error_response = self.error_handler.create_error_response(e, context)
+                raise ProcessingError(f"Header row adjustment failed: {error_response}") from e
+            else:
+                raise
+
+    def _apply_range_to_data(self, data: Any, range_info: RangeInfo) -> Any:
+        """Apply range specification to extract data subset.
+        
+        Converts 1-based Excel indices to 0-based Python indices and extracts
+        the specified range from the data.
+        
+        Args:
+            data: Original data as list of lists
+            range_info: Range specification with 1-based indices
+            
+        Returns:
+            Extracted data subset as list of lists
+        """
+        if not data or not isinstance(data, list):
+            return data
+            
+        # Convert 1-based Excel indices to 0-based Python indices
+        start_row = range_info.start_row - 1
+        end_row = range_info.end_row - 1
+        start_col = range_info.start_col - 1
+        end_col = range_info.end_col - 1
+        
+        # Validate range bounds against actual data
+        max_data_rows = len(data)
+        max_data_cols = len(data[0]) if data else 0
+        
+        if start_row >= max_data_rows or end_row >= max_data_rows:
+            raise ProcessingError(
+                f"Range row indices ({range_info.start_row}-{range_info.end_row}) "
+                f"exceed data rows (1-{max_data_rows})"
+            )
+            
+        if start_col >= max_data_cols or end_col >= max_data_cols:
+            raise ProcessingError(
+                f"Range column indices ({range_info.start_col}-{range_info.end_col}) "
+                f"exceed data columns (1-{max_data_cols})"
+            )
+        
+        # Extract range data: rows [start_row:end_row+1], columns [start_col:end_col+1]
+        range_data = []
+        for row_idx in range(start_row, end_row + 1):
+            if row_idx < len(data):
+                row_data = data[row_idx]
+                if isinstance(row_data, list):
+                    # Extract specified columns from this row
+                    range_row = row_data[start_col:end_col + 1]
+                    range_data.append(range_row)
+                else:
+                    # Handle non-list row data
+                    range_data.append([row_data])
+        
+        return range_data
+
+    def _apply_header_row_processing(
+        self, data: Any, header_row: int
+    ) -> tuple[Any, list[str], bool]:
+        """Apply header row processing to extract headers and remove header row from data.
+        
+        Args:
+            data: Original data as list of lists
+            header_row: Header row index (0-based)
+            
+        Returns:
+            Tuple of (processed_data, headers, has_header)
+        """
+        # Validate header_row parameter
+        if header_row < 0:
+            raise ValueError("Header row must be non-negative")
+            
+        if not data or not isinstance(data, list):
+            return data, [], False
+            
+        # Validate header_row bounds
+        if header_row >= len(data):
+            raise ValueError(
+                f"Header row {header_row} is out of range"
+            )
+            
+        # Extract headers from specified row
+        header_data = data[header_row]
+        if isinstance(header_data, list):
+            headers = [str(cell) if cell is not None else "" for cell in header_data]
+        else:
+            headers = [str(header_data)]
+            
+        # Normalize headers (handle empty headers)
+        headers = self._normalize_header_names(headers)
+        
+        # Remove header row and all rows before it from data
+        processed_data = data[header_row + 1:]
+        
+        return processed_data, headers, True
+
+    def _normalize_header_names(self, headers: list[str]) -> list[str]:
+        """Normalize header names to handle empty headers and duplicates.
+        
+        Args:
+            headers: List of raw header names
+            
+        Returns:
+            List of normalized header names
+        """
+        normalized = []
+        header_counts = {}
+        
+        for i, header in enumerate(headers):
+            # Strip whitespace
+            header = header.strip()
+            
+            # Handle empty headers
+            if not header:
+                header = f"column_{i + 1}"
+            
+            # Handle duplicates
+            if header in header_counts:
+                header_counts[header] += 1
+                header = f"{header}_{header_counts[header]}"
+            else:
+                header_counts[header] = 0
+            
+            normalized.append(header)
+            
+        return normalized
 
     def _get_components_info(self) -> Dict[str, str]:
         """Get information about pipeline components."""

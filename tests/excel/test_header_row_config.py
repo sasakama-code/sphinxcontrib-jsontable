@@ -112,10 +112,10 @@ class TestHeaderRowConfiguration:
         return file_path
 
     def test_header_row_specification(self):
-        """指定行をヘッダーとして使用するテスト(未実装機能なので失敗する)。"""
+        """指定行をヘッダーとして使用するテスト。"""
         excel_path = self.create_header_test_excel()
 
-        # 4行目(0ベースで3)をヘッダーとして指定
+        # ヘッダー行(0ベースで3)をヘッダーとして指定
         result = self.loader.load_from_excel_with_header_row(excel_path, header_row=3)
 
         # 期待されるヘッダー
@@ -123,7 +123,7 @@ class TestHeaderRowConfiguration:
         assert result["headers"] == expected_headers
         assert result["has_header"]
 
-        # データ部分(header_row=3の場合、前の行は削除され、4,5,6行目がデータになる)
+        # データ部分(header_row=3の場合、4行目以降がデータになる)
         expected_data = [
             ["商品A", "100000", "120000", "110000"],
             ["商品B", "150000", "180000", "160000"],

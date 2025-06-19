@@ -109,6 +109,10 @@ class ExcelDataLoaderFacadeRefactored:
         if merge_mode:
             kwargs["merge_mode"] = merge_mode
 
+        # Handle directive option name compatibility: 'range' -> 'range_spec'
+        if "range" in kwargs and range_spec is None:
+            range_spec = kwargs.pop("range")
+
         result = self.processing_pipeline.process_excel_file(
             file_path=file_path,
             sheet_name=sheet_name,
@@ -139,6 +143,127 @@ class ExcelDataLoaderFacadeRefactored:
     def get_workbook_info(self, file_path: Union[str, Path]) -> Dict[str, Any]:
         """Get workbook information using utilities."""
         return self.utilities.get_workbook_info(file_path)
+
+    # Excel high-level feature methods
+
+    def load_from_excel_with_range(
+        self, 
+        file_path: Union[str, Path], 
+        range_spec: str, 
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Load Excel data with range specification.
+        
+        Args:
+            file_path: Path to Excel file
+            range_spec: Excel range specification (e.g., "A1:C10", "B2", "A:C")
+            **kwargs: Additional parameters
+            
+        Returns:
+            Processing result with data and metadata
+        """
+        return self.load_from_excel(
+            file_path=file_path, 
+            range_spec=range_spec, 
+            **kwargs
+        )
+
+    def load_from_excel_with_header_row(
+        self, 
+        file_path: Union[str, Path], 
+        header_row: int, 
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Load Excel data with header row specification.
+        
+        Args:
+            file_path: Path to Excel file
+            header_row: Header row number (0-based)
+            **kwargs: Additional parameters
+            
+        Returns:
+            Processing result with data and metadata
+        """
+        return self.load_from_excel(
+            file_path=file_path, 
+            header_row=header_row, 
+            **kwargs
+        )
+
+    def load_from_excel_with_skip_rows(
+        self, 
+        file_path: Union[str, Path], 
+        skip_rows: Any, 
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Load Excel data with skip rows specification.
+        
+        Args:
+            file_path: Path to Excel file
+            skip_rows: Skip rows specification
+            **kwargs: Additional parameters
+            
+        Returns:
+            Processing result with data and metadata
+        """
+        return self.load_from_excel(
+            file_path=file_path, 
+            skip_rows=skip_rows, 
+            **kwargs
+        )
+
+    def load_from_excel_with_header_row_and_range(
+        self, 
+        file_path: Union[str, Path], 
+        header_row: int,
+        range_spec: str,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Load Excel data with header row and range specification.
+        
+        Args:
+            file_path: Path to Excel file
+            header_row: Header row number (0-based)
+            range_spec: Excel range specification
+            **kwargs: Additional parameters
+            
+        Returns:
+            Processing result with data and metadata
+        """
+        return self.load_from_excel(
+            file_path=file_path,
+            header_row=header_row,
+            range_spec=range_spec,
+            **kwargs
+        )
+
+    def load_from_excel_with_skip_rows_range_and_header(
+        self, 
+        file_path: Union[str, Path], 
+        skip_rows: Any,
+        range_spec: str,
+        header_row: int,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Load Excel data with skip rows, range, and header specification.
+        
+        Args:
+            file_path: Path to Excel file
+            skip_rows: Skip rows specification
+            range_spec: Excel range specification
+            header_row: Header row number (0-based)
+            **kwargs: Additional parameters
+            
+        Returns:
+            Processing result with data and metadata
+        """
+        return self.load_from_excel(
+            file_path=file_path,
+            range_spec=range_spec,
+            header_row=header_row,
+            skip_rows=skip_rows,
+            **kwargs
+        )
 
     # Backward compatibility methods
 

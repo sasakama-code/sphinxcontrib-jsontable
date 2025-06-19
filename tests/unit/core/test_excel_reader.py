@@ -433,7 +433,8 @@ class TestInterface:
         for reader in readers:
             assert isinstance(reader, IExcelReader)
             assert hasattr(reader, "validate_file")
-            assert hasattr(reader, "read_excel")
+            assert hasattr(reader, "read_workbook")  # 正しいメソッド名に修正
+            assert hasattr(reader, "read_sheet")     # read_sheetも追加
             assert hasattr(reader, "get_sheet_names")
 
     def test_polymorphic_usage(self):
@@ -443,7 +444,7 @@ class TestInterface:
             """Function that accepts any IExcelReader implementation."""
             reader.validate_file(file_path)  # Just validate, don't store result
             sheet_names = reader.get_sheet_names(file_path)
-            return reader.read_excel(file_path, sheet_name=sheet_names[0])
+            return reader.read_workbook(file_path, sheet_name=sheet_names[0])  # 正しいメソッド名に修正
 
         # Test with mock reader (real reader would need actual files)
         mock_reader = MockExcelReader()
