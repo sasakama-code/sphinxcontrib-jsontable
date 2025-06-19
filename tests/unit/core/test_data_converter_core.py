@@ -93,7 +93,7 @@ class TestDataConverterCore:
         """Test error handling with invalid data."""
         try:
             invalid_data = "not_valid_data"
-            with pytest.raises(Exception):
+            with pytest.raises((ValueError, TypeError)):
                 self.converter.convert_to_json(invalid_data)
         except AttributeError:
             pytest.skip("Error handling test not applicable")

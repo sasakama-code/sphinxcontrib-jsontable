@@ -456,7 +456,7 @@ class TestFileReadingStage:
             "excel_reader"
         ].read_workbook.return_value = expected_read_result
 
-        result = pipeline._read_excel_file("test.xlsx", None, 1, "test_context")
+        pipeline._read_excel_file("test.xlsx", None, 1, "test_context")
 
         mock_components["excel_reader"].read_workbook.assert_called_once_with(
             "test.xlsx", sheet_name=None, sheet_index=1
@@ -546,7 +546,7 @@ class TestDataConversionStage:
             "data_converter"
         ].convert_dataframe_to_json.return_value = expected_conversion_result
 
-        result = pipeline._convert_data_to_json(test_df, None, "test_context")
+        pipeline._convert_data_to_json(test_df, None, "test_context")
 
         mock_components[
             "data_converter"

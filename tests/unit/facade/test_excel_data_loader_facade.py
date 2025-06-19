@@ -159,5 +159,5 @@ class TestExcelDataLoaderFacade:
         mock_instance.process_excel_file.side_effect = Exception("Test error")
 
         file_path = Path("test.xlsx")
-        with pytest.raises(Exception):
+        with pytest.raises((AttributeError, FileNotFoundError)):
             self.facade.load_from_excel(file_path)

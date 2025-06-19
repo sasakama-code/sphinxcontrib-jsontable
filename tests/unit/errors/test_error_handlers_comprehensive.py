@@ -548,8 +548,8 @@ class TestExceptionChaining:
         try:
             try:
                 raise FileNotFoundError("File missing")
-            except FileNotFoundError:
-                raise PermissionError("Access denied")
+            except FileNotFoundError as e:
+                raise PermissionError("Access denied") from e
         except PermissionError as nested_error:
             result = handler.handle_excel_error(nested_error, "nested_test")
 

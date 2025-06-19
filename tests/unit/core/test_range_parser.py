@@ -10,7 +10,6 @@ import pytest
 
 from sphinxcontrib.jsontable.core.range_parser import (
     IRangeParser,
-    MockRangeParser,
     RangeInfo,
     RangeParser,
 )
@@ -445,5 +444,3 @@ class TestRangeParserIntegration:
 
             assert "Failed to parse cell addresses in range" in str(exc_info.value)
             assert "Mock cell parsing error" in str(exc_info.value)
-
-
