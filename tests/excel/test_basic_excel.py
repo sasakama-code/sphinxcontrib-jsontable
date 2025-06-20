@@ -40,7 +40,7 @@ def test_excel_directive_import():
 
         # ディレクティブの基本クラス確認
         assert hasattr(JsonTableDirective, "__init__")
-        assert hasattr(JsonTableDirective, "_load_json_data")
+        assert hasattr(JsonTableDirective, "_load_data")
 
         print("✓ JsonTableDirective Excel統合確認")
 
