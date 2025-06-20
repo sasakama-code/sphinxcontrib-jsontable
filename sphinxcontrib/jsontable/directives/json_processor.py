@@ -114,15 +114,15 @@ class JsonProcessor:
         - Error Disclosure: セキュリティ情報漏洩防止
     """
 
-    def __init__(self, base_path: Path, encoding: str = DEFAULT_ENCODING):
+    def __init__(self, base_path: Path | None = None, encoding: str = DEFAULT_ENCODING):
         """
         JsonProcessor の初期化
 
         Args:
-            base_path: ベースディレクトリパス
+            base_path: ベースディレクトリパス（Noneの場合はカレントディレクトリ）
             encoding: 文字エンコーディング
         """
-        self.base_path = base_path
+        self.base_path = base_path or Path.cwd()
         self.encoding = self._validate_encoding(encoding)
 
     def _validate_encoding(self, encoding: str) -> str:
@@ -372,3 +372,17 @@ class JsonProcessor:
                 f"Error: {e.msg}. Content preview: {json_text[:100]}..."
             )
             raise JsonTableError(f"Invalid inline JSON: {e.msg}") from e
+
+    # Backward compatibility methods
+    def process_inline_json(self, json_data: str | list[str]) -> JsonData:
+        """Process inline JSON - backward compatibility method."""
+        if isinstance(json_data, str):
+            # Single string input
+            return self.parse_inline([json_data])
+        else:
+            # List of strings input
+            return self.parse_inline(json_data)
+
+    def process_file_json(self, file_path: str) -> JsonData:
+        """Process file JSON - backward compatibility method."""
+        return self.load_from_file(file_path)

@@ -1,31 +1,34 @@
 #!/usr/bin/env python3
 """DataFrameサイズ問題のデバッグスクリプト"""
 
-import tempfile
-import shutil
 import os
-from openpyxl import Workbook
+import shutil
+import tempfile
+
 import pandas as pd
+from openpyxl import Workbook
+
 from sphinxcontrib.jsontable.core.excel_reader import ExcelReader
+
 
 def main():
     # Test data setup
     temp_dir = tempfile.mkdtemp()
-    file_path = os.path.join(temp_dir, 'header_test.xlsx')
+    file_path = os.path.join(temp_dir, "header_test.xlsx")
 
     data = [
-        ['メタデータ', '作成日: 2025-06-13', '', ''],
-        ['説明', '売上データの月次集計', '', ''],
-        ['', '', '', ''],
-        ['商品名', '1月売上', '2月売上', '3月売上'],
-        ['商品A', '100000', '120000', '110000'],
-        ['商品B', '150000', '180000', '160000'],
-        ['商品C', '80000', '90000', '85000'],
+        ["メタデータ", "作成日: 2025-06-13", "", ""],
+        ["説明", "売上データの月次集計", "", ""],
+        ["", "", "", ""],
+        ["商品名", "1月売上", "2月売上", "3月売上"],
+        ["商品A", "100000", "120000", "110000"],
+        ["商品B", "150000", "180000", "160000"],
+        ["商品C", "80000", "90000", "85000"],
     ]
 
     wb = Workbook()
     ws = wb.active
-    ws.title = 'Sheet1'
+    ws.title = "Sheet1"
 
     for row_idx, row_data in enumerate(data, 1):
         for col_idx, value in enumerate(row_data, 1):
@@ -53,10 +56,10 @@ def main():
 
     # Test range A4:C7 against pandas DataFrame
     print("\n=== Range A4:C7 against pandas DataFrame ===")
-    print(f"Excel rows 4-7 (1-based) = pandas rows 3-6 (0-based)")
-    print(f"DataFrame has {len(df_pandas)} rows, max valid index: {len(df_pandas)-1}")
-    print(f"Trying to access rows 3-6...")
-    
+    print("Excel rows 4-7 (1-based) = pandas rows 3-6 (0-based)")
+    print(f"DataFrame has {len(df_pandas)} rows, max valid index: {len(df_pandas) - 1}")
+    print("Trying to access rows 3-6...")
+
     try:
         range_df = df_pandas.iloc[3:7, 0:3]  # A4:C7 -> rows 3-6, cols 0-2
         print(f"Range DataFrame shape: {range_df.shape}")
@@ -68,6 +71,7 @@ def main():
 
     # Cleanup
     shutil.rmtree(temp_dir, ignore_errors=True)
+
 
 if __name__ == "__main__":
     main()

@@ -294,12 +294,12 @@ class ExcelProcessor:
 
             # 通常の読み込み処理
             result = self.excel_loader.load_from_excel(file_path, **converted_options)
-            
+
             # Check for error result
             if result.get("error"):
                 error_msg = result.get("error_message", "Unknown error")
                 raise JsonTableError(f"Excel processing error: {error_msg}")
-            
+
             return result.get("data", [])
 
         except Exception as e:

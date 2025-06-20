@@ -262,7 +262,7 @@ class TestExcelReaderWorkbookReading:
                 assert result.metadata["sheet_name"] == "大量データ"
                 assert result.metadata["original_shape"] == (100, 3)
                 assert "dtype" in result.metadata["read_options"]
-                assert result.metadata["read_options"]["dtype"]["ID"] == int
+                assert result.metadata["read_options"]["dtype"]["ID"] is int
 
 
 class TestExcelReaderSheetReading:

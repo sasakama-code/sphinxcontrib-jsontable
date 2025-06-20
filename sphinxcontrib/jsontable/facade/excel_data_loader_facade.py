@@ -151,103 +151,85 @@ class ExcelDataLoaderFacadeRefactored:
     # Excel high-level feature methods
 
     def load_from_excel_with_range(
-        self, 
-        file_path: Union[str, Path], 
-        range_spec: str, 
-        **kwargs
+        self, file_path: Union[str, Path], range_spec: str, **kwargs
     ) -> Dict[str, Any]:
         """Load Excel data with range specification.
-        
+
         Args:
             file_path: Path to Excel file
             range_spec: Excel range specification (e.g., "A1:C10", "B2", "A:C")
             **kwargs: Additional parameters
-            
+
         Returns:
             Processing result with data and metadata
         """
         return self.load_from_excel(
-            file_path=file_path, 
-            range_spec=range_spec, 
-            **kwargs
+            file_path=file_path, range_spec=range_spec, **kwargs
         )
 
     def load_from_excel_with_header_row(
-        self, 
-        file_path: Union[str, Path], 
-        header_row: int, 
-        **kwargs
+        self, file_path: Union[str, Path], header_row: int, **kwargs
     ) -> Dict[str, Any]:
         """Load Excel data with header row specification.
-        
+
         Args:
             file_path: Path to Excel file
             header_row: Header row number (0-based)
             **kwargs: Additional parameters
-            
+
         Returns:
             Processing result with data and metadata
         """
         return self.load_from_excel(
-            file_path=file_path, 
-            header_row=header_row, 
-            **kwargs
+            file_path=file_path, header_row=header_row, **kwargs
         )
 
     def load_from_excel_with_skip_rows(
-        self, 
-        file_path: Union[str, Path], 
-        skip_rows: Any, 
-        **kwargs
+        self, file_path: Union[str, Path], skip_rows: Any, **kwargs
     ) -> Dict[str, Any]:
         """Load Excel data with skip rows specification.
-        
+
         Args:
             file_path: Path to Excel file
             skip_rows: Skip rows specification
             **kwargs: Additional parameters
-            
+
         Returns:
             Processing result with data and metadata
         """
-        return self.load_from_excel(
-            file_path=file_path, 
-            skip_rows=skip_rows, 
-            **kwargs
-        )
+        return self.load_from_excel(file_path=file_path, skip_rows=skip_rows, **kwargs)
 
     def load_from_excel_with_detect_range(
-        self,
-        file_path: Union[str, Path],
-        detect_range: str = "auto",
-        **kwargs
+        self, file_path: Union[str, Path], detect_range: str = "auto", **kwargs
     ) -> Dict[str, Any]:
         """Load Excel data with automatic range detection.
-        
+
         Args:
             file_path: Path to Excel file
             detect_range: Detection mode ('auto', 'smart', 'manual')
             **kwargs: Additional parameters including range_hint for manual mode
-            
+
         Returns:
             Processing result with detected range information
         """
         # Validate detect_range mode
         valid_modes = {"auto", "smart", "manual"}
         if detect_range not in valid_modes:
-            raise ValueError(f"Invalid detect mode: {detect_range}. Must be one of {valid_modes}")
-        
+            raise ValueError(
+                f"Invalid detect mode: {detect_range}. Must be one of {valid_modes}"
+            )
+
         # Extract range_hint before delegating to avoid unexpected keyword argument
         range_hint = kwargs.pop("range_hint", "A1:Z100")
-        
+
         # For now, delegate to basic load_from_excel and add detection metadata
         # TODO: Implement actual range detection algorithms
         result = self.load_from_excel(file_path=file_path, **kwargs)
-        
+
         # Add detection metadata
         result["detect_mode"] = detect_range
         result["detected_range"] = range_hint  # Use extracted range_hint
-        
+
         return result
 
     def load_from_excel_with_skip_rows_range_and_header(
@@ -256,17 +238,17 @@ class ExcelDataLoaderFacadeRefactored:
         skip_rows: str,
         range_spec: str,
         header_row: int,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """Load Excel data with skip rows, range, and header row.
-        
+
         Args:
             file_path: Path to Excel file
             skip_rows: Skip rows specification
             range_spec: Excel range specification
             header_row: Header row number (0-based)
             **kwargs: Additional parameters
-            
+
         Returns:
             Processing result with data and metadata
         """
@@ -275,61 +257,27 @@ class ExcelDataLoaderFacadeRefactored:
             skip_rows=skip_rows,
             range_spec=range_spec,
             header_row=header_row,
-            **kwargs
+            **kwargs,
         )
 
     def load_from_excel_with_header_row_and_range(
-        self, 
-        file_path: Union[str, Path], 
-        header_row: int,
-        range_spec: str,
-        **kwargs
+        self, file_path: Union[str, Path], header_row: int, range_spec: str, **kwargs
     ) -> Dict[str, Any]:
         """Load Excel data with header row and range specification.
-        
+
         Args:
             file_path: Path to Excel file
             header_row: Header row number (0-based)
             range_spec: Excel range specification
             **kwargs: Additional parameters
-            
+
         Returns:
             Processing result with data and metadata
         """
         return self.load_from_excel(
-            file_path=file_path,
-            header_row=header_row,
-            range_spec=range_spec,
-            **kwargs
+            file_path=file_path, header_row=header_row, range_spec=range_spec, **kwargs
         )
 
-    def load_from_excel_with_skip_rows_range_and_header(
-        self, 
-        file_path: Union[str, Path], 
-        skip_rows: Any,
-        range_spec: str,
-        header_row: int,
-        **kwargs
-    ) -> Dict[str, Any]:
-        """Load Excel data with skip rows, range, and header specification.
-        
-        Args:
-            file_path: Path to Excel file
-            skip_rows: Skip rows specification
-            range_spec: Excel range specification
-            header_row: Header row number (0-based)
-            **kwargs: Additional parameters
-            
-        Returns:
-            Processing result with data and metadata
-        """
-        return self.load_from_excel(
-            file_path=file_path,
-            range_spec=range_spec,
-            header_row=header_row,
-            skip_rows=skip_rows,
-            **kwargs
-        )
 
     # Backward compatibility methods
 

@@ -110,7 +110,7 @@ class TestExcelProcessorInitialization:
             with patch(
                 "sphinxcontrib.jsontable.directives.excel_processor.logger"
             ) as mock_logger:
-                processor = ExcelProcessor("/tmp/test")
+                _processor = ExcelProcessor("/tmp/test")
                 mock_logger.info.assert_called_once()
                 call_args = mock_logger.info.call_args[0][0]
                 assert "ExcelProcessor initialized successfully" in call_args

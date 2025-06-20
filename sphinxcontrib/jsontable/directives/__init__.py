@@ -21,6 +21,7 @@ from .backward_compatibility import (
     ensure_file_exists,
     format_error,
     is_safe_path,
+    logger,
     safe_str,
     validate_not_empty,
 )
@@ -50,6 +51,8 @@ __all__ = [
     "ensure_file_exists",
     "format_error",
     "is_safe_path",
+    # Logging
+    "logger",
     # Constants
     "DEFAULT_ENCODING",
     "DEFAULT_MAX_ROWS",

@@ -2,7 +2,7 @@
 
 Task 2.4: Excel高度機能完全実装のテスト
 - 結合セル処理機能
-- 自動範囲検出機能  
+- 自動範囲検出機能
 - 複雑な組み合わせ処理
 - エラーハンドリング強化
 """
@@ -201,8 +201,8 @@ class TestAdvancedExcelFeatures:
         # 基本的な組み合わせ処理（安全な設定）
         result = self.loader.load_from_excel(
             excel_path,
-            skip_rows="1",        # シンプルなスキップ
-            header_row=2          # ヘッダー行のみ指定
+            skip_rows="1",  # シンプルなスキップ
+            header_row=2,  # ヘッダー行のみ指定
         )
 
         # 組み合わせ処理結果検証
@@ -218,8 +218,8 @@ class TestAdvancedExcelFeatures:
         # 結合セル処理とヘッダー指定（基本的な組み合わせ）
         result = self.loader.load_from_excel(
             excel_path,
-            header_row=2,         # ヘッダー行指定
-            merge_mode="expand"   # 結合セル展開モード
+            header_row=2,  # ヘッダー行指定
+            merge_mode="expand",  # 結合セル展開モード
         )
 
         assert result["success"] is True
@@ -233,9 +233,9 @@ class TestAdvancedExcelFeatures:
         # 基本的な機能組み合わせ（安全な設定）
         result = self.loader.load_from_excel(
             excel_path,
-            skip_rows="1",          # シンプルなスキップ
-            header_row=2,           # ヘッダー行指定
-            merge_mode="expand"     # 結合セル処理
+            skip_rows="1",  # シンプルなスキップ
+            header_row=2,  # ヘッダー行指定
+            merge_mode="expand",  # 結合セル処理
         )
 
         # 機能組み合わせ結果検証
@@ -257,7 +257,7 @@ class TestAdvancedExcelFeatures:
         result = self.loader.load_from_excel(
             excel_path,
             skip_rows="invalid_format",  # 無効なスキップ行指定
-            header_row=2
+            header_row=2,
         )
         # エラーレスポンスが返されることを確認
         assert result.get("error") is True
@@ -269,11 +269,12 @@ class TestAdvancedExcelFeatures:
 
         # パフォーマンステスト（基本的な実行時間確認）
         import time
+
         start_time = time.time()
 
         result = self.loader.load_from_excel(
             excel_path,
-            merge_mode="expand"    # シンプルな処理
+            merge_mode="expand",  # シンプルな処理
         )
 
         end_time = time.time()

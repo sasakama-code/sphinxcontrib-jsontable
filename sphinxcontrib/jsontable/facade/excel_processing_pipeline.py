@@ -102,7 +102,7 @@ class ExcelProcessingPipeline:
                 read_result.dataframe = self._apply_range_to_dataframe(
                     read_result.dataframe, range_info, context
                 )
-                
+
                 # Adjust header_row index to be relative to the range
                 if header_row is not None:
                     header_row = self._adjust_header_row_for_range(
@@ -116,7 +116,7 @@ class ExcelProcessingPipeline:
                 read_result.dataframe = self._apply_skip_rows_to_dataframe(
                     read_result.dataframe, skip_rows_list, context
                 )
-                
+
                 # Adjust header_row index to account for skipped rows
                 if header_row is not None:
                     header_row = self._adjust_header_row_for_skip_rows(
@@ -130,10 +130,17 @@ class ExcelProcessingPipeline:
 
             # Stage 5: Result integration (header processing only)
             return self._build_integrated_result(
-                conversion_result, read_result, range_info, context, header_row, skip_rows_list, skip_rows, merge_mode
+                conversion_result,
+                read_result,
+                range_info,
+                context,
+                header_row,
+                skip_rows_list,
+                skip_rows,
+                merge_mode,
             )
 
-        except ValueError as e:
+        except ValueError:
             # Re-raise ValueError directly for proper test behavior
             raise
         except Exception as e:
@@ -199,7 +206,7 @@ class ExcelProcessingPipeline:
         self, dataframe: pd.DataFrame, header_row: Optional[int], context: str
     ) -> Any:
         """Stage 4: Convert data to JSON format.
-        
+
         Note: header_row processing is handled separately in _apply_header_row_processing
         to avoid double-processing. DataConverter should use auto-detection only.
         """
@@ -230,7 +237,7 @@ class ExcelProcessingPipeline:
         merge_mode: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Stage 5: Build integrated result with header processing only.
-        
+
         Note: Range application is now handled in Stage 3.5 on raw DataFrame.
         """
         try:
@@ -280,7 +287,9 @@ class ExcelProcessingPipeline:
 
             # Add skip rows information if available
             if skip_rows_list:
-                result["skip_rows"] = skip_rows_original or ",".join(map(str, skip_rows_list))
+                result["skip_rows"] = skip_rows_original or ",".join(
+                    map(str, skip_rows_list)
+                )
                 result["skipped_row_count"] = len(skip_rows_list)
                 result["metadata"]["skip_rows_info"] = {
                     "skipped_rows": skip_rows_list,
@@ -299,7 +308,7 @@ class ExcelProcessingPipeline:
 
             return result
 
-        except ValueError as e:
+        except ValueError:
             # Re-raise ValueError directly for proper test behavior
             raise
         except Exception as e:
@@ -332,14 +341,14 @@ class ExcelProcessingPipeline:
         self, dataframe: pd.DataFrame, range_info: RangeInfo, context: str
     ) -> pd.DataFrame:
         """Apply range specification to raw DataFrame.
-        
+
         Operates on Excel's 1-based row/column numbering for accurate range selection.
-        
+
         Args:
             dataframe: Original pandas DataFrame
             range_info: Range specification with 1-based indices
             context: Processing context for error reporting
-            
+
         Returns:
             DataFrame subset matching the specified range
         """
@@ -349,33 +358,35 @@ class ExcelProcessingPipeline:
             end_row = range_info.end_row - 1
             start_col = range_info.start_col - 1
             end_col = range_info.end_col - 1
-            
+
             # Validate range bounds against DataFrame
             max_df_rows = len(dataframe)
             max_df_cols = len(dataframe.columns)
-            
+
             if start_row >= max_df_rows or end_row >= max_df_rows:
                 raise ProcessingError(
                     f"Range row indices ({range_info.start_row}-{range_info.end_row}) "
                     f"exceed DataFrame rows (1-{max_df_rows})"
                 )
-                
+
             if start_col >= max_df_cols or end_col >= max_df_cols:
                 raise ProcessingError(
                     f"Range column indices ({range_info.start_col}-{range_info.end_col}) "
                     f"exceed DataFrame columns (1-{max_df_cols})"
                 )
-            
+
             # Apply range selection to DataFrame
-            range_df = dataframe.iloc[start_row:end_row + 1, start_col:end_col + 1]
-            
+            range_df = dataframe.iloc[start_row : end_row + 1, start_col : end_col + 1]
+
             # Reset index to maintain 0-based indexing
             return range_df.reset_index(drop=True)
-            
+
         except Exception as e:
             if self.enable_error_handling and self.error_handler:
                 error_response = self.error_handler.create_error_response(e, context)
-                raise ProcessingError(f"DataFrame range application failed: {error_response}") from e
+                raise ProcessingError(
+                    f"DataFrame range application failed: {error_response}"
+                ) from e
             else:
                 raise
 
@@ -383,15 +394,15 @@ class ExcelProcessingPipeline:
         self, header_row: int, range_info: RangeInfo, context: str
     ) -> int:
         """Adjust header_row index to be relative to the applied range.
-        
+
         Args:
             header_row: Original header row index (0-based)
             range_info: Range specification with 1-based indices
             context: Processing context for error reporting
-            
+
         Returns:
             Adjusted header row index relative to the range (0-based)
-            
+
         Raises:
             ProcessingError: If header_row is outside the specified range
         """
@@ -399,64 +410,66 @@ class ExcelProcessingPipeline:
             # Convert 1-based Excel range to 0-based DataFrame indices
             range_start_row = range_info.start_row - 1
             range_end_row = range_info.end_row - 1
-            
+
             # Check if header_row is within the range
             if header_row < range_start_row or header_row > range_end_row:
                 raise ProcessingError(
                     f"Header row {header_row} is outside the specified range "
                     f"({range_info.start_row}-{range_info.end_row})"
                 )
-            
+
             # Calculate relative index within the range
             relative_header_row = header_row - range_start_row
-            
+
             return relative_header_row
-            
+
         except Exception as e:
             if self.enable_error_handling and self.error_handler:
                 error_response = self.error_handler.create_error_response(e, context)
-                raise ProcessingError(f"Header row adjustment failed: {error_response}") from e
+                raise ProcessingError(
+                    f"Header row adjustment failed: {error_response}"
+                ) from e
             else:
                 raise
 
     def _apply_range_to_data(self, data: Any, range_info: RangeInfo) -> Any:
         """Apply range specification to extract data subset.
-        
+
         Converts 1-based Excel indices to 0-based Python indices and extracts
         the specified range from the data.
-        
+
         Args:
             data: Original data as list of lists
             range_info: Range specification with 1-based indices
-            
+
         Returns:
             Extracted data subset as list of lists
         """
         if not data or not isinstance(data, list):
             return data
-            
+
         # Convert 1-based Excel indices to 0-based Python indices
         start_row = range_info.start_row - 1
         end_row = range_info.end_row - 1
         start_col = range_info.start_col - 1
         end_col = range_info.end_col - 1
-        
+
         # Validate range bounds against actual data
         max_data_rows = len(data)
         max_data_cols = len(data[0]) if data else 0
-        
+
         if start_row >= max_data_rows or end_row >= max_data_rows:
             raise ProcessingError(
                 f"Range row indices ({range_info.start_row}-{range_info.end_row}) "
                 f"exceed data rows (1-{max_data_rows})"
             )
-            
+
         if start_col >= max_data_cols or end_col >= max_data_cols:
             raise ProcessingError(
                 f"Range column indices ({range_info.start_col}-{range_info.end_col}) "
                 f"exceed data columns (1-{max_data_cols})"
             )
-        
+
         # Extract range data: rows [start_row:end_row+1], columns [start_col:end_col+1]
         range_data = []
         for row_idx in range(start_row, end_row + 1):
@@ -464,147 +477,153 @@ class ExcelProcessingPipeline:
                 row_data = data[row_idx]
                 if isinstance(row_data, list):
                     # Extract specified columns from this row
-                    range_row = row_data[start_col:end_col + 1]
+                    range_row = row_data[start_col : end_col + 1]
                     range_data.append(range_row)
                 else:
                     # Handle non-list row data
                     range_data.append([row_data])
-        
+
         return range_data
 
     def _apply_header_row_processing(
         self, data: Any, header_row: int
     ) -> tuple[Any, list[str], bool]:
         """Apply header row processing to extract headers and remove header row from data.
-        
+
         Args:
             data: Original data as list of lists
             header_row: Header row index (0-based)
-            
+
         Returns:
             Tuple of (processed_data, headers, has_header)
         """
         # Validate header_row parameter
         if header_row < 0:
             raise ValueError("Header row must be non-negative")
-            
+
         if not data or not isinstance(data, list):
             return data, [], False
-            
+
         # Validate header_row bounds
         if header_row >= len(data):
-            raise ValueError(
-                f"Header row {header_row} is out of range"
-            )
-            
+            raise ValueError(f"Header row {header_row} is out of range")
+
         # Extract headers from specified row
         header_data = data[header_row]
         if isinstance(header_data, list):
             headers = [str(cell) if cell is not None else "" for cell in header_data]
         else:
             headers = [str(header_data)]
-            
+
         # Normalize headers (handle empty headers)
         headers = self._normalize_header_names(headers)
-        
+
         # Remove header row and all rows before it from data
-        processed_data = data[header_row + 1:]
-        
+        processed_data = data[header_row + 1 :]
+
         return processed_data, headers, True
 
     def _normalize_header_names(self, headers: list[str]) -> list[str]:
         """Normalize header names to handle empty headers and duplicates.
-        
+
         Args:
             headers: List of raw header names
-            
+
         Returns:
             List of normalized header names
         """
         normalized = []
         header_counts = {}
-        
+
         for i, header in enumerate(headers):
             # Strip whitespace
             header = header.strip()
-            
+
             # Handle empty headers
             if not header:
                 header = f"column_{i + 1}"
-            
+
             # Handle duplicates
             if header in header_counts:
                 header_counts[header] += 1
                 header = f"{header}_{header_counts[header]}"
             else:
                 header_counts[header] = 0
-            
+
             normalized.append(header)
-            
+
         return normalized
 
-    def _parse_skip_rows_specification(
-        self, skip_rows: str, context: str
-    ) -> list[int]:
+    def _parse_skip_rows_specification(self, skip_rows: str, context: str) -> list[int]:
         """Parse skip rows specification into list of row indices.
-        
+
         Args:
             skip_rows: Skip rows specification (e.g., "0,1,2" or "0-2,5,7-9")
             context: Processing context for error reporting
-            
+
         Returns:
             List of row indices to skip (0-based, sorted, deduplicated)
-            
+
         Raises:
             ProcessingError: If skip_rows format is invalid
         """
         try:
             if not skip_rows or not skip_rows.strip():
                 return []
-                
+
             # Split by commas and process each part
-            parts = skip_rows.strip().split(',')
+            parts = skip_rows.strip().split(",")
             skip_indices = set()
-            
+
             for part in parts:
                 part = part.strip()
                 if not part:
-                    raise ProcessingError("Empty values not allowed in skip rows specification")
-                    
-                if '-' in part:
+                    raise ProcessingError(
+                        "Empty values not allowed in skip rows specification"
+                    )
+
+                if "-" in part:
                     # Handle range format (e.g., "0-2")
-                    range_parts = part.split('-')
+                    range_parts = part.split("-")
                     if len(range_parts) != 2:
                         raise ProcessingError(f"Invalid range format: {part}")
-                    
+
                     try:
                         start = int(range_parts[0])
                         end = int(range_parts[1])
-                        
+
                         if start < 0 or end < 0:
-                            raise ProcessingError(f"Negative row indices not allowed: {part}")
+                            raise ProcessingError(
+                                f"Negative row indices not allowed: {part}"
+                            )
                         if start > end:
                             raise ProcessingError(f"Invalid range order: {part}")
-                            
+
                         skip_indices.update(range(start, end + 1))
                     except ValueError as e:
-                        raise ProcessingError(f"Invalid range specification: {part}") from e
+                        raise ProcessingError(
+                            f"Invalid range specification: {part}"
+                        ) from e
                 else:
                     # Handle single index
                     try:
                         index = int(part)
                         if index < 0:
-                            raise ProcessingError(f"Negative row index not allowed: {index}")
+                            raise ProcessingError(
+                                f"Negative row index not allowed: {index}"
+                            )
                         skip_indices.add(index)
                     except ValueError as e:
                         raise ProcessingError(f"Invalid row index: {part}") from e
-            
+
             return sorted(list(skip_indices))
-            
+
         except Exception as e:
             if self.enable_error_handling and self.error_handler:
                 error_response = self.error_handler.create_error_response(e, context)
-                raise ProcessingError(f"Skip rows parsing failed: {error_response}") from e
+                raise ProcessingError(
+                    f"Skip rows parsing failed: {error_response}"
+                ) from e
             else:
                 raise
 
@@ -612,43 +631,45 @@ class ExcelProcessingPipeline:
         self, dataframe: pd.DataFrame, skip_rows_list: list[int], context: str
     ) -> pd.DataFrame:
         """Apply skip rows specification to remove specified rows from DataFrame.
-        
+
         Args:
             dataframe: Original pandas DataFrame
             skip_rows_list: List of row indices to skip (0-based)
             context: Processing context for error reporting
-            
+
         Returns:
             DataFrame with specified rows removed and reset index
-            
+
         Raises:
             ProcessingError: If skip_rows are out of range
         """
         try:
             if not skip_rows_list:
                 return dataframe
-                
+
             # Validate skip rows are within DataFrame bounds
             max_df_rows = len(dataframe)
             invalid_rows = [idx for idx in skip_rows_list if idx >= max_df_rows]
-            
+
             if invalid_rows:
                 raise ProcessingError(
-                    f"Skip row {invalid_rows[0]} is out of range (0-{max_df_rows-1})"
+                    f"Skip row {invalid_rows[0]} is out of range (0-{max_df_rows - 1})"
                 )
-            
+
             # Create boolean mask for rows to keep (inverse of skip_rows)
             keep_mask = ~dataframe.index.isin(skip_rows_list)
-            
+
             # Apply mask and reset index
             filtered_df = dataframe[keep_mask].reset_index(drop=True)
-            
+
             return filtered_df
-            
+
         except Exception as e:
             if self.enable_error_handling and self.error_handler:
                 error_response = self.error_handler.create_error_response(e, context)
-                raise ProcessingError(f"DataFrame skip rows application failed: {error_response}") from e
+                raise ProcessingError(
+                    f"DataFrame skip rows application failed: {error_response}"
+                ) from e
             else:
                 raise
 
@@ -656,40 +677,42 @@ class ExcelProcessingPipeline:
         self, header_row: int, skip_rows_list: list[int], context: str
     ) -> int:
         """Adjust header_row index to account for skipped rows.
-        
+
         Args:
             header_row: Original header row index (0-based)
             skip_rows_list: List of skipped row indices (0-based, sorted)
             context: Processing context for error reporting
-            
+
         Returns:
             Adjusted header row index after skipping rows
-            
+
         Raises:
             ProcessingError: If header_row is in skip_rows_list
         """
         try:
             if not skip_rows_list:
                 return header_row
-                
+
             # Check if header_row is being skipped
             if header_row in skip_rows_list:
-                raise ProcessingError(
-                    f"Header row {header_row} cannot be skipped"
-                )
-            
+                raise ProcessingError(f"Header row {header_row} cannot be skipped")
+
             # Count how many rows before header_row are being skipped
-            skipped_before_header = sum(1 for skip_idx in skip_rows_list if skip_idx < header_row)
-            
+            skipped_before_header = sum(
+                1 for skip_idx in skip_rows_list if skip_idx < header_row
+            )
+
             # Adjust header_row index
             adjusted_header_row = header_row - skipped_before_header
-            
+
             return adjusted_header_row
-            
+
         except Exception as e:
             if self.enable_error_handling and self.error_handler:
                 error_response = self.error_handler.create_error_response(e, context)
-                raise ProcessingError(f"Header row adjustment failed: {error_response}") from e
+                raise ProcessingError(
+                    f"Header row adjustment failed: {error_response}"
+                ) from e
             else:
                 raise
 

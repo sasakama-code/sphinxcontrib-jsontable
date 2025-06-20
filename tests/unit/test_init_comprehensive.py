@@ -238,7 +238,7 @@ class TestImportStructure:
 
         # 型ヒント用インポートが実行時にエラーを起こさないことを確認
         try:
-            import sphinx.application  # 直接インポートでエラーなし確認
+            import sphinx.application  # noqa: F401 # 直接インポートでエラーなし確認
         except ImportError:
             # Sphinxが利用できない環境では型ヒントのみ使用されることを確認
             assert TYPE_CHECKING is False

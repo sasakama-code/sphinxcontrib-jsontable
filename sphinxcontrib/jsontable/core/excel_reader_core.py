@@ -144,7 +144,9 @@ class ExcelReader(IExcelReader):
             # This ensures Excel row numbering remains consistent for range operations
             default_kwargs = {"header": None}
             default_kwargs.update(kwargs)  # Allow override if explicitly specified
-            dataframe = pd.read_excel(file_path, sheet_name=target_sheet, **default_kwargs)
+            dataframe = pd.read_excel(
+                file_path, sheet_name=target_sheet, **default_kwargs
+            )
 
             # Create metadata
             metadata = {

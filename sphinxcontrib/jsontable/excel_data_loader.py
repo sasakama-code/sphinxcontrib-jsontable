@@ -116,7 +116,7 @@ class ExcelDataLoader:
         """Load with header row configuration."""
         # Validate header_row early to ensure proper error handling
         self._validate_header_row(header_row)
-        
+
         resolved_path = self._resolve_path(file_path)
         return self.facade.load_from_excel_with_header_row(
             resolved_path, header_row, **kwargs
@@ -152,12 +152,12 @@ class ExcelDataLoader:
                 raise ValueError("Negative row indices not allowed") from e
             else:
                 raise
-        
+
         resolved_path = self._resolve_path(file_path)
         result = self.facade.load_from_excel_with_skip_rows(
             resolved_path, skip_rows, **kwargs
         )
-        
+
         # Check if result is an error response and convert to exception
         if isinstance(result, dict) and result.get("error"):
             error_message = result.get("error_message", "Unknown error")
@@ -166,6 +166,7 @@ class ExcelDataLoader:
                 if "Skip row" in error_message and "out of range" in error_message:
                     # Extract row number and range from error message
                     import re
+
                     match = re.search(r"Skip row (\d+) is out of range", error_message)
                     if match:
                         row_num = match.group(1)
@@ -173,7 +174,7 @@ class ExcelDataLoader:
                 raise ValueError(error_message)
             else:
                 raise ValueError(error_message)
-        
+
         return result
 
     def get_sheet_names(self, file_path: Union[str, Path]) -> list:
@@ -214,6 +215,7 @@ class ExcelDataLoader:
                     warnings.warn(
                         "Security Warning: Macro-enabled Excel file detected",
                         UserWarning,
+                        stacklevel=2,
                     )
                 # "allow" mode permits macro files
 
@@ -248,14 +250,12 @@ class ExcelDataLoader:
         """
         resolved_path = self._resolve_path(file_path)
         # Delegate to facade with merge cells handling
-        return self.facade.load_from_excel(resolved_path, merge_mode=merge_mode, **kwargs)
+        return self.facade.load_from_excel(
+            resolved_path, merge_mode=merge_mode, **kwargs
+        )
 
     def load_from_excel_with_header_row_and_range(
-        self, 
-        file_path: Union[str, Path], 
-        header_row: int, 
-        range_spec: str,
-        **kwargs
+        self, file_path: Union[str, Path], header_row: int, range_spec: str, **kwargs
     ) -> Dict[str, Any]:
         """Load Excel file with header row and range specification.
 
@@ -275,10 +275,10 @@ class ExcelDataLoader:
 
     def _normalize_header_names(self, headers: list) -> list:
         """Normalize header names to handle empty headers and duplicates.
-        
+
         Args:
             headers: List of raw header names
-            
+
         Returns:
             List of normalized header names
         """
@@ -286,11 +286,7 @@ class ExcelDataLoader:
         return self.facade.processing_pipeline._normalize_header_names(headers)
 
     def load_from_excel_with_skip_rows_and_header(
-        self,
-        file_path: Union[str, Path],
-        skip_rows: str,
-        header_row: int,
-        **kwargs
+        self, file_path: Union[str, Path], skip_rows: str, header_row: int, **kwargs
     ) -> Dict[str, Any]:
         """Load Excel file with skip rows and header row configuration.
 
@@ -306,18 +302,14 @@ class ExcelDataLoader:
         # Validate parameters
         self._validate_skip_rows_specification(skip_rows)
         self._validate_header_row(header_row)
-        
+
         resolved_path = self._resolve_path(file_path)
         return self.facade.load_from_excel(
             resolved_path, skip_rows=skip_rows, header_row=header_row, **kwargs
         )
 
     def load_from_excel_with_skip_rows_and_range(
-        self,
-        file_path: Union[str, Path],
-        range_spec: str,
-        skip_rows: str,
-        **kwargs
+        self, file_path: Union[str, Path], range_spec: str, skip_rows: str, **kwargs
     ) -> Dict[str, Any]:
         """Load Excel file with range specification and skip rows.
 
@@ -332,7 +324,7 @@ class ExcelDataLoader:
         """
         # Validate parameters
         self._validate_skip_rows_specification(skip_rows)
-        
+
         resolved_path = self._resolve_path(file_path)
         return self.facade.load_from_excel(
             resolved_path, range_spec=range_spec, skip_rows=skip_rows, **kwargs
@@ -340,10 +332,10 @@ class ExcelDataLoader:
 
     def _parse_skip_rows_specification(self, skip_rows: str) -> list[int]:
         """Parse skip rows specification into list of row indices.
-        
+
         Args:
             skip_rows: Skip rows specification (e.g., "0,1,2" or "0-2,5,7-9")
-            
+
         Returns:
             List of row indices to skip (0-based, sorted, deduplicated)
         """
@@ -352,50 +344,54 @@ class ExcelDataLoader:
             skip_rows, "excel_data_loader"
         )
 
-    def _validate_skip_rows_specification(self, skip_rows: Union[str, None]) -> Union[str, None]:
+    def _validate_skip_rows_specification(
+        self, skip_rows: Union[str, None]
+    ) -> Union[str, None]:
         """Validate skip rows specification.
-        
+
         Args:
             skip_rows: Skip rows specification
-            
+
         Returns:
             Validated skip rows specification or None
-            
+
         Raises:
             TypeError: If skip_rows is not a string or None
             ValueError: If skip_rows specification is empty
         """
         if skip_rows is None:
             return None  # No skipping mode
-            
+
         if not isinstance(skip_rows, str):
             raise TypeError("Skip rows must be a string")
-            
+
         if not skip_rows.strip():
             raise ValueError("Skip rows specification cannot be empty")
-            
+
         return skip_rows
 
-    def _validate_header_row(self, header_row: Union[int, str, None]) -> Union[int, None]:
+    def _validate_header_row(
+        self, header_row: Union[int, str, None]
+    ) -> Union[int, None]:
         """Validate header row parameter.
-        
+
         Args:
             header_row: Header row specification
-            
+
         Returns:
             Validated header row number or None for auto-detection
-            
+
         Raises:
             TypeError: If header_row is not an integer or None
             ValueError: If header_row is negative
         """
         if header_row is None:
             return None  # Auto-detection mode
-            
+
         if not isinstance(header_row, int):
             raise TypeError("Header row must be an integer")
-            
+
         if header_row < 0:
             raise ValueError("Header row must be non-negative")
-            
+
         return header_row

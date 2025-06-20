@@ -2,10 +2,13 @@
 """ヘッダー行機能のデバッグスクリプト"""
 
 import os
-import tempfile
 import shutil
+import tempfile
+
 from openpyxl import Workbook
+
 from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
+
 
 def create_header_test_excel() -> str:
     """ヘッダー行設定テスト用のExcelファイルを作成"""
@@ -35,17 +38,19 @@ def create_header_test_excel() -> str:
     wb.save(file_path)
     return file_path, temp_dir
 
+
 def main():
     """メイン関数"""
     # テスト用Excelファイルを作成
     excel_path, temp_dir = create_header_test_excel()
-    
+
     print(f"Created Excel file: {excel_path}")
-    
+
     # 生のExcelデータを確認
     print("\n=== 生のExcelデータ（openpyxlで直読み） ===")
     try:
         from openpyxl import load_workbook
+
         wb = load_workbook(excel_path)
         ws = wb.active
         print("Raw Excel data:")
@@ -57,10 +62,10 @@ def main():
             print(f"  Excel Row {row_idx}: {row_data}")
     except Exception as e:
         print(f"Error reading raw Excel: {e}")
-    
+
     # ExcelDataLoaderを初期化
     loader = ExcelDataLoader(temp_dir)
-    
+
     # 通常の読み込み
     print("\n=== 通常読み込み ===")
     try:
@@ -68,11 +73,11 @@ def main():
         print(f"Normal result keys: {list(result_normal.keys())}")
         print(f"Normal data shape: {len(result_normal['data'])} rows")
         print("All normal data:")
-        for i, row in enumerate(result_normal['data']):
+        for i, row in enumerate(result_normal["data"]):
             print(f"  Row {i}: {row}")
     except Exception as e:
         print(f"Error in normal load: {type(e).__name__}: {e}")
-    
+
     # ヘッダー行指定読み込み（テスト値）
     print("\n=== ヘッダー行指定読み込み (header_row=2 - empty row) ===")
     try:
@@ -89,9 +94,10 @@ def main():
         print(f"Data rows: {len(result_header.get('data', []))}")
     except Exception as e:
         print(f"Error: {e}")
-    
+
     # クリーンアップ
     shutil.rmtree(temp_dir, ignore_errors=True)
+
 
 if __name__ == "__main__":
     main()
