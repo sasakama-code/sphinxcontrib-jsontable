@@ -62,6 +62,7 @@ class ExcelProcessingPipeline:
         sheet_index: Optional[int] = None,
         range_spec: Optional[str] = None,
         header_row: Optional[int] = None,
+        skip_rows: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Execute 5-stage Excel processing pipeline.
 
@@ -71,6 +72,7 @@ class ExcelProcessingPipeline:
             sheet_index: Target sheet index (0-based)
             range_spec: Excel range specification (e.g., "A1:C10")
             header_row: Header row number (0-based)
+            skip_rows: Row skip specification (e.g., "0,1,2" or "0-2,5,7-9")
 
         Returns:
             Processing result with data and metadata
@@ -105,6 +107,20 @@ class ExcelProcessingPipeline:
                         header_row, range_info, context
                     )
 
+            # Stage 3.75: Apply skip rows to dataframe (if specified)
+            skip_rows_list = None
+            if skip_rows:
+                skip_rows_list = self._parse_skip_rows_specification(skip_rows, context)
+                read_result.dataframe = self._apply_skip_rows_to_dataframe(
+                    read_result.dataframe, skip_rows_list, context
+                )
+                
+                # Adjust header_row index to account for skipped rows
+                if header_row is not None:
+                    header_row = self._adjust_header_row_for_skip_rows(
+                        header_row, skip_rows_list, context
+                    )
+
             # Stage 4: Data conversion
             conversion_result = self._convert_data_to_json(
                 read_result.dataframe, header_row, context
@@ -112,7 +128,7 @@ class ExcelProcessingPipeline:
 
             # Stage 5: Result integration (header processing only)
             return self._build_integrated_result(
-                conversion_result, read_result, range_info, context, header_row
+                conversion_result, read_result, range_info, context, header_row, skip_rows_list, skip_rows
             )
 
         except ValueError as e:
@@ -207,6 +223,8 @@ class ExcelProcessingPipeline:
         range_info: Optional[RangeInfo],
         context: str,
         header_row: Optional[int] = None,
+        skip_rows_list: Optional[list] = None,
+        skip_rows_original: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Stage 5: Build integrated result with header processing only.
         
@@ -255,6 +273,16 @@ class ExcelProcessingPipeline:
                     "normalized_spec": range_info.normalized_spec,
                     "row_count": range_info.row_count,
                     "col_count": range_info.col_count,
+                }
+
+            # Add skip rows information if available
+            if skip_rows_list:
+                result["skip_rows"] = skip_rows_original or ",".join(map(str, skip_rows_list))
+                result["skipped_row_count"] = len(skip_rows_list)
+                result["metadata"]["skip_rows_info"] = {
+                    "skipped_rows": skip_rows_list,
+                    "skipped_count": len(skip_rows_list),
+                    "original_spec": skip_rows_original,
                 }
 
             return result
@@ -502,6 +530,156 @@ class ExcelProcessingPipeline:
             normalized.append(header)
             
         return normalized
+
+    def _parse_skip_rows_specification(
+        self, skip_rows: str, context: str
+    ) -> list[int]:
+        """Parse skip rows specification into list of row indices.
+        
+        Args:
+            skip_rows: Skip rows specification (e.g., "0,1,2" or "0-2,5,7-9")
+            context: Processing context for error reporting
+            
+        Returns:
+            List of row indices to skip (0-based, sorted, deduplicated)
+            
+        Raises:
+            ProcessingError: If skip_rows format is invalid
+        """
+        try:
+            if not skip_rows or not skip_rows.strip():
+                return []
+                
+            # Split by commas and process each part
+            parts = skip_rows.strip().split(',')
+            skip_indices = set()
+            
+            for part in parts:
+                part = part.strip()
+                if not part:
+                    raise ProcessingError("Empty values not allowed in skip rows specification")
+                    
+                if '-' in part:
+                    # Handle range format (e.g., "0-2")
+                    range_parts = part.split('-')
+                    if len(range_parts) != 2:
+                        raise ProcessingError(f"Invalid range format: {part}")
+                    
+                    try:
+                        start = int(range_parts[0])
+                        end = int(range_parts[1])
+                        
+                        if start < 0 or end < 0:
+                            raise ProcessingError(f"Negative row indices not allowed: {part}")
+                        if start > end:
+                            raise ProcessingError(f"Invalid range order: {part}")
+                            
+                        skip_indices.update(range(start, end + 1))
+                    except ValueError as e:
+                        raise ProcessingError(f"Invalid range specification: {part}") from e
+                else:
+                    # Handle single index
+                    try:
+                        index = int(part)
+                        if index < 0:
+                            raise ProcessingError(f"Negative row index not allowed: {index}")
+                        skip_indices.add(index)
+                    except ValueError as e:
+                        raise ProcessingError(f"Invalid row index: {part}") from e
+            
+            return sorted(list(skip_indices))
+            
+        except Exception as e:
+            if self.enable_error_handling and self.error_handler:
+                error_response = self.error_handler.create_error_response(e, context)
+                raise ProcessingError(f"Skip rows parsing failed: {error_response}") from e
+            else:
+                raise
+
+    def _apply_skip_rows_to_dataframe(
+        self, dataframe: pd.DataFrame, skip_rows_list: list[int], context: str
+    ) -> pd.DataFrame:
+        """Apply skip rows specification to remove specified rows from DataFrame.
+        
+        Args:
+            dataframe: Original pandas DataFrame
+            skip_rows_list: List of row indices to skip (0-based)
+            context: Processing context for error reporting
+            
+        Returns:
+            DataFrame with specified rows removed and reset index
+            
+        Raises:
+            ProcessingError: If skip_rows are out of range
+        """
+        try:
+            if not skip_rows_list:
+                return dataframe
+                
+            # Validate skip rows are within DataFrame bounds
+            max_df_rows = len(dataframe)
+            invalid_rows = [idx for idx in skip_rows_list if idx >= max_df_rows]
+            
+            if invalid_rows:
+                raise ProcessingError(
+                    f"Skip row {invalid_rows[0]} is out of range (0-{max_df_rows-1})"
+                )
+            
+            # Create boolean mask for rows to keep (inverse of skip_rows)
+            keep_mask = ~dataframe.index.isin(skip_rows_list)
+            
+            # Apply mask and reset index
+            filtered_df = dataframe[keep_mask].reset_index(drop=True)
+            
+            return filtered_df
+            
+        except Exception as e:
+            if self.enable_error_handling and self.error_handler:
+                error_response = self.error_handler.create_error_response(e, context)
+                raise ProcessingError(f"DataFrame skip rows application failed: {error_response}") from e
+            else:
+                raise
+
+    def _adjust_header_row_for_skip_rows(
+        self, header_row: int, skip_rows_list: list[int], context: str
+    ) -> int:
+        """Adjust header_row index to account for skipped rows.
+        
+        Args:
+            header_row: Original header row index (0-based)
+            skip_rows_list: List of skipped row indices (0-based, sorted)
+            context: Processing context for error reporting
+            
+        Returns:
+            Adjusted header row index after skipping rows
+            
+        Raises:
+            ProcessingError: If header_row is in skip_rows_list
+        """
+        try:
+            if not skip_rows_list:
+                return header_row
+                
+            # Check if header_row is being skipped
+            if header_row in skip_rows_list:
+                raise ProcessingError(
+                    f"Header row {header_row} cannot be skipped"
+                )
+            
+            # Count how many rows before header_row are being skipped
+            skipped_before_header = sum(1 for skip_idx in skip_rows_list if skip_idx < header_row)
+            
+            # Adjust header_row index
+            adjusted_header_row = header_row - skipped_before_header
+            
+            return adjusted_header_row
+            
+        except Exception as e:
+            if self.enable_error_handling and self.error_handler:
+                error_response = self.error_handler.create_error_response(e, context)
+                raise ProcessingError(f"Header row adjustment failed: {error_response}") from e
+            else:
+                raise
 
     def _get_components_info(self) -> Dict[str, str]:
         """Get information about pipeline components."""

@@ -154,6 +154,18 @@ class ExcelProcessor:
             raise JsonTableError("Options must be a dictionary")
         return options
 
+    def _convert_directive_options(self, options):
+        """ディレクティブオプション名をAPIパラメータ名に変換"""
+        converted_options = {}
+        for key, value in options.items():
+            if key == "header-row":
+                converted_options["header_row"] = value
+            elif key == "skip-rows":
+                converted_options["skip_rows"] = value
+            else:
+                converted_options[key] = value
+        return converted_options
+
     def _generate_cache_key(self, file_path: str, options: dict) -> str:
         """キャッシュキー生成"""
         options_str = str(sorted(options.items()))
@@ -171,8 +183,11 @@ class ExcelProcessor:
         if cache_key in self._cache:
             return self._cache[cache_key]
 
+        # オプション名変換
+        converted_options = self._convert_directive_options(options)
+
         # キャッシュミス - 実際にデータを読み込み
-        result = self.excel_loader.load_from_excel(file_path, **options)
+        result = self.excel_loader.load_from_excel(file_path, **converted_options)
         data = result.get("data", [])
 
         # キャッシュに保存
@@ -274,8 +289,11 @@ class ExcelProcessor:
             if validated_options.get("json-cache", False):
                 return self._load_with_cache(file_path, validated_options)
 
+            # ディレクティブオプション名をAPIパラメータ名に変換
+            converted_options = self._convert_directive_options(validated_options)
+
             # 通常の読み込み処理
-            result = self.excel_loader.load_from_excel(file_path, **validated_options)
+            result = self.excel_loader.load_from_excel(file_path, **converted_options)
             
             # Check for error result
             if result.get("error"):

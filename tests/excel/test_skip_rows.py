@@ -264,16 +264,15 @@ class TestSkipRows:
             )
             directive.excel_loader = ExcelDataLoader(self.temp_dir)
 
-            json_data = directive._load_json_data()
+            json_data = directive._load_data()
 
             # スキップ処理された結果を確認
+            # _load_data()はリスト形式でデータを返す
             assert len(json_data) == 4  # データ行数(ヘッダー除く)
-            assert json_data[0]["商品名"] == "商品A"
-            assert json_data[1]["商品名"] == "商品B"
-            assert (
-                json_data[2]["商品名"] == "商品C"
-            )  # Row 6がスキップされているためRow 7
-            assert json_data[3]["商品名"] == "商品D"
+            assert json_data[0][0] == "商品A"  # 1列目（商品名）
+            assert json_data[1][0] == "商品B"  # 1列目（商品名）
+            assert json_data[2][0] == "商品C"  # Row 6がスキップされているためRow 7
+            assert json_data[3][0] == "商品D"  # 1列目（商品名）
 
     def test_skip_rows_parsing(self):
         """Skip Rows指定文字列の解析テスト(未実装なので失敗する)。"""

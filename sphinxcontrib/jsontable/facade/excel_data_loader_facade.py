@@ -86,6 +86,7 @@ class ExcelDataLoaderFacadeRefactored:
         sheet_index: Optional[int] = None,
         range_spec: Optional[str] = None,
         header_row: Optional[int] = None,
+        skip_rows: Optional[str] = None,
         merge_mode: Optional[str] = None,
         **kwargs,
     ) -> Dict[str, Any]:
@@ -99,6 +100,7 @@ class ExcelDataLoaderFacadeRefactored:
             sheet_index: Target sheet index (0-based)
             range_spec: Excel range specification (e.g., "A1:C10")
             header_row: Header row number (0-based)
+            skip_rows: Row skip specification (e.g., "0,1,2" or "0-2,5,7-9")
             merge_mode: How to handle merged cells ('expand', 'first', 'skip')
             **kwargs: Additional parameters
 
@@ -119,6 +121,7 @@ class ExcelDataLoaderFacadeRefactored:
             sheet_index=sheet_index,
             range_spec=range_spec,
             header_row=header_row,
+            skip_rows=skip_rows,
             **kwargs,
         )
 
