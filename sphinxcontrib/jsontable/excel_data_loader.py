@@ -248,8 +248,7 @@ class ExcelDataLoader:
         """
         resolved_path = self._resolve_path(file_path)
         # Delegate to facade with merge cells handling
-        kwargs["merge_mode"] = merge_mode
-        return self.facade.load_from_excel(resolved_path, **kwargs)
+        return self.facade.load_from_excel(resolved_path, merge_mode=merge_mode, **kwargs)
 
     def load_from_excel_with_header_row_and_range(
         self, 

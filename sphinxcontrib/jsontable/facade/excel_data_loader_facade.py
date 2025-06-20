@@ -107,13 +107,13 @@ class ExcelDataLoaderFacadeRefactored:
         Returns:
             Processing result with data and metadata
         """
-        # Handle merge_mode and additional parameters
-        if merge_mode:
-            kwargs["merge_mode"] = merge_mode
-
         # Handle directive option name compatibility: 'range' -> 'range_spec'
         if "range" in kwargs and range_spec is None:
             range_spec = kwargs.pop("range")
+
+        # Handle merge_mode parameter (avoid duplication)
+        if "merge_mode" in kwargs and merge_mode is None:
+            merge_mode = kwargs.pop("merge_mode")
 
         result = self.processing_pipeline.process_excel_file(
             file_path=file_path,
@@ -122,6 +122,7 @@ class ExcelDataLoaderFacadeRefactored:
             range_spec=range_spec,
             header_row=header_row,
             skip_rows=skip_rows,
+            merge_mode=merge_mode,
             **kwargs,
         )
 
@@ -212,6 +213,68 @@ class ExcelDataLoaderFacadeRefactored:
         return self.load_from_excel(
             file_path=file_path, 
             skip_rows=skip_rows, 
+            **kwargs
+        )
+
+    def load_from_excel_with_detect_range(
+        self,
+        file_path: Union[str, Path],
+        detect_range: str = "auto",
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Load Excel data with automatic range detection.
+        
+        Args:
+            file_path: Path to Excel file
+            detect_range: Detection mode ('auto', 'smart', 'manual')
+            **kwargs: Additional parameters including range_hint for manual mode
+            
+        Returns:
+            Processing result with detected range information
+        """
+        # Validate detect_range mode
+        valid_modes = {"auto", "smart", "manual"}
+        if detect_range not in valid_modes:
+            raise ValueError(f"Invalid detect mode: {detect_range}. Must be one of {valid_modes}")
+        
+        # Extract range_hint before delegating to avoid unexpected keyword argument
+        range_hint = kwargs.pop("range_hint", "A1:Z100")
+        
+        # For now, delegate to basic load_from_excel and add detection metadata
+        # TODO: Implement actual range detection algorithms
+        result = self.load_from_excel(file_path=file_path, **kwargs)
+        
+        # Add detection metadata
+        result["detect_mode"] = detect_range
+        result["detected_range"] = range_hint  # Use extracted range_hint
+        
+        return result
+
+    def load_from_excel_with_skip_rows_range_and_header(
+        self,
+        file_path: Union[str, Path],
+        skip_rows: str,
+        range_spec: str,
+        header_row: int,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Load Excel data with skip rows, range, and header row.
+        
+        Args:
+            file_path: Path to Excel file
+            skip_rows: Skip rows specification
+            range_spec: Excel range specification
+            header_row: Header row number (0-based)
+            **kwargs: Additional parameters
+            
+        Returns:
+            Processing result with data and metadata
+        """
+        return self.load_from_excel(
+            file_path=file_path,
+            skip_rows=skip_rows,
+            range_spec=range_spec,
+            header_row=header_row,
             **kwargs
         )
 

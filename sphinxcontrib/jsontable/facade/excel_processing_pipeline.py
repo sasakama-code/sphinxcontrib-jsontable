@@ -63,6 +63,7 @@ class ExcelProcessingPipeline:
         range_spec: Optional[str] = None,
         header_row: Optional[int] = None,
         skip_rows: Optional[str] = None,
+        merge_mode: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Execute 5-stage Excel processing pipeline.
 
@@ -73,6 +74,7 @@ class ExcelProcessingPipeline:
             range_spec: Excel range specification (e.g., "A1:C10")
             header_row: Header row number (0-based)
             skip_rows: Row skip specification (e.g., "0,1,2" or "0-2,5,7-9")
+            merge_mode: How to handle merged cells ('expand', 'first', 'skip')
 
         Returns:
             Processing result with data and metadata
@@ -128,7 +130,7 @@ class ExcelProcessingPipeline:
 
             # Stage 5: Result integration (header processing only)
             return self._build_integrated_result(
-                conversion_result, read_result, range_info, context, header_row, skip_rows_list, skip_rows
+                conversion_result, read_result, range_info, context, header_row, skip_rows_list, skip_rows, merge_mode
             )
 
         except ValueError as e:
@@ -225,6 +227,7 @@ class ExcelProcessingPipeline:
         header_row: Optional[int] = None,
         skip_rows_list: Optional[list] = None,
         skip_rows_original: Optional[str] = None,
+        merge_mode: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Stage 5: Build integrated result with header processing only.
         
@@ -283,6 +286,15 @@ class ExcelProcessingPipeline:
                     "skipped_rows": skip_rows_list,
                     "skipped_count": len(skip_rows_list),
                     "original_spec": skip_rows_original,
+                }
+
+            # Add merge mode information if available
+            if merge_mode:
+                result["merge_mode"] = merge_mode
+                result["metadata"]["merge_info"] = {
+                    "merge_mode": merge_mode,
+                    "has_merged_cells": False,  # Placeholder - TODO: implement actual detection
+                    "merged_ranges": [],  # Placeholder
                 }
 
             return result
