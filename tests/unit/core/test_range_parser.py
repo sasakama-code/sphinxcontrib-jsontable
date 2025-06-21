@@ -423,9 +423,9 @@ class TestRangeParserIntegration:
 
     def test_generic_exception_handling_in_parse_specification(self):
         """Test generic exception handling in _parse_format method."""
-        # Mock internal re.match to raise generic exception that isn't RangeSpecificationError
-        with patch("re.match") as mock_match:
-            mock_match.side_effect = RuntimeError("Mock regex error")
+        # Mock _range_pattern.match to raise generic exception that isn't RangeSpecificationError
+        with patch.object(self.parser, "_range_pattern") as mock_pattern:
+            mock_pattern.match.side_effect = RuntimeError("Mock regex error")
 
             with pytest.raises(RangeSpecificationError) as exc_info:
                 self.parser.parse("A1:B2")

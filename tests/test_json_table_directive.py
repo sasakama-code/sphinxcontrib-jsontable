@@ -6,7 +6,7 @@ JsonTableDirective class, including normal and error cases.
 """
 
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, PropertyMock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
@@ -100,7 +100,7 @@ class TestJsonTableDirective:
         directive = JsonTableDirective(*args)  # noqa
 
         # Assert
-        mock_loader.assert_called_once_with(DEFAULT_ENCODING)
+        mock_loader.assert_called_once_with(encoding=DEFAULT_ENCODING)
 
     @patch("sphinxcontrib.jsontable.directives.JsonDataLoader")
     @patch("sphinxcontrib.jsontable.directives.TableConverter")
@@ -127,7 +127,7 @@ class TestJsonTableDirective:
         directive = JsonTableDirective(*args)  # noqa
 
         # Assert
-        mock_loader.assert_called_once_with(custom_encoding)
+        mock_loader.assert_called_once_with(encoding=custom_encoding)
 
     @patch("sphinxcontrib.jsontable.directives.JsonDataLoader")
     @patch("sphinxcontrib.jsontable.directives.TableConverter")
@@ -173,8 +173,8 @@ class TestJsonTableDirective:
         mock_table_node = Mock()
 
         directive_instance.loader.load_from_file.return_value = mock_json_data
-        directive_instance.converter.convert.return_value = mock_table_data
-        directive_instance.builder.build_table.return_value = [mock_table_node]
+        directive_instance.table_converter.convert.return_value = mock_table_data
+        directive_instance.table_builder.build_table.return_value = [mock_table_node]
 
         # Act
         result = directive_instance.run()
@@ -193,15 +193,15 @@ class TestJsonTableDirective:
 
         mock_json_data = [{"name": "test"}]
         directive_instance.loader.load_from_file.return_value = mock_json_data
-        directive_instance.converter.convert.return_value = [["name"], ["test"]]
-        directive_instance.builder.build.return_value = Mock()
+        directive_instance.table_converter.convert.return_value = [["name"], ["test"]]
+        directive_instance.table_builder.build_table.return_value = [Mock()]
 
         # Act
         directive_instance.run()
 
         # Assert
-        directive_instance.converter.convert.assert_called_once_with(
-            mock_json_data, True, None
+        directive_instance.table_converter.convert.assert_called_once_with(
+            mock_json_data
         )
 
     @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
@@ -215,15 +215,15 @@ class TestJsonTableDirective:
 
         mock_json_data = [{"name": "test"}]
         directive_instance.loader.load_from_file.return_value = mock_json_data
-        directive_instance.converter.convert.return_value = [["test"]]
-        directive_instance.builder.build.return_value = Mock()
+        directive_instance.table_converter.convert.return_value = [["test"]]
+        directive_instance.table_builder.build_table.return_value = [Mock()]
 
         # Act
         directive_instance.run()
 
         # Assert
-        directive_instance.converter.convert.assert_called_once_with(
-            mock_json_data, False, 10
+        directive_instance.table_converter.convert.assert_called_once_with(
+            mock_json_data
         )
 
     @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
@@ -236,8 +236,8 @@ class TestJsonTableDirective:
 
         mock_json_data = {"key": "value"}
         directive_instance.loader.parse_inline.return_value = mock_json_data
-        directive_instance.converter.convert.return_value = [["row1"]]
-        directive_instance.builder.build.return_value = Mock()
+        directive_instance.table_converter.convert.return_value = [["row1"]]
+        directive_instance.table_builder.build_table.return_value = [Mock()]
 
         # Act
         result = directive_instance.run()
@@ -257,15 +257,15 @@ class TestJsonTableDirective:
 
         mock_json_data = [{"name": "test"}]
         directive_instance.loader.parse_inline.return_value = mock_json_data
-        directive_instance.converter.convert.return_value = [["name"], ["test"]]
-        directive_instance.builder.build.return_value = Mock()
+        directive_instance.table_converter.convert.return_value = [["name"], ["test"]]
+        directive_instance.table_builder.build_table.return_value = [Mock()]
 
         # Act
         directive_instance.run()
 
         # Assert
-        directive_instance.builder.build.assert_called_once_with(
-            [["name"], ["test"]], True
+        directive_instance.table_builder.build_table.assert_called_once_with(
+            [["name"], ["test"]]
         )
 
     @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
@@ -277,15 +277,15 @@ class TestJsonTableDirective:
 
         mock_json_data = [{"name": "test"}]
         directive_instance.loader.load_from_file.return_value = mock_json_data
-        directive_instance.converter.convert.return_value = [["name"], ["test"]]
-        directive_instance.builder.build.return_value = Mock()
+        directive_instance.table_converter.convert.return_value = [["name"], ["test"]]
+        directive_instance.table_builder.build_table.return_value = [Mock()]
 
         # Act
         directive_instance.run()
 
         # Assert
-        directive_instance.converter.convert.assert_called_once_with(
-            mock_json_data, True, 5
+        directive_instance.table_converter.convert.assert_called_once_with(
+            mock_json_data
         )
 
     @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
@@ -330,10 +330,10 @@ class TestJsonTableDirective:
             # Assert
             assert result == [mock_error_node]
 
-    # Tests for _load_json_data method
+    # Tests for _load_json_file method
 
-    def test_load_json_data_from_file(self, directive_instance):
-        """Test _load_json_data loads from file when arguments provided."""
+    def test_load_json_file_from_file(self, directive_instance):
+        """Test _load_json_file loads from file when arguments provided."""
         # Arrange
         directive_instance.arguments = ["test.json"]
         directive_instance.content = []
@@ -348,13 +348,13 @@ class TestJsonTableDirective:
             mock_env.return_value.srcdir = "/source/dir"
 
             # Act
-            result = directive_instance._load_json_data()
+            result = directive_instance._load_json_file("test.json")
 
             # Assert
             assert result == mock_json_data
 
-    def test_load_json_data_from_inline_content(self, directive_instance):
-        """Test _load_json_data loads from inline content when no arguments."""
+    def test_load_json_file_from_inline_content(self, directive_instance):
+        """Test _load_data loads from inline content when no arguments."""
         # Arrange
         directive_instance.arguments = []
         directive_instance.content = ['{"key": "value"}']
@@ -363,20 +363,20 @@ class TestJsonTableDirective:
         directive_instance.loader.parse_inline.return_value = mock_json_data
 
         # Act
-        result = directive_instance._load_json_data()
+        result = directive_instance._load_data()
 
         # Assert
         assert result == mock_json_data
 
-    def test_load_json_data_no_source_raises_error(self, directive_instance):
-        """Test _load_json_data raises JsonTableError when no source provided."""
+    def test_load_json_file_no_source_raises_error(self, directive_instance):
+        """Test _load_data raises JsonTableError when no source provided."""
         # Arrange
         directive_instance.arguments = []
         directive_instance.content = []
 
         # Act & Assert
         with pytest.raises(JsonTableError) as exc_info:
-            directive_instance._load_json_data()
+            directive_instance._load_data()
 
         assert str(exc_info.value) == NO_JSON_SOURCE_ERROR
 
@@ -387,45 +387,32 @@ class TestJsonTableDirective:
         # Arrange
         error_message = "Test error message"
 
-        with patch("sphinxcontrib.jsontable.directives.nodes") as mock_nodes:
-            # Use MagicMock which supports magic methods like __iadd__
-            mock_error_node = MagicMock()
-            mock_paragraph = MagicMock()
+        # Act
+        result = directive_instance._create_error_node(error_message)
 
-            # Ensure __iadd__ returns the same object
-            mock_error_node.__iadd__.return_value = mock_error_node
+        # Assert - Check that it returns an actual error node
+        from docutils import nodes
 
-            # Configure nodes module mocks
-            mock_nodes.error.return_value = mock_error_node
-            mock_nodes.paragraph.return_value = mock_paragraph
-
-            # Act
-            result = directive_instance._create_error_node(error_message)
-
-            # Assert
-            assert result == mock_error_node
-            mock_nodes.error.assert_called_once()
-            mock_nodes.paragraph.assert_called_once_with(text=error_message)
+        assert isinstance(result, nodes.error)
+        assert len(result.children) == 1  # Should contain one paragraph
+        assert isinstance(result.children[0], nodes.paragraph)
+        assert result.children[0].astext() == error_message
 
     def test_create_error_node_message_content(self, directive_instance):
         """Test _create_error_node includes message in paragraph node."""
         # Arrange
-        error_message = "Test error message"
+        error_message = "Custom error message for testing"
 
-        with patch("sphinxcontrib.jsontable.directives.nodes") as mock_nodes:
-            # Use MagicMock which supports magic methods like __iadd__
-            mock_error_node = MagicMock()
-            mock_paragraph = MagicMock()
+        # Act
+        result = directive_instance._create_error_node(error_message)
 
-            # Configure nodes module mocks
-            mock_nodes.error.return_value = mock_error_node
-            mock_nodes.paragraph.return_value = mock_paragraph
+        # Assert - Check message content
+        from docutils import nodes
 
-            # Act
-            directive_instance._create_error_node(error_message)
-
-            # Assert
-            mock_nodes.paragraph.assert_called_once_with(text=error_message)
+        assert isinstance(result, nodes.error)
+        paragraph = result.children[0]
+        assert isinstance(paragraph, nodes.paragraph)
+        assert paragraph.astext() == error_message
 
     # Additional edge case tests
 
@@ -440,22 +427,22 @@ class TestJsonTableDirective:
 
         mock_json_data = [{"name": "test"}]
         directive_instance.loader.load_from_file.return_value = mock_json_data
-        directive_instance.converter.convert.return_value = [["test"]]
-        directive_instance.builder.build.return_value = Mock()
+        directive_instance.table_converter.convert.return_value = [["test"]]
+        directive_instance.table_builder.build_table.return_value = [Mock()]
 
         # Act
         result = directive_instance.run()
 
         # Assert
         # Verify that the limit was passed to converter.convert
-        directive_instance.converter.convert.assert_called_once_with(
-            mock_json_data, False, 10
+        directive_instance.table_converter.convert.assert_called_once_with(
+            mock_json_data
         )
         # Verify successful execution
         assert len(result) == 1
 
-    def test_load_json_data_calls_loader_with_correct_path(self, directive_instance):
-        """Test _load_json_data calls loader with correct source directory path."""
+    def test_load_json_file_calls_loader_with_correct_path(self, directive_instance):
+        """Test _load_json_file calls loader with correct source directory path."""
         # Arrange
         directive_instance.arguments = ["data/test.json"]
         directive_instance.content = []
@@ -471,10 +458,10 @@ class TestJsonTableDirective:
             mock_env.return_value.srcdir = str(mock_source_dir)
 
             # Act
-            directive_instance._load_json_data()
+            directive_instance._load_json_file("test.json")
 
             # Assert
             directive_instance.loader.load_from_file.assert_called_once_with(
-                "data/test.json",
+                "test.json",
                 mock_source_dir,
             )

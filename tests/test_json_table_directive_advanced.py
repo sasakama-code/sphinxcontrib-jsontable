@@ -332,13 +332,13 @@ class TestJsonTableDirectiveAdvanced:
 
             try:
                 # データ読み込みメソッドの直接テスト
-                loaded_data = directive._load_json_data()
+                loaded_data = directive._load_data()
                 assert isinstance(loaded_data, list)
                 assert len(loaded_data) == 2
                 assert loaded_data[0]["name"] == "Alice"
             except AttributeError:
                 # メソッドが存在しない場合はスキップ
-                pytest.skip("_load_json_data method not accessible")
+                pytest.skip("_load_data method not accessible")
             except Exception as e:
                 # その他のエラーの場合もスキップ
                 pytest.skip(f"Data loading method test failed: {e}")

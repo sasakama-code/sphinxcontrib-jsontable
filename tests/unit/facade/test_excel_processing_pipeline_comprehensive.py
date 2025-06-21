@@ -25,6 +25,7 @@ from sphinxcontrib.jsontable.facade.excel_processing_pipeline import (
     ExcelProcessingPipeline,
     ProcessingError,
 )
+from sphinxcontrib.jsontable.security.security_scanner import ValidationResult
 
 
 @pytest.fixture
@@ -218,10 +219,11 @@ class TestSecurityValidationStage:
         - 処理効率性
         - False Positiveの防止
         """
-        mock_components["security_validator"].validate_file.return_value = {
-            "is_safe": True,
-            "threats": [],
-        }
+        mock_components[
+            "security_validator"
+        ].validate_file.return_value = ValidationResult(
+            is_valid=True, errors=[], warnings=[], security_issues=[]
+        )
 
         # セキュリティ検証が例外なく完了することを確認
         pipeline._perform_security_validation("/safe/file.xlsx", "test_context")
@@ -246,13 +248,17 @@ class TestSecurityValidationStage:
         - 脅威検出の確実性
         - エラーメッセージの有用性
         """
-        mock_components["security_validator"].validate_file.return_value = {
-            "is_safe": False,
-            "threats": [
+        mock_components[
+            "security_validator"
+        ].validate_file.return_value = ValidationResult(
+            is_valid=False,
+            errors=[],
+            warnings=[],
+            security_issues=[
                 {"type": "macro", "severity": "high"},
                 {"type": "external_link", "severity": "medium"},
             ],
-        }
+        )
         mock_components[
             "error_handler"
         ].create_error_response.return_value = "Security error response"
@@ -520,7 +526,7 @@ class TestDataConversionStage:
         assert result == expected_conversion_result
         mock_components[
             "data_converter"
-        ].convert_dataframe_to_json.assert_called_once_with(test_df, header_row=0)
+        ].convert_dataframe_to_json.assert_called_once_with(test_df, header_row=None)
 
     def test_data_conversion_without_header(self, pipeline, mock_components):
         """ヘッダーなしデータ変換を確認する。
@@ -734,9 +740,11 @@ class TestEndToEndProcessing:
         - 企業グレード品質の達成
         """
         # モック設定
-        mock_components["security_validator"].validate_file.return_value = {
-            "is_safe": True
-        }
+        mock_components[
+            "security_validator"
+        ].validate_file.return_value = ValidationResult(
+            is_valid=True, errors=[], warnings=[], security_issues=[]
+        )
         mock_components["range_parser"].parse.return_value = RangeInfo(
             start_row=0,
             start_col=0,
@@ -746,7 +754,7 @@ class TestEndToEndProcessing:
             normalized_spec="A1:B2",
         )
         mock_components["excel_reader"].read_workbook.return_value = ReadResult(
-            dataframe=pd.DataFrame({"Name": ["Alice"], "Age": [25]}),
+            dataframe=pd.DataFrame({"Name": ["Name", "Alice"], "Age": ["Age", 25]}),
             workbook_info=WorkbookInfo(
                 file_path=Path("test.xlsx"),
                 sheet_names=["Sheet1"],
@@ -760,7 +768,7 @@ class TestEndToEndProcessing:
         mock_components[
             "data_converter"
         ].convert_dataframe_to_json.return_value = ConversionResult(
-            data=[["Alice", 25]],
+            data=[["Name", "Age"], ["Alice", 25], ["Bob", 30]],
             has_header=True,
             headers=["Name", "Age"],
             metadata={"conversion_type": "dataframe_to_json"},
@@ -771,7 +779,7 @@ class TestEndToEndProcessing:
         )
 
         assert result["success"] is True
-        assert result["data"] == [["Alice", 25]]
+        assert result["data"] == [["Bob", 30]]
         assert "metadata" in result
         assert "range_info" in result["metadata"]
         assert "components_used" in result

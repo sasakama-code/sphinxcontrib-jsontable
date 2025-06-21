@@ -107,9 +107,10 @@ class JsonTableDirective(BaseDirective):
 
         # Initialize JSON processor
         self.json_processor = JsonProcessor(base_path=self.base_path, encoding=encoding)
-        
+
         # Initialize JsonDataLoader for backward compatibility
         from . import JsonDataLoader
+
         self.json_data_loader = JsonDataLoader(encoding=encoding)
         # Backward compatibility alias
         self.loader = self.json_data_loader
@@ -129,7 +130,7 @@ class JsonTableDirective(BaseDirective):
 
         # Initialize table converter
         self.table_converter = TableConverter(default_max_rows)
-        
+
         # Backward compatibility aliases
         self.converter = self.table_converter
         self.builder = self.table_builder
@@ -167,9 +168,10 @@ class JsonTableDirective(BaseDirective):
             raise JsonTableError(NO_JSON_SOURCE_ERROR)
 
     def _load_json_file(self, file_path: str) -> JsonData:
-        """Load JSON data from file using JsonProcessor."""
+        """Load JSON data from file using JsonDataLoader for backward compatibility."""
         logger.debug(f"Loading JSON file: {file_path}")
-        return self.json_processor.load_from_file(file_path)
+        # Use JsonDataLoader for backward compatibility and proper path handling
+        return self.loader.load_from_file(file_path, Path(self.env.srcdir))
 
     def _load_excel_data(self, file_path: str) -> JsonData:
         """Load Excel data with complete option compatibility."""
@@ -247,9 +249,17 @@ class JsonTableDirective(BaseDirective):
             )
 
             # Step 3: Convert to table format
-            table_data = self.table_converter.convert(json_data, include_header, limit)
+            table_data = self.table_converter.convert(json_data)
 
-            # Step 4: Build docutils table
+            # Step 4: Apply directive options to table data
+            if limit is not None:
+                # Apply row limit (keep header if present)
+                if include_header and len(table_data) > 1:
+                    table_data = [table_data[0]] + table_data[1 : limit + 1]
+                else:
+                    table_data = table_data[:limit]
+
+            # Step 5: Build docutils table
             table_nodes = self.table_builder.build_table(table_data)
 
             logger.info("JsonTableDirective execution completed successfully")

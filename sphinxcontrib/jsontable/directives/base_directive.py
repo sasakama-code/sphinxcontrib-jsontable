@@ -286,7 +286,9 @@ class BaseDirective(SphinxDirective, ABC):
             error_msg = f"File not found in {directive_name}: {e}"
             logger.error(error_msg)
             user_msg = (
-                f"File not found: {e.filename}" if hasattr(e, "filename") else str(e)
+                f"File not found: {e.filename}"
+                if hasattr(e, "filename") and e.filename is not None
+                else f"File not found: {str(e)}"
             )
             return [self._create_error_node(user_msg)]
 

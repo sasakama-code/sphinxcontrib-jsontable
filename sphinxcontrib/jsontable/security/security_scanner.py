@@ -148,7 +148,7 @@ class SecurityScanner(ISecurityValidator):
         return ValidationResult(
             is_valid=len(errors) == 0,
             errors=errors,
-            warnings=warnings,
+            warnings=warning_messages,
             security_issues=security_issues,
         )
 

@@ -278,7 +278,6 @@ class ExcelDataLoaderFacadeRefactored:
             file_path=file_path, header_row=header_row, range_spec=range_spec, **kwargs
         )
 
-
     # Backward compatibility methods
 
     def is_safe_path(self, file_path: Union[str, Path]) -> bool:

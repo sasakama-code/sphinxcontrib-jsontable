@@ -190,3 +190,98 @@ class DataConverterCore(IDataConverter):
                 return False
 
         return False
+
+    def normalize_data_structure(self, data: Any) -> List[List[Any]]:
+        """Normalize data structure to 2D list format.
+
+        Args:
+            data: Input data to normalize
+
+        Returns:
+            Normalized 2D list structure
+        """
+        if isinstance(data, list):
+            # If it's already a list of dicts, convert to 2D list
+            if data and isinstance(data[0], dict):
+                if not data:
+                    return []
+                headers = list(data[0].keys())
+                result = [headers]
+                for item in data:
+                    row = [item.get(key, "") for key in headers]
+                    result.append(row)
+                return result
+            # If it's already a 2D list, return as-is
+            elif data and isinstance(data[0], list):
+                return data
+            else:
+                # Single level list, convert to single row
+                return [data] if data else []
+        elif isinstance(data, dict):
+            # Convert single dict to 2D list
+            headers = list(data.keys())
+            values = list(data.values())
+            return [headers, values]
+        else:
+            # Single value, wrap in 2D structure
+            return [[str(data)]]
+
+    def handle_missing_values(self, data: Any) -> Any:
+        """Handle missing values in data structure.
+
+        Args:
+            data: Data with potential missing values
+
+        Returns:
+            Data with missing values handled
+        """
+        if isinstance(data, list):
+            return [
+                self.handle_missing_values(item)
+                if isinstance(item, (list, dict))
+                else (self.empty_string_replacement if item is None else item)
+                for item in data
+            ]
+        elif isinstance(data, dict):
+            return {
+                key: (
+                    self.empty_string_replacement
+                    if value is None
+                    else self.handle_missing_values(value)
+                    if isinstance(value, (list, dict))
+                    else value
+                )
+                for key, value in data.items()
+            }
+        else:
+            return self.empty_string_replacement if data is None else data
+
+    def convert_data_types(self, data: Any) -> Any:
+        """Convert data types for consistency.
+
+        Args:
+            data: Data to convert types
+
+        Returns:
+            Data with converted types
+        """
+        if isinstance(data, list):
+            return [self.convert_data_types(item) for item in data]
+        elif isinstance(data, dict):
+            return {key: self.convert_data_types(value) for key, value in data.items()}
+        elif isinstance(data, str):
+            # Try to convert string numbers to numeric types
+            if self.preserve_numeric_types and self._is_numeric_value(data):
+                try:
+                    if "." in data:
+                        return float(data)
+                    else:
+                        return int(data)
+                except (ValueError, TypeError):
+                    pass
+            # Convert boolean strings
+            if data.lower() in ("true", "yes", "1"):
+                return True
+            elif data.lower() in ("false", "no", "0"):
+                return False
+        return data

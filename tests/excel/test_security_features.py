@@ -159,7 +159,9 @@ class TestSecurityFeatures:
                 result = loader.load_from_excel(macro_file)
 
                 # 警告が発生することを確認（可能な場合）
-                if _w and any("macro" in str(warning.message).lower() for warning in _w):
+                if _w and any(
+                    "macro" in str(warning.message).lower() for warning in _w
+                ):
                     print("✓ warnモード：警告付きで処理")
                 else:
                     print("⚠️ warnモード：警告なしで処理（facade構造による変更）")

@@ -50,23 +50,28 @@ class JsonDataLoader:
             "test".encode(encoding)
             return encoding
         except (LookupError, TypeError):
-            logger.warning(f"Invalid encoding '{encoding}', falling back to {DEFAULT_ENCODING}")
+            logger.warning(
+                f"Invalid encoding '{encoding}', falling back to {DEFAULT_ENCODING}"
+            )
             return DEFAULT_ENCODING
 
-    def _validate_file_path(self, file_path: str, base_path: Path | None = None) -> Path:
+    def _validate_file_path(
+        self, file_path: str, base_path: Path | None = None
+    ) -> Path:
         """Validate file path for security and existence."""
         path = Path(file_path)
         base = base_path or Path.cwd()
-        
+
         # Security validation - use module-level function for testing compatibility
         from . import is_safe_path
+
         if not is_safe_path(path, base):
             raise JsonTableError(f"Unsafe file path: {file_path}")
-        
+
         # Make absolute path
         if not path.is_absolute():
             path = base / path
-            
+
         return path
 
     def load_from_file(self, source: str, base_path: Path | None = None) -> JsonData:

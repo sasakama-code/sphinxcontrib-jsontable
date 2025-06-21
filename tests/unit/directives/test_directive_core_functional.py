@@ -221,18 +221,25 @@ class TestJsonTableDirectiveDataSourceSelection:
         """
         # JSONファイル処理のモック設定
         test_data = [{"name": "test", "value": 123}]
-        directive_with_file_argument.json_processor.load_from_file = Mock(
-            return_value=test_data
-        )
 
-        # データ読み込みの実行
-        result = directive_with_file_argument._load_data()
+        # is_safe_pathをモックしてセキュリティチェックを通す
+        with patch(
+            "sphinxcontrib.jsontable.directives.backward_compatibility.is_safe_path",
+            return_value=True,
+        ):
+            # JsonDataLoaderの load_from_file をモック
+            directive_with_file_argument.loader.load_from_file = Mock(
+                return_value=test_data
+            )
 
-        # 結果の検証
-        assert result == test_data
-        directive_with_file_argument.json_processor.load_from_file.assert_called_once_with(
-            "test.json"
-        )
+            # データ読み込みの実行
+            result = directive_with_file_argument._load_data()
+
+            # 結果の検証
+            assert result == test_data
+            directive_with_file_argument.loader.load_from_file.assert_called_once_with(
+                "test.json", Path("/test/source")
+            )
 
     @pytest.mark.skipif(not EXCEL_SUPPORT, reason="Excel support not available")
     def test_excel_file_extension_detection_and_processor_selection(self):
@@ -341,7 +348,7 @@ class TestJsonTableDirectiveDataSourceSelection:
             with pytest.raises(JsonTableError) as exc_info:
                 directive._load_data()
 
-            assert "No JSON source" in str(exc_info.value)
+            assert "No JSON data source" in str(exc_info.value)
 
 
 class TestJsonTableDirectiveExcelOptions:
@@ -627,35 +634,40 @@ class TestJsonTableDirectiveExecution:
         - 全ステップの確実な実行
         - 結果の整合性確認
         """
-        # モックの設定
-        test_json_data = [{"name": "test", "value": 123}]
-        test_table_data = [["name", "value"], ["test", "123"]]
-        test_table_nodes = [nodes.table()]
+        # セキュリティチェックをパス
+        with patch(
+            "sphinxcontrib.jsontable.directives.backward_compatibility.is_safe_path",
+            return_value=True,
+        ):
+            # モックの設定
+            test_json_data = [{"name": "test", "value": 123}]
+            test_table_data = [["name", "value"], ["test", "123"]]
+            test_table_nodes = [nodes.table()]
 
-        complete_directive.json_processor.load_from_file = Mock(
-            return_value=test_json_data
-        )
-        complete_directive.table_converter.convert = Mock(return_value=test_table_data)
-        complete_directive.table_builder.build_table = Mock(
-            return_value=test_table_nodes
-        )
+            complete_directive.loader.load_from_file = Mock(return_value=test_json_data)
+            complete_directive.table_converter.convert = Mock(
+                return_value=test_table_data
+            )
+            complete_directive.table_builder.build_table = Mock(
+                return_value=test_table_nodes
+            )
 
-        # 実行フローの実行
-        result = complete_directive.run()
+            # 実行フローの実行
+            result = complete_directive.run()
 
-        # 結果の検証
-        assert result == test_table_nodes
+            # 結果の検証
+            assert result == test_table_nodes
 
-        # 各ステップの実行確認
-        complete_directive.json_processor.load_from_file.assert_called_once_with(
-            "test.json"
-        )
-        complete_directive.table_converter.convert.assert_called_once_with(
-            test_json_data, True, 100
-        )
-        complete_directive.table_builder.build_table.assert_called_once_with(
-            test_table_data
-        )
+            # 各ステップの実行確認
+            complete_directive.loader.load_from_file.assert_called_once_with(
+                "test.json", Path("/test/source")
+            )
+            complete_directive.table_converter.convert.assert_called_once_with(
+                test_json_data
+            )
+            complete_directive.table_builder.build_table.assert_called_once_with(
+                test_table_data
+            )
 
     def test_execution_error_handling_with_recovery(self, complete_directive):
         """
@@ -672,24 +684,29 @@ class TestJsonTableDirectiveExecution:
         - 適切な障害回復
         - ユーザー体験の向上
         """
-        # データ読み込みエラーのシミュレーション
-        error_message = "Test JSON processing error"
-        complete_directive.json_processor.load_from_file = Mock(
-            side_effect=JsonTableError(error_message)
-        )
+        # セキュリティチェックをパス
+        with patch(
+            "sphinxcontrib.jsontable.directives.backward_compatibility.is_safe_path",
+            return_value=True,
+        ):
+            # データ読み込みエラーのシミュレーション
+            error_message = "Test JSON processing error"
+            complete_directive.loader.load_from_file = Mock(
+                side_effect=JsonTableError(error_message)
+            )
 
-        # エラーハンドリングの実行
-        result = complete_directive.run()
+            # エラーハンドリングの実行
+            result = complete_directive.run()
 
-        # エラーノードの生成確認
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], nodes.error)
+            # エラーノードの生成確認
+            assert isinstance(result, list)
+            assert len(result) == 1
+            assert isinstance(result[0], nodes.error)
 
-        # エラーメッセージの内容確認
-        error_node = result[0]
-        error_text = str(error_node)
-        assert error_message in error_text
+            # エラーメッセージの内容確認
+            error_node = result[0]
+            error_text = str(error_node)
+            assert error_message in error_text
 
     def test_file_not_found_error_specific_handling(self, complete_directive):
         """
@@ -705,20 +722,25 @@ class TestJsonTableDirectiveExecution:
         - 具体的な問題の明示
         - トラブルシューティングの支援
         """
-        # ファイル未発見エラーのシミュレーション
-        complete_directive.json_processor.load_from_file = Mock(
-            side_effect=FileNotFoundError("test.json not found")
-        )
+        # セキュリティチェックをパス
+        with patch(
+            "sphinxcontrib.jsontable.directives.backward_compatibility.is_safe_path",
+            return_value=True,
+        ):
+            # ファイル未発見エラーのシミュレーション
+            complete_directive.loader.load_from_file = Mock(
+                side_effect=FileNotFoundError("test.json not found")
+            )
 
-        # エラーハンドリングの実行
-        result = complete_directive.run()
+            # エラーハンドリングの実行
+            result = complete_directive.run()
 
-        # エラーノードの生成確認
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], nodes.error)
+            # エラーノードの生成確認
+            assert isinstance(result, list)
+            assert len(result) == 1
+            assert isinstance(result[0], nodes.error)
 
-        # ファイル関連エラーメッセージの確認
-        error_node = result[0]
-        error_text = str(error_node)
-        assert "not found" in error_text
+            # ファイル関連エラーメッセージの確認
+            error_node = result[0]
+            error_text = str(error_node)
+            assert "not found" in error_text
