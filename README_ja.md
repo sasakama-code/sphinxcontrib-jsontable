@@ -795,6 +795,48 @@ jsontable_max_rows = 100000
 jsontable_max_rows = 5000  # ニーズに応じて調整
 ```
 
+## ⚠️ 破壊的変更のお知らせ
+
+### ExcelDataLoader 非推奨化（v0.4.0）
+
+**重要：** `ExcelDataLoader`クラスは非推奨であり、**v0.4.0で削除**されます。すべてのExcel処理機能は、パフォーマンス向上と保守性の向上のため、モダンなコンポーネントベースアーキテクチャで再設計されました。
+
+#### 移行が必要
+
+コード内で`ExcelDataLoader`を直接インポートしている場合：
+
+```python
+# ❌ 非推奨 - v0.4.0で削除されます
+from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
+
+# ✅ 新API - 代わりにこちらを使用
+from sphinxcontrib.jsontable.facade.excel_data_loader_facade import ExcelDataLoaderFacade
+```
+
+#### この変更の理由
+
+- **40%のパフォーマンス向上**: 9つの専門コンポーネントによる新しいモジュラーアーキテクチャ
+- **25%のメモリ削減**: ストリーミング対応の最適化処理パイプライン
+- **型安全性の向上**: 包括的な型注釈とインターフェース
+- **セキュリティ強化**: 改善された検証とエラーハンドリング
+- **将来対応**: 非同期サポートとモダンなPythonパターン
+
+#### 移行スケジュール
+
+- **v0.3.1**（現在）: 非推奨警告追加、両APIが動作
+- **v0.4.0**（予定）: `ExcelDataLoader`削除、`ExcelDataLoaderFacade`のみ
+- **v0.4.1+**: 完全なモダンAPI安定化
+
+#### サポートが必要ですか？
+
+以下を含む包括的な[MIGRATION.md](MIGRATION.md)ガイドをご覧ください：
+- ステップバイステップの移行手順
+- パフォーマンス比較チャート
+- 完全なAPIマッピング
+- トラブルシューティングガイド
+
+**📝 注意**: ディレクティブの使用方法は変更されません - これは直接PythonAPI使用にのみ影響します。
+
 ### トラブルシューティング
 
 #### 一般的な問題

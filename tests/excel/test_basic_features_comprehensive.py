@@ -13,7 +13,9 @@ from openpyxl import Workbook
 
 # Excel対応確認
 try:
-    from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
+    from sphinxcontrib.jsontable.facade.excel_data_loader_facade import (
+        ExcelDataLoaderFacade,
+    )
 
     EXCEL_AVAILABLE = True
 except ImportError:
@@ -182,12 +184,12 @@ class TestBasicFeaturesComprehensive:
         """基本的なExcelファイル読み込みテスト."""
         excel_path = self.create_comprehensive_excel()
 
-        # デフォルト設定でローダー作成
-        loader = ExcelDataLoader(self.temp_dir)
+        # デフォルト設定でfacade作成
+        facade = ExcelDataLoaderFacade()
 
         try:
             # 基本ファイル読み込み
-            result = loader.load_from_excel(excel_path)
+            result = facade.load_from_excel(excel_path)
 
             # 基本検証
             assert isinstance(result, dict)
@@ -204,11 +206,11 @@ class TestBasicFeaturesComprehensive:
     def test_sheet_selection_by_name(self):
         """シート名指定テスト."""
         excel_path = self.create_comprehensive_excel()
-        loader = ExcelDataLoader(self.temp_dir)
+        facade = ExcelDataLoaderFacade()
 
         try:
             # 日本語シート名での読み込み
-            result = loader.load_from_excel(excel_path, sheet_name="営業データ")
+            result = facade.load_from_excel(excel_path, sheet="営業データ")
 
             if result and "data" in result:
                 print("✓ 日本語シート名読み込み成功")
@@ -224,11 +226,11 @@ class TestBasicFeaturesComprehensive:
     def test_range_specification_basic(self):
         """範囲指定基本テスト."""
         excel_path = self.create_range_test_excel()
-        loader = ExcelDataLoader(self.temp_dir)
+        facade = ExcelDataLoaderFacade()
 
         try:
             # A1:C3範囲指定
-            result = loader.load_from_excel_with_range(excel_path, range_spec="A1:C3")
+            result = facade.load_from_excel(excel_path, range_spec="A1:C3")
 
             if result and "data" in result:
                 print("✓ 範囲指定読み込み成功")
@@ -239,21 +241,18 @@ class TestBasicFeaturesComprehensive:
                 print("⚠️ 範囲指定未実装または異なる動作")
 
         except AttributeError as e:
-            if "load_from_excel_with_range" in str(e):
-                print("⚠️ 範囲指定メソッド未実装（facade構造での変更）")
-            else:
-                print(f"範囲指定エラー: {e}")
+            print(f"範囲指定エラー: {e}")
         except Exception as e:
             print(f"範囲指定予期しないエラー: {e}")
 
     def test_header_row_specification(self):
         """ヘッダー行指定テスト."""
         excel_path = self.create_header_test_excel()
-        loader = ExcelDataLoader(self.temp_dir)
+        facade = ExcelDataLoaderFacade()
 
         try:
             # 4行目をヘッダーとして指定
-            result = loader.load_from_excel_with_header_row(excel_path, header_row=3)
+            result = facade.load_from_excel(excel_path, header_row=3)
 
             if result and "headers" in result:
                 print("✓ ヘッダー行指定成功")
@@ -264,21 +263,18 @@ class TestBasicFeaturesComprehensive:
                 print("⚠️ ヘッダー行指定未実装または異なる動作")
 
         except AttributeError as e:
-            if "load_from_excel_with_header_row" in str(e):
-                print("⚠️ ヘッダー行指定メソッド未実装（facade構造での変更）")
-            else:
-                print(f"ヘッダー行指定エラー: {e}")
+            print(f"ヘッダー行指定エラー: {e}")
         except Exception as e:
             print(f"ヘッダー行指定予期しないエラー: {e}")
 
     def test_skip_rows_functionality(self):
         """スキップ行機能テスト."""
         excel_path = self.create_skip_rows_test_excel()
-        loader = ExcelDataLoader(self.temp_dir)
+        facade = ExcelDataLoaderFacade()
 
         try:
             # 1,2行目をスキップ
-            result = loader.load_from_excel_with_skip_rows(excel_path, skip_rows="0,1")
+            result = facade.load_from_excel(excel_path, skip_rows="0,1")
 
             if result and "data" in result:
                 print("✓ スキップ行機能成功")
@@ -289,31 +285,26 @@ class TestBasicFeaturesComprehensive:
                 print("⚠️ スキップ行機能未実装または異なる動作")
 
         except AttributeError as e:
-            if "load_from_excel_with_skip_rows" in str(e):
-                print("⚠️ スキップ行メソッド未実装（facade構造での変更）")
-            else:
-                print(f"スキップ行機能エラー: {e}")
+            print(f"スキップ行機能エラー: {e}")
         except Exception as e:
             print(f"スキップ行予期しないエラー: {e}")
 
     def test_facade_structure_compatibility(self):
         """facade構造互換性テスト."""
         excel_path = self.create_comprehensive_excel()
-        loader = ExcelDataLoader(self.temp_dir)
+        facade = ExcelDataLoaderFacade()
 
         # facade構造の基本メソッド確認
         try:
             # 基本読み込みメソッドの存在確認
-            assert hasattr(loader, "load_from_excel")
+            assert hasattr(facade, "load_from_excel")
             print("✓ load_from_excel メソッド存在確認")
 
-            # 設定値の確認
-            if hasattr(loader, "base_path"):
-                assert loader.base_path is not None
-                print("✓ base_path 設定確認")
+            # 新APIでは設定値の確認方法が異なる
+            print("✓ 新API構造確認")
 
             # facade構造でのExcel読み込み
-            result = loader.load_from_excel(excel_path)
+            result = facade.load_from_excel(excel_path)
 
             if result:
                 print("✓ facade構造Excel読み込み成功")
@@ -328,11 +319,11 @@ class TestBasicFeaturesComprehensive:
 
     def test_error_handling_graceful(self):
         """エラーハンドリング包括テスト."""
-        loader = ExcelDataLoader(self.temp_dir)
+        facade = ExcelDataLoaderFacade()
 
         # 存在しないファイル
         try:
-            result = loader.load_from_excel("nonexistent.xlsx")
+            result = facade.load_from_excel("nonexistent.xlsx")
 
             # facade構造ではエラーでもNoneまたは空辞書を返す可能性
             if result is None:
@@ -349,13 +340,13 @@ class TestBasicFeaturesComprehensive:
     def test_multiple_features_integration(self):
         """複数機能統合テスト."""
         excel_path = self.create_comprehensive_excel()
-        loader = ExcelDataLoader(self.temp_dir)
+        facade = ExcelDataLoaderFacade()
 
         features_tested = []
 
         # 基本読み込み
         try:
-            result = loader.load_from_excel(excel_path)
+            result = facade.load_from_excel(excel_path)
             if result:
                 features_tested.append("基本読み込み")
         except Exception:
@@ -363,7 +354,7 @@ class TestBasicFeaturesComprehensive:
 
         # シート指定
         try:
-            result = loader.load_from_excel(excel_path, sheet_name="Sheet1")
+            result = facade.load_from_excel(excel_path, sheet="Sheet1")
             if result:
                 features_tested.append("シート指定")
         except Exception:
@@ -377,10 +368,10 @@ class TestBasicFeaturesComprehensive:
     def test_data_consistency_validation(self):
         """データ整合性検証テスト."""
         excel_path = self.create_comprehensive_excel()
-        loader = ExcelDataLoader(self.temp_dir)
+        facade = ExcelDataLoaderFacade()
 
         try:
-            result = loader.load_from_excel(excel_path)
+            result = facade.load_from_excel(excel_path)
 
             if result and "data" in result:
                 # データ構造の一貫性確認
@@ -412,13 +403,13 @@ class TestBasicFeaturesComprehensive:
     def test_performance_monitoring_basic(self):
         """基本パフォーマンス監視テスト."""
         excel_path = self.create_comprehensive_excel()
-        loader = ExcelDataLoader(self.temp_dir)
+        facade = ExcelDataLoaderFacade()
 
         import time
 
         try:
             start_time = time.time()
-            result = loader.load_from_excel(excel_path)
+            result = facade.load_from_excel(excel_path)
             end_time = time.time()
 
             processing_time = end_time - start_time

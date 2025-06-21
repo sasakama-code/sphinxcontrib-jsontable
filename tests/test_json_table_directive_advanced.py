@@ -9,7 +9,9 @@ from sphinx.util.docutils import docutils_namespace
 
 try:
     from sphinxcontrib.jsontable.directives import JsonTableDirective
-    from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
+    from sphinxcontrib.jsontable.facade.excel_data_loader_facade import (
+        ExcelDataLoaderFacade,
+    )
 
     DIRECTIVE_AVAILABLE = True
 except ImportError:
@@ -294,8 +296,8 @@ class TestJsonTableDirectiveAdvanced:
                 state_machine=mock_state_machine,
             )
 
-            # ExcelDataLoaderの設定
-            directive.excel_loader = ExcelDataLoader(self.temp_dir)
+            # ExcelDataLoaderFacadeの設定
+            directive.excel_loader = ExcelDataLoaderFacade()
 
             try:
                 result = directive.run()

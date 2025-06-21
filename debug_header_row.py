@@ -7,7 +7,9 @@ import tempfile
 
 from openpyxl import Workbook
 
-from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
+from sphinxcontrib.jsontable.facade.excel_data_loader_facade import (
+    ExcelDataLoaderFacade,
+)
 
 
 def create_header_test_excel() -> str:
@@ -63,13 +65,13 @@ def main():
     except Exception as e:
         print(f"Error reading raw Excel: {e}")
 
-    # ExcelDataLoaderを初期化
-    loader = ExcelDataLoader(temp_dir)
+    # ExcelDataLoaderFacadeを初期化
+    facade = ExcelDataLoaderFacade()
 
     # 通常の読み込み
     print("\n=== 通常読み込み ===")
     try:
-        result_normal = loader.load_from_excel(excel_path)
+        result_normal = facade.load_from_excel(excel_path)
         print(f"Normal result keys: {list(result_normal.keys())}")
         print(f"Normal data shape: {len(result_normal['data'])} rows")
         print("All normal data:")
@@ -81,7 +83,7 @@ def main():
     # ヘッダー行指定読み込み（テスト値）
     print("\n=== ヘッダー行指定読み込み (header_row=2 - empty row) ===")
     try:
-        result_header = loader.load_from_excel_with_header_row(excel_path, header_row=2)
+        result_header = facade.load_from_excel(excel_path, header_row=2)
         print(f"Headers: {result_header.get('headers', 'NOT_FOUND')}")
         print(f"Data rows: {len(result_header.get('data', []))}")
     except Exception as e:
@@ -89,7 +91,7 @@ def main():
 
     print("\n=== ヘッダー行指定読み込み (header_row=3 - actual header) ===")
     try:
-        result_header = loader.load_from_excel_with_header_row(excel_path, header_row=3)
+        result_header = facade.load_from_excel(excel_path, header_row=3)
         print(f"Headers: {result_header.get('headers', 'NOT_FOUND')}")
         print(f"Data rows: {len(result_header.get('data', []))}")
     except Exception as e:

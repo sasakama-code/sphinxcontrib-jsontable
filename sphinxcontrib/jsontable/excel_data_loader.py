@@ -1,5 +1,9 @@
 """Excel Data Loader - Simplified Legacy API.
 
+⚠️  DEPRECATION WARNING: This module is deprecated and will be removed in v0.4.0
+    Please use ExcelDataLoaderFacade directly for new code.
+    Migration guide: See MIGRATION.md for detailed instructions.
+
 Unified entry point for Excel loading functionality with clean delegation
 to facade pattern. Dramatically reduced from 476 lines to ~100 lines.
 
@@ -9,6 +13,7 @@ CLAUDE.md Code Excellence Compliance:
 - YAGNI Principle: Essential backward compatibility only
 """
 
+import warnings
 from pathlib import Path
 from typing import Any, Dict, Union
 
@@ -31,11 +36,28 @@ class ExcelDataLoader:
     ):
         """Initialize with legacy API compatibility.
 
+        ⚠️  DEPRECATION WARNING: ExcelDataLoader is deprecated and will be removed in v0.4.0
+            Please migrate to ExcelDataLoaderFacade for better performance and maintainability.
+
+            Migration example:
+            # Old (deprecated):
+            loader = ExcelDataLoader(base_path="./data")
+            # New (recommended):
+            from .facade.excel_data_loader_facade import ExcelDataLoaderFacade
+            facade = ExcelDataLoaderFacade()
+
         Args:
             base_path: Base directory path (legacy parameter)
             macro_security: Security level for macro-enabled files ('strict', 'warn', 'allow')
             lazy_init: Whether to use lazy initialization for facade
         """
+        warnings.warn(
+            "ExcelDataLoader is deprecated and will be removed in v0.4.0. "
+            "Please use ExcelDataLoaderFacade directly. "
+            "See MIGRATION.md for detailed migration instructions.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.base_path = Path(base_path) if base_path else Path.cwd()
         self.macro_security = macro_security  # 緊急復元
         self._facade = None

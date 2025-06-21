@@ -14,7 +14,9 @@ import tempfile
 import pandas as pd
 import pytest
 
-from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
+from sphinxcontrib.jsontable.facade.excel_data_loader_facade import (
+    ExcelDataLoaderFacade,
+)
 
 
 class TestAdvancedExcelFeatures:
@@ -23,7 +25,7 @@ class TestAdvancedExcelFeatures:
     def setup_method(self):
         """各テストメソッドの前に実行される。"""
         self.temp_dir = tempfile.mkdtemp()
-        self.loader = ExcelDataLoader(self.temp_dir)
+        self.facade = ExcelDataLoaderFacade()
 
     def teardown_method(self):
         """各テストメソッドの後に実行される。"""
@@ -89,9 +91,7 @@ class TestAdvancedExcelFeatures:
         excel_path = self.create_merged_cells_test_excel()
 
         # expandモードで結合セル処理
-        result = self.loader.load_from_excel_with_merge_cells(
-            excel_path, merge_mode="expand"
-        )
+        result = self.facade.load_from_excel(excel_path, merge_mode="expand")
 
         # 基本結果検証
         assert result["success"] is True
@@ -109,9 +109,7 @@ class TestAdvancedExcelFeatures:
         excel_path = self.create_merged_cells_test_excel()
 
         # firstモードで結合セル処理
-        result = self.loader.load_from_excel_with_merge_cells(
-            excel_path, merge_mode="first"
-        )
+        result = self.facade.load_from_excel(excel_path, merge_mode="first")
 
         assert result["success"] is True
         assert result["merge_mode"] == "first"
@@ -122,9 +120,7 @@ class TestAdvancedExcelFeatures:
         excel_path = self.create_merged_cells_test_excel()
 
         # skipモードで結合セル処理
-        result = self.loader.load_from_excel_with_merge_cells(
-            excel_path, merge_mode="skip"
-        )
+        result = self.facade.load_from_excel(excel_path, merge_mode="skip")
 
         assert result["success"] is True
         assert result["merge_mode"] == "skip"
@@ -136,9 +132,7 @@ class TestAdvancedExcelFeatures:
 
         # 無効なマージモードでエラー発生確認
         # Note: 現在の実装では直接エラーが発生しないため、将来の実装で改善
-        result = self.loader.load_from_excel_with_merge_cells(
-            excel_path, merge_mode="invalid_mode"
-        )
+        result = self.facade.load_from_excel(excel_path, merge_mode="invalid_mode")
 
         # 現在は成功するが、merge_modeが記録される
         assert "merge_mode" in result
@@ -148,7 +142,7 @@ class TestAdvancedExcelFeatures:
         excel_path = self.create_complex_structure_excel()
 
         # autoモードで範囲自動検出
-        result = self.loader.load_from_excel_with_detect_range(
+        result = self.facade.load_from_excel_with_detect_range(
             excel_path, detect_range="auto"
         )
 
@@ -163,7 +157,7 @@ class TestAdvancedExcelFeatures:
         excel_path = self.create_complex_structure_excel()
 
         # smartモードで範囲自動検出
-        result = self.loader.load_from_excel_with_detect_range(
+        result = self.facade.load_from_excel_with_detect_range(
             excel_path, detect_range="smart"
         )
 
@@ -176,7 +170,7 @@ class TestAdvancedExcelFeatures:
         excel_path = self.create_complex_structure_excel()
 
         # manualモードで範囲ヒント指定
-        result = self.loader.load_from_excel_with_detect_range(
+        result = self.facade.load_from_excel_with_detect_range(
             excel_path, detect_range="manual", range_hint="A3:C6"
         )
 
@@ -190,7 +184,7 @@ class TestAdvancedExcelFeatures:
 
         # 無効な検出モードでエラー発生確認
         with pytest.raises(ValueError, match="Invalid detect mode"):
-            self.loader.load_from_excel_with_detect_range(
+            self.facade.load_from_excel_with_detect_range(
                 excel_path, detect_range="invalid_mode"
             )
 
@@ -199,7 +193,7 @@ class TestAdvancedExcelFeatures:
         excel_path = self.create_complex_structure_excel()
 
         # 基本的な組み合わせ処理（安全な設定）
-        result = self.loader.load_from_excel(
+        result = self.facade.load_from_excel(
             excel_path,
             skip_rows="1",  # シンプルなスキップ
             header_row=2,  # ヘッダー行のみ指定
@@ -216,7 +210,7 @@ class TestAdvancedExcelFeatures:
         excel_path = self.create_merged_cells_test_excel()
 
         # 結合セル処理とヘッダー指定（基本的な組み合わせ）
-        result = self.loader.load_from_excel(
+        result = self.facade.load_from_excel(
             excel_path,
             header_row=2,  # ヘッダー行指定
             merge_mode="expand",  # 結合セル展開モード
@@ -231,7 +225,7 @@ class TestAdvancedExcelFeatures:
         excel_path = self.create_complex_structure_excel()
 
         # 基本的な機能組み合わせ（安全な設定）
-        result = self.loader.load_from_excel(
+        result = self.facade.load_from_excel(
             excel_path,
             skip_rows="1",  # シンプルなスキップ
             header_row=2,  # ヘッダー行指定
@@ -254,7 +248,7 @@ class TestAdvancedExcelFeatures:
         excel_path = self.create_complex_structure_excel()
 
         # 無効な組み合わせパラメータ
-        result = self.loader.load_from_excel(
+        result = self.facade.load_from_excel(
             excel_path,
             skip_rows="invalid_format",  # 無効なスキップ行指定
             header_row=2,
@@ -272,7 +266,7 @@ class TestAdvancedExcelFeatures:
 
         start_time = time.time()
 
-        result = self.loader.load_from_excel(
+        result = self.facade.load_from_excel(
             excel_path,
             merge_mode="expand",  # シンプルな処理
         )

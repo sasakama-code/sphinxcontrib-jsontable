@@ -13,7 +13,10 @@ from openpyxl import Workbook
 
 # Excel対応確認
 try:
-    from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
+    from sphinxcontrib.jsontable.facade.excel_data_loader_facade import (
+        ExcelDataLoaderFacade,
+    )
+    from sphinxcontrib.jsontable.security.security_scanner import SecurityScanner
 
     EXCEL_AVAILABLE = True
 except ImportError:
@@ -102,12 +105,12 @@ class TestSecurityFeatures:
         """通常のExcelファイル読み込みテスト."""
         excel_path = self.create_normal_excel()
 
-        # デフォルトセキュリティ設定でローダー作成
-        loader = ExcelDataLoader(self.temp_dir)
+        # デフォルトセキュリティ設定でfacade作成
+        facade = ExcelDataLoaderFacade()
 
         try:
             # 通常ファイルは問題なく読み込める
-            result = loader.load_from_excel(excel_path)
+            result = facade.load_from_excel(excel_path)
 
             # 基本検証
             assert isinstance(result, dict)
@@ -126,12 +129,13 @@ class TestSecurityFeatures:
         """マクロセキュリティ strict モードテスト."""
         macro_file = self.create_macro_enabled_file()
 
-        # strict モードでローダー作成
-        loader = ExcelDataLoader(self.temp_dir, macro_security="strict")
+        # strict モードでfacade作成
+        security_scanner = SecurityScanner(macro_security="strict")
+        facade = ExcelDataLoaderFacade(security_validator=security_scanner)
 
         # マクロ有効ファイルはstrictモードで拒否される
         try:
-            result = loader.load_from_excel(macro_file)
+            result = facade.load_from_excel(macro_file)
 
             # facade構造では警告として処理される可能性
             if result:
@@ -148,15 +152,16 @@ class TestSecurityFeatures:
         """マクロセキュリティ warn モードテスト."""
         macro_file = self.create_macro_enabled_file()
 
-        # warn モードでローダー作成
-        loader = ExcelDataLoader(self.temp_dir, macro_security="warn")
+        # warn モードでfacade作成
+        security_scanner = SecurityScanner(macro_security="warn")
+        facade = ExcelDataLoaderFacade(security_validator=security_scanner)
 
         # warnモードでは警告を出しつつ処理
         with warnings.catch_warnings(record=True) as _w:
             warnings.simplefilter("always")
 
             try:
-                result = loader.load_from_excel(macro_file)
+                result = facade.load_from_excel(macro_file)
 
                 # 警告が発生することを確認（可能な場合）
                 if _w and any(
@@ -177,12 +182,13 @@ class TestSecurityFeatures:
         """マクロセキュリティ allow モードテスト."""
         macro_file = self.create_macro_enabled_file()
 
-        # allow モードでローダー作成
-        loader = ExcelDataLoader(self.temp_dir, macro_security="allow")
+        # allow モードでfacade作成
+        security_scanner = SecurityScanner(macro_security="allow")
+        facade = ExcelDataLoaderFacade(security_validator=security_scanner)
 
         try:
             # allowモードではマクロファイルも処理される
-            result = loader.load_from_excel(macro_file)
+            result = facade.load_from_excel(macro_file)
 
             if result and "data" in result:
                 print("✓ allowモード：マクロファイル読み込み成功")
@@ -197,12 +203,13 @@ class TestSecurityFeatures:
         """外部リンクセキュリティ strict モードテスト."""
         external_file = self.create_excel_with_external_links()
 
-        # strict モードでローダー作成
-        loader = ExcelDataLoader(self.temp_dir, macro_security="strict")
+        # strict モードでfacade作成
+        security_scanner = SecurityScanner(macro_security="strict")
+        facade = ExcelDataLoaderFacade(security_validator=security_scanner)
 
         try:
             # 外部リンクファイルの処理確認
-            result = loader.load_from_excel(external_file)
+            result = facade.load_from_excel(external_file)
 
             if result:
                 print("✓ 外部リンクファイル処理確認")
@@ -215,14 +222,15 @@ class TestSecurityFeatures:
         """外部リンクセキュリティ warn モードテスト."""
         external_file = self.create_excel_with_external_links()
 
-        # warn モードでローダー作成
-        loader = ExcelDataLoader(self.temp_dir, macro_security="warn")
+        # warn モードでfacade作成
+        security_scanner = SecurityScanner(macro_security="warn")
+        facade = ExcelDataLoaderFacade(security_validator=security_scanner)
 
         with warnings.catch_warnings(record=True) as _w:
             warnings.simplefilter("always")
 
             try:
-                result = loader.load_from_excel(external_file)
+                result = facade.load_from_excel(external_file)
 
                 # 警告またはデータ処理の確認
                 if result:
@@ -235,12 +243,13 @@ class TestSecurityFeatures:
         """外部リンクセキュリティ allow モードテスト."""
         external_file = self.create_excel_with_external_links()
 
-        # allow モードでローダー作成
-        loader = ExcelDataLoader(self.temp_dir, macro_security="allow")
+        # allow モードでfacade作成
+        security_scanner = SecurityScanner(macro_security="allow")
+        facade = ExcelDataLoaderFacade(security_validator=security_scanner)
 
         try:
             # allowモードでは外部リンクも許可
-            result = loader.load_from_excel(external_file)
+            result = facade.load_from_excel(external_file)
 
             if result and "data" in result:
                 print("✓ allowモード：外部リンクファイル処理成功")
@@ -256,8 +265,9 @@ class TestSecurityFeatures:
 
         for level in valid_levels:
             try:
-                loader = ExcelDataLoader(self.temp_dir, macro_security=level)
-                assert loader.macro_security == level
+                security_scanner = SecurityScanner(macro_security=level)
+                ExcelDataLoaderFacade(security_validator=security_scanner)
+                assert security_scanner.macro_security == level
                 print(f"✓ セキュリティレベル '{level}' 設定成功")
 
             except Exception as e:
@@ -267,10 +277,11 @@ class TestSecurityFeatures:
         """無効なセキュリティレベルの処理テスト."""
         try:
             # 無効なセキュリティレベル
-            loader = ExcelDataLoader(self.temp_dir, macro_security="invalid_level")
+            security_scanner = SecurityScanner(macro_security="invalid_level")
+            ExcelDataLoaderFacade(security_validator=security_scanner)
 
             # facade構造では無効レベルもデフォルト値で処理される可能性
-            print(f"無効セキュリティレベル処理: {loader.macro_security}")
+            print(f"無効セキュリティレベル処理: {security_scanner.macro_security}")
 
         except Exception as e:
             # エラーが発生する場合は適切な処理
@@ -288,11 +299,12 @@ class TestSecurityFeatures:
         security_levels = ["strict", "warn", "allow"]
 
         for level in security_levels:
-            loader = ExcelDataLoader(self.temp_dir, macro_security=level)
+            security_scanner = SecurityScanner(macro_security=level)
+            facade = ExcelDataLoaderFacade(security_validator=security_scanner)
 
             for file_type, file_path in files.items():
                 try:
-                    result = loader.load_from_excel(file_path)
+                    result = facade.load_from_excel(file_path)
 
                     status = "成功" if result and "data" in result else "失敗"
                     print(f"セキュリティ{level} - {file_type}ファイル: {status}")
@@ -307,15 +319,16 @@ class TestSecurityFeatures:
         excel_path = self.create_normal_excel()
 
         # facade構造でのセキュリティ機能確認
-        loader = ExcelDataLoader(self.temp_dir, macro_security="strict")
+        security_scanner = SecurityScanner(macro_security="strict")
+        facade = ExcelDataLoaderFacade(security_validator=security_scanner)
 
         try:
             # セキュリティ設定の反映確認
-            assert hasattr(loader, "macro_security")
-            assert loader.macro_security == "strict"
+            assert hasattr(security_scanner, "macro_security")
+            assert security_scanner.macro_security == "strict"
 
             # facade内部でのセキュリティ処理確認
-            result = loader.load_from_excel(excel_path)
+            result = facade.load_from_excel(excel_path)
 
             if result:
                 print("✓ facade構造セキュリティ統合確認")
