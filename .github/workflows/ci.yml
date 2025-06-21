@@ -310,8 +310,17 @@ jobs:
         python -c "import sphinxcontrib.jsontable; print('Package installed successfully')"
         python -c "import pytest; print('Pytest installed successfully')"
 
-    - name: Run tests
+    - name: Run tests (Unix)
+      if: runner.os != 'Windows'
       run: |
+        source $HOME/.cargo/env
+        source .venv/bin/activate
+        uv run python -m pytest tests/ --cov=sphinxcontrib.jsontable --cov-report=xml --cov-report=term-missing --cov-fail-under=10 -v -m "not benchmark"
+
+    - name: Run tests (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        .venv\Scripts\activate
         uv run python -m pytest tests/ --cov=sphinxcontrib.jsontable --cov-report=xml --cov-report=term-missing --cov-fail-under=10 -v -m "not benchmark"
 
     - name: Upload coverage to Codecov
@@ -359,19 +368,36 @@ jobs:
         source .venv/bin/activate
         uv pip install -e .[test]
 
-    - name: Run benchmark tests
+    - name: Run benchmark tests (Unix)
+      if: runner.os != 'Windows'
       run: |
         source $HOME/.cargo/env
         source .venv/bin/activate
         uv run python -m pytest tests/ -m benchmark --benchmark-enable --benchmark-sort=mean --benchmark-json=benchmark.json -v --cov-fail-under=0
       continue-on-error: true  # ベンチマークは失敗してもCI全体は通す
 
-    - name: Run performance tests (CI-safe)
+    - name: Run benchmark tests (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        .venv\Scripts\activate
+        uv run python -m pytest tests/ -m benchmark --benchmark-enable --benchmark-sort=mean --benchmark-json=benchmark.json -v --cov-fail-under=0
+      continue-on-error: true  # ベンチマークは失敗してもCI全体は通す
+
+    - name: Run performance tests (CI-safe) (Unix)
+      if: runner.os != 'Windows'
       env:
         CI: true
       run: |
         source $HOME/.cargo/env
         source .venv/bin/activate
+        uv run python -m pytest tests/ -m performance -v --override-ini addopts=""
+
+    - name: Run performance tests (CI-safe) (Windows)
+      if: runner.os == 'Windows'
+      env:
+        CI: true
+      run: |
+        .venv\Scripts\activate
         uv run python -m pytest tests/ -m performance -v --override-ini addopts=""
 
     - name: Upload benchmark results
