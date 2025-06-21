@@ -152,7 +152,7 @@ class TestErrorHandlingComprehensive:
         """無効Excelフォーマットエラーハンドリングテスト."""
         # 偽のExcelファイル（実際はテキスト）作成
         fake_excel_path = os.path.join(self.temp_dir, "fake_excel.xlsx")
-        with open(fake_excel_path, "w") as f:
+        with open(fake_excel_path, "w", encoding="utf-8") as f:
             f.write("これはExcelファイルではありません。\nJustPlainText\n123")
 
         # 初期化

@@ -243,9 +243,8 @@ class TestMockExcelReaderFileValidation:
         assert (
             mock_reader.validate_file_calls[0]["file_path"] == "relative/path/file.xlsx"
         )
-        assert (
-            mock_reader.validate_file_calls[1]["file_path"]
-            == "/absolute/path/file.xlsx"
+        assert mock_reader.validate_file_calls[1]["file_path"] == str(
+            Path("/absolute/path/file.xlsx")
         )
 
 

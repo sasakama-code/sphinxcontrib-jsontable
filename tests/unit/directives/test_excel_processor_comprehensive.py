@@ -114,7 +114,7 @@ class TestExcelProcessorInitialization:
                 mock_logger.info.assert_called_once()
                 call_args = mock_logger.info.call_args[0][0]
                 assert "ExcelProcessor initialized successfully" in call_args
-                assert "/tmp/test" in call_args
+                assert str(Path("/tmp/test")) in call_args
 
 
 class TestExcelProcessorSheetResolution:
