@@ -35,18 +35,10 @@ class TestJsonTableDirective:
     @pytest.fixture
     def directive_instance(self, mock_state):
         """Create a JsonTableDirective instance with mocked dependencies."""
-        with (
-            patch("sphinx.util.docutils.SphinxDirective.__init__"),
-            patch(
-                "sphinxcontrib.jsontable.directives.JsonDataLoader"
-            ) as mock_loader_class,
-            patch(
-                "sphinxcontrib.jsontable.directives.TableConverter"
-            ) as mock_converter_class,
-            patch(
-                "sphinxcontrib.jsontable.directives.TableBuilder"
-            ) as mock_builder_class,
-        ):
+        with patch("sphinx.util.docutils.SphinxDirective.__init__"), \
+             patch("sphinxcontrib.jsontable.directives.JsonDataLoader") as mock_loader_class, \
+             patch("sphinxcontrib.jsontable.directives.TableConverter") as mock_converter_class, \
+             patch("sphinxcontrib.jsontable.directives.TableBuilder") as mock_builder_class:
             # Create instance without calling parent __init__
             directive = JsonTableDirective.__new__(JsonTableDirective)
 
