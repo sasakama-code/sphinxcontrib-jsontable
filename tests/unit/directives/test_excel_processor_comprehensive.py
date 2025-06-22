@@ -12,6 +12,7 @@ CLAUDE.md品質保証準拠:
 """
 
 import tempfile
+import time
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -530,10 +531,18 @@ class TestExcelProcessorCacheManagement:
         options = {"sheet": "Test"}
         cache_key = self.processor._generate_cache_key("test.xlsx", options)
         cached_data = [["header"], ["data"]]
-        self.processor._cache[cache_key] = cached_data
+        # ExcelProcessorが期待する形式 (data, timestamp, file_mtime) でキャッシュに保存
+        current_time = time.time()
+        file_mtime = 0.0  # ダミーのファイル変更時刻
+        self.processor._cache[cache_key] = (cached_data, current_time, file_mtime)
 
         # キャッシュヒットテスト
-        result = self.processor._load_with_cache("test.xlsx", options)
+        # _load_with_cache内で_is_cache_validが呼ばれるため、関連するモックが必要な場合がある
+        # ここでは、_get_file_modification_timeが呼ばれる可能性があるのでモックする
+        with patch.object(
+            self.processor, "_get_file_modification_time", return_value=file_mtime
+        ):
+            result = self.processor._load_with_cache("test.xlsx", options)
         assert result == cached_data
 
     def test_load_with_cache_miss_and_storage(self):
@@ -559,7 +568,11 @@ class TestExcelProcessorCacheManagement:
         # キャッシュに保存されたかを確認
         cache_key = self.processor._generate_cache_key("test.xlsx", options)
         assert cache_key in self.processor._cache
-        assert self.processor._cache[cache_key] == [["header"], ["data1"], ["data2"]]
+        # キャッシュには (data, timestamp, file_mtime) のタプルが保存されるため、最初の要素(data)を比較
+        cached_entry = self.processor._cache[cache_key]
+        assert isinstance(cached_entry, tuple)
+        assert len(cached_entry) == 3
+        assert cached_entry[0] == [["header"], ["data1"], ["data2"]]
 
 
 class TestExcelProcessorDataLoading:
