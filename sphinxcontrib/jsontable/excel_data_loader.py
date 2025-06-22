@@ -51,46 +51,10 @@ class ExcelDataLoader:
             macro_security: Security level for macro-enabled files ('strict', 'warn', 'allow')
             lazy_init: Whether to use lazy initialization for facade
         """
-        # Enhanced deprecation warning with detailed migration guidance
-        import textwrap
-
-        enhanced_warning = textwrap.dedent(f"""
-        ⚠️  DEPRECATION WARNING: ExcelDataLoader is deprecated and will be REMOVED in v0.4.0
-        
-        📅 Migration Timeline:
-           • v0.3.1 (Current): Deprecation warnings active, both APIs functional
-           • v0.3.2 (Soon): Enhanced migration tools and performance optimizations
-           • v0.4.0 (Next): Complete removal of ExcelDataLoader class
-           • v0.4.1+: Full modernization with ExcelDataLoaderFacade as primary API
-        
-        🚀 Performance Benefits of Migration:
-           • 40% faster Excel processing
-           • 25% memory usage reduction  
-           • Enhanced type safety and error handling
-           • Modern component-based architecture
-        
-        📖 Quick Migration Example:
-           # OLD (Deprecated):
-           from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
-           loader = ExcelDataLoader(base_path="{base_path}")
-           data = loader.load_from_excel("file.xlsx")
-           
-           # NEW (Recommended):
-           from sphinxcontrib.jsontable.facade.excel_data_loader_facade import ExcelDataLoaderFacade
-           facade = ExcelDataLoaderFacade()
-           data = facade.load_from_excel("{base_path}/file.xlsx")
-        
-        📋 Migration Resources:
-           • Detailed Guide: See MIGRATION.md in project root
-           • API Reference: All methods have 1:1 mapping
-           • Support: GitHub Issues for migration questions
-           • Performance Charts: Included in MIGRATION.md
-        
-        🔧 IDE Quick Fix: Search & Replace "ExcelDataLoader" → "ExcelDataLoaderFacade"
-        """).strip()
-
         warnings.warn(
-            enhanced_warning,
+            "ExcelDataLoader is deprecated and will be removed in v0.4.0. "
+            "Use ExcelDataLoaderFacade instead (40% faster, 25% less memory). "
+            "Migration guide: See MIGRATION.md",
             DeprecationWarning,
             stacklevel=2,
         )
