@@ -8,6 +8,7 @@ CLAUDE.mdコードエクセレンス原則に準拠した設計となってい�
 from __future__ import annotations
 
 import logging
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
@@ -51,7 +52,10 @@ class ExcelProcessor:
             JsonTableError: Excel対応が利用できない場合
         """
         self.base_path = Path(base_path) if isinstance(base_path, str) else base_path
-        self._cache = {}  # キャッシュ機能追加
+        # Enhanced caching system with file modification time tracking
+        self._cache = {}  # Data cache: {cache_key: (data, timestamp, file_mtime)}
+        self._cache_max_size = 100  # Maximum cache entries
+        self._cache_ttl = 300  # Time-to-live in seconds (5 minutes)
 
         try:
             # ExcelDataLoaderFacadeの動的インポートと初期化
@@ -167,31 +171,83 @@ class ExcelProcessor:
         return converted_options
 
     def _generate_cache_key(self, file_path: str, options: dict) -> str:
-        """キャッシュキー生成"""
+        """Enhanced cache key generation with file path normalization"""
+        normalized_path = str(Path(file_path).resolve())
         options_str = str(sorted(options.items()))
-        return f"{file_path}:{hash(options_str)}"
+        return f"{normalized_path}:{hash(options_str)}"
+
+    def _get_file_modification_time(self, file_path: str) -> float:
+        """Get file modification time safely"""
+        try:
+            return Path(file_path).stat().st_mtime
+        except OSError:
+            return 0.0
+
+    def _is_cache_valid(self, cache_entry: tuple, file_path: str) -> bool:
+        """Check if cache entry is still valid"""
+        data, cache_timestamp, cached_file_mtime = cache_entry
+        current_time = time.time()
+        current_file_mtime = self._get_file_modification_time(file_path)
+
+        # Check TTL expiration
+        if current_time - cache_timestamp > self._cache_ttl:
+            return False
+
+        # Check file modification
+        if current_file_mtime != cached_file_mtime:
+            return False
+
+        return True
+
+    def _evict_old_cache_entries(self):
+        """Evict old cache entries when cache size limit is reached"""
+        if len(self._cache) >= self._cache_max_size:
+            # Remove oldest entries (simple FIFO for now)
+            oldest_keys = sorted(
+                self._cache.keys(),
+                key=lambda k: self._cache[k][1],  # Sort by timestamp
+            )
+            # Remove oldest 20% of entries
+            remove_count = max(1, len(oldest_keys) // 5)
+            for key in oldest_keys[:remove_count]:
+                del self._cache[key]
 
     def clear_cache(self):
-        """キャッシュクリア"""
+        """Enhanced cache clearing with logging"""
+        cache_size = len(self._cache)
         self._cache.clear()
+        logger.debug(f"Cache cleared: {cache_size} entries removed")
 
     def _load_with_cache(self, file_path: str, options: dict):
-        """キャッシュ付きデータ読み込み"""
+        """Enhanced cache system with file modification time and TTL"""
         cache_key = self._generate_cache_key(file_path, options)
+        current_time = time.time()
 
-        # キャッシュヒット
+        # Check if valid cache entry exists
         if cache_key in self._cache:
-            return self._cache[cache_key]
+            cache_entry = self._cache[cache_key]
+            if self._is_cache_valid(cache_entry, file_path):
+                logger.debug(f"Cache hit for {file_path}")
+                return cache_entry[0]  # Return cached data
+            else:
+                logger.debug(f"Cache invalidated for {file_path}")
+                del self._cache[cache_key]
 
-        # オプション名変換
+        # Cache miss or invalid - load data
+        logger.debug(f"Cache miss for {file_path}")
+
+        # Evict old entries if necessary
+        self._evict_old_cache_entries()
+
+        # Convert options and load data
         converted_options = self._convert_directive_options(options)
-
-        # キャッシュミス - 実際にデータを読み込み
         result = self.excel_loader.load_from_excel(file_path, **converted_options)
         data = result.get("data", [])
 
-        # キャッシュに保存
-        self._cache[cache_key] = data
+        # Store in cache with metadata
+        file_mtime = self._get_file_modification_time(file_path)
+        self._cache[cache_key] = (data, current_time, file_mtime)
+
         return data
 
     def load_excel_data(self, file_path: str, options: ExcelOptions) -> JsonData:

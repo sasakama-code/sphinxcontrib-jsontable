@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2025-06-xx (Planned)
+
+### Enhanced
+#### 🚨 **強化Deprecation警告システム**
+- **Enhanced Warning Messages**: ExcelDataLoader使用時により詳細で具体的な警告メッセージ
+- **Migration Timeline Display**: ユーザーに明確な移行スケジュールを提示
+- **Code Examples in Warnings**: 警告メッセージ内に具体的な移行コード例を含める
+- **IDE Integration**: IDEでの警告表示最適化とクイックフィックス提案
+
+#### ⚡ **パフォーマンス最適化**
+- **Facade Architecture Optimization**: ExcelDataLoaderFacadeのパフォーマンス向上
+- **Memory Usage Reduction**: さらなるメモリ使用量削減 (追加10%削減目標)
+- **Caching Enhancement**: より効率的なキャッシュ機構の実装
+- **Parallel Processing**: 可能な部分での並列処理導入
+
+#### 🧪 **テスト・品質向上**
+- **Comprehensive Integration Tests**: 新旧API間の完全互換性確認テスト
+- **Performance Benchmark**: 新旧アーキテクチャの定量的性能比較
+- **Security Enhancement**: セキュリティスキャナーの更なる強化
+- **Error Handling Improvement**: より詳細で分かりやすいエラーメッセージ
+
+### Fixed
+#### 🔧 **バージョン管理修正**
+- **Version Synchronization**: __init__.py と pyproject.toml のバージョン同期
+- **Build Process**: setup.py と pyproject.toml の依存関係整合性修正
+
+### Preparation for v0.4.0
+#### 📋 **削除準備作業**
+- **Import Statement Analysis**: ExcelDataLoader への全依存関係マッピング
+- **Documentation Update**: v0.4.0 での変更に関する完全なドキュメント更新
+- **Backward Compatibility Testing**: 最終的な後方互換性確認
+- **Migration Tools**: 自動マイグレーションスクリプトの提供検討
+
 ## [0.3.1] - 2025-06-21
 
 ### Deprecated
