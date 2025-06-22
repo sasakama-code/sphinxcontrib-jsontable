@@ -286,14 +286,14 @@ jobs:
         source $HOME/.cargo/env
         uv venv
         source .venv/bin/activate
-        uv pip install -e .[test]
+        uv pip install -e .[excel,test]
 
     - name: Install dependencies (Windows)
       if: runner.os == 'Windows'
       run: |
         uv venv
         .venv\Scripts\activate
-        uv pip install -e .[test]
+        uv pip install -e .[excel,test]
 
     - name: Verify test installation (Unix)
       if: runner.os != 'Windows'
@@ -366,7 +366,7 @@ jobs:
         source $HOME/.cargo/env
         uv venv
         source .venv/bin/activate
-        uv pip install -e .[test]
+        uv pip install -e .[excel,test]
 
     - name: Run benchmark tests (Unix)
       if: runner.os != 'Windows'
