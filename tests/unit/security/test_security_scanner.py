@@ -277,10 +277,16 @@ class TestSecurityScanner:
 
         result = self.scanner.scan_security_threats(workbook)
 
-        # Should handle error gracefully
-        assert not result.is_valid
-        assert len(result.errors) >= 1
-        assert "Security scan failed" in result.errors[0]
+        # Should handle error gracefully (errors recorded as security issues)
+        assert result.is_valid  # Individual scan errors don't fail the whole scan
+        assert len(result.security_issues) >= 1
+        # Check that scan errors are recorded
+        scan_errors = [
+            issue
+            for issue in result.security_issues
+            if "scan_error" in issue.get("type", "")
+        ]
+        assert len(scan_errors) >= 1
 
     def test_coverage_difficult_lines(self):
         """

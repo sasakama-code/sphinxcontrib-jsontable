@@ -8,7 +8,7 @@ Tests cover both normal and error scenarios with proper mocking for isolation.
 
 import json
 from pathlib import Path
-from unittest.mock import mock_open, patch
+from unittest.mock import call, mock_open, patch
 
 import pytest
 
@@ -70,7 +70,7 @@ class TestJsonDataLoaderValidateEncoding:
         # Assert
         assert result == valid_encoding
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.backward_compatibility.logger")
     def test_validate_encoding_with_invalid_encoding_returns_default(self, mock_logger):
         """Test _validate_encoding returns default for invalid encoding."""
         # Arrange
@@ -83,7 +83,7 @@ class TestJsonDataLoaderValidateEncoding:
         # Assert
         assert result == DEFAULT_ENCODING
 
-    @patch("sphinxcontrib.jsontable.directives.logger")
+    @patch("sphinxcontrib.jsontable.directives.backward_compatibility.logger")
     def test_validate_encoding_logs_warning_for_invalid_encoding(self, mock_logger):
         """Test _validate_encoding logs warning for invalid encoding."""
         # Arrange
@@ -125,7 +125,7 @@ class TestJsonDataLoaderValidateFilePath:
         mock_is_safe_path.return_value = False
 
         # Act & Assert
-        with pytest.raises(JsonTableError, match="Invalid file path"):
+        with pytest.raises(JsonTableError, match="Unsafe file path"):
             loader._validate_file_path(source, srcdir)
 
     @patch("sphinxcontrib.jsontable.directives.is_safe_path")
@@ -138,7 +138,7 @@ class TestJsonDataLoaderValidateFilePath:
         source = "data.json"
         srcdir = Path("/safe/dir")
         mock_is_safe_path.return_value = True
-        expected_file_path = srcdir / source
+        expected_file_path = Path(source)  # 相対パスのまま呼び出される
 
         # Act
         loader._validate_file_path(source, srcdir)
@@ -150,7 +150,9 @@ class TestJsonDataLoaderValidateFilePath:
 class TestJsonDataLoaderLoadFromFile:
     """Test cases for JsonDataLoader.load_from_file method."""
 
-    @patch("sphinxcontrib.jsontable.directives.ensure_file_exists")
+    @patch(
+        "sphinxcontrib.jsontable.directives.validators.ValidationUtils.ensure_file_exists"
+    )
     @patch("builtins.open", new_callable=mock_open, read_data='{"key": "value"}')
     @patch("json.load")
     def test_load_from_file_with_valid_json_returns_data(
@@ -184,7 +186,7 @@ class TestJsonDataLoaderLoadFromFile:
             mock_validate.return_value = srcdir / source
 
             with patch(
-                "sphinxcontrib.jsontable.directives.ensure_file_exists"
+                "sphinxcontrib.jsontable.directives.validators.ValidationUtils.ensure_file_exists"
             ) as mock_ensure:
                 mock_ensure.side_effect = FileNotFoundError("File not found")
 
@@ -192,7 +194,9 @@ class TestJsonDataLoaderLoadFromFile:
                 with pytest.raises(FileNotFoundError):
                     loader.load_from_file(source, srcdir)
 
-    @patch("sphinxcontrib.jsontable.directives.ensure_file_exists")
+    @patch(
+        "sphinxcontrib.jsontable.directives.validators.ValidationUtils.ensure_file_exists"
+    )
     @patch("builtins.open", new_callable=mock_open, read_data="invalid json")
     @patch("json.load")
     def test_load_from_file_with_invalid_json_raises_json_table_error(
@@ -212,7 +216,9 @@ class TestJsonDataLoaderLoadFromFile:
             with pytest.raises(JsonTableError, match="Failed to load"):
                 loader.load_from_file(source, srcdir)
 
-    @patch("sphinxcontrib.jsontable.directives.ensure_file_exists")
+    @patch(
+        "sphinxcontrib.jsontable.directives.validators.ValidationUtils.ensure_file_exists"
+    )
     @patch("builtins.open")
     def test_load_from_file_with_unicode_error_raises_json_table_error(
         self, mock_open_func, mock_ensure_exists
@@ -231,7 +237,9 @@ class TestJsonDataLoaderLoadFromFile:
             with pytest.raises(JsonTableError, match="Failed to load"):
                 loader.load_from_file(source, srcdir)
 
-    @patch("sphinxcontrib.jsontable.directives.ensure_file_exists")
+    @patch(
+        "sphinxcontrib.jsontable.directives.validators.ValidationUtils.ensure_file_exists"
+    )
     @patch("builtins.open", new_callable=mock_open, read_data='{"key": "value"}')
     @patch("json.load")
     def test_load_from_file_opens_file_with_correct_encoding(
@@ -302,7 +310,9 @@ class TestJsonDataLoaderParseInline:
         # Assert
         assert result == expected_data
 
-    @patch("sphinxcontrib.jsontable.directives.validate_not_empty")
+    @patch(
+        "sphinxcontrib.jsontable.directives.validators.ValidationUtils.validate_not_empty"
+    )
     def test_parse_inline_with_empty_content_raises_error(self, mock_validate):
         """Test parse_inline raises error for empty content."""
         # Arrange
@@ -334,7 +344,9 @@ class TestJsonDataLoaderParseInline:
         with pytest.raises(JsonTableError, match="Invalid inline JSON"):
             loader.parse_inline(content)
 
-    @patch("sphinxcontrib.jsontable.directives.validate_not_empty")
+    @patch(
+        "sphinxcontrib.jsontable.directives.validators.ValidationUtils.validate_not_empty"
+    )
     def test_parse_inline_calls_validate_not_empty_with_content(self, mock_validate):
         """Test parse_inline calls validate_not_empty with correct arguments."""
         # Arrange
@@ -344,8 +356,11 @@ class TestJsonDataLoaderParseInline:
         # Act
         loader.parse_inline(content)
 
-        # Assert
-        mock_validate.assert_called_once_with(content, EMPTY_CONTENT_ERROR)
+        # Assert - validate_not_empty is called twice: once in JsonDataLoader and once in JsonProcessor
+        assert mock_validate.call_count == 2
+        mock_validate.assert_has_calls(
+            [call(content, EMPTY_CONTENT_ERROR), call(content, EMPTY_CONTENT_ERROR)]
+        )
 
 
 # Integration test fixtures and helpers
@@ -367,9 +382,11 @@ def sample_json_data():
 class TestJsonDataLoaderIntegration:
     """Integration tests for JsonDataLoader methods working together."""
 
-    def test_loader_encoding_affects_file_operations(self, tmp_path):
+    @patch("sphinxcontrib.jsontable.directives.validators.ValidationUtils.is_safe_path")
+    def test_loader_encoding_affects_file_operations(self, mock_is_safe_path, tmp_path):
         """Test that loader encoding setting affects file operations."""
         # Arrange
+        mock_is_safe_path.return_value = True  # Allow the test file path
         utf8_loader = JsonDataLoader(encoding="utf-8")
         test_data = {"test": "data"}
         json_file = tmp_path / "test.json"

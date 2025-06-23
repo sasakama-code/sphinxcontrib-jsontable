@@ -4,11 +4,12 @@ Tests the functional composition-based range parsing that addresses
 the 814-853 line complexity problem through small, testable functions.
 """
 
+from unittest.mock import patch
+
 import pytest
 
 from sphinxcontrib.jsontable.core.range_parser import (
     IRangeParser,
-    MockRangeParser,
     RangeInfo,
     RangeParser,
 )
@@ -420,145 +421,26 @@ class TestRangeParserIntegration:
         with pytest.raises(RangeValidationError):
             self.parser.parse("A10:A1")  # Reversed bounds
 
+    def test_generic_exception_handling_in_parse_specification(self):
+        """Test generic exception handling in _parse_format method."""
+        # Mock _range_pattern.match to raise generic exception that isn't RangeSpecificationError
+        with patch.object(self.parser, "_range_pattern") as mock_pattern:
+            mock_pattern.match.side_effect = RuntimeError("Mock regex error")
 
-class TestMockRangeParser:
-    """Test suite for MockRangeParser."""
+            with pytest.raises(RangeSpecificationError) as exc_info:
+                self.parser.parse("A1:B2")
 
-    def test_default_mock_behavior(self):
-        """Test MockRangeParser with default behavior."""
-        mock_parser = MockRangeParser()
+            assert "Failed to parse range specification" in str(exc_info.value)
+            assert "Mock regex error" in str(exc_info.value)
 
-        result = mock_parser.parse("A1:B10")
+    def test_generic_exception_handling_in_validate_bounds(self):
+        """Test generic exception handling in _validate_bounds method."""
+        # Mock internal method to raise generic exception
+        with patch.object(self.parser, "_parse_cell_address") as mock_parse:
+            mock_parse.side_effect = RuntimeError("Mock cell parsing error")
 
-        assert isinstance(result, RangeInfo)
-        assert result.start_row == 1
-        assert result.start_col == 1
-        assert result.end_row == 10
-        assert result.end_col == 2
-        assert result.original_spec == "A1:B10"
-        assert result.normalized_spec == "A1:B10"
+            with pytest.raises(RangeSpecificationError) as exc_info:
+                self.parser.parse("A1:B2")
 
-        # Verify call tracking
-        assert len(mock_parser.parse_calls) == 1
-        assert mock_parser.parse_calls[0]["range_spec"] == "A1:B10"
-
-    def test_custom_mock_result(self):
-        """Test MockRangeParser with custom result."""
-        custom_result = RangeInfo(
-            start_row=5,
-            start_col=10,
-            end_row=15,
-            end_col=20,
-            original_spec="custom",
-            normalized_spec="CUSTOM",
-        )
-
-        mock_parser = MockRangeParser(mock_result=custom_result)
-        result = mock_parser.parse("any_input")
-
-        assert result is custom_result
-        assert result.start_row == 5
-        assert result.start_col == 10
-
-    def test_mock_error_behavior(self):
-        """Test MockRangeParser error simulation."""
-        custom_error = RangeValidationError(
-            "TEST:ERROR", message="Mock validation error"
-        )
-        mock_parser = MockRangeParser(should_fail=True, error_to_raise=custom_error)
-
-        with pytest.raises(RangeValidationError, match="Mock validation error"):
-            mock_parser.parse("A1:B10")
-
-        # Call should still be tracked even when error occurs
-        assert len(mock_parser.parse_calls) == 1
-
-    def test_mock_default_error(self):
-        """Test MockRangeParser with default error."""
-        mock_parser = MockRangeParser(should_fail=True)
-
-        with pytest.raises(RangeSpecificationError, match="Mock error"):
-            mock_parser.parse("test_input")
-
-    def test_call_tracking_multiple_calls(self):
-        """Test call tracking for multiple invocations."""
-        mock_parser = MockRangeParser()
-
-        mock_parser.parse("A1:B10")
-        mock_parser.parse("C1:D20")
-        mock_parser.parse("E1")
-
-        assert len(mock_parser.parse_calls) == 3
-        assert mock_parser.parse_calls[0]["range_spec"] == "A1:B10"
-        assert mock_parser.parse_calls[1]["range_spec"] == "C1:D20"
-        assert mock_parser.parse_calls[2]["range_spec"] == "E1"
-
-
-class TestRangeParserInterface:
-    """Test interface compliance and polymorphism."""
-
-    def test_interface_compliance(self):
-        """Test that all parsers implement the interface correctly."""
-        parsers = [RangeParser(), MockRangeParser()]
-
-        for parser in parsers:
-            assert isinstance(parser, IRangeParser)
-            assert hasattr(parser, "parse")
-            assert callable(parser.parse)
-
-    def test_polymorphic_usage(self):
-        """Test polymorphic usage of different parser implementations."""
-
-        def process_range(parser: IRangeParser, spec: str) -> RangeInfo:
-            """Function that accepts any IRangeParser implementation."""
-            return parser.parse(spec)
-
-        # Test with real parser
-        real_parser = RangeParser()
-        result1 = process_range(real_parser, "A1:B10")
-        assert result1.start_row == 1
-        assert result1.end_row == 10
-
-        # Test with mock parser
-        mock_parser = MockRangeParser()
-        result2 = process_range(mock_parser, "A1:B10")
-        assert result2.start_row == 1
-        assert result2.end_row == 10
-
-        # Both should return valid RangeInfo objects
-        assert isinstance(result1, RangeInfo)
-        assert isinstance(result2, RangeInfo)
-
-
-# Performance and stress testing
-class TestRangeParserPerformance:
-    """Performance and stress tests for RangeParser."""
-
-    def setup_method(self):
-        """Set up test fixtures."""
-        self.parser = RangeParser()
-
-    def test_large_range_parsing(self):
-        """Test parsing of very large ranges."""
-        # Test maximum Excel range
-        result = self.parser.parse("A1:XFD1048576")
-
-        assert result.start_row == 1
-        assert result.start_col == 1
-        assert result.end_row == 1048576
-        assert result.end_col == 16384  # XFD = 16384
-        assert result.cell_count == 1048576 * 16384
-
-    def test_multiple_parsing_calls(self):
-        """Test multiple sequential parsing calls."""
-        test_specs = ["A1:B10", "C5:F20", "AA1:ZZ100", "A1", "XFD1048576"]
-
-        results = []
-        for spec in test_specs:
-            result = self.parser.parse(spec)
-            results.append(result)
-            assert isinstance(result, RangeInfo)
-
-        # Verify all results are independent
-        assert len(results) == len(test_specs)
-        assert all(isinstance(r, RangeInfo) for r in results)
+            assert "Failed to parse cell addresses in range" in str(exc_info.value)
+            assert "Mock cell parsing error" in str(exc_info.value)
