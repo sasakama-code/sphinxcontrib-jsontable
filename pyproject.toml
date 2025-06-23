@@ -134,6 +134,7 @@ addopts = [
     "--tb=short",                    # 短いトレースバック
 ]
 testpaths = ["tests"]
+pythonpath = ["sphinxcontrib"]
 markers = [
     "slow: marks tests as slow (use -m 'not slow' to deselect)",
     "integration: marks tests as integration tests",
