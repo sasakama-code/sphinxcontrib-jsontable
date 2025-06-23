@@ -14,6 +14,7 @@ CLAUDE.md品質保証準拠:
 """
 
 import tempfile
+import time
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -540,7 +541,9 @@ class TestExcelProcessorCacheManagement:
         # キャッシュヒットテスト
         # _load_with_cache内で_is_cache_validが呼ばれるため、関連するモックが必要な場合がある
         # ここでは、_get_file_modification_timeが呼ばれる可能性があるのでモックする
-        with patch.object(self.processor, '_get_file_modification_time', return_value=file_mtime):
+        with patch.object(
+            self.processor, "_get_file_modification_time", return_value=file_mtime
+        ):
             result = self.processor._load_with_cache("test.xlsx", options)
         assert result == cached_data
 
