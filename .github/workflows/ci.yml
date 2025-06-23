@@ -373,14 +373,33 @@ jobs:
       run: |
         source $HOME/.cargo/env
         source .venv/bin/activate
-        uv run python -m pytest tests/ -m benchmark --benchmark-enable --benchmark-sort=mean --benchmark-json=benchmark.json -v --cov-fail-under=0
+        echo "=== ベンチマークテスト実行 ==="
+        echo "利用可能なベンチマークテスト数を確認中..."
+        BENCHMARK_COUNT=$(uv run python -m pytest tests/ -m benchmark --collect-only -q | grep "test session starts" -A 10 | grep -o "[0-9]\+ selected" | head -1 | cut -d' ' -f1 || echo "0")
+        echo "発見されたベンチマークテスト数: $BENCHMARK_COUNT"
+        if [ "$BENCHMARK_COUNT" -gt 0 ]; then
+          echo "ベンチマークテストを実行します..."
+          uv run python -m pytest tests/ -m benchmark --benchmark-enable --benchmark-sort=mean --benchmark-json=benchmark.json -v --cov-fail-under=0
+        else
+          echo "⚠️ ベンチマークテストが見つかりませんでした。ベンチマーク実行をスキップします。"
+        fi
       continue-on-error: true  # ベンチマークは失敗してもCI全体は通す
 
     - name: Run benchmark tests (Windows)
       if: runner.os == 'Windows'
       run: |
         .venv\Scripts\activate
-        uv run python -m pytest tests/ -m benchmark --benchmark-enable --benchmark-sort=mean --benchmark-json=benchmark.json -v --cov-fail-under=0
+        echo "=== ベンチマークテスト実行 ==="
+        echo "利用可能なベンチマークテスト数を確認中..."
+        for /f %%i in ('uv run python -m pytest tests/ -m benchmark --collect-only -q 2^>nul ^| findstr /C:"selected" 2^>nul') do set BENCHMARK_COUNT=%%i
+        if not defined BENCHMARK_COUNT set BENCHMARK_COUNT=0
+        echo 発見されたベンチマークテスト数: %BENCHMARK_COUNT%
+        if %BENCHMARK_COUNT% gtr 0 (
+          echo ベンチマークテストを実行します...
+          uv run python -m pytest tests/ -m benchmark --benchmark-enable --benchmark-sort=mean --benchmark-json=benchmark.json -v --cov-fail-under=0
+        ) else (
+          echo ⚠️ ベンチマークテストが見つかりませんでした。ベンチマーク実行をスキップします。
+        )
       continue-on-error: true  # ベンチマークは失敗してもCI全体は通す
 
     - name: Run performance tests (CI-safe) (Unix)
@@ -390,7 +409,18 @@ jobs:
       run: |
         source $HOME/.cargo/env
         source .venv/bin/activate
-        uv run python -m pytest tests/ -m performance -v --override-ini addopts=""
+        echo "=== パフォーマンステスト実行 ==="
+        echo "利用可能なパフォーマンステスト数を確認中..."
+        PERFORMANCE_COUNT=$(uv run python -m pytest tests/ -m performance --collect-only -q | grep "test session starts" -A 10 | grep -o "[0-9]\+ selected" | head -1 | cut -d' ' -f1 || echo "0")
+        echo "発見されたパフォーマンステスト数: $PERFORMANCE_COUNT"
+        if [ "$PERFORMANCE_COUNT" -gt 0 ]; then
+          echo "パフォーマンステストを実行します..."
+          uv run python -m pytest tests/ -m performance -v --override-ini addopts=""
+        else
+          echo "❌ パフォーマンステストが見つかりませんでした。"
+          echo "パフォーマンステストの@pytest.mark.performanceマーカーを確認してください。"
+          exit 1
+        fi
 
     - name: Run performance tests (CI-safe) (Windows)
       if: runner.os == 'Windows'
@@ -398,7 +428,19 @@ jobs:
         CI: true
       run: |
         .venv\Scripts\activate
-        uv run python -m pytest tests/ -m performance -v --override-ini addopts=""
+        echo "=== パフォーマンステスト実行 ==="
+        echo "利用可能なパフォーマンステスト数を確認中..."
+        for /f %%i in ('uv run python -m pytest tests/ -m performance --collect-only -q 2^>nul ^| findstr /C:"selected" 2^>nul') do set PERFORMANCE_COUNT=%%i
+        if not defined PERFORMANCE_COUNT set PERFORMANCE_COUNT=0
+        echo 発見されたパフォーマンステスト数: %PERFORMANCE_COUNT%
+        if %PERFORMANCE_COUNT% gtr 0 (
+          echo パフォーマンステストを実行します...
+          uv run python -m pytest tests/ -m performance -v --override-ini addopts=""
+        ) else (
+          echo ❌ パフォーマンステストが見つかりませんでした。
+          echo パフォーマンステストの@pytest.mark.performanceマーカーを確認してください。
+          exit 1
+        )
 
     - name: Upload benchmark results
       if: always()
