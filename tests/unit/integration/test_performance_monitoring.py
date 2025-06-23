@@ -160,6 +160,7 @@ class TestPerformanceMonitoring:
 
         return initial_memory, final_memory, memory_increase, result
 
+    @pytest.mark.performance
     def test_small_file_performance(self):
         """小規模ファイルパフォーマンステスト（100行）."""
         rows = 100
@@ -182,6 +183,7 @@ class TestPerformanceMonitoring:
 
         print(f"小規模ファイル（{rows}行）処理時間: {processing_time:.3f}秒")
 
+    @pytest.mark.performance
     def test_medium_file_performance(self):
         """中規模ファイルパフォーマンステスト（1000行）."""
         rows = 1000
@@ -204,6 +206,7 @@ class TestPerformanceMonitoring:
 
         print(f"中規模ファイル（{rows}行）処理時間: {processing_time:.3f}秒")
 
+    @pytest.mark.performance
     def test_large_file_performance(self):
         """大規模ファイルパフォーマンステスト（5000行）."""
         rows = 5000
@@ -226,6 +229,7 @@ class TestPerformanceMonitoring:
 
         print(f"大規模ファイル（{rows}行）処理時間: {processing_time:.3f}秒")
 
+    @pytest.mark.performance
     def test_memory_usage_small_file(self):
         """小規模ファイルメモリ使用量テスト."""
         rows = 100
@@ -242,6 +246,7 @@ class TestPerformanceMonitoring:
 
         print(f"小規模ファイル（{rows}行）メモリ増加: {increase:.1f}MB")
 
+    @pytest.mark.performance
     def test_memory_usage_large_file(self):
         """大規模ファイルメモリ使用量テスト."""
         rows = 2000
@@ -260,6 +265,7 @@ class TestPerformanceMonitoring:
 
         print(f"大規模ファイル（{rows}行）メモリ増加: {increase:.1f}MB")
 
+    @pytest.mark.performance
     def test_processing_scalability(self):
         """処理スケーラビリティテスト."""
         # 異なるサイズでの処理時間測定
@@ -300,6 +306,7 @@ class TestPerformanceMonitoring:
         )
         assert ratio < 5.0, f"処理スケーラビリティが悪い: 最大/最小比 = {ratio:.2f}"
 
+    @pytest.mark.performance
     def test_concurrent_processing_performance(self):
         """並行処理パフォーマンステスト."""
         import concurrent.futures
@@ -378,6 +385,7 @@ class TestPerformanceMonitoring:
             "並行処理が極端に遅くなっています"
         )
 
+    @pytest.mark.performance
     def test_memory_cleanup_verification(self):
         """メモリクリーンアップ検証テスト."""
         import gc
@@ -420,6 +428,7 @@ class TestPerformanceMonitoring:
             f"メモリリークの可能性: {memory_increase:.1f}MB増加"
         )
 
+    @pytest.mark.performance
     def test_cpu_usage_monitoring(self):
         """CPU使用率監視テスト."""
         import psutil
@@ -454,6 +463,7 @@ class TestPerformanceMonitoring:
         # 処理中はCPUを使用するが、極端に高くないことを確認
         assert cpu_percent_after < 100, f"CPU使用率が高すぎる: {cpu_percent_after:.1f}%"
 
+    @pytest.mark.performance
     def test_disk_io_efficiency(self):
         """ディスクI/O効率テスト."""
         import psutil
@@ -488,6 +498,7 @@ class TestPerformanceMonitoring:
             total_io = (read_bytes + write_bytes) / 1024 / 1024  # MB
             assert total_io < 500, f"ディスクI/Oが多すぎる: {total_io:.2f}MB"
 
+    @pytest.mark.performance
     def test_resource_limits_compliance(self):
         """リソース制限遵守テスト."""
         # 制限値設定

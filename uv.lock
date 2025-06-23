@@ -1834,6 +1834,7 @@ all = [
     { name = "openpyxl" },
     { name = "pandas" },
     { name = "pre-commit" },
+    { name = "psutil" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-cov" },
@@ -1875,6 +1876,7 @@ excel = [
 test = [
     { name = "openpyxl" },
     { name = "pandas" },
+    { name = "psutil" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-cov" },
@@ -1893,6 +1895,7 @@ requires-dist = [
     { name = "pandas", marker = "extra == 'excel'", specifier = ">=2.0.0" },
     { name = "pandas", marker = "extra == 'test'", specifier = ">=2.0.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.5.0" },
+    { name = "psutil", marker = "extra == 'test'" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.5" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.3.5" },
     { name = "pytest-benchmark", marker = "extra == 'dev'", specifier = ">=5.1.0" },
