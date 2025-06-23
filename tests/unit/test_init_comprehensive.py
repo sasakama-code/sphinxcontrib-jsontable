@@ -42,7 +42,7 @@ class TestModuleConstants:
         - リリース情報の信頼性
         """
         assert isinstance(__version__, str)
-        assert __version__ == "0.2.0"
+        assert __version__ == "0.3.1"
         assert len(__version__.split(".")) >= 2  # セマンティックバージョニング
 
     def test_author_information_validity(self):
