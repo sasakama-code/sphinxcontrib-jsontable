@@ -795,45 +795,75 @@ jsontable_max_rows = 5000  # Adjust based on your needs
 
 ## ⚠️ Breaking Changes Notice
 
-### ExcelDataLoader Deprecation (v0.4.0)
+### ExcelDataLoader Removal (v0.4.0) - **COMPLETED**
 
-**Important:** `ExcelDataLoader` class is deprecated and will be removed in **v0.4.0**. All Excel processing functionality has been redesigned with a modern, component-based architecture for better performance and maintainability.
+**Important:** `ExcelDataLoader` class has been **completely removed** in **v0.4.0** as announced in the deprecation timeline. All Excel processing functionality now uses the modern, component-based architecture for significantly better performance and maintainability.
 
-#### Migration Required
+#### Migration Required - **IMMEDIATE ACTION NEEDED**
 
-If you are directly importing `ExcelDataLoader` in your code:
+If you are directly importing `ExcelDataLoader` in your code, you **must** update to the new API:
 
 ```python
-# ❌ Deprecated - Will be removed in v0.4.0
+# ❌ REMOVED in v0.4.0 - Will cause ImportError
 from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
 
-# ✅ New API - Use instead
+# ✅ Required in v0.4.0+ - Use this instead
 from sphinxcontrib.jsontable.facade.excel_data_loader_facade import ExcelDataLoaderFacade
 ```
 
-#### Why This Change?
+#### Benefits of Migration
 
-- **40% Performance Improvement**: New modular architecture with 9 specialized components
+- **40% Performance Improvement**: Modern modular architecture with 9 specialized components
 - **25% Memory Reduction**: Optimized processing pipeline with streaming support
-- **Better Type Safety**: Comprehensive type annotations and interfaces
-- **Enhanced Security**: Improved validation and error handling
-- **Future-Ready**: Async support and modern Python patterns
+- **Enhanced Type Safety**: Comprehensive type annotations and interfaces
+- **Improved Security**: Advanced validation and error handling
+- **Future-Ready**: Async-ready foundation and modern Python patterns
 
-#### Migration Timeline
+#### Migration Timeline - **COMPLETED**
 
-- **v0.3.1** (Current): Deprecation warnings added, both APIs work
-- **v0.4.0** (Planned): `ExcelDataLoader` removed, `ExcelDataLoaderFacade` only
-- **v0.4.1+**: Full modern API stabilization
+- **v0.3.1**: Deprecation warnings added, both APIs worked
+- **v0.4.0** (**Current**): `ExcelDataLoader` completely removed, `ExcelDataLoaderFacade` only
+- **v0.4.1+**: Full modern API stabilization ongoing
 
-#### Need Help?
+#### Migration Support
 
-See our comprehensive [MIGRATION.md](MIGRATION.md) guide with:
-- Step-by-step migration instructions
-- Performance comparison charts
-- Complete API mapping
-- Troubleshooting guide
+See our comprehensive [MIGRATION.md](MIGRATION.md) guide featuring:
+- **Step-by-step migration instructions** with code examples
+- **Performance comparison charts** showing quantified improvements
+- **Complete API mapping** from old to new methods
+- **Troubleshooting guide** for common migration issues
+- **Automated migration tools** for faster conversion
 
-**📝 Note**: The directive usage remains unchanged - this only affects direct Python API usage.
+#### Quick Migration Example
+
+```python
+# OLD (v0.3.x) - Causes ImportError in v0.4.0
+from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
+loader = ExcelDataLoader(base_path="./data", macro_security="strict")
+result = loader.load_from_excel_with_range("file.xlsx", "A1:C10")
+
+# NEW (v0.4.0+) - Required implementation
+from sphinxcontrib.jsontable.facade.excel_data_loader_facade import ExcelDataLoaderFacade
+from sphinxcontrib.jsontable.security.security_scanner import SecurityScanner
+
+security_scanner = SecurityScanner(macro_security="strict")
+facade = ExcelDataLoaderFacade(security_validator=security_scanner)
+result = facade.load_from_excel("./data/file.xlsx", range_spec="A1:C10")
+```
+
+#### Directive Usage Unchanged
+
+**Important**: The `jsontable` directive usage remains **completely unchanged**. This breaking change only affects direct Python API usage:
+
+```rst
+# This continues to work exactly the same in v0.4.0
+.. jsontable:: data.xlsx
+   :header:
+   :sheet: "Data"
+   :range: A1:E50
+```
+
+**📝 Migration Help**: For assistance with migration, please use our [GitHub Discussions](https://github.com/sasakama-code/sphinxcontrib-jsontable/discussions) with the "migration" tag.
 
 ### Troubleshooting
 

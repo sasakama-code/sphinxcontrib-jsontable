@@ -797,45 +797,75 @@ jsontable_max_rows = 5000  # ニーズに応じて調整
 
 ## ⚠️ 破壊的変更のお知らせ
 
-### ExcelDataLoader 非推奨化（v0.4.0）
+### ExcelDataLoader 削除（v0.4.0）- **完了**
 
-**重要：** `ExcelDataLoader`クラスは非推奨であり、**v0.4.0で削除**されます。すべてのExcel処理機能は、パフォーマンス向上と保守性の向上のため、モダンなコンポーネントベースアーキテクチャで再設計されました。
+**重要：** `ExcelDataLoader`クラスは非推奨化タイムラインに従って**v0.4.0で完全に削除**されました。すべてのExcel処理機能は、大幅なパフォーマンス向上と保守性の向上を実現するため、モダンなコンポーネントベースアーキテクチャを使用するようになりました。
 
-#### 移行が必要
+#### 移行が必要 - **即座の対応が必要**
 
-コード内で`ExcelDataLoader`を直接インポートしている場合：
+コード内で`ExcelDataLoader`を直接インポートしている場合、新しいAPIに**必ず**更新してください：
 
 ```python
-# ❌ 非推奨 - v0.4.0で削除されます
+# ❌ v0.4.0で削除 - ImportErrorが発生します
 from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
 
-# ✅ 新API - 代わりにこちらを使用
+# ✅ v0.4.0以降で必須 - 代わりにこちらを使用
 from sphinxcontrib.jsontable.facade.excel_data_loader_facade import ExcelDataLoaderFacade
 ```
 
-#### この変更の理由
+#### 移行のメリット
 
-- **40%のパフォーマンス向上**: 9つの専門コンポーネントによる新しいモジュラーアーキテクチャ
+- **40%のパフォーマンス向上**: 9つの専門コンポーネントによるモダンなモジュラーアーキテクチャ
 - **25%のメモリ削減**: ストリーミング対応の最適化処理パイプライン
-- **型安全性の向上**: 包括的な型注釈とインターフェース
-- **セキュリティ強化**: 改善された検証とエラーハンドリング
-- **将来対応**: 非同期サポートとモダンなPythonパターン
+- **型安全性の強化**: 包括的な型注釈とインターフェース
+- **セキュリティ向上**: 高度な検証とエラーハンドリング
+- **将来対応**: 非同期対応基盤とモダンなPythonパターン
 
-#### 移行スケジュール
+#### 移行スケジュール - **完了**
 
-- **v0.3.1**（現在）: 非推奨警告追加、両APIが動作
-- **v0.4.0**（予定）: `ExcelDataLoader`削除、`ExcelDataLoaderFacade`のみ
-- **v0.4.1+**: 完全なモダンAPI安定化
+- **v0.3.1**: 非推奨警告追加、両APIが動作
+- **v0.4.0**（**現在**）: `ExcelDataLoader`完全削除、`ExcelDataLoaderFacade`のみ
+- **v0.4.1+**: 完全なモダンAPI安定化進行中
 
-#### サポートが必要ですか？
+#### 移行サポート
 
 以下を含む包括的な[MIGRATION.md](MIGRATION.md)ガイドをご覧ください：
-- ステップバイステップの移行手順
-- パフォーマンス比較チャート
-- 完全なAPIマッピング
-- トラブルシューティングガイド
+- **ステップバイステップの移行手順** とコード例
+- **パフォーマンス比較チャート** による定量的改善の表示
+- **完全なAPIマッピング** 旧メソッドから新メソッドへの対応
+- **トラブルシューティングガイド** よくある移行問題の解決方法
+- **自動移行ツール** より高速な変換のためのツール
 
-**📝 注意**: ディレクティブの使用方法は変更されません - これは直接PythonAPI使用にのみ影響します。
+#### クイック移行例
+
+```python
+# 旧版（v0.3.x）- v0.4.0でImportErrorが発生
+from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
+loader = ExcelDataLoader(base_path="./data", macro_security="strict")
+result = loader.load_from_excel_with_range("file.xlsx", "A1:C10")
+
+# 新版（v0.4.0+）- 必須の実装
+from sphinxcontrib.jsontable.facade.excel_data_loader_facade import ExcelDataLoaderFacade
+from sphinxcontrib.jsontable.security.security_scanner import SecurityScanner
+
+security_scanner = SecurityScanner(macro_security="strict")
+facade = ExcelDataLoaderFacade(security_validator=security_scanner)
+result = facade.load_from_excel("./data/file.xlsx", range_spec="A1:C10")
+```
+
+#### ディレクティブの使用方法は変更なし
+
+**重要**: `jsontable`ディレクティブの使用方法は**完全に変更されません**。この破壊的変更は直接PythonAPI使用にのみ影響します：
+
+```rst
+# これはv0.4.0でも全く同じように動作し続けます
+.. jsontable:: data.xlsx
+   :header:
+   :sheet: "データ"
+   :range: A1:E50
+```
+
+**📝 移行サポート**: 移行に関するサポートが必要な場合は、「migration」タグを付けて[GitHub Discussions](https://github.com/sasakama-code/sphinxcontrib-jsontable/discussions)をご利用ください。
 
 ### トラブルシューティング
 
