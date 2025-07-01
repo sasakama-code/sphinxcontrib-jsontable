@@ -83,7 +83,7 @@ def benchmark_table_converter():
             converter.convert, dataset
         )
         conversion_time = time.perf_counter() - start_time
-        
+
         # Count headers from the result
         headers_count = len(table_data[0]) if table_data else 0
 
