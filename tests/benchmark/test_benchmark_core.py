@@ -117,6 +117,7 @@ class TestBenchmarkCore:
     @pytest.mark.benchmark
     def test_json_data_creation_benchmark(self, benchmark):
         """JSONデータ作成のベンチマーク."""
+
         def json_data_creation():
             """ベンチマーク対象の処理."""
             return [{"id": i, "name": f"Item{i}", "value": i * 10} for i in range(100)]
@@ -127,6 +128,7 @@ class TestBenchmarkCore:
     @pytest.mark.benchmark
     def test_table_data_conversion_benchmark(self, benchmark):
         """テーブルデータ変換のベンチマーク."""
+
         def table_data_conversion():
             """ベンチマーク対象の処理."""
             headers = ["ID", "Name", "Value"]
