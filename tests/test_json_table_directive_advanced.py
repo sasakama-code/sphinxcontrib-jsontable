@@ -9,7 +9,9 @@ from sphinx.util.docutils import docutils_namespace
 
 try:
     from sphinxcontrib.jsontable.directives import JsonTableDirective
-    from sphinxcontrib.jsontable.excel_data_loader import ExcelDataLoader
+    from sphinxcontrib.jsontable.facade.excel_data_loader_facade import (
+        ExcelDataLoaderFacade,
+    )
 
     DIRECTIVE_AVAILABLE = True
 except ImportError:
@@ -294,8 +296,8 @@ class TestJsonTableDirectiveAdvanced:
                 state_machine=mock_state_machine,
             )
 
-            # ExcelDataLoaderの設定
-            directive.excel_loader = ExcelDataLoader(self.temp_dir)
+            # ExcelDataLoaderFacadeの設定
+            directive.excel_loader = ExcelDataLoaderFacade()
 
             try:
                 result = directive.run()
@@ -332,13 +334,13 @@ class TestJsonTableDirectiveAdvanced:
 
             try:
                 # データ読み込みメソッドの直接テスト
-                loaded_data = directive._load_json_data()
+                loaded_data = directive._load_data()
                 assert isinstance(loaded_data, list)
                 assert len(loaded_data) == 2
                 assert loaded_data[0]["name"] == "Alice"
             except AttributeError:
                 # メソッドが存在しない場合はスキップ
-                pytest.skip("_load_json_data method not accessible")
+                pytest.skip("_load_data method not accessible")
             except Exception as e:
                 # その他のエラーの場合もスキップ
                 pytest.skip(f"Data loading method test failed: {e}")
