@@ -59,8 +59,6 @@ def benchmark_table_converter():
     print("🚀 Starting TableConverter Performance Benchmark")
     print("=" * 60)
 
-    converter = TableConverter()
-
     # Test sizes: from small to very large
     test_sizes = [100, 1000, 5000, 10000, 25000, 50000, 100000]
 
@@ -69,6 +67,9 @@ def benchmark_table_converter():
     for size in test_sizes:
         print(f"\n📊 Testing with {size:,} objects...")
 
+        # Create converter with sufficient capacity for this test size
+        converter = TableConverter(max_rows=size + 1000)
+
         # Generate test data
         start_time = time.perf_counter()
         dataset = generate_large_dataset(size, keys_per_object=8)
@@ -76,47 +77,35 @@ def benchmark_table_converter():
 
         print(f"   ⏱️  Data generation: {generation_time:.3f}s")
 
-        # Test _extract_headers performance
-        start_time = time.perf_counter()
-        headers, current_mem, peak_mem = measure_memory_usage(
-            converter._extract_headers, dataset
-        )
-        headers_time = time.perf_counter() - start_time
-
-        print(f"   🏷️  Header extraction: {headers_time:.3f}s")
-        print(f"   🧠 Memory usage: {peak_mem / 1024 / 1024:.1f} MB peak")
-        print(f"   📝 Headers found: {len(headers)}")
-
-        # Test full conversion performance
+        # Test full conversion performance (skip _extract_headers as it's internal)
         start_time = time.perf_counter()
         table_data, current_mem_full, peak_mem_full = measure_memory_usage(
-            converter.convert, dataset, include_header=True, limit=None
+            converter.convert, dataset
         )
         conversion_time = time.perf_counter() - start_time
+
+        # Count headers from the result
+        headers_count = len(table_data[0]) if table_data else 0
 
         print(f"   🔄 Full conversion: {conversion_time:.3f}s")
         print(f"   🧠 Full memory: {peak_mem_full / 1024 / 1024:.1f} MB peak")
         print(f"   📋 Rows generated: {len(table_data):,}")
+        print(f"   📝 Headers found: {headers_count}")
 
         # Calculate rates
-        headers_rate = size / headers_time if headers_time > 0 else float("inf")
         conversion_rate = (
             size / conversion_time if conversion_time > 0 else float("inf")
         )
 
-        print(f"   ⚡ Header rate: {headers_rate:,.0f} objects/sec")
         print(f"   ⚡ Conversion rate: {conversion_rate:,.0f} objects/sec")
 
         results.append(
             {
                 "size": size,
-                "headers_time": headers_time,
                 "conversion_time": conversion_time,
-                "headers_memory_mb": peak_mem / 1024 / 1024,
                 "conversion_memory_mb": peak_mem_full / 1024 / 1024,
-                "headers_rate": headers_rate,
                 "conversion_rate": conversion_rate,
-                "headers_count": len(headers),
+                "headers_count": headers_count,
                 "rows_count": len(table_data),
             }
         )
@@ -133,7 +122,6 @@ def benchmark_table_converter():
     for result in results:
         print(
             f"Size: {result['size']:>6,} | "
-            f"Headers: {result['headers_time']:>6.3f}s | "
             f"Convert: {result['conversion_time']:>6.3f}s | "
             f"Memory: {result['conversion_memory_mb']:>5.1f}MB | "
             f"Rate: {result['conversion_rate']:>7,.0f} obj/s"
@@ -174,10 +162,8 @@ def benchmark_with_limit():
     print("\n🎯 Testing Performance with Limit Applied")
     print("=" * 50)
 
-    converter = TableConverter()
-
-    # Generate very large dataset
-    large_dataset = generate_large_dataset(50000, keys_per_object=10)
+    # Generate very large dataset (should be larger than any limit we're testing)
+    large_dataset = generate_large_dataset(60000, keys_per_object=10)
 
     limits = [None, 50000, 25000, 10000, 5000, 1000]
 
@@ -185,9 +171,19 @@ def benchmark_with_limit():
         print(f"\n🔢 Testing with limit: {limit if limit else 'None'}")
 
         start_time = time.perf_counter()
-        table_data, current_mem, peak_mem = measure_memory_usage(
-            converter.convert, large_dataset, include_header=True, limit=limit
-        )
+        # Apply limit if specified
+        if limit is not None:
+            # For testing with limit, we need to create a limited converter
+            limited_converter = TableConverter(max_rows=limit)
+            table_data, current_mem, peak_mem = measure_memory_usage(
+                limited_converter.convert, large_dataset
+            )
+        else:
+            # For unlimited testing, create converter with very high limit
+            unlimited_converter = TableConverter(max_rows=len(large_dataset) + 1000)
+            table_data, current_mem, peak_mem = measure_memory_usage(
+                unlimited_converter.convert, large_dataset
+            )
         processing_time = time.perf_counter() - start_time
 
         actual_rows = len(table_data)

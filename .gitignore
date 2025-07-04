@@ -71,3 +71,6 @@ uv.lock
 
 #Claude
 plan
+memo.md
+.claude/
+.claude/settings.local.json
