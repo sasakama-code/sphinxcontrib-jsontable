@@ -13,6 +13,12 @@ from .optimized_header_processor import (
     OptimizedHeaderProcessor,
     SinglePassHeaderResult,
 )
+from .duplicate_detector_optimized import (
+    DuplicateDetectorOptimized,
+    DuplicateDetectionResult,
+    HashTableMetrics,
+    OptimizationMetrics,
+)
 
 __all__ = [
     "OptimizedHeaderProcessor",
@@ -22,4 +28,8 @@ __all__ = [
     "MemoryOptimizationResult",
     "BenchmarkComparisonResult",
     "LinearScalabilityTestResult",
+    "DuplicateDetectorOptimized",
+    "DuplicateDetectionResult",
+    "HashTableMetrics",
+    "OptimizationMetrics",
 ]
