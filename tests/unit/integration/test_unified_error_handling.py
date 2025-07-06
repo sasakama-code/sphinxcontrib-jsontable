@@ -19,7 +19,6 @@ Task 1.3.4: エラーハンドリング重複排除
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock
-from enum import Enum
 
 import pandas as pd
 import pytest
@@ -27,18 +26,18 @@ import pytest
 # REDフェーズ: 存在しないクラスをインポート（意図的にエラー）
 try:
     from sphinxcontrib.jsontable.integration.unified_error_handler import (
-        UnifiedPipelineErrorHandler,
-        PipelineErrorClassification,
-        UnifiedHandlingResult,
-        UnifiedErrorMonitor,
-        UnifiedRecoveryStrategies,
         ErrorCategory,
         ErrorSeverity,
-        PipelineStage,
-        PipelineContext,
         OperationContext,
+        PipelineContext,
+        PipelineErrorClassification,
+        PipelineStage,
         RecoveryResult,
         RetryContext,
+        UnifiedErrorMonitor,
+        UnifiedHandlingResult,
+        UnifiedPipelineErrorHandler,
+        UnifiedRecoveryStrategies,
     )
     UNIFIED_ERROR_HANDLER_AVAILABLE = True
 except ImportError:
