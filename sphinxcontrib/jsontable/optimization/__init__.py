@@ -19,6 +19,13 @@ from .duplicate_detector_optimized import (
     HashTableMetrics,
     OptimizationMetrics,
 )
+from .range_parser_optimized import (
+    RangeParserOptimized,
+    RangeParsingResult,
+    CacheMetrics,
+    RegexOptimizationMetrics,
+    PerformanceMetrics,
+)
 
 __all__ = [
     "OptimizedHeaderProcessor",
@@ -32,4 +39,9 @@ __all__ = [
     "DuplicateDetectionResult",
     "HashTableMetrics",
     "OptimizationMetrics",
+    "RangeParserOptimized",
+    "RangeParsingResult",
+    "CacheMetrics",
+    "RegexOptimizationMetrics",
+    "PerformanceMetrics",
 ]
