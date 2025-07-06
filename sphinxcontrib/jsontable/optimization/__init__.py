@@ -26,6 +26,16 @@ from .range_parser_optimized import (
     RegexOptimizationMetrics,
     PerformanceMetrics,
 )
+from .unified_data_validator import (
+    UnifiedDataValidator,
+    UnifiedValidationResult,
+    DataValidationMetrics,
+    SecurityValidationMetrics,
+    ValidationIntegrationMetrics,
+    ValidationPerformanceMetrics,
+    ValidationQualityMetrics,
+    ValidationEfficiencyMetrics,
+)
 
 __all__ = [
     "OptimizedHeaderProcessor",
@@ -44,4 +54,12 @@ __all__ = [
     "CacheMetrics",
     "RegexOptimizationMetrics",
     "PerformanceMetrics",
+    "UnifiedDataValidator",
+    "UnifiedValidationResult",
+    "DataValidationMetrics",
+    "SecurityValidationMetrics",
+    "ValidationIntegrationMetrics",
+    "ValidationPerformanceMetrics",
+    "ValidationQualityMetrics",
+    "ValidationEfficiencyMetrics",
 ]
