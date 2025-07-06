@@ -5,11 +5,21 @@ bottlenecks identified in the sphinxcontrib-jsontable processing pipeline.
 """
 
 from .optimized_header_processor import (
-    OptimizedHeaderProcessor,
-    HeaderProcessingResult,
-    DuplicationEliminationMetrics,
-    SinglePassHeaderResult,
-    MemoryOptimizationResult,
     BenchmarkComparisonResult,
+    DuplicationEliminationMetrics,
+    HeaderProcessingResult,
     LinearScalabilityTestResult,
+    MemoryOptimizationResult,
+    OptimizedHeaderProcessor,
+    SinglePassHeaderResult,
 )
+
+__all__ = [
+    "OptimizedHeaderProcessor",
+    "HeaderProcessingResult",
+    "DuplicationEliminationMetrics",
+    "SinglePassHeaderResult",
+    "MemoryOptimizationResult",
+    "BenchmarkComparisonResult",
+    "LinearScalabilityTestResult",
+]

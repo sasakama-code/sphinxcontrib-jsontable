@@ -25,3 +25,15 @@ from .unified_error_handler import (
     PipelineErrorClassification,
     UnifiedErrorMonitor,
 )
+
+from .pipeline_regression_validator import (
+    PipelineRegressionValidator,
+    RegressionTestResult,
+    FunctionalityComparisonResult,
+    BackwardCompatibilityVerification,
+    OutputConsistencyAnalysis,
+    ErrorHandlingConsistencyCheck,
+    EdgeCasePreservationVerification,
+    PerformanceRegressionCheck,
+    ComprehensiveRegressionReport,
+)
