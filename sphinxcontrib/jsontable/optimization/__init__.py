@@ -40,6 +40,18 @@ from .optimized_string_processor import (
     StringPerformanceMetrics,
     StringProcessingResult,
 )
+from .optimized_index_processor import (
+    CompositeIndexResult,
+    ConcurrentIndexResult,
+    HashIndexResult,
+    IndexBenchmarkResult,
+    IndexCacheMetrics,
+    IndexOptimizationMetrics,
+    IndexPerformanceMetrics,
+    IndexProcessingResult,
+    OptimizedIndexProcessor,
+    RangeIndexResult,
+)
 from .range_parser_optimized import (
     CacheMetrics,
     PerformanceMetrics,
@@ -99,4 +111,14 @@ __all__ = [
     "ConcurrentStringResult",
     "StringMemoryMetrics",
     "StringBenchmarkResult",
+    "OptimizedIndexProcessor",
+    "IndexProcessingResult",
+    "IndexOptimizationMetrics",
+    "IndexPerformanceMetrics",
+    "HashIndexResult",
+    "RangeIndexResult",
+    "CompositeIndexResult",
+    "ConcurrentIndexResult",
+    "IndexCacheMetrics",
+    "IndexBenchmarkResult",
 ]
