@@ -102,7 +102,9 @@ class TableBuilder:
             f"TableBuilder initialized: max_rows={max_rows}, encoding={encoding}"
         )
 
-    def build_table(self, table_data: TableData) -> list[nodes.table]:
+    def build_table(
+        self, table_data: TableData, has_header: bool = True
+    ) -> list[nodes.table]:
         """
         Build enterprise-grade docutils.nodes.table from 2D list of strings.
 
@@ -115,6 +117,9 @@ class TableBuilder:
                        - First dimension represents rows
                        - Second dimension represents columns
                        - Each cell should be a string (None values auto-converted)
+            has_header: Whether the first row should be treated as a header row
+                       - True (default): First row becomes table header
+                       - False: All rows treated as body content
 
         Returns:
             List containing a single nodes.table node optimized for Sphinx rendering.
@@ -162,12 +167,26 @@ class TableBuilder:
         col_count = max(len(row) for row in table_data) if table_data else 0
         logger.info(f"Building table: {row_count} rows x {col_count} columns")
 
-        # Determine if first row should be treated as header (smart detection)
-        has_header = True  # Default assumption for documentation tables
+        # Use the provided has_header parameter for backward compatibility
         table_node = self._build_table_internal(table_data, has_header)
 
         logger.debug("Table build completed successfully")
         return [table_node]
+
+    def build(self, table_data: TableData, has_header: bool = True) -> nodes.table:
+        """
+        Backward compatibility method for the legacy build() API.
+
+        Args:
+            table_data: 2D list representing table content
+            has_header: Whether the first row should be treated as a header row
+
+        Returns:
+            Single nodes.table node (unwrapped from list)
+        """
+        logger.debug("Legacy build() method called - redirecting to build_table()")
+        table_nodes = self.build_table(table_data, has_header)
+        return table_nodes[0]
 
     def _build_table_internal(
         self, table_data: TableData, has_header: bool = False

@@ -80,7 +80,7 @@ class TableConverter:
             f"TableConverter initialized with max_rows={self.max_rows}, performance_mode={performance_mode}"
         )
 
-    def convert(self, data: JsonData) -> TableData:
+    def convert(self, data: JsonData, include_header: bool | None = None) -> TableData:
         """
         Convert JSON data to tabular format with comprehensive validation and optimization.
 
@@ -109,6 +109,10 @@ class TableConverter:
         Args:
             data: JSON data in supported format (dict, list, or nested structures)
                  Must not be None or empty for successful conversion
+            include_header: Backward compatibility parameter for header control
+                          - None (default): Automatic header detection (current behavior)
+                          - True: Force include header (same as None for backward compatibility)
+                          - False: Return data rows only (header stripped if present)
 
         Returns:
             TableData: 2D list structure where:
@@ -173,6 +177,14 @@ class TableConverter:
             result = self._convert_array(data)
         else:
             raise JsonTableError(INVALID_JSON_DATA_ERROR)
+
+        # Handle backward compatibility for include_header parameter
+        if include_header is False and result and len(result) > 1:
+            # Remove header row if include_header=False and data has header
+            result = result[1:]
+            logger.debug(
+                "Header row removed for backward compatibility (include_header=False)"
+            )
 
         logger.debug(f"Conversion completed: {len(result)} rows")
         return result
