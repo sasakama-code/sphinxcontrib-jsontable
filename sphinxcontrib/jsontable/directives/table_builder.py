@@ -189,7 +189,7 @@ class TableBuilder:
         return table_nodes[0]
 
     def _build_table_internal(
-        self, table_data: TableData, has_header: bool = False
+        self, table_data: TableData, has_header: bool = True
     ) -> nodes.table:
         """
         Internal method to build docutils table structure.

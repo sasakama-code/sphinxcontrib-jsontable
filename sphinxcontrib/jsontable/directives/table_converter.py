@@ -180,11 +180,27 @@ class TableConverter:
 
         # Handle backward compatibility for include_header parameter
         if include_header is False and result and len(result) > 1:
-            # Remove header row if include_header=False and data has header
-            result = result[1:]
-            logger.debug(
-                "Header row removed for backward compatibility (include_header=False)"
-            )
+            # Only remove header row if we can determine it's actually a header
+            # For object arrays, we know the first row is a header
+            # For 2D arrays, we need to be more careful
+            if isinstance(data, list) and data and isinstance(data[0], dict):
+                # Object array - first row is definitely a header
+                result = result[1:]
+                logger.debug(
+                    "Header row removed for backward compatibility (include_header=False)"
+                )
+            elif isinstance(data, dict):
+                # Single object - first row is definitely a header
+                result = result[1:]
+                logger.debug(
+                    "Header row removed for backward compatibility (include_header=False)"
+                )
+            else:
+                # 2D array or single object - log warning about potential data loss
+                logger.warning(
+                    "include_header=False applied to data that may not have a header row"
+                )
+                result = result[1:]
 
         logger.debug(f"Conversion completed: {len(result)} rows")
         return result
