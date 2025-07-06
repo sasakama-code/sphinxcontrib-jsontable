@@ -7,7 +7,6 @@ Task 1.2.8: キャッシュ統合実装
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pandas as pd
 import pytest
@@ -17,14 +16,14 @@ try:
     from sphinxcontrib.jsontable.core.cache_integrated_pipeline import (
         CacheIntegratedPipeline,
         PipelineCacheManager,
-        StageWiseCacheOptimizer
+        StageWiseCacheOptimizer,
     )
     CACHE_INTEGRATION_AVAILABLE = True
 except ImportError:
     CACHE_INTEGRATION_AVAILABLE = False
 
-from sphinxcontrib.jsontable.core.file_level_cache import FileLevelCache, CacheConfiguration
-from sphinxcontrib.jsontable.core.distributed_cache import DistributedCache, DistributedCacheConfiguration
+from sphinxcontrib.jsontable.core.distributed_cache import DistributedCacheConfiguration
+from sphinxcontrib.jsontable.core.file_level_cache import CacheConfiguration
 
 
 class TestCacheIntegrationFullPipeline:
@@ -483,8 +482,8 @@ class TestCacheIntegrationFullPipeline:
         ]
         
         # 並行処理実行
-        import threading
         import queue
+        import threading
         
         result_queue = queue.Queue()
         threads = []

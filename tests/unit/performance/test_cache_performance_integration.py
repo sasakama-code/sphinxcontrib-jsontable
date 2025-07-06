@@ -5,9 +5,7 @@ Task 1.2.7: キャッシュパフォーマンステスト
 """
 
 import tempfile
-import time
 from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pandas as pd
 import pytest
@@ -15,16 +13,16 @@ import pytest
 # REDフェーズ: 存在しないクラスをインポート（意図的にエラー）
 try:
     from sphinxcontrib.jsontable.core.cache_performance_analyzer import (
+        CacheEffectivenessReport,
         CachePerformanceAnalyzer,
         PerformanceComparisonResult,
-        CacheEffectivenessReport
     )
     CACHE_PERFORMANCE_AVAILABLE = True
 except ImportError:
     CACHE_PERFORMANCE_AVAILABLE = False
 
-from sphinxcontrib.jsontable.core.file_level_cache import FileLevelCache, CacheConfiguration
-from sphinxcontrib.jsontable.core.distributed_cache import DistributedCache, DistributedCacheConfiguration
+from sphinxcontrib.jsontable.core.distributed_cache import DistributedCacheConfiguration
+from sphinxcontrib.jsontable.core.file_level_cache import CacheConfiguration
 
 
 class TestCachePerformanceIntegration:

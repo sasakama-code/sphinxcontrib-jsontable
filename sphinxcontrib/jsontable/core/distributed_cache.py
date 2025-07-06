@@ -10,16 +10,14 @@ Task 1.2.6: 分散キャッシュ対応
 - クラスタリング・負荷分散
 """
 
-import json
 import logging
-import multiprocessing
 import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .file_level_cache import CacheKey, CacheEntry, FileLevelCache
+from .file_level_cache import CacheEntry, CacheKey, FileLevelCache
 
 # ロギング設定
 logger = logging.getLogger(__name__)

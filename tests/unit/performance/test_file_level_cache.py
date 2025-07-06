@@ -4,11 +4,9 @@ TDD REDフェーズ: 失敗するテストを先に作成
 Task 1.2.1: キャッシュ基盤アーキテクチャ
 """
 
-import hashlib
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pandas as pd
 import pytest
@@ -16,10 +14,10 @@ import pytest
 # REDフェーズ: 存在しないクラスをインポート（意図的にエラー）
 try:
     from sphinxcontrib.jsontable.core.file_level_cache import (
-        FileLevelCache,
-        CacheKey,
+        CacheConfiguration,
         CacheEntry,
-        CacheConfiguration
+        CacheKey,
+        FileLevelCache,
     )
     CACHE_AVAILABLE = True
 except ImportError:

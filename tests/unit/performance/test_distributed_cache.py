@@ -8,7 +8,6 @@ import multiprocessing
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pandas as pd
 import pytest
@@ -16,10 +15,10 @@ import pytest
 # REDフェーズ: 存在しないクラスをインポート（意図的にエラー）
 try:
     from sphinxcontrib.jsontable.core.distributed_cache import (
-        DistributedCache,
         CacheNode,
         CacheSynchronizer,
-        DistributedCacheConfiguration
+        DistributedCache,
+        DistributedCacheConfiguration,
     )
     DISTRIBUTED_CACHE_AVAILABLE = True
 except ImportError:
@@ -37,7 +36,10 @@ def worker_process(process_id: int, shared_cache_dir: Path) -> dict:
         dict: プロセス実行結果
     """
     # プロセス内でキャッシュ初期化
-    from sphinxcontrib.jsontable.core.distributed_cache import DistributedCache, DistributedCacheConfiguration
+    from sphinxcontrib.jsontable.core.distributed_cache import (
+        DistributedCache,
+        DistributedCacheConfiguration,
+    )
     
     worker_config = DistributedCacheConfiguration(
         shared_cache_directory=shared_cache_dir,

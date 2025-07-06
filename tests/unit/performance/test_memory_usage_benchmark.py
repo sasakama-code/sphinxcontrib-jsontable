@@ -6,27 +6,18 @@ Task 1.1.7: メモリ使用量ベンチマーク
 
 import gc
 import tempfile
-import time
 from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pandas as pd
 import pytest
 
-from sphinxcontrib.jsontable.core.streaming_excel_reader import StreamingExcelReader
-from sphinxcontrib.jsontable.core.optimized_chunk_processor import OptimizedChunkProcessor
-from sphinxcontrib.jsontable.core.memory_monitor import MemoryMonitor
-from sphinxcontrib.jsontable.core.range_view_processor import RangeViewProcessor
-from sphinxcontrib.jsontable.core.dataframe_memory_pool import DataFrameMemoryPool
-from sphinxcontrib.jsontable.core.large_file_processor import LargeFileProcessor
-
 # REDフェーズ: 存在しないクラスをインポート（意図的にエラー）
 try:
     from sphinxcontrib.jsontable.core.memory_usage_benchmarker import (
-        MemoryUsageBenchmarker,
+        BaselineComparison,
         BenchmarkResult,
         ComponentMemoryProfile,
-        BaselineComparison
+        MemoryUsageBenchmarker,
     )
     BENCHMARKER_AVAILABLE = True
 except ImportError:

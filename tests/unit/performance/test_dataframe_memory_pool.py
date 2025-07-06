@@ -8,12 +8,13 @@ import gc
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import patch, Mock
 
 import pandas as pd
 import pytest
 
-from sphinxcontrib.jsontable.core.dataframe_memory_pool import DataFrameMemoryPool, PooledDataFrame
+from sphinxcontrib.jsontable.core.dataframe_memory_pool import (
+    DataFrameMemoryPool,
+)
 
 
 class TestDataFrameMemoryPool:
@@ -407,8 +408,10 @@ class TestDataFrameMemoryPool:
         - StreamingExcelReader統合
         - RangeViewProcessor統合
         """
-        from sphinxcontrib.jsontable.core.streaming_excel_reader import StreamingExcelReader
         from sphinxcontrib.jsontable.core.range_view_processor import RangeViewProcessor
+        from sphinxcontrib.jsontable.core.streaming_excel_reader import (
+            StreamingExcelReader,
+        )
         
         # 統合メモリプール
         pool = DataFrameMemoryPool(

@@ -8,20 +8,25 @@ import gc
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import patch
 
 import pandas as pd
 import pytest
 
-from sphinxcontrib.jsontable.core.streaming_excel_reader import StreamingExcelReader
-from sphinxcontrib.jsontable.core.optimized_chunk_processor import OptimizedChunkProcessor
-from sphinxcontrib.jsontable.core.memory_monitor import MemoryMonitor
-from sphinxcontrib.jsontable.core.range_view_processor import RangeViewProcessor
 from sphinxcontrib.jsontable.core.dataframe_memory_pool import DataFrameMemoryPool
 from sphinxcontrib.jsontable.core.large_file_processor import (
-    LargeFileProcessor, ComponentCoordinator, MemoryConstrainedProcessor,
-    ConcurrentLargeFileProcessor, ErrorRecoveryProcessor, PerformanceBenchmarker
+    ComponentCoordinator,
+    ConcurrentLargeFileProcessor,
+    ErrorRecoveryProcessor,
+    LargeFileProcessor,
+    MemoryConstrainedProcessor,
+    PerformanceBenchmarker,
 )
+from sphinxcontrib.jsontable.core.memory_monitor import MemoryMonitor
+from sphinxcontrib.jsontable.core.optimized_chunk_processor import (
+    OptimizedChunkProcessor,
+)
+from sphinxcontrib.jsontable.core.range_view_processor import RangeViewProcessor
+from sphinxcontrib.jsontable.core.streaming_excel_reader import StreamingExcelReader
 
 
 class TestLargeFileProcessing:
