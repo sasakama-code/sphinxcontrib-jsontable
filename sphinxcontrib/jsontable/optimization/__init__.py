@@ -29,6 +29,17 @@ from .optimized_security_scanner import (
     ThreatCacheMetrics,
     ThreatDetectionResult,
 )
+from .optimized_string_processor import (
+    ConcurrentStringResult,
+    OptimizedStringProcessor,
+    RegexOptimizationResult,
+    StringBenchmarkResult,
+    StringCacheMetrics,
+    StringMemoryMetrics,
+    StringOptimizationMetrics,
+    StringPerformanceMetrics,
+    StringProcessingResult,
+)
 from .range_parser_optimized import (
     CacheMetrics,
     PerformanceMetrics,
@@ -79,4 +90,13 @@ __all__ = [
     "SecurityPerformanceMetrics",
     "ThreatCacheMetrics",
     "ConcurrentSecurityResult",
+    "OptimizedStringProcessor",
+    "StringProcessingResult",
+    "StringOptimizationMetrics",
+    "StringPerformanceMetrics",
+    "RegexOptimizationResult",
+    "StringCacheMetrics",
+    "ConcurrentStringResult",
+    "StringMemoryMetrics",
+    "StringBenchmarkResult",
 ]
