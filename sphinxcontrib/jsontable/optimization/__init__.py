@@ -4,6 +4,12 @@ This package contains optimized components for various performance
 bottlenecks identified in the sphinxcontrib-jsontable processing pipeline.
 """
 
+from .duplicate_detector_optimized import (
+    DuplicateDetectionResult,
+    DuplicateDetectorOptimized,
+    HashTableMetrics,
+    OptimizationMetrics,
+)
 from .optimized_header_processor import (
     BenchmarkComparisonResult,
     DuplicationEliminationMetrics,
@@ -13,28 +19,32 @@ from .optimized_header_processor import (
     OptimizedHeaderProcessor,
     SinglePassHeaderResult,
 )
-from .duplicate_detector_optimized import (
-    DuplicateDetectorOptimized,
-    DuplicateDetectionResult,
-    HashTableMetrics,
-    OptimizationMetrics,
+from .optimized_security_scanner import (
+    BenchmarkComparisonResult,
+    ConcurrentSecurityResult,
+    OptimizedSecurityScanner,
+    SecurityOptimizationMetrics,
+    SecurityPerformanceMetrics,
+    SecurityScanResult,
+    ThreatCacheMetrics,
+    ThreatDetectionResult,
 )
 from .range_parser_optimized import (
+    CacheMetrics,
+    PerformanceMetrics,
     RangeParserOptimized,
     RangeParsingResult,
-    CacheMetrics,
     RegexOptimizationMetrics,
-    PerformanceMetrics,
 )
 from .unified_data_validator import (
-    UnifiedDataValidator,
-    UnifiedValidationResult,
     DataValidationMetrics,
     SecurityValidationMetrics,
+    UnifiedDataValidator,
+    UnifiedValidationResult,
+    ValidationEfficiencyMetrics,
     ValidationIntegrationMetrics,
     ValidationPerformanceMetrics,
     ValidationQualityMetrics,
-    ValidationEfficiencyMetrics,
 )
 
 __all__ = [
@@ -62,4 +72,11 @@ __all__ = [
     "ValidationPerformanceMetrics",
     "ValidationQualityMetrics",
     "ValidationEfficiencyMetrics",
+    "OptimizedSecurityScanner",
+    "SecurityScanResult",
+    "ThreatDetectionResult",
+    "SecurityOptimizationMetrics",
+    "SecurityPerformanceMetrics",
+    "ThreatCacheMetrics",
+    "ConcurrentSecurityResult",
 ]

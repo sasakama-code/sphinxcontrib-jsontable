@@ -18,7 +18,7 @@ CLAUDE.md TDD compliance:
 
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Dict
 
 import pandas as pd
 import pytest
@@ -68,10 +68,15 @@ class TestUnifiedDataValidation:
         standard_data = {
             "name": ["Alice", "Bob", "Charlie", "Diana"],
             "age": [25, 30, 35, 28],
-            "email": ["alice@test.com", "bob@test.com", "charlie@test.com", "diana@test.com"],
+            "email": [
+                "alice@test.com",
+                "bob@test.com",
+                "charlie@test.com",
+                "diana@test.com",
+            ],
             "department": ["Sales", "Engineering", "Marketing", "HR"],
         }
-        
+
         temp_file = tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False)
         pd.DataFrame(standard_data).to_excel(temp_file.name, index=False)
         files["standard"] = Path(temp_file.name)
@@ -83,18 +88,30 @@ class TestUnifiedDataValidation:
             "email": ["valid@email.com", "invalid_email", "", "another@valid.com"],
             "score": [85.5, None, "not_number", 92.0],
         }
-        
+
         temp_file = tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False)
         pd.DataFrame(problematic_data).to_excel(temp_file.name, index=False)
         files["problematic"] = Path(temp_file.name)
 
         # セキュリティ問題のあるファイル（マクロ有効）
         security_data = {
-            "data": ["normal_data", "SYSTEM('rm -rf /')", "safe_data", "another_normal"],
-            "formula": ["SUM(A1:A10)", "CALL('dangerous.dll')", "AVERAGE(B1:B5)", "COUNT(C1:C10)"],
+            "data": [
+                "normal_data",
+                "SYSTEM('rm -rf /')",
+                "safe_data",
+                "another_normal",
+            ],
+            "formula": [
+                "SUM(A1:A10)",
+                "CALL('dangerous.dll')",
+                "AVERAGE(B1:B5)",
+                "COUNT(C1:C10)",
+            ],
         }
-        
-        temp_file = tempfile.NamedTemporaryFile(suffix=".xlsm", delete=False)  # マクロ有効形式
+
+        temp_file = tempfile.NamedTemporaryFile(
+            suffix=".xlsm", delete=False
+        )  # マクロ有効形式
         pd.DataFrame(security_data).to_excel(temp_file.name, index=False)
         files["security_risk"] = Path(temp_file.name)
 
@@ -169,9 +186,15 @@ class TestUnifiedDataValidation:
         assert data_validation.data_types_verified is True
         assert data_validation.data_constraints_satisfied is True
 
-        print(f"Processing time reduction: {performance_metrics.processing_time_reduction:.1%}")
-        print(f"Memory usage reduction: {performance_metrics.memory_usage_reduction:.1%}")
-        print(f"Integration efficiency: {integration_metrics.integration_efficiency:.1%}")
+        print(
+            f"Processing time reduction: {performance_metrics.processing_time_reduction:.1%}"
+        )
+        print(
+            f"Memory usage reduction: {performance_metrics.memory_usage_reduction:.1%}"
+        )
+        print(
+            f"Integration efficiency: {integration_metrics.integration_efficiency:.1%}"
+        )
 
     @pytest.mark.performance
     def test_unified_validation_with_data_quality_issues(self):
@@ -219,7 +242,7 @@ class TestUnifiedDataValidation:
         # 品質問題詳細確認
         quality_issues = data_validation.data_quality_issues
         issue_types = [issue["type"] for issue in quality_issues]
-        
+
         # 期待される問題タイプ（Excel読み込み後の実際の状態に基づく）
         assert "null_value" in issue_types  # null値（空文字列もNaNに変換される）
         assert "invalid_type" in issue_types  # 無効な型
@@ -243,7 +266,7 @@ class TestUnifiedDataValidation:
         print(f"Valid records: {data_validation.valid_records_count}")
         print(f"Invalid records: {data_validation.invalid_records_count}")
 
-    @pytest.mark.performance  
+    @pytest.mark.performance
     def test_unified_security_validation_integration(self):
         """
         セキュリティ検証統合を検証する。
@@ -292,13 +315,14 @@ class TestUnifiedDataValidation:
         # 脅威詳細確認
         security_threats = security_validation.detected_threats
         threat_types = [threat["type"] for threat in security_threats]
-        
+
         assert "macro_file" in threat_types  # マクロファイル
         assert "dangerous_formula" in threat_types  # 危険な数式
-        
+
         # 危険数式の具体的検出確認
         dangerous_formulas = [
-            threat for threat in security_threats 
+            threat
+            for threat in security_threats
             if threat["type"] == "dangerous_formula"
         ]
         assert len(dangerous_formulas) >= 2  # SYSTEM, CALL関数検出
@@ -315,9 +339,13 @@ class TestUnifiedDataValidation:
         assert policy_application.threats_blocked is True
         assert policy_application.security_recommendations_provided is True
 
-        print(f"Security threats detected: {security_validation.threats_detected_count}")
+        print(
+            f"Security threats detected: {security_validation.threats_detected_count}"
+        )
         print(f"Security scan time: {security_efficiency.security_scan_time_ms:.1f}ms")
-        print(f"Threat detection accuracy: {security_efficiency.threat_detection_accuracy:.1%}")
+        print(
+            f"Threat detection accuracy: {security_efficiency.threat_detection_accuracy:.1%}"
+        )
 
     @pytest.mark.performance
     def test_unified_validation_performance_benchmark(self):
@@ -391,9 +419,13 @@ class TestUnifiedDataValidation:
         assert scalability_metrics.memory_usage_predictable is True
         assert scalability_metrics.large_file_support_verified is True
 
-        print(f"Processing time improvement: {time_comparison.improvement_percentage:.1%}")
+        print(
+            f"Processing time improvement: {time_comparison.improvement_percentage:.1%}"
+        )
         print(f"Memory usage reduction: {memory_comparison.reduction_percentage:.1%}")
-        print(f"CPU efficiency improvement: {cpu_comparison.efficiency_improvement:.1%}")
+        print(
+            f"CPU efficiency improvement: {cpu_comparison.efficiency_improvement:.1%}"
+        )
 
     @pytest.mark.performance
     def test_unified_validation_concurrent_processing(self):
@@ -416,15 +448,17 @@ class TestUnifiedDataValidation:
         - エンタープライズ性能基準達成
         """
         # 並行処理実行
-        concurrent_result = self.unified_validator.execute_concurrent_unified_validation(
-            file_paths=list(self.sample_files.values()),
-            concurrent_options={
-                "enable_parallel_processing": True,
-                "max_worker_threads": 4,
-                "enable_resource_monitoring": True,
-                "ensure_thread_safety": True,
-                "optimize_memory_sharing": True,
-            },
+        concurrent_result = (
+            self.unified_validator.execute_concurrent_unified_validation(
+                file_paths=list(self.sample_files.values()),
+                concurrent_options={
+                    "enable_parallel_processing": True,
+                    "max_worker_threads": 4,
+                    "enable_resource_monitoring": True,
+                    "ensure_thread_safety": True,
+                    "optimize_memory_sharing": True,
+                },
+            )
         )
 
         # 並行処理結果検証
@@ -468,5 +502,7 @@ class TestUnifiedDataValidation:
         assert result_consistency.no_race_conditions_detected is True
 
         print(f"Parallel speedup: {concurrency_metrics.parallel_speedup_factor:.1f}x")
-        print(f"Thread utilization: {concurrency_metrics.thread_utilization_efficiency:.1%}")
+        print(
+            f"Thread utilization: {concurrency_metrics.thread_utilization_efficiency:.1%}"
+        )
         print(f"Files processed: {len(validation_results)}")
