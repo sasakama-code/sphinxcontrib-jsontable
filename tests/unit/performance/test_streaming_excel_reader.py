@@ -6,7 +6,6 @@ Task 1.1.1: ストリーミング読み込み基盤実装
 
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pandas as pd
 import pytest
@@ -198,7 +197,7 @@ class TestStreamingExcelReader:
         )
         
         # 監視付き処理実行
-        for chunk in reader.read_chunks(test_file):
+        for _chunk in reader.read_chunks(test_file):
             pass  # 処理実行のみ
         
         # パフォーマンスメトリクス取得

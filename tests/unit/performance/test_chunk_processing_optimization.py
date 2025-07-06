@@ -5,15 +5,16 @@ Task 1.1.2: チャンク処理実装
 """
 
 import tempfile
-from pathlib import Path
-from unittest.mock import Mock, patch
 import time
+from pathlib import Path
 
 import pandas as pd
 import pytest
 
+from sphinxcontrib.jsontable.core.optimized_chunk_processor import (
+    OptimizedChunkProcessor,
+)
 from sphinxcontrib.jsontable.core.streaming_excel_reader import StreamingExcelReader
-from sphinxcontrib.jsontable.core.optimized_chunk_processor import OptimizedChunkProcessor
 
 
 class TestChunkProcessingOptimization:
@@ -83,12 +84,12 @@ class TestChunkProcessingOptimization:
         # 従来処理時間測定
         start_time = time.perf_counter()
         traditional_chunks = list(traditional_reader.read_chunks(large_file))
-        traditional_time = time.perf_counter() - start_time
+        _traditional_time = time.perf_counter() - start_time
         
         # 最適化処理時間測定
         start_time = time.perf_counter()
         optimized_chunks = list(optimized_processor.process_chunks(large_file))
-        optimized_time = time.perf_counter() - start_time
+        _optimized_time = time.perf_counter() - start_time
         
         # パフォーマンス改善確認（最適化プロセッサのメトリクス使用）
         optimization_metrics = optimized_processor.get_performance_metrics()
@@ -155,9 +156,9 @@ class TestChunkProcessingOptimization:
         )
         
         # 各ファイルでの適応的処理
-        small_chunks = list(processor.process_chunks(small_file))
-        medium_chunks = list(processor.process_chunks(medium_file))
-        large_chunks = list(processor.process_chunks(large_file))
+        _small_chunks = list(processor.process_chunks(small_file))
+        _medium_chunks = list(processor.process_chunks(medium_file))
+        _large_chunks = list(processor.process_chunks(large_file))
         
         # 適応的サイズ調整確認
         small_metrics = processor.get_last_processing_metrics()
@@ -229,7 +230,7 @@ class TestChunkProcessingOptimization:
         )
         
         # 最適化パイプライン処理実行
-        chunks = list(processor.process_chunks(large_file))
+        _chunks = list(processor.process_chunks(large_file))
         
         # パイプライン効率メトリクス確認
         metrics = processor.get_pipeline_metrics()
@@ -288,7 +289,7 @@ class TestChunkProcessingOptimization:
         )
         
         # ベンチマーク付き処理実行
-        chunks = list(processor.process_chunks(large_file))
+        _chunks = list(processor.process_chunks(large_file))
         
         # ベンチマーク結果取得
         benchmark_results = processor.get_benchmark_results()

@@ -5,14 +5,12 @@ Task 1.1.2: チャンク処理実装
 """
 
 import gc
-import time
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator, List, Dict, Any, Union, Optional
-import psutil
-import pandas as pd
+from typing import Any, Dict, Iterator, List, Optional, Union
 
 from .streaming_excel_reader import ChunkData, StreamingExcelReader
 
@@ -234,7 +232,7 @@ class OptimizedChunkProcessor:
                 try:
                     result = future.result()
                     results[chunk_id] = result
-                except Exception as e:
+                except Exception:
                     # スレッドセーフティ違反記録
                     self._metrics['thread_safety_violations'] += 1
                     # フォールバック処理
@@ -315,7 +313,7 @@ class OptimizedChunkProcessor:
             )
             start_time = time.perf_counter()
             chunk_count = 0
-            for chunk in baseline_reader.read_chunks(file_path):
+            for _chunk in baseline_reader.read_chunks(file_path):
                 chunk_count += 1
             baseline_time = time.perf_counter() - start_time
             

@@ -8,9 +8,10 @@ import gc
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator, List, Dict, Any, Union
-import psutil
+from typing import Any, Dict, Iterator, List, Union
+
 import pandas as pd
+import psutil
 
 
 @dataclass
