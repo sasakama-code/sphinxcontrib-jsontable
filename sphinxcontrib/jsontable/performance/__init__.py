@@ -38,6 +38,22 @@ from .unified_data_transformation_processor import (
     UnifiedDataTransformationProcessor,
     UnifiedTransformationIntegrationResult,
 )
+from .efficient_state_manager import (
+    ConcurrentStateMetrics,
+    ConcurrentStateResult,
+    EfficientStateManager,
+    MemoryStorageMetrics,
+    MemoryStorageResult,
+    OverallStateManagementEffect,
+    StateIntegrationQuality,
+    StateIntegrationResult,
+    StateMonitoringMetrics,
+    StateMonitoringResult,
+    StateTrackingMetrics,
+    StateTrackingResult,
+    StateTransitionMetrics,
+    StateTransitionResult,
+)
 
 __all__ = [
     "SinglePassProcessor",
@@ -68,4 +84,18 @@ __all__ = [
     "TransformationMonitoringMetrics",
     "TransformationIntegrationQuality",
     "OverallTransformationEffect",
+    "EfficientStateManager",
+    "StateTrackingResult",
+    "StateTransitionResult",
+    "ConcurrentStateResult",
+    "StateMonitoringResult",
+    "MemoryStorageResult",
+    "StateIntegrationResult",
+    "StateTrackingMetrics",
+    "StateTransitionMetrics",
+    "ConcurrentStateMetrics",
+    "StateMonitoringMetrics",
+    "MemoryStorageMetrics",
+    "StateIntegrationQuality",
+    "OverallStateManagementEffect",
 ]

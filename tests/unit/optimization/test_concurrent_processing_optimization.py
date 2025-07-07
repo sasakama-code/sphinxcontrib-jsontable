@@ -15,7 +15,6 @@ CLAUDE.md Code Excellence Compliance:
 - セキュリティ考慮: スレッドセーフティ・競合状態防止
 """
 
-
 import pytest
 
 from sphinxcontrib.jsontable.optimization import (
