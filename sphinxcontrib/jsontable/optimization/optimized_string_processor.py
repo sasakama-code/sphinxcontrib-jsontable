@@ -407,7 +407,7 @@ class OptimizedStringProcessor:
             # パフォーマンス測定
             processing_time = (time.perf_counter() - start_time) * 1000
             end_memory = process.memory_info().rss / 1024 / 1024
-            memory_used = end_memory - start_memory
+            end_memory - start_memory
 
             # 結果構築
             return StringProcessingResult(
@@ -533,7 +533,7 @@ class OptimizedStringProcessor:
             total_requests = cache_hits + cache_misses
             hit_rate = cache_hits / total_requests if total_requests > 0 else 0.0
 
-            processing_time = (time.perf_counter() - start_time) * 1000
+            (time.perf_counter() - start_time) * 1000
 
             return StringProcessingResult(
                 processing_success=True,
@@ -626,7 +626,7 @@ class OptimizedStringProcessor:
         try:
             start_time = time.perf_counter()
             process = psutil.Process()
-            start_memory = process.memory_info().rss / 1024 / 1024
+            process.memory_info().rss / 1024 / 1024
 
             # ファイル読み込み
             df = pd.read_excel(file_path)
@@ -660,7 +660,7 @@ class OptimizedStringProcessor:
             # メモリ使用量測定
             peak_memory = process.memory_info().rss / 1024 / 1024
 
-            processing_time = (time.perf_counter() - start_time) * 1000
+            (time.perf_counter() - start_time) * 1000
 
             return StringProcessingResult(
                 processing_success=True,
@@ -856,8 +856,8 @@ class OptimizedStringProcessor:
         df = pd.read_excel(file_path)
 
         # 非効率な文字列処理シミュレート
-        for idx, row in df.iterrows():
-            for col, value in row.items():
+        for _idx, row in df.iterrows():
+            for _col, value in row.items():
                 if isinstance(value, str):
                     # 毎回正規表現コンパイル（非効率）
                     for _ in range(3):  # 3回繰り返し

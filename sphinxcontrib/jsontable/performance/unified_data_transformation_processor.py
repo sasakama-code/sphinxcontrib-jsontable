@@ -238,7 +238,7 @@ class UnifiedDataTransformationProcessor:
         Returns:
             統合変換アーキテクチャ実装結果
         """
-        start_time = time.time()
+        time.time()
 
         # 統合変換アーキテクチャ設計実装
         unified_enabled = architecture_options.get(
@@ -320,7 +320,7 @@ class UnifiedDataTransformationProcessor:
 
         # Excelファイル読み込み・精度検証処理
         if file_path.exists() and accuracy_enabled:
-            df = pd.read_excel(file_path)
+            pd.read_excel(file_path)
 
             # データ品質検証実装
             if quality_assurance and validation_enabled:
@@ -443,7 +443,7 @@ class UnifiedDataTransformationProcessor:
 
         # Excelファイル読み込み・タイプ統合処理
         if file_path.exists() and type_integration:
-            df = pd.read_excel(file_path)
+            pd.read_excel(file_path)
 
             # 複数変換タイプ統合実装
             if rule_optimization and consistency_ensured:
@@ -501,7 +501,7 @@ class UnifiedDataTransformationProcessor:
 
         # Excelファイル読み込み・監視システム実装
         if file_path.exists() and real_time:
-            df = pd.read_excel(file_path)
+            pd.read_excel(file_path)
 
             # リアルタイム監視システム実装
             if quality_mgmt and performance_tracking:
@@ -558,7 +558,7 @@ class UnifiedDataTransformationProcessor:
 
         # Excelファイル読み込み・統合検証処理
         if file_path.exists() and verify_all:
-            df = pd.read_excel(file_path)
+            pd.read_excel(file_path)
 
             # 全変換要素統合検証実装
             if system_integration and quality_validation:

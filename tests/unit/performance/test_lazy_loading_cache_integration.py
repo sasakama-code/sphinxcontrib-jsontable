@@ -17,7 +17,6 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: キャッシュ効率・統合最適化重視
 """
 
-
 import pytest
 
 from sphinxcontrib.jsontable.performance.lazy_loading_cache_integrator import (
@@ -120,9 +119,9 @@ class TestLazyLoadingCacheIntegration:
             },
         )
 
-        assert result.cache_integration_success == True
-        assert result.lazy_cache_synergy_optimized == True
-        assert result.intelligent_coordination_active == True
+        assert result.cache_integration_success
+        assert result.lazy_cache_synergy_optimized
+        assert result.intelligent_coordination_active
 
         integration_metrics = result.cache_integration_metrics
         assert (
@@ -165,9 +164,9 @@ class TestLazyLoadingCacheIntegration:
             },
         )
 
-        assert result.hit_ratio_optimization_success == True
-        assert result.predictive_warming_active == True
-        assert result.ml_prediction_enabled == True
+        assert result.hit_ratio_optimization_success
+        assert result.predictive_warming_active
+        assert result.ml_prediction_enabled
 
         hit_metrics = result.cache_hit_optimization_metrics
         assert hit_metrics.cache_hit_ratio_improvement >= CACHE_HIT_IMPROVEMENT_TARGET
@@ -204,9 +203,9 @@ class TestLazyLoadingCacheIntegration:
             },
         )
 
-        assert result.synergy_maximization_success == True
-        assert result.processing_optimization_active == True
-        assert result.memory_efficiency_enhanced == True
+        assert result.synergy_maximization_success
+        assert result.processing_optimization_active
+        assert result.memory_efficiency_enhanced
 
         synergy_metrics = result.synergy_effect_metrics
         assert synergy_metrics.synergy_effectiveness >= SYNERGY_EFFECT_TARGET
@@ -244,9 +243,9 @@ class TestLazyLoadingCacheIntegration:
             },
         )
 
-        assert result.intelligent_strategies_success == True
-        assert result.ai_ml_integration_active == True
-        assert result.adaptive_sizing_enabled == True
+        assert result.intelligent_strategies_success
+        assert result.ai_ml_integration_active
+        assert result.adaptive_sizing_enabled
 
         intelligent_metrics = result.intelligent_cache_metrics
         assert (
@@ -289,9 +288,9 @@ class TestLazyLoadingCacheIntegration:
             },
         )
 
-        assert result.distributed_integration_success == True
-        assert result.clustering_enabled == True
-        assert result.load_balancing_active == True
+        assert result.distributed_integration_success
+        assert result.clustering_enabled
+        assert result.load_balancing_active
 
         distributed_metrics = result.distributed_cache_metrics
         assert (
@@ -333,22 +332,22 @@ class TestLazyLoadingCacheIntegration:
             },
         )
 
-        assert result.integration_verification_success == True
-        assert result.all_elements_integrated == True
-        assert result.system_coherence_verified == True
+        assert result.integration_verification_success
+        assert result.all_elements_integrated
+        assert result.system_coherence_verified
 
         # 統合品質確認
         quality_metrics = result.integration_quality_metrics
         assert quality_metrics.overall_integration_quality >= 0.90
         assert quality_metrics.integration_completeness >= 0.95
         assert quality_metrics.system_consistency_score >= 0.92
-        assert quality_metrics.enterprise_grade_integration == True
+        assert quality_metrics.enterprise_grade_integration
 
         # 全体効果確認
         overall_effect = result.overall_integration_effect
-        assert overall_effect.cache_efficiency_achieved == True
-        assert overall_effect.lazy_optimization_confirmed == True
-        assert overall_effect.scalability_enhanced == True
+        assert overall_effect.cache_efficiency_achieved
+        assert overall_effect.lazy_optimization_confirmed
+        assert overall_effect.scalability_enhanced
 
 
 class TestLazyLoadingCacheIntegrationEdgeCases:
@@ -391,7 +390,7 @@ class TestLazyLoadingCacheIntegrationEdgeCases:
             },
         )
 
-        assert result.hit_ratio_optimization_success == True
+        assert result.hit_ratio_optimization_success
         # 大容量データでも30%以上のヒット率向上を期待
         assert (
             result.cache_hit_optimization_metrics.cache_hit_ratio_improvement
@@ -415,7 +414,7 @@ class TestLazyLoadingCacheIntegrationEdgeCases:
             },
         )
 
-        assert result.intelligent_strategies_success == True
+        assert result.intelligent_strategies_success
         assert (
             result.intelligent_cache_metrics.intelligent_cache_effectiveness
             >= INTELLIGENT_CACHE_TARGET

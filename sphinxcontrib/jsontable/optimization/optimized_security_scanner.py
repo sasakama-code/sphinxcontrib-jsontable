@@ -393,7 +393,7 @@ class OptimizedSecurityScanner:
             # パフォーマンス測定
             scan_time = (time.perf_counter() - start_time) * 1000
             end_memory = process.memory_info().rss / 1024 / 1024
-            memory_used = end_memory - start_memory
+            end_memory - start_memory
 
             # 脅威分類
             high_threats = len([t for t in threats if t.get("severity") == "high"])
@@ -467,7 +467,7 @@ class OptimizedSecurityScanner:
             total_requests = cache_hits + cache_misses
             hit_rate = cache_hits / total_requests if total_requests > 0 else 0.0
 
-            scan_time = (time.perf_counter() - start_time) * 1000
+            (time.perf_counter() - start_time) * 1000
 
             return SecurityScanResult(
                 scan_success=True,
@@ -595,9 +595,9 @@ class OptimizedSecurityScanner:
 
             # メモリ使用量測定
             peak_memory = process.memory_info().rss / 1024 / 1024
-            memory_used = peak_memory - start_memory
+            peak_memory - start_memory
 
-            scan_time = (time.perf_counter() - start_time) * 1000
+            (time.perf_counter() - start_time) * 1000
 
             return SecurityScanResult(
                 scan_success=True,
@@ -802,8 +802,8 @@ class OptimizedSecurityScanner:
         df = pd.read_excel(file_path)
 
         # 非効率な脅威検出シミュレート
-        for idx, row in df.iterrows():
-            for col, value in row.items():
+        for _idx, row in df.iterrows():
+            for _col, value in row.items():
                 if isinstance(value, str):
                     # 毎回正規表現コンパイル（非効率）
                     re.search(r"SYSTEM\s*\(", value, re.IGNORECASE)

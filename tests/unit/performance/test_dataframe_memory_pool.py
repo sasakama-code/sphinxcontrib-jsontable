@@ -77,7 +77,7 @@ class TestDataFrameMemoryPool:
 
         # プールへの追加
         pooled_items = []
-        for i, df in enumerate(test_dfs):
+        for _i, df in enumerate(test_dfs):
             pooled_df = pool.acquire_dataframe(df.shape, df.dtypes)
             pooled_df.data = df.copy()
             pooled_items.append(pooled_df)
@@ -191,11 +191,11 @@ class TestDataFrameMemoryPool:
 
         # LRU動作確認
         # 最初の2つ（最古）は削除されているはず
-        old_df_1 = pool.acquire_dataframe(test_dfs[0].shape, test_dfs[0].dtypes)
-        old_df_2 = pool.acquire_dataframe(test_dfs[1].shape, test_dfs[1].dtypes)
+        pool.acquire_dataframe(test_dfs[0].shape, test_dfs[0].dtypes)
+        pool.acquire_dataframe(test_dfs[1].shape, test_dfs[1].dtypes)
 
         # 最近のものは残っているはず
-        recent_df = pool.acquire_dataframe(test_dfs[-1].shape, test_dfs[-1].dtypes)
+        pool.acquire_dataframe(test_dfs[-1].shape, test_dfs[-1].dtypes)
 
         # LRU統計確認
         lru_stats = pool.get_lru_statistics()
@@ -222,7 +222,7 @@ class TestDataFrameMemoryPool:
 
         # メモリ制限テスト用大容量DataFrame作成
         large_dfs = []
-        for i in range(5):  # 数を減らしてメモリ使用量を制御
+        for _i in range(5):  # 数を減らしてメモリ使用量を制御
             # 各DataFrame約20MB（5個で100MB、制限を超える）
             data = {
                 "col1": list(range(100000)),  # 100k行に削減
@@ -352,7 +352,7 @@ class TestDataFrameMemoryPool:
         def traditional_dataframe_creation(count: int):
             start_time = time.perf_counter()
             dataframes = []
-            for i in range(count):
+            for _i in range(count):
                 data = {
                     "col1": list(range(1000)),
                     "col2": [f"data_{j}" for j in range(1000)],
@@ -374,7 +374,7 @@ class TestDataFrameMemoryPool:
 
             start_time = time.perf_counter()
             dataframes = []
-            for i in range(count):
+            for _i in range(count):
                 shape = (1000, 2)
                 dtypes = {"col1": "int64", "col2": "object"}
                 pooled_df = pool.acquire_dataframe(shape, dtypes)
@@ -457,9 +457,9 @@ class TestDataFrameMemoryPool:
 
         # 統合処理実行（簡略化）
         try:
-            stream_chunks = list(streaming_reader.read_chunks(test_file))
+            list(streaming_reader.read_chunks(test_file))
         except AttributeError:
-            stream_chunks = []  # メソッドが存在しない場合のフォールバック
+            pass  # メソッドが存在しない場合のフォールバック
 
         range_views = []
         for i in range(0, 2000, 400):

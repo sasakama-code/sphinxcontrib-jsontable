@@ -17,7 +17,6 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: メモリ効率・レスポンス時間重視
 """
 
-
 import pytest
 
 from sphinxcontrib.jsontable.performance.lazy_data_loader import (
@@ -82,15 +81,15 @@ class TestLazyLoadingFoundation:
             },
         )
 
-        assert result.lazy_loading_implementation_success == True
-        assert result.foundation_architecture_established == True
-        assert result.metadata_loading_optimized == True
+        assert result.lazy_loading_implementation_success
+        assert result.foundation_architecture_established
+        assert result.metadata_loading_optimized
 
         lazy_metrics = result.lazy_loading_metrics
         assert lazy_metrics.lazy_loading_effectiveness >= LAZY_LOADING_TARGET
         assert lazy_metrics.memory_usage_reduction >= 0.60  # 60%以上メモリ削減
         assert lazy_metrics.initial_loading_time_ms <= RESPONSE_TIME_TARGET
-        assert lazy_metrics.deferred_loading_enabled == True
+        assert lazy_metrics.deferred_loading_enabled
 
     def test_on_demand_data_loading_mechanism(
         self, lazy_loading_components, large_test_file
@@ -118,9 +117,9 @@ class TestLazyLoadingFoundation:
             },
         )
 
-        assert result.on_demand_loading_success == True
-        assert result.demand_based_loading_active == True
-        assert result.partial_loading_supported == True
+        assert result.on_demand_loading_success
+        assert result.demand_based_loading_active
+        assert result.partial_loading_supported
 
         demand_metrics = result.on_demand_data_metrics
         assert demand_metrics.on_demand_loading_rate >= ON_DEMAND_LOADING_TARGET
@@ -156,15 +155,15 @@ class TestLazyLoadingFoundation:
             },
         )
 
-        assert result.memory_optimization_success == True
-        assert result.efficient_memory_management_active == True
-        assert result.large_file_handling_optimized == True
+        assert result.memory_optimization_success
+        assert result.efficient_memory_management_active
+        assert result.large_file_handling_optimized
 
         memory_metrics = result.memory_efficiency_metrics
         assert memory_metrics.memory_efficiency_score >= MEMORY_EFFICIENCY_TARGET
         assert memory_metrics.memory_usage_reduction >= 0.75  # 75%以上メモリ削減
-        assert memory_metrics.peak_memory_controlled == True
-        assert memory_metrics.memory_leak_prevention_active == True
+        assert memory_metrics.peak_memory_controlled
+        assert memory_metrics.memory_leak_prevention_active
 
     def test_loading_performance_optimization(
         self, lazy_loading_components, large_test_file
@@ -192,9 +191,9 @@ class TestLazyLoadingFoundation:
             },
         )
 
-        assert result.loading_optimization_success == True
-        assert result.staged_loading_enabled == True
-        assert result.io_efficiency_improved == True
+        assert result.loading_optimization_success
+        assert result.staged_loading_enabled
+        assert result.io_efficiency_improved
 
         loading_metrics = result.loading_optimization_metrics
         assert (
@@ -205,7 +204,7 @@ class TestLazyLoadingFoundation:
             loading_metrics.initial_loading_speedup >= 0.70
         )  # 70%以上初期読み込み高速化
         assert loading_metrics.io_efficiency_improvement >= 0.60  # 60%以上I/O効率向上
-        assert loading_metrics.parallel_loading_supported == True
+        assert loading_metrics.parallel_loading_supported
 
     def test_cache_integration_preparation(
         self, lazy_loading_components, large_test_file
@@ -231,9 +230,9 @@ class TestLazyLoadingFoundation:
             },
         )
 
-        assert result.cache_integration_preparation_success == True
-        assert result.lazy_cache_combination_optimized == True
-        assert result.integration_benefits_maximized == True
+        assert result.cache_integration_preparation_success
+        assert result.lazy_cache_combination_optimized
+        assert result.integration_benefits_maximized
 
         cache_metrics = result.cache_integration_metrics
         assert cache_metrics.cache_integration_effectiveness >= CACHE_INTEGRATION_TARGET
@@ -269,22 +268,22 @@ class TestLazyLoadingFoundation:
             },
         )
 
-        assert result.integration_verification_success == True
-        assert result.all_lazy_features_integrated == True
-        assert result.system_coherence_verified == True
+        assert result.integration_verification_success
+        assert result.all_lazy_features_integrated
+        assert result.system_coherence_verified
 
         # 統合品質確認
         integration_quality = result.lazy_loading_integration_quality
         assert integration_quality.overall_lazy_loading_quality >= 0.90
         assert integration_quality.integration_completeness >= 0.95
         assert integration_quality.system_consistency_score >= 0.92
-        assert integration_quality.enterprise_grade_lazy_loading == True
+        assert integration_quality.enterprise_grade_lazy_loading
 
         # 全体効果確認
         overall_effect = result.overall_lazy_loading_effect
-        assert overall_effect.memory_efficiency_achieved == True
-        assert overall_effect.performance_improvement_confirmed == True
-        assert overall_effect.scalability_enhanced == True
+        assert overall_effect.memory_efficiency_achieved
+        assert overall_effect.performance_improvement_confirmed
+        assert overall_effect.scalability_enhanced
 
 
 class TestLazyLoadingFoundationEdgeCases:
@@ -303,7 +302,7 @@ class TestLazyLoadingFoundationEdgeCases:
         ].implement_lazy_loading_foundation(empty_file, {"enable_lazy_loading": True})
 
         # 空ファイルでもエラーなく処理される
-        assert result.lazy_loading_implementation_success == True
+        assert result.lazy_loading_implementation_success
 
     def test_very_large_file_lazy_loading(self, lazy_loading_components, tmp_path):
         """超大容量ファイル遅延読み込み処理"""
@@ -321,7 +320,7 @@ class TestLazyLoadingFoundationEdgeCases:
             huge_file, {"optimize_memory_usage": True, "large_file_support": True}
         )
 
-        assert result.memory_optimization_success == True
+        assert result.memory_optimization_success
         assert (
             result.memory_efficiency_metrics.memory_usage_reduction >= 0.80
         )  # 超大容量では80%以上削減期待

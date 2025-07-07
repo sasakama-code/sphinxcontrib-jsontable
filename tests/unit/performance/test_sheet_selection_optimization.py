@@ -17,7 +17,6 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: メモリ効率・I/O最適化重視
 """
 
-
 import pytest
 
 from sphinxcontrib.jsontable.performance.sheet_selection_optimizer import (
@@ -95,9 +94,9 @@ class TestSheetSelectionOptimization:
             },
         )
 
-        assert result.sheet_selection_success == True
-        assert result.target_sheet_loading_enabled == True
-        assert result.unused_sheet_skipping_active == True
+        assert result.sheet_selection_success
+        assert result.target_sheet_loading_enabled
+        assert result.unused_sheet_skipping_active
 
         selection_metrics = result.sheet_selection_metrics
         assert selection_metrics.sheet_selection_effectiveness >= SHEET_SELECTION_TARGET
@@ -135,9 +134,9 @@ class TestSheetSelectionOptimization:
             },
         )
 
-        assert result.memory_optimization_success == True
-        assert result.selective_loading_active == True
-        assert result.memory_efficient_processing_enabled == True
+        assert result.memory_optimization_success
+        assert result.selective_loading_active
+        assert result.memory_efficient_processing_enabled
 
         memory_metrics = result.memory_optimization_metrics
         assert (
@@ -176,9 +175,9 @@ class TestSheetSelectionOptimization:
             },
         )
 
-        assert result.io_optimization_success == True
-        assert result.disk_reading_optimized == True
-        assert result.network_transfer_reduced == True
+        assert result.io_optimization_success
+        assert result.disk_reading_optimized
+        assert result.network_transfer_reduced
 
         io_metrics = result.io_optimization_metrics
         assert io_metrics.io_optimization_effectiveness >= IO_OPTIMIZATION_TARGET
@@ -214,9 +213,9 @@ class TestSheetSelectionOptimization:
             },
         )
 
-        assert result.multi_sheet_optimization_success == True
-        assert result.selective_sheet_processing_active == True
-        assert result.priority_management_enabled == True
+        assert result.multi_sheet_optimization_success
+        assert result.selective_sheet_processing_active
+        assert result.priority_management_enabled
 
         multi_metrics = result.multi_sheet_processing_metrics
         assert (
@@ -225,7 +224,7 @@ class TestSheetSelectionOptimization:
         )
         assert multi_metrics.sheet_selection_accuracy >= 0.95  # 95%以上シート選択精度
         assert multi_metrics.processing_efficiency >= 0.80  # 80%以上処理効率
-        assert multi_metrics.resource_distribution_optimized == True
+        assert multi_metrics.resource_distribution_optimized
 
     def test_lazy_loading_sheet_integration(
         self, sheet_selection_components, multi_sheet_test_file
@@ -253,9 +252,9 @@ class TestSheetSelectionOptimization:
             },
         )
 
-        assert result.lazy_sheet_integration_success == True
-        assert result.lazy_sheet_synergy_optimized == True
-        assert result.integration_benefits_maximized == True
+        assert result.lazy_sheet_integration_success
+        assert result.lazy_sheet_synergy_optimized
+        assert result.integration_benefits_maximized
 
         integration_metrics = result.lazy_sheet_integration_metrics
         assert (
@@ -296,22 +295,22 @@ class TestSheetSelectionOptimization:
             },
         )
 
-        assert result.integration_verification_success == True
-        assert result.all_sheet_features_integrated == True
-        assert result.system_coherence_verified == True
+        assert result.integration_verification_success
+        assert result.all_sheet_features_integrated
+        assert result.system_coherence_verified
 
         # 統合品質確認
         integration_quality = result.sheet_selection_integration_quality
         assert integration_quality.overall_sheet_selection_quality >= 0.90
         assert integration_quality.integration_completeness >= 0.95
         assert integration_quality.system_consistency_score >= 0.92
-        assert integration_quality.enterprise_grade_sheet_processing == True
+        assert integration_quality.enterprise_grade_sheet_processing
 
         # 全体効果確認
         overall_effect = result.overall_sheet_selection_effect
-        assert overall_effect.memory_efficiency_achieved == True
-        assert overall_effect.io_optimization_confirmed == True
-        assert overall_effect.scalability_enhanced == True
+        assert overall_effect.memory_efficiency_achieved
+        assert overall_effect.io_optimization_confirmed
+        assert overall_effect.scalability_enhanced
 
 
 class TestSheetSelectionOptimizationEdgeCases:
@@ -335,7 +334,7 @@ class TestSheetSelectionOptimizationEdgeCases:
         )
 
         # 単一シートでもエラーなく処理される
-        assert result.sheet_selection_success == True
+        assert result.sheet_selection_success
 
     def test_large_multi_sheet_file_optimization(
         self, sheet_selection_components, tmp_path
@@ -369,7 +368,7 @@ class TestSheetSelectionOptimizationEdgeCases:
             },
         )
 
-        assert result.memory_optimization_success == True
+        assert result.memory_optimization_success
         assert (
             result.memory_optimization_metrics.memory_usage_reduction >= 0.75
         )  # 大容量では75%以上削減期待

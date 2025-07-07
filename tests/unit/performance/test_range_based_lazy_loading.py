@@ -17,7 +17,6 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: メモリ効率・I/O最適化重視
 """
 
-
 import pytest
 
 from sphinxcontrib.jsontable.performance.range_based_lazy_loader import (
@@ -113,9 +112,9 @@ class TestRangeBasedLazyLoading:
             },
         )
 
-        assert result.range_loading_success == True
-        assert result.range_specification_enabled == True
-        assert result.excel_notation_supported == True
+        assert result.range_loading_success
+        assert result.range_specification_enabled
+        assert result.excel_notation_supported
 
         range_metrics = result.range_loading_metrics
         assert range_metrics.range_loading_effectiveness >= RANGE_LOADING_TARGET
@@ -149,16 +148,16 @@ class TestRangeBasedLazyLoading:
             },
         )
 
-        assert result.partial_loading_success == True
-        assert result.lazy_partial_access_enabled == True
-        assert result.memory_efficient_loading_active == True
+        assert result.partial_loading_success
+        assert result.lazy_partial_access_enabled
+        assert result.memory_efficient_loading_active
 
         partial_metrics = result.partial_data_metrics
         assert (
             partial_metrics.partial_loading_efficiency >= 0.85
         )  # 85%以上部分読み込み効率
         assert partial_metrics.memory_usage_reduction >= 0.75  # 75%以上メモリ削減
-        assert partial_metrics.unused_data_deferred == True  # 未使用データ遅延確認
+        assert partial_metrics.unused_data_deferred  # 未使用データ遅延確認
         assert partial_metrics.partial_access_speed_ms <= 40  # 40ms以下部分アクセス時間
 
     def test_memory_efficiency_through_range_loading(
@@ -187,9 +186,9 @@ class TestRangeBasedLazyLoading:
             },
         )
 
-        assert result.memory_optimization_success == True
-        assert result.peak_memory_controlled == True
-        assert result.large_file_handling_optimized == True
+        assert result.memory_optimization_success
+        assert result.peak_memory_controlled
+        assert result.large_file_handling_optimized
 
         memory_metrics = result.memory_efficiency_metrics
         assert memory_metrics.memory_efficiency_score >= MEMORY_EFFICIENCY_TARGET
@@ -225,9 +224,9 @@ class TestRangeBasedLazyLoading:
             },
         )
 
-        assert result.lazy_integration_success == True
-        assert result.range_lazy_synergy_optimized == True
-        assert result.integration_benefits_maximized == True
+        assert result.lazy_integration_success
+        assert result.range_lazy_synergy_optimized
+        assert result.integration_benefits_maximized
 
         integration_metrics = result.lazy_integration_metrics
         assert (
@@ -266,9 +265,9 @@ class TestRangeBasedLazyLoading:
             },
         )
 
-        assert result.cache_integration_success == True
-        assert result.range_cache_optimization_active == True
-        assert result.intelligent_cache_management_enabled == True
+        assert result.cache_integration_success
+        assert result.range_cache_optimization_active
+        assert result.intelligent_cache_management_enabled
 
         cache_metrics = result.cache_integration_metrics
         assert cache_metrics.cache_integration_effectiveness >= CACHE_INTEGRATION_TARGET
@@ -306,22 +305,22 @@ class TestRangeBasedLazyLoading:
             },
         )
 
-        assert result.integration_verification_success == True
-        assert result.all_range_features_integrated == True
-        assert result.system_coherence_verified == True
+        assert result.integration_verification_success
+        assert result.all_range_features_integrated
+        assert result.system_coherence_verified
 
         # 統合品質確認
         integration_quality = result.range_loading_integration_quality
         assert integration_quality.overall_range_loading_quality >= 0.90
         assert integration_quality.integration_completeness >= 0.95
         assert integration_quality.system_consistency_score >= 0.92
-        assert integration_quality.enterprise_grade_range_loading == True
+        assert integration_quality.enterprise_grade_range_loading
 
         # 全体効果確認
         overall_effect = result.overall_range_loading_effect
-        assert overall_effect.memory_efficiency_achieved == True
-        assert overall_effect.io_optimization_confirmed == True
-        assert overall_effect.scalability_enhanced == True
+        assert overall_effect.memory_efficiency_achieved
+        assert overall_effect.io_optimization_confirmed
+        assert overall_effect.scalability_enhanced
 
 
 class TestRangeBasedLazyLoadingEdgeCases:
@@ -363,7 +362,7 @@ class TestRangeBasedLazyLoadingEdgeCases:
             },
         )
 
-        assert result.partial_loading_success == True
+        assert result.partial_loading_success
         # 大容量データでも85%以上の効率を期待
         assert result.partial_data_metrics.partial_loading_efficiency >= 0.85
 
@@ -387,7 +386,7 @@ class TestRangeBasedLazyLoadingEdgeCases:
             },
         )
 
-        assert result.lazy_integration_success == True
+        assert result.lazy_integration_success
         assert (
             result.lazy_integration_metrics.lazy_integration_effectiveness
             >= LAZY_INTEGRATION_TARGET

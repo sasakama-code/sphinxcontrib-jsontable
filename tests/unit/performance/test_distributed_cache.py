@@ -228,7 +228,7 @@ class TestDistributedCache:
         - 効率的なプロセス間通信
         """
         # 分散キャッシュ設定（マルチプロセス対応）
-        mp_config = DistributedCacheConfiguration(
+        DistributedCacheConfiguration(
             shared_cache_directory=self.shared_cache_dir,
             enable_multiprocessing=True,
             process_synchronization_method="file_locking",
@@ -389,7 +389,7 @@ class TestDistributedCache:
             assert len(node_data) >= 2  # 最低2ノードでデータ確認
 
             # データ整合性確認
-            for node_id, node_data_content in node_data.items():
+            for _node_id, node_data_content in node_data.items():
                 assert node_data_content is not None
                 # タイムスタンプベースの最新版確認
                 assert node_data_content["timestamp"] >= expected_data["timestamp"]

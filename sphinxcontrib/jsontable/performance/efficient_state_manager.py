@@ -318,7 +318,7 @@ class EfficientStateManager:
 
         # Excelファイル読み込み・遷移最適化処理
         if file_path.exists() and optimize_transitions:
-            df = pd.read_excel(file_path)
+            pd.read_excel(file_path)
 
             # 状態遷移最適化適用
             if minimize_overhead and batch_enabled:
@@ -376,7 +376,7 @@ class EfficientStateManager:
 
         # Excelファイル読み込み・並行管理処理
         if file_path.exists() and concurrent_enabled:
-            df = pd.read_excel(file_path)
+            pd.read_excel(file_path)
 
             # 並行状態管理適用
             if thread_safe and sync_optimized:
@@ -432,7 +432,7 @@ class EfficientStateManager:
 
         # Excelファイル読み込み・監視システム実装
         if file_path.exists() and real_time:
-            df = pd.read_excel(file_path)
+            pd.read_excel(file_path)
 
             # 状態メトリクス監視実装
             if analytics and auto_tuning:
@@ -545,7 +545,7 @@ class EfficientStateManager:
 
         # Excelファイル読み込み・統合検証処理
         if file_path.exists() and verify_all:
-            df = pd.read_excel(file_path)
+            pd.read_excel(file_path)
 
             # 全状態管理要素統合検証実装
             if system_integration and performance_validation:

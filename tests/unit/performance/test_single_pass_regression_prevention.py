@@ -17,7 +17,6 @@ CLAUDE.md Code Excellence Compliance:
 - 品質監視: 継続的回帰防止体制
 """
 
-
 import pandas as pd
 import pytest
 

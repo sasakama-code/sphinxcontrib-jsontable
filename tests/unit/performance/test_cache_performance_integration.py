@@ -504,7 +504,7 @@ class TestCachePerformanceIntegration:
 
         regression_results = []
 
-        for i, degraded_config in enumerate(degraded_configs):
+        for _i, degraded_config in enumerate(degraded_configs):
             # 劣化設定でのパフォーマンス測定
             degraded_performance = (
                 regression_analyzer.measure_performance_against_baseline(

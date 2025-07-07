@@ -17,7 +17,6 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: レスポンス時間・データ効率重視
 """
 
-
 import pytest
 
 from sphinxcontrib.jsontable.performance.on_demand_data_fetcher import (
@@ -115,9 +114,9 @@ class TestOnDemandDataFetching:
             },
         )
 
-        assert result.on_demand_fetching_success == True
-        assert result.efficient_access_enabled == True
-        assert result.selective_loading_supported == True
+        assert result.on_demand_fetching_success
+        assert result.efficient_access_enabled
+        assert result.selective_loading_supported
 
         fetching_metrics = result.on_demand_fetching_metrics
         assert fetching_metrics.on_demand_effectiveness >= ON_DEMAND_FETCHING_TARGET
@@ -152,9 +151,9 @@ class TestOnDemandDataFetching:
             },
         )
 
-        assert result.section_fetching_success == True
-        assert result.section_management_enabled == True
-        assert result.partial_access_optimized == True
+        assert result.section_fetching_success
+        assert result.section_management_enabled
+        assert result.partial_access_optimized
 
         section_metrics = result.section_based_fetching_metrics
         assert section_metrics.section_fetching_effectiveness >= SECTION_FETCHING_TARGET
@@ -193,9 +192,9 @@ class TestOnDemandDataFetching:
             },
         )
 
-        assert result.incremental_loading_success == True
-        assert result.dynamic_expansion_enabled == True
-        assert result.loading_history_managed == True
+        assert result.incremental_loading_success
+        assert result.dynamic_expansion_enabled
+        assert result.loading_history_managed
 
         incremental_metrics = result.incremental_loading_metrics
         assert (
@@ -234,9 +233,9 @@ class TestOnDemandDataFetching:
             },
         )
 
-        assert result.prediction_implementation_success == True
-        assert result.pattern_learning_enabled == True
-        assert result.prefetching_optimized == True
+        assert result.prediction_implementation_success
+        assert result.pattern_learning_enabled
+        assert result.prefetching_optimized
 
         prediction_metrics = result.fetching_prediction_metrics
         assert prediction_metrics.prediction_accuracy >= PREDICTION_ACCURACY_TARGET
@@ -275,9 +274,9 @@ class TestOnDemandDataFetching:
             },
         )
 
-        assert result.cache_integration_success == True
-        assert result.data_caching_optimized == True
-        assert result.cache_strategy_adjusted == True
+        assert result.cache_integration_success
+        assert result.data_caching_optimized
+        assert result.cache_strategy_adjusted
 
         cache_metrics = result.cache_integrated_fetching_metrics
         assert cache_metrics.cache_integration_effectiveness >= CACHE_INTEGRATION_TARGET
@@ -316,22 +315,22 @@ class TestOnDemandDataFetching:
             },
         )
 
-        assert result.quality_verification_success == True
-        assert result.all_elements_integrated == True
-        assert result.system_consistency_verified == True
+        assert result.quality_verification_success
+        assert result.all_elements_integrated
+        assert result.system_consistency_verified
 
         # 統合品質確認
         quality_metrics = result.on_demand_fetching_quality_metrics
         assert quality_metrics.overall_fetching_quality >= 0.90
         assert quality_metrics.integration_completeness >= 0.95
         assert quality_metrics.system_consistency_score >= 0.92
-        assert quality_metrics.enterprise_grade_fetching == True
+        assert quality_metrics.enterprise_grade_fetching
 
         # 全体効果確認
         overall_effect = result.overall_fetching_effect
-        assert overall_effect.memory_efficiency_achieved == True
-        assert overall_effect.response_optimization_confirmed == True
-        assert overall_effect.scalability_enhanced == True
+        assert overall_effect.memory_efficiency_achieved
+        assert overall_effect.response_optimization_confirmed
+        assert overall_effect.scalability_enhanced
 
 
 class TestOnDemandDataFetchingEdgeCases:
@@ -372,7 +371,7 @@ class TestOnDemandDataFetchingEdgeCases:
             },
         )
 
-        assert result.section_fetching_success == True
+        assert result.section_fetching_success
         # 大容量データでも85%以上の効率を期待
         assert (
             result.section_based_fetching_metrics.section_fetching_effectiveness
@@ -396,7 +395,7 @@ class TestOnDemandDataFetchingEdgeCases:
             },
         )
 
-        assert result.incremental_loading_success == True
+        assert result.incremental_loading_success
         assert (
             result.incremental_loading_metrics.incremental_effectiveness
             >= INCREMENTAL_LOADING_TARGET

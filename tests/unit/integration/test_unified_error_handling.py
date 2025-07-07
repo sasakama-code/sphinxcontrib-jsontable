@@ -660,7 +660,7 @@ class TestUnifiedErrorHandling:
 
         for scenario in recovery_scenarios:
             # リカバリコンテキスト作成
-            retry_context = RetryContext(
+            RetryContext(
                 max_attempts=3, backoff_strategy="exponential", timeout_seconds=30
             )
 

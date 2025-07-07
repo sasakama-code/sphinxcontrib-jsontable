@@ -240,7 +240,7 @@ class TestCacheIntegrationFullPipeline:
             assert len(stage_results.stage_results) == 4  # 4ステージ
 
             # 各ステージの成功確認
-            for stage_name, stage_result in stage_results.stage_results.items():
+            for _stage_name, stage_result in stage_results.stage_results.items():
                 assert stage_result.success is True
                 assert stage_result.cache_hit_status is not None
                 assert stage_result.processing_time > 0
