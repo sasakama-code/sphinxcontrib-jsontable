@@ -46,10 +46,30 @@ def mock_cluster_configuration():
     return {
         "cluster_id": "prod-cluster-01",
         "cluster_nodes": [
-            {"node_id": "node-01", "ip": "10.0.1.10", "status": "active", "capacity": 0.85},
-            {"node_id": "node-02", "ip": "10.0.1.11", "status": "active", "capacity": 0.78},
-            {"node_id": "node-03", "ip": "10.0.1.12", "status": "active", "capacity": 0.92},
-            {"node_id": "node-04", "ip": "10.0.1.13", "status": "standby", "capacity": 0.00},
+            {
+                "node_id": "node-01",
+                "ip": "10.0.1.10",
+                "status": "active",
+                "capacity": 0.85,
+            },
+            {
+                "node_id": "node-02",
+                "ip": "10.0.1.11",
+                "status": "active",
+                "capacity": 0.78,
+            },
+            {
+                "node_id": "node-03",
+                "ip": "10.0.1.12",
+                "status": "active",
+                "capacity": 0.92,
+            },
+            {
+                "node_id": "node-04",
+                "ip": "10.0.1.13",
+                "status": "standby",
+                "capacity": 0.00,
+            },
         ],
         "load_balancer_config": {
             "algorithm": "weighted_round_robin",
@@ -480,7 +500,10 @@ class TestDistributedScalingCoordinator:
             "injected_faults": [
                 {"type": "node_failure", "target": "node-01", "severity": "critical"},
                 {"type": "network_partition", "affected_nodes": ["node-02", "node-03"]},
-                {"type": "data_corruption", "data_segments": ["segment_a", "segment_b"]},
+                {
+                    "type": "data_corruption",
+                    "data_segments": ["segment_a", "segment_b"],
+                },
             ],
             "fault_injection_active": True,
             "recovery_testing_mode": True,
@@ -570,9 +593,7 @@ class TestDistributedScalingCoordinator:
         assert (
             quality_metrics.enterprise_grade_distributed_score >= 0.97
         )  # 97%以上企業グレード分散品質
-        assert (
-            quality_metrics.sla_compliance_rate >= 0.9999
-        )  # 99.99%以上SLA準拠率
+        assert quality_metrics.sla_compliance_rate >= 0.9999  # 99.99%以上SLA準拠率
         assert quality_metrics.audit_completeness >= 0.98  # 98%以上監査完全性
         assert (
             quality_metrics.business_continuity_score >= 0.96
@@ -619,9 +640,7 @@ class TestDistributedScalingCoordinator:
 
         # パフォーマンス確認
         performance_metrics = result.distributed_performance_metrics
-        assert (
-            performance_metrics.response_time_ms <= DISTRIBUTED_RESPONSE_TIME_TARGET
-        )
+        assert performance_metrics.response_time_ms <= DISTRIBUTED_RESPONSE_TIME_TARGET
         assert (
             performance_metrics.coordination_overhead_percent <= 8.0
         )  # 8%以下協調オーバーヘッド
@@ -684,7 +703,9 @@ class TestDistributedScalingCoordinator:
 class TestDistributedScalingCoordinatorEdgeCases:
     """分散処理連携エッジケーステスト"""
 
-    def test_massive_cluster_scaling_coordination(self, distributed_scaling_coordinator):
+    def test_massive_cluster_scaling_coordination(
+        self, distributed_scaling_coordinator
+    ):
         """大規模クラスタスケーリング協調確認"""
         # 大規模クラスタでも効率的に協調できることを確認
         massive_cluster = {
@@ -692,7 +713,12 @@ class TestDistributedScalingCoordinatorEdgeCases:
                 {"node_id": f"node-{i:03d}", "status": "active", "capacity": 0.80}
                 for i in range(1, 101)
             ],  # 100ノードクラスタ
-            "distributed_regions": ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"],
+            "distributed_regions": [
+                "us-east-1",
+                "us-west-2",
+                "eu-west-1",
+                "ap-southeast-1",
+            ],
             "cross_region_latency_ms": [50, 120, 180, 250],
             "massive_scaling_mode": True,
             "enterprise_cluster_management": True,
@@ -712,7 +738,9 @@ class TestDistributedScalingCoordinatorEdgeCases:
         # 大規模でも協調動作
         assert hasattr(result, "distributed_scaling_success")
 
-    def test_network_partition_recovery_coordination(self, distributed_scaling_coordinator):
+    def test_network_partition_recovery_coordination(
+        self, distributed_scaling_coordinator
+    ):
         """ネットワーク分断復旧協調確認"""
         # ネットワーク分断からの復旧協調を確認
         network_partition_scenario = {
@@ -740,7 +768,9 @@ class TestDistributedScalingCoordinatorEdgeCases:
             result.high_availability_metrics.high_availability_guarantee >= 0.995
         )  # 分断復旧でも99.5%以上
 
-    def test_multi_tenant_distributed_coordination(self, distributed_scaling_coordinator):
+    def test_multi_tenant_distributed_coordination(
+        self, distributed_scaling_coordinator
+    ):
         """マルチテナント分散協調確認"""
         # 複数テナント環境での分散協調を確認
         multi_tenant_config = {

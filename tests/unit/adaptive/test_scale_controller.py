@@ -143,9 +143,7 @@ class TestScaleController:
             control_metrics.scaling_control_effectiveness
             >= SCALING_CONTROL_EFFECTIVENESS_TARGET
         )
-        assert (
-            control_metrics.cpu_scaling_control_quality >= 0.92
-        )  # 92%以上CPU制御品質
+        assert control_metrics.cpu_scaling_control_quality >= 0.92  # 92%以上CPU制御品質
         assert (
             control_metrics.memory_scaling_control_quality >= 0.88
         )  # 88%以上メモリ制御品質
@@ -245,7 +243,9 @@ class TestScaleController:
         assert result.cost_optimization_effective
 
         scale_down_metrics = result.scale_down_decision_metrics
-        assert scale_down_metrics.scale_down_judgment_accuracy >= 0.90  # 90%以上判定精度
+        assert (
+            scale_down_metrics.scale_down_judgment_accuracy >= 0.90
+        )  # 90%以上判定精度
         assert (
             scale_down_metrics.resource_surplus_detection_accuracy >= 0.93
         )  # 93%以上余剰検出精度
@@ -302,7 +302,9 @@ class TestScaleController:
         assert (
             safety_metrics.excessive_scaling_prevention_rate >= 0.98
         )  # 98%以上過度防止率
-        assert safety_metrics.failsafe_activation_accuracy >= 0.96  # 96%以上フェイルセーフ精度
+        assert (
+            safety_metrics.failsafe_activation_accuracy >= 0.96
+        )  # 96%以上フェイルセーフ精度
         assert (
             safety_metrics.system_stability_guarantee >= 0.99
         )  # 99%以上システム安定性保証
@@ -441,7 +443,9 @@ class TestScaleController:
         assert result.feedback_loop_operational
 
         monitoring_metrics = result.scaling_monitoring_metrics
-        assert monitoring_metrics.scaling_monitoring_effectiveness >= 0.94  # 94%以上監視効果
+        assert (
+            monitoring_metrics.scaling_monitoring_effectiveness >= 0.94
+        )  # 94%以上監視効果
         assert (
             monitoring_metrics.realtime_tracking_accuracy >= 0.96
         )  # 96%以上リアルタイム追跡精度
@@ -601,9 +605,7 @@ class TestScaleController:
         assert (
             performance_metrics.control_overhead_percent <= 2.5
         )  # 2.5%以下制御オーバーヘッド
-        assert (
-            performance_metrics.scaling_control_efficiency >= 0.96
-        )  # 96%以上制御効率
+        assert performance_metrics.scaling_control_efficiency >= 0.96  # 96%以上制御効率
         assert (
             performance_metrics.realtime_control_score >= 0.98
         )  # 98%以上リアルタイム制御性能
@@ -713,7 +715,12 @@ class TestScaleControllerEdgeCases:
                 "database": [],
                 "cache": [],
             },
-            "tier_scaling_ratios": {"web": 1.0, "api": 0.8, "database": 0.3, "cache": 0.5},
+            "tier_scaling_ratios": {
+                "web": 1.0,
+                "api": 0.8,
+                "database": 0.3,
+                "cache": 0.5,
+            },
             "inter_tier_coordination": True,
         }
 
