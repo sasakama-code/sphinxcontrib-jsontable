@@ -685,9 +685,17 @@ class RealtimePerformanceMonitor:
         
         self._logger.info("Enterprise logging initialized")
 
+    def _get_config_value(self, key: str, default=None):
+        """設定値取得（辞書またはオブジェクト対応）"""
+        if isinstance(self._config, dict):
+            return self._config.get(key, default)
+        else:
+            return getattr(self._config, key, default)
+
     def _initialize_concurrent_processing(self):
         """並行処理基盤初期化"""
-        max_workers = self._config.__dict__.get('max_workers', 8)
+        max_workers = self._get_config_value('max_workers', 8)
+            
         self._executor = ThreadPoolExecutor(
             max_workers=max_workers,
             thread_name_prefix="monitoring"
@@ -701,7 +709,7 @@ class RealtimePerformanceMonitor:
     def _initialize_monitoring_cache(self):
         """監視キャッシュシステム初期化"""
         self._cache = {}
-        self._cache_ttl = timedelta(seconds=self._config.__dict__.get('cache_ttl_seconds', 60))
+        self._cache_ttl = timedelta(seconds=self._get_config_value('cache_ttl_seconds', 60))
         self._cache_stats = {
             'hits': 0,
             'misses': 0,
@@ -741,9 +749,9 @@ class RealtimePerformanceMonitor:
             'concurrent_failure': self._recover_from_concurrent_failure
         }
         self._retry_config = {
-            'max_retries': self._config.__dict__.get('max_retries', 3),
-            'base_delay': self._config.__dict__.get('base_delay_seconds', 1.0),
-            'max_delay': self._config.__dict__.get('max_delay_seconds', 30.0),
+            'max_retries': self._get_config_value('max_retries', 3),
+            'base_delay': self._get_config_value('base_delay_seconds', 1.0),
+            'max_delay': self._get_config_value('max_delay_seconds', 30.0),
             'exponential_base': 2.0
         }
         self._circuit_breaker_state = 'closed'
@@ -757,13 +765,13 @@ class RealtimePerformanceMonitor:
         self._audit_logger = logging.getLogger(f"{__name__}.audit")
         self._security_events = []
         self._access_control = {}
-        self._encryption_key = self._config.__dict__.get('encryption_key', 'default_key')
+        self._encryption_key = self._get_config_value('encryption_key', 'default_key')
         
         # セキュリティポリシー
         self._security_policies = {
-            'require_authentication': self._config.__dict__.get('require_auth', True),
-            'encrypt_data': self._config.__dict__.get('encrypt_data', True),
-            'audit_monitoring_operations': self._config.__dict__.get('audit_ops', True)
+            'require_authentication': self._get_config_value('require_auth', True),
+            'encrypt_data': self._get_config_value('encrypt_data', True),
+            'audit_monitoring_operations': self._get_config_value('audit_ops', True)
         }
         
         self._logger.info("Security audit and access control initialized")
@@ -776,9 +784,9 @@ class RealtimePerformanceMonitor:
             'temp_files': []
         }
         self._resource_limits = {
-            'max_connections': self._config.__dict__.get('max_connections', 100),
-            'max_memory_mb': self._config.__dict__.get('max_memory_mb', 1024),
-            'max_temp_files': self._config.__dict__.get('max_temp_files', 50)
+            'max_connections': self._get_config_value('max_connections', 100),
+            'max_memory_mb': self._get_config_value('max_memory_mb', 1024),
+            'max_temp_files': self._get_config_value('max_temp_files', 50)
         }
         self._resource_usage = {
             'current_connections': 0,
@@ -853,7 +861,7 @@ class RealtimePerformanceMonitor:
                 cache[cache_key] = (data, datetime.now())
                 
                 # キャッシュサイズ制限
-                max_cache_size = self._config.__dict__.get('max_cache_size', 1000)
+                max_cache_size = self._get_config_value('max_cache_size', 1000)
                 if len(cache) > max_cache_size:
                     # 最も古いエントリを削除
                     oldest_key = min(cache.keys(), key=lambda k: cache[k][1])

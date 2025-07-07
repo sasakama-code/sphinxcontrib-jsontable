@@ -750,6 +750,18 @@ wheels = [
 ]
 
 [[package]]
+name = "memory-profiler"
+version = "0.61.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "psutil" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b2/88/e1907e1ca3488f2d9507ca8b0ae1add7b1cd5d3ca2bc8e5b329382ea2c7b/memory_profiler-0.61.0.tar.gz", hash = "sha256:4e5b73d7864a1d1292fb76a03e82a3e78ef934d06828a698d9dada76da2067b0", size = 35935, upload_time = "2022-11-15T17:57:28.994Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/26/aaca612a0634ceede20682e692a6c55e35a94c21ba36b807cc40fe910ae1/memory_profiler-0.61.0-py3-none-any.whl", hash = "sha256:400348e61031e3942ad4d4109d18753b2fb08c2f6fb8290671c5513a34182d84", size = 31803, upload_time = "2022-11-15T17:57:27.031Z" },
+]
+
+[[package]]
 name = "more-itertools"
 version = "10.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1883,6 +1895,12 @@ test = [
     { name = "pytest-mock" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "memory-profiler" },
+    { name = "psutil" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "build", marker = "extra == 'dev'", specifier = ">=1.2.2.post1" },
@@ -1915,6 +1933,12 @@ requires-dist = [
     { name = "xlsxwriter", marker = "extra == 'excel'", specifier = ">=3.0.0" },
 ]
 provides-extras = ["excel", "dev", "docs", "test", "all"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "memory-profiler", specifier = ">=0.61.0" },
+    { name = "psutil", specifier = ">=6.1.1" },
+]
 
 [[package]]
 name = "sphinxcontrib-qthelp"

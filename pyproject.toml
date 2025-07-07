@@ -143,6 +143,10 @@ markers = [
     "benchmark: marks tests as benchmark tests (use pytest-benchmark)",
     "property: marks tests related to property handling",
     "error_handling: marks tests related to error handling",
+    "memory: marks tests related to memory usage profiling",
+    "largefile: marks tests related to large file processing",
+    "cache: marks tests related to cache effectiveness",
+    "enterprise: marks tests related to enterprise grade quality",
 ]
 # Performance test environment handling
 filterwarnings = [
@@ -206,3 +210,9 @@ sort = "mean"
 autosave = false
 # Skip benchmarks by default (use --benchmark-only to run)
 skip = true
+
+[dependency-groups]
+dev = [
+    "memory-profiler>=0.61.0",
+    "psutil>=6.1.1",
+]
