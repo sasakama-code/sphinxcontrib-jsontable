@@ -10,6 +10,20 @@ from .duplicate_detector_optimized import (
     HashTableMetrics,
     OptimizationMetrics,
 )
+from .optimized_concurrent_processor import (
+    AsyncProcessingMetrics,
+    AsyncProcessingResult,
+    ConcurrentBenchmarkResult,
+    ConcurrentPerformanceMetrics,
+    ConcurrentProcessingResult,
+    OptimizedConcurrentProcessor,
+    ResourceContentionMetrics,
+    ResourceContentionResult,
+    ScalabilityMetrics,
+    ScalabilityResult,
+    ThreadSafetyMetrics,
+    ThreadSafetyResult,
+)
 from .optimized_header_processor import (
     BenchmarkComparisonResult,
     DuplicationEliminationMetrics,
@@ -18,6 +32,18 @@ from .optimized_header_processor import (
     MemoryOptimizationResult,
     OptimizedHeaderProcessor,
     SinglePassHeaderResult,
+)
+from .optimized_index_processor import (
+    CompositeIndexResult,
+    ConcurrentIndexResult,
+    HashIndexResult,
+    IndexBenchmarkResult,
+    IndexCacheMetrics,
+    IndexOptimizationMetrics,
+    IndexPerformanceMetrics,
+    IndexProcessingResult,
+    OptimizedIndexProcessor,
+    RangeIndexResult,
 )
 from .optimized_security_scanner import (
     BenchmarkComparisonResult,
@@ -39,32 +65,6 @@ from .optimized_string_processor import (
     StringOptimizationMetrics,
     StringPerformanceMetrics,
     StringProcessingResult,
-)
-from .optimized_index_processor import (
-    CompositeIndexResult,
-    ConcurrentIndexResult,
-    HashIndexResult,
-    IndexBenchmarkResult,
-    IndexCacheMetrics,
-    IndexOptimizationMetrics,
-    IndexPerformanceMetrics,
-    IndexProcessingResult,
-    OptimizedIndexProcessor,
-    RangeIndexResult,
-)
-from .optimized_concurrent_processor import (
-    AsyncProcessingMetrics,
-    AsyncProcessingResult,
-    ConcurrentBenchmarkResult,
-    ConcurrentPerformanceMetrics,
-    ConcurrentProcessingResult,
-    OptimizedConcurrentProcessor,
-    ResourceContentionMetrics,
-    ResourceContentionResult,
-    ScalabilityMetrics,
-    ScalabilityResult,
-    ThreadSafetyMetrics,
-    ThreadSafetyResult,
 )
 from .range_parser_optimized import (
     CacheMetrics,

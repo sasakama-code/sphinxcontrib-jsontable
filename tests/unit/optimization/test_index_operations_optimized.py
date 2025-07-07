@@ -17,9 +17,8 @@ CLAUDE.md TDD compliance:
 """
 
 import tempfile
-import time
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 import pandas as pd
 import pytest
@@ -27,16 +26,16 @@ import pytest
 # REDフェーズ: 存在しないクラスをインポート（意図的にエラー）
 try:
     from sphinxcontrib.jsontable.optimization.optimized_index_processor import (
-        OptimizedIndexProcessor,
-        IndexProcessingResult,
-        IndexOptimizationMetrics,
-        IndexPerformanceMetrics,
-        HashIndexResult,
-        RangeIndexResult,
         CompositeIndexResult,
         ConcurrentIndexResult,
-        IndexCacheMetrics,
+        HashIndexResult,
         IndexBenchmarkResult,
+        IndexCacheMetrics,
+        IndexOptimizationMetrics,
+        IndexPerformanceMetrics,
+        IndexProcessingResult,
+        OptimizedIndexProcessor,
+        RangeIndexResult,
     )
 
     OPTIMIZED_INDEX_AVAILABLE = True
@@ -100,7 +99,10 @@ class TestIndexOperationsOptimized:
         large_data["record_id"] = list(range(size))
         large_data["department"] = [f"dept_{i % 50}" for i in range(size)]
         large_data["salary"] = [30000 + (i % 70000) for i in range(size)]
-        large_data["join_date"] = [f"20{20 + (i % 5)}-{((i % 12) + 1):02d}-{((i % 28) + 1):02d}" for i in range(size)]
+        large_data["join_date"] = [
+            f"20{20 + (i % 5)}-{((i % 12) + 1):02d}-{((i % 28) + 1):02d}"
+            for i in range(size)
+        ]
         large_data["performance_score"] = [1.0 + (i % 100) / 100.0 for i in range(size)]
 
         temp_file = tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False)
@@ -167,7 +169,9 @@ class TestIndexOperationsOptimized:
         assert hash_details.collision_rate < 0.05  # 5%未満の衝突率
         assert hash_details.load_factor <= 0.75  # 75%以下の負荷率
 
-        print(f"Search time reduction: {optimization_metrics.search_time_reduction:.1%}")
+        print(
+            f"Search time reduction: {optimization_metrics.search_time_reduction:.1%}"
+        )
         print(f"Index efficiency: {optimization_metrics.index_efficiency_score:.1%}")
         print(f"Records indexed: {hash_result.records_indexed}")
 
@@ -233,7 +237,9 @@ class TestIndexOperationsOptimized:
         assert btree_metrics.tree_height <= 20  # 最大深度20
         assert btree_metrics.node_utilization >= 0.75  # 75%以上利用率
 
-        print(f"Range search reduction: {range_metrics.range_search_time_reduction:.1%}")
+        print(
+            f"Range search reduction: {range_metrics.range_search_time_reduction:.1%}"
+        )
         print(f"B-Tree efficiency: {range_metrics.btree_search_efficiency:.1%}")
         print(f"Range indexes created: {range_result.range_indexes_created}")
 
@@ -261,7 +267,10 @@ class TestIndexOperationsOptimized:
         composite_result = self.index_processor.execute_composite_index_optimization(
             file_path=self.test_files["composite"],
             composite_options={
-                "composite_columns": [["user_id", "region"], ["product_type", "amount"]],
+                "composite_columns": [
+                    ["user_id", "region"],
+                    ["product_type", "amount"],
+                ],
                 "enable_query_optimization": True,
                 "optimize_index_selection": True,
                 "enable_statistics_collection": True,
@@ -285,12 +294,20 @@ class TestIndexOperationsOptimized:
         assert len(composite_tests) >= 4  # 最低4つのテストケース
 
         # user_id + region 検索確認
-        user_region_tests = [t for t in composite_tests if "user_id" in t["columns"] and "region" in t["columns"]]
+        user_region_tests = [
+            t
+            for t in composite_tests
+            if "user_id" in t["columns"] and "region" in t["columns"]
+        ]
         assert len(user_region_tests) > 0
         assert all(test["search_time_ms"] < 150 for test in user_region_tests)
 
         # product_type + amount 検索確認
-        product_amount_tests = [t for t in composite_tests if "product_type" in t["columns"] and "amount" in t["columns"]]
+        product_amount_tests = [
+            t
+            for t in composite_tests
+            if "product_type" in t["columns"] and "amount" in t["columns"]
+        ]
         assert len(product_amount_tests) > 0
         assert all(test["results_found"] >= 0 for test in product_amount_tests)
 
@@ -299,8 +316,12 @@ class TestIndexOperationsOptimized:
         assert index_selection.optimal_index_chosen_rate >= 0.90  # 90%以上最適選択
         assert index_selection.query_plan_optimization_rate >= 0.85  # 85%以上最適化
 
-        print(f"Composite search reduction: {composite_metrics.composite_search_time_reduction:.1%}")
-        print(f"Index selection accuracy: {composite_metrics.index_selection_accuracy:.1%}")
+        print(
+            f"Composite search reduction: {composite_metrics.composite_search_time_reduction:.1%}"
+        )
+        print(
+            f"Index selection accuracy: {composite_metrics.index_selection_accuracy:.1%}"
+        )
         print(f"Composite indexes: {composite_result.composite_indexes_created}")
 
     @pytest.mark.performance
@@ -370,7 +391,9 @@ class TestIndexOperationsOptimized:
         assert consistency_check.concurrent_access_safe is True
 
         print(f"Parallel speedup: {concurrency_metrics.parallel_speedup_factor:.1f}x")
-        print(f"Thread utilization: {concurrency_metrics.thread_utilization_efficiency:.1%}")
+        print(
+            f"Thread utilization: {concurrency_metrics.thread_utilization_efficiency:.1%}"
+        )
         print(f"Files indexed: {len(index_results)}")
 
     @pytest.mark.performance
@@ -500,7 +523,9 @@ class TestIndexOperationsOptimized:
 
         print(f"Index build time: {scalability_metrics.index_build_time_seconds:.1f}s")
         print(f"Peak memory usage: {scalability_metrics.peak_memory_usage_mb:.1f}MB")
-        print(f"Search throughput: {search_performance.search_throughput:.0f} searches/sec")
+        print(
+            f"Search throughput: {search_performance.search_throughput:.0f} searches/sec"
+        )
 
     @pytest.mark.performance
     def test_index_optimization_benchmark(self):
@@ -572,7 +597,13 @@ class TestIndexOperationsOptimized:
         assert enterprise_metrics.enterprise_scalability_achieved is True
         assert enterprise_metrics.reliability_standards_met is True
 
-        print(f"Index creation improvement: {creation_comparison.creation_time_improvement:.1%}")
-        print(f"Search performance improvement: {search_comparison.search_performance_improvement:.1f}x")
-        print(f"Memory efficiency improvement: {memory_comparison.memory_efficiency_improvement:.1%}")
+        print(
+            f"Index creation improvement: {creation_comparison.creation_time_improvement:.1%}"
+        )
+        print(
+            f"Search performance improvement: {search_comparison.search_performance_improvement:.1f}x"
+        )
+        print(
+            f"Memory efficiency improvement: {memory_comparison.memory_efficiency_improvement:.1%}"
+        )
         print(f"Optimization effective: {overall_evaluation.optimization_effective}")

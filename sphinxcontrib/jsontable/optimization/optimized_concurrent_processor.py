@@ -347,9 +347,7 @@ class OptimizedConcurrentProcessor:
             sequential_start = time.perf_counter()
             if file_paths:
                 # 1ファイルの処理時間を測定
-                self.thread_safe_processor.process_file_thread_safe(
-                    file_paths[0]
-                )
+                self.thread_safe_processor.process_file_thread_safe(file_paths[0])
                 single_file_time = time.perf_counter() - sequential_start
                 estimated_sequential_time = single_file_time * len(file_paths)
             else:

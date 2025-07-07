@@ -22,6 +22,22 @@ from .single_pass_processor import (
     SinglePassProcessor,
     UnifiedProcessingPipeline,
 )
+from .unified_data_transformation_processor import (
+    IntegratedTransformationResult,
+    OverallTransformationEffect,
+    TransformationAccuracyMetrics,
+    TransformationAccuracyResult,
+    TransformationEfficiencyMetrics,
+    TransformationIntegrationQuality,
+    TransformationMonitoringMetrics,
+    TransformationMonitoringResult,
+    TransformationPerformanceMetrics,
+    TransformationPerformanceResult,
+    TransformationTypeMetrics,
+    TransformationTypeResult,
+    UnifiedDataTransformationProcessor,
+    UnifiedTransformationIntegrationResult,
+)
 
 __all__ = [
     "SinglePassProcessor",
@@ -38,4 +54,18 @@ __all__ = [
     "FlowEfficiencyMetrics",
     "PerformanceMonitoringResult",
     "PipelineOptimizationResult",
+    "UnifiedDataTransformationProcessor",
+    "IntegratedTransformationResult",
+    "TransformationAccuracyResult",
+    "TransformationPerformanceResult",
+    "TransformationTypeResult",
+    "TransformationMonitoringResult",
+    "UnifiedTransformationIntegrationResult",
+    "TransformationEfficiencyMetrics",
+    "TransformationAccuracyMetrics",
+    "TransformationPerformanceMetrics",
+    "TransformationTypeMetrics",
+    "TransformationMonitoringMetrics",
+    "TransformationIntegrationQuality",
+    "OverallTransformationEffect",
 ]

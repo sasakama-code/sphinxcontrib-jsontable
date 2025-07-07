@@ -17,9 +17,8 @@ CLAUDE.md TDD compliance:
 """
 
 import tempfile
-import time
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 import pandas as pd
 import pytest
@@ -27,15 +26,15 @@ import pytest
 # REDフェーズ: 存在しないクラスをインポート（意図的にエラー）
 try:
     from sphinxcontrib.jsontable.optimization.optimized_string_processor import (
+        ConcurrentStringResult,
         OptimizedStringProcessor,
-        StringProcessingResult,
+        RegexOptimizationResult,
+        StringBenchmarkResult,
+        StringCacheMetrics,
+        StringMemoryMetrics,
         StringOptimizationMetrics,
         StringPerformanceMetrics,
-        RegexOptimizationResult,
-        StringCacheMetrics,
-        ConcurrentStringResult,
-        StringMemoryMetrics,
-        StringBenchmarkResult,
+        StringProcessingResult,
     )
 
     OPTIMIZED_STRING_AVAILABLE = True

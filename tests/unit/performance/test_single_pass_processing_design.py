@@ -15,7 +15,6 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: 処理効率・メモリ最適化保証
 """
 
-
 import pandas as pd
 import pytest
 

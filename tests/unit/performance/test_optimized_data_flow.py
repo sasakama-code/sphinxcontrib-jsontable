@@ -15,7 +15,6 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: フロー効率・ボトルネック排除保証
 """
 
-
 import pandas as pd
 import pytest
 
