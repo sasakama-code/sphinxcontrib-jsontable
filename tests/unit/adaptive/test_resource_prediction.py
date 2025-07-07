@@ -17,9 +17,9 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: 予測効率・精度重視
 """
 
-import pytest
 import time
-from unittest.mock import Mock, patch
+
+import pytest
 
 from sphinxcontrib.jsontable.adaptive.resource_predictor import (
     ResourcePredictor,
@@ -48,9 +48,13 @@ def mock_historical_data():
         "memory_usage_history": [65.8, 68.2, 71.5, 69.3, 73.1, 76.4, 74.8],
         "network_usage_history": [12.5, 15.3, 18.7, 16.2, 19.8, 22.4, 20.1],
         "timestamp_history": [
-            "2025-01-06T10:00:00", "2025-01-06T10:05:00", "2025-01-06T10:10:00",
-            "2025-01-06T10:15:00", "2025-01-06T10:20:00", "2025-01-06T10:25:00",
-            "2025-01-06T10:30:00"
+            "2025-01-06T10:00:00",
+            "2025-01-06T10:05:00",
+            "2025-01-06T10:10:00",
+            "2025-01-06T10:15:00",
+            "2025-01-06T10:20:00",
+            "2025-01-06T10:25:00",
+            "2025-01-06T10:30:00",
         ],
         "prediction_horizon_minutes": 15,
         "learning_window_hours": 24,
@@ -63,7 +67,9 @@ def mock_historical_data():
 class TestResourcePrediction:
     """リソース予測機能テストクラス"""
 
-    def test_resource_usage_time_series_prediction(self, resource_predictor, mock_historical_data):
+    def test_resource_usage_time_series_prediction(
+        self, resource_predictor, mock_historical_data
+    ):
         """リソース使用量時系列予測確認
 
         過去のリソース使用パターンを学習し
@@ -75,7 +81,9 @@ class TestResourcePrediction:
         - 機械学習モデル予測
         - トレンド・季節性検出
         """
-        result = resource_predictor["resource_predictor"].predict_resource_usage_timeseries(
+        result = resource_predictor[
+            "resource_predictor"
+        ].predict_resource_usage_timeseries(
             {
                 "enable_timeseries_prediction": True,
                 "machine_learning_enabled": True,
@@ -92,12 +100,21 @@ class TestResourcePrediction:
         assert result.ml_model_enabled
 
         prediction_metrics = result.resource_prediction_metrics
-        assert prediction_metrics.resource_prediction_accuracy >= RESOURCE_PREDICTION_TARGET
-        assert prediction_metrics.timeseries_learning_effectiveness >= 0.90  # 90%以上時系列学習効果
+        assert (
+            prediction_metrics.resource_prediction_accuracy
+            >= RESOURCE_PREDICTION_TARGET
+        )
+        assert (
+            prediction_metrics.timeseries_learning_effectiveness >= 0.90
+        )  # 90%以上時系列学習効果
         assert prediction_metrics.ml_model_performance >= 0.85  # 85%以上ML性能
-        assert prediction_metrics.trend_detection_quality >= 0.88  # 88%以上トレンド検出品質
+        assert (
+            prediction_metrics.trend_detection_quality >= 0.88
+        )  # 88%以上トレンド検出品質
 
-    def test_cpu_usage_prediction_optimization(self, resource_predictor, mock_historical_data):
+    def test_cpu_usage_prediction_optimization(
+        self, resource_predictor, mock_historical_data
+    ):
         """CPU使用率予測・最適化確認
 
         CPU負荷のトレンドを分析し
@@ -116,7 +133,7 @@ class TestResourcePrediction:
             "cpu_thermal_state": "normal",
             "process_priority_levels": 4,
         }
-        
+
         result = resource_predictor["resource_predictor"].predict_cpu_usage_adaptive(
             {
                 "enable_cpu_prediction": True,
@@ -134,12 +151,22 @@ class TestResourcePrediction:
         assert result.preemptive_control_enabled
 
         cpu_prediction_metrics = result.cpu_prediction_metrics
-        assert cpu_prediction_metrics.cpu_prediction_effectiveness >= CPU_PREDICTION_TARGET
-        assert cpu_prediction_metrics.load_trend_accuracy >= 0.85  # 85%以上負荷トレンド精度
-        assert cpu_prediction_metrics.preemptive_optimization_quality >= 0.90  # 90%以上事前最適化品質
-        assert cpu_prediction_metrics.adaptive_management_score >= 0.87  # 87%以上適応管理品質
+        assert (
+            cpu_prediction_metrics.cpu_prediction_effectiveness >= CPU_PREDICTION_TARGET
+        )
+        assert (
+            cpu_prediction_metrics.load_trend_accuracy >= 0.85
+        )  # 85%以上負荷トレンド精度
+        assert (
+            cpu_prediction_metrics.preemptive_optimization_quality >= 0.90
+        )  # 90%以上事前最適化品質
+        assert (
+            cpu_prediction_metrics.adaptive_management_score >= 0.87
+        )  # 87%以上適応管理品質
 
-    def test_memory_usage_prediction_planning(self, resource_predictor, mock_historical_data):
+    def test_memory_usage_prediction_planning(
+        self, resource_predictor, mock_historical_data
+    ):
         """メモリ使用量予測・容量計画確認
 
         メモリ使用パターンを予測し
@@ -158,8 +185,10 @@ class TestResourcePrediction:
             "memory_pressure_levels": ["low", "medium", "high", "critical"],
             "gc_frequency_minutes": 5,
         }
-        
-        result = resource_predictor["resource_predictor"].predict_memory_usage_capacity_planning(
+
+        result = resource_predictor[
+            "resource_predictor"
+        ].predict_memory_usage_capacity_planning(
             {
                 "enable_memory_prediction": True,
                 "capacity_planning_active": True,
@@ -176,12 +205,23 @@ class TestResourcePrediction:
         assert result.adaptive_management_enabled
 
         memory_prediction_metrics = result.memory_prediction_metrics
-        assert memory_prediction_metrics.memory_prediction_effectiveness >= MEMORY_PREDICTION_TARGET
-        assert memory_prediction_metrics.capacity_planning_accuracy >= 0.88  # 88%以上容量計画精度
-        assert memory_prediction_metrics.adaptive_management_quality >= 0.92  # 92%以上適応管理品質
-        assert memory_prediction_metrics.efficiency_optimization_score >= 0.89  # 89%以上効率最適化
+        assert (
+            memory_prediction_metrics.memory_prediction_effectiveness
+            >= MEMORY_PREDICTION_TARGET
+        )
+        assert (
+            memory_prediction_metrics.capacity_planning_accuracy >= 0.88
+        )  # 88%以上容量計画精度
+        assert (
+            memory_prediction_metrics.adaptive_management_quality >= 0.92
+        )  # 92%以上適応管理品質
+        assert (
+            memory_prediction_metrics.efficiency_optimization_score >= 0.89
+        )  # 89%以上効率最適化
 
-    def test_network_bandwidth_prediction_optimization(self, resource_predictor, mock_historical_data):
+    def test_network_bandwidth_prediction_optimization(
+        self, resource_predictor, mock_historical_data
+    ):
         """ネットワーク帯域予測・最適化確認
 
         ネットワーク使用パターンを予測し
@@ -200,8 +240,10 @@ class TestResourcePrediction:
             "qos_levels": ["critical", "high", "medium", "low"],
             "latency_sensitivity": "high",
         }
-        
-        result = resource_predictor["resource_predictor"].predict_network_bandwidth_communication(
+
+        result = resource_predictor[
+            "resource_predictor"
+        ].predict_network_bandwidth_communication(
             {
                 "enable_network_prediction": True,
                 "bandwidth_usage_prediction": True,
@@ -218,12 +260,23 @@ class TestResourcePrediction:
         assert result.communication_optimization_enabled
 
         network_prediction_metrics = result.network_prediction_metrics
-        assert network_prediction_metrics.network_prediction_effectiveness >= NETWORK_PREDICTION_TARGET
-        assert network_prediction_metrics.bandwidth_prediction_accuracy >= 0.85  # 85%以上帯域予測精度
-        assert network_prediction_metrics.communication_optimization_quality >= 0.88  # 88%以上通信最適化品質
-        assert network_prediction_metrics.distributed_adaptation_score >= 0.80  # 80%以上分散適応
+        assert (
+            network_prediction_metrics.network_prediction_effectiveness
+            >= NETWORK_PREDICTION_TARGET
+        )
+        assert (
+            network_prediction_metrics.bandwidth_prediction_accuracy >= 0.85
+        )  # 85%以上帯域予測精度
+        assert (
+            network_prediction_metrics.communication_optimization_quality >= 0.88
+        )  # 88%以上通信最適化品質
+        assert (
+            network_prediction_metrics.distributed_adaptation_score >= 0.80
+        )  # 80%以上分散適応
 
-    def test_integrated_resource_prediction_intelligence(self, resource_predictor, mock_historical_data):
+    def test_integrated_resource_prediction_intelligence(
+        self, resource_predictor, mock_historical_data
+    ):
         """統合リソース予測・知的制御確認
 
         全リソース（CPU・メモリ・ネットワーク）を統合予測し
@@ -235,7 +288,9 @@ class TestResourcePrediction:
         - 企業グレード知的制御
         - 継続的予測改善
         """
-        result = resource_predictor["resource_predictor"].predict_integrated_resource_intelligence(
+        result = resource_predictor[
+            "resource_predictor"
+        ].predict_integrated_resource_intelligence(
             {
                 "enable_integrated_prediction": True,
                 "comprehensive_resource_optimization": True,
@@ -252,12 +307,22 @@ class TestResourcePrediction:
         assert result.enterprise_intelligence_enabled
 
         integration_metrics = result.resource_integration_metrics
-        assert integration_metrics.overall_prediction_quality >= 0.95  # 95%以上全体予測品質
-        assert integration_metrics.integrated_optimization_effectiveness >= 0.93  # 93%以上統合最適化効果
-        assert integration_metrics.enterprise_intelligence_compliance >= 0.97  # 97%以上企業知的制御準拠
-        assert integration_metrics.continuous_improvement_score >= 0.91  # 91%以上継続改善
+        assert (
+            integration_metrics.overall_prediction_quality >= 0.95
+        )  # 95%以上全体予測品質
+        assert (
+            integration_metrics.integrated_optimization_effectiveness >= 0.93
+        )  # 93%以上統合最適化効果
+        assert (
+            integration_metrics.enterprise_intelligence_compliance >= 0.97
+        )  # 97%以上企業知的制御準拠
+        assert (
+            integration_metrics.continuous_improvement_score >= 0.91
+        )  # 91%以上継続改善
 
-    def test_machine_learning_integration_continuous_learning(self, resource_predictor, mock_historical_data):
+    def test_machine_learning_integration_continuous_learning(
+        self, resource_predictor, mock_historical_data
+    ):
         """機械学習統合・継続学習確認
 
         機械学習モデルを統合し
@@ -276,8 +341,10 @@ class TestResourcePrediction:
             "feature_importance_analysis": True,
             "cross_validation_enabled": True,
         }
-        
-        result = resource_predictor["resource_predictor"].integrate_machine_learning_continuous_learning(
+
+        result = resource_predictor[
+            "resource_predictor"
+        ].integrate_machine_learning_continuous_learning(
             {
                 "enable_ml_integration": True,
                 "continuous_learning_active": True,
@@ -294,12 +361,22 @@ class TestResourcePrediction:
         assert result.intelligent_adaptation_enabled
 
         ml_integration_metrics = result.ml_integration_metrics
-        assert ml_integration_metrics.ml_integration_effectiveness >= ML_INTEGRATION_TARGET
-        assert ml_integration_metrics.continuous_learning_quality >= 0.89  # 89%以上継続学習品質
-        assert ml_integration_metrics.prediction_accuracy_improvement >= 0.15  # 15%以上精度向上
-        assert ml_integration_metrics.intelligent_adaptation_score >= 0.92  # 92%以上知的適応
+        assert (
+            ml_integration_metrics.ml_integration_effectiveness >= ML_INTEGRATION_TARGET
+        )
+        assert (
+            ml_integration_metrics.continuous_learning_quality >= 0.89
+        )  # 89%以上継続学習品質
+        assert (
+            ml_integration_metrics.prediction_accuracy_improvement >= 0.15
+        )  # 15%以上精度向上
+        assert (
+            ml_integration_metrics.intelligent_adaptation_score >= 0.92
+        )  # 92%以上知的適応
 
-    def test_resource_prediction_performance(self, resource_predictor, mock_historical_data):
+    def test_resource_prediction_performance(
+        self, resource_predictor, mock_historical_data
+    ):
         """リソース予測パフォーマンス確認
 
         リソース予測のパフォーマンスと
@@ -312,7 +389,7 @@ class TestResourcePrediction:
         - リアルタイム予測性能
         """
         start_time = time.time()
-        
+
         result = resource_predictor["resource_predictor"].verify_prediction_performance(
             {
                 "enable_performance_verification": True,
@@ -322,7 +399,7 @@ class TestResourcePrediction:
                 "realtime_prediction_requirement": True,
             }
         )
-        
+
         end_time = time.time()
         response_time_ms = (end_time - start_time) * 1000
 
@@ -333,11 +410,17 @@ class TestResourcePrediction:
         # パフォーマンス確認
         performance_metrics = result.prediction_performance_metrics
         assert performance_metrics.response_time_ms <= PREDICTION_RESPONSE_TIME_TARGET
-        assert performance_metrics.prediction_overhead_percent <= 3.0  # 3%以下予測オーバーヘッド
+        assert (
+            performance_metrics.prediction_overhead_percent <= 3.0
+        )  # 3%以下予測オーバーヘッド
         assert performance_metrics.prediction_efficiency >= 0.95  # 95%以上予測効率
-        assert performance_metrics.realtime_performance_score >= 0.97  # 97%以上リアルタイム性能
+        assert (
+            performance_metrics.realtime_performance_score >= 0.97
+        )  # 97%以上リアルタイム性能
 
-    def test_resource_prediction_integration(self, resource_predictor, mock_historical_data):
+    def test_resource_prediction_integration(
+        self, resource_predictor, mock_historical_data
+    ):
         """リソース予測統合確認
 
         全リソース予測機能の統合・整合性と
@@ -390,8 +473,10 @@ class TestResourcePredictionEdgeCases:
             "data_quality": "insufficient",
             "confidence_threshold": 0.3,
         }
-        
-        result = resource_predictor["resource_predictor"].predict_resource_usage_timeseries(
+
+        result = resource_predictor[
+            "resource_predictor"
+        ].predict_resource_usage_timeseries(
             {
                 "enable_timeseries_prediction": True,
                 "handle_insufficient_data": True,
@@ -413,8 +498,10 @@ class TestResourcePredictionEdgeCases:
             "noise_filtering_required": True,
             "outlier_detection_active": True,
         }
-        
-        result = resource_predictor["resource_predictor"].predict_resource_usage_timeseries(
+
+        result = resource_predictor[
+            "resource_predictor"
+        ].predict_resource_usage_timeseries(
             {
                 "enable_timeseries_prediction": True,
                 "high_volatility_handling": True,
@@ -424,7 +511,9 @@ class TestResourcePredictionEdgeCases:
         )
 
         assert result.prediction_success
-        assert result.resource_prediction_metrics.resource_prediction_accuracy >= 0.70  # 高変動でも70%以上
+        assert (
+            result.resource_prediction_metrics.resource_prediction_accuracy >= 0.70
+        )  # 高変動でも70%以上
 
     def test_distributed_prediction_coordination(self, resource_predictor):
         """分散予測協調確認"""
@@ -436,8 +525,10 @@ class TestResourcePredictionEdgeCases:
             "inter_node_coordination": True,
             "prediction_aggregation": "weighted_average",
         }
-        
-        result = resource_predictor["resource_predictor"].predict_integrated_resource_intelligence(
+
+        result = resource_predictor[
+            "resource_predictor"
+        ].predict_integrated_resource_intelligence(
             {
                 "enable_integrated_prediction": True,
                 "distributed_coordination": True,

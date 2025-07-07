@@ -17,9 +17,9 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: CPU制御効率・応答性重視
 """
 
-import pytest
 import time
-from unittest.mock import Mock, patch
+
+import pytest
 
 from sphinxcontrib.jsontable.adaptive.cpu_usage_optimizer import (
     CPUUsageOptimizer,
@@ -60,7 +60,9 @@ def mock_cpu_state():
 class TestCPUUsageOptimization:
     """CPU使用率最適化テストクラス"""
 
-    def test_cpu_usage_realtime_adaptive_optimization(self, cpu_optimizer, mock_cpu_state):
+    def test_cpu_usage_realtime_adaptive_optimization(
+        self, cpu_optimizer, mock_cpu_state
+    ):
         """CPU使用率リアルタイム適応最適化確認
 
         CPU使用率をリアルタイムで監視し
@@ -88,10 +90,19 @@ class TestCPUUsageOptimization:
         assert result.realtime_optimization_enabled
 
         optimization_metrics = result.cpu_optimization_metrics
-        assert optimization_metrics.cpu_optimization_effectiveness >= CPU_OPTIMIZATION_TARGET
-        assert optimization_metrics.realtime_optimization_accuracy >= 0.94  # 94%以上リアルタイム最適化精度
-        assert optimization_metrics.adaptive_control_quality >= 0.91  # 91%以上適応制御品質
-        assert optimization_metrics.dynamic_adjustment_responsiveness >= 0.93  # 93%以上動的調整応答性
+        assert (
+            optimization_metrics.cpu_optimization_effectiveness
+            >= CPU_OPTIMIZATION_TARGET
+        )
+        assert (
+            optimization_metrics.realtime_optimization_accuracy >= 0.94
+        )  # 94%以上リアルタイム最適化精度
+        assert (
+            optimization_metrics.adaptive_control_quality >= 0.91
+        )  # 91%以上適応制御品質
+        assert (
+            optimization_metrics.dynamic_adjustment_responsiveness >= 0.93
+        )  # 93%以上動的調整応答性
 
     def test_cpu_load_balancing_optimization(self, cpu_optimizer, mock_cpu_state):
         """CPU負荷分散最適化確認
@@ -122,10 +133,18 @@ class TestCPUUsageOptimization:
         assert result.multicore_utilization_enabled
 
         load_balancing_metrics = result.load_balancing_metrics
-        assert load_balancing_metrics.load_balancing_effectiveness >= CPU_EFFICIENCY_TARGET
-        assert load_balancing_metrics.scheduling_optimization_quality >= 0.88  # 88%以上スケジューリング最適化品質
-        assert load_balancing_metrics.multicore_utilization_efficiency >= 0.92  # 92%以上マルチコア活用効率
-        assert load_balancing_metrics.workload_distribution_quality >= 0.87  # 87%以上ワークロード分散品質
+        assert (
+            load_balancing_metrics.load_balancing_effectiveness >= CPU_EFFICIENCY_TARGET
+        )
+        assert (
+            load_balancing_metrics.scheduling_optimization_quality >= 0.88
+        )  # 88%以上スケジューリング最適化品質
+        assert (
+            load_balancing_metrics.multicore_utilization_efficiency >= 0.92
+        )  # 92%以上マルチコア活用効率
+        assert (
+            load_balancing_metrics.workload_distribution_quality >= 0.87
+        )  # 87%以上ワークロード分散品質
 
     def test_cpu_frequency_scaling_optimization(self, cpu_optimizer, mock_cpu_state):
         """CPU周波数スケーリング最適化確認
@@ -159,9 +178,13 @@ class TestCPUUsageOptimization:
         assert frequency_metrics.frequency_scaling_effectiveness >= CPU_CONTROL_TARGET
         assert frequency_metrics.power_efficiency_score >= 0.89  # 89%以上電力効率
         assert frequency_metrics.thermal_management_quality >= 0.91  # 91%以上熱管理品質
-        assert frequency_metrics.performance_power_balance >= 0.86  # 86%以上性能・電力バランス
+        assert (
+            frequency_metrics.performance_power_balance >= 0.86
+        )  # 86%以上性能・電力バランス
 
-    def test_multicore_parallel_processing_optimization(self, cpu_optimizer, mock_cpu_state):
+    def test_multicore_parallel_processing_optimization(
+        self, cpu_optimizer, mock_cpu_state
+    ):
         """マルチコア並列処理最適化確認
 
         マルチコアを活用し
@@ -190,12 +213,23 @@ class TestCPUUsageOptimization:
         assert result.resource_distribution_optimized
 
         multicore_metrics = result.multicore_optimization_metrics
-        assert multicore_metrics.multicore_utilization_efficiency >= CPU_RESPONSIVENESS_TARGET
-        assert multicore_metrics.parallel_processing_effectiveness >= 0.91  # 91%以上並列処理効果
-        assert multicore_metrics.resource_distribution_quality >= 0.88  # 88%以上リソース分散品質
-        assert multicore_metrics.inter_core_communication_efficiency >= 0.86  # 86%以上コア間通信効率
+        assert (
+            multicore_metrics.multicore_utilization_efficiency
+            >= CPU_RESPONSIVENESS_TARGET
+        )
+        assert (
+            multicore_metrics.parallel_processing_effectiveness >= 0.91
+        )  # 91%以上並列処理効果
+        assert (
+            multicore_metrics.resource_distribution_quality >= 0.88
+        )  # 88%以上リソース分散品質
+        assert (
+            multicore_metrics.inter_core_communication_efficiency >= 0.86
+        )  # 86%以上コア間通信効率
 
-    def test_cpu_usage_prediction_intelligent_control(self, cpu_optimizer, mock_cpu_state):
+    def test_cpu_usage_prediction_intelligent_control(
+        self, cpu_optimizer, mock_cpu_state
+    ):
         """CPU使用率予測・インテリジェント制御確認
 
         CPU使用率を予測し
@@ -224,12 +258,22 @@ class TestCPUUsageOptimization:
         assert result.adaptive_learning_enabled
 
         prediction_metrics = result.cpu_prediction_metrics
-        assert prediction_metrics.usage_prediction_accuracy >= 0.85  # 85%以上使用率予測精度
-        assert prediction_metrics.intelligent_control_effectiveness >= 0.89  # 89%以上インテリジェント制御効果
-        assert prediction_metrics.adaptive_learning_quality >= 0.82  # 82%以上適応学習品質
-        assert prediction_metrics.ml_based_optimization_score >= 0.87  # 87%以上ML基盤最適化
+        assert (
+            prediction_metrics.usage_prediction_accuracy >= 0.85
+        )  # 85%以上使用率予測精度
+        assert (
+            prediction_metrics.intelligent_control_effectiveness >= 0.89
+        )  # 89%以上インテリジェント制御効果
+        assert (
+            prediction_metrics.adaptive_learning_quality >= 0.82
+        )  # 82%以上適応学習品質
+        assert (
+            prediction_metrics.ml_based_optimization_score >= 0.87
+        )  # 87%以上ML基盤最適化
 
-    def test_cpu_integrated_management_optimization(self, cpu_optimizer, mock_cpu_state):
+    def test_cpu_integrated_management_optimization(
+        self, cpu_optimizer, mock_cpu_state
+    ):
         """CPU統合管理最適化確認
 
         全CPU制御機能を統合管理し
@@ -258,10 +302,18 @@ class TestCPUUsageOptimization:
         assert result.enterprise_efficiency_assured
 
         integration_metrics = result.cpu_integration_metrics
-        assert integration_metrics.overall_cpu_management_quality >= 0.95  # 95%以上全体CPU管理品質
-        assert integration_metrics.integrated_optimization_effectiveness >= 0.93  # 93%以上統合最適化効果
-        assert integration_metrics.enterprise_efficiency_compliance >= 0.97  # 97%以上企業効率準拠
-        assert integration_metrics.continuous_improvement_score >= 0.90  # 90%以上継続改善
+        assert (
+            integration_metrics.overall_cpu_management_quality >= 0.95
+        )  # 95%以上全体CPU管理品質
+        assert (
+            integration_metrics.integrated_optimization_effectiveness >= 0.93
+        )  # 93%以上統合最適化効果
+        assert (
+            integration_metrics.enterprise_efficiency_compliance >= 0.97
+        )  # 97%以上企業効率準拠
+        assert (
+            integration_metrics.continuous_improvement_score >= 0.90
+        )  # 90%以上継続改善
 
     def test_cpu_optimization_performance(self, cpu_optimizer, mock_cpu_state):
         """CPU最適化パフォーマンス確認
@@ -276,7 +328,7 @@ class TestCPUUsageOptimization:
         - リアルタイム最適化性能
         """
         start_time = time.time()
-        
+
         result = cpu_optimizer["cpu_optimizer"].verify_cpu_optimization_performance(
             {
                 "enable_performance_verification": True,
@@ -286,7 +338,7 @@ class TestCPUUsageOptimization:
                 "realtime_optimization_requirement": True,
             }
         )
-        
+
         end_time = time.time()
         response_time_ms = (end_time - start_time) * 1000
 
@@ -297,9 +349,13 @@ class TestCPUUsageOptimization:
         # パフォーマンス確認
         performance_metrics = result.cpu_performance_metrics
         assert performance_metrics.response_time_ms <= OPTIMIZATION_RESPONSE_TIME_TARGET
-        assert performance_metrics.optimization_overhead_percent <= 1.5  # 1.5%以下最適化オーバーヘッド
+        assert (
+            performance_metrics.optimization_overhead_percent <= 1.5
+        )  # 1.5%以下最適化オーバーヘッド
         assert performance_metrics.optimization_efficiency >= 0.96  # 96%以上最適化効率
-        assert performance_metrics.realtime_performance_score >= 0.97  # 97%以上リアルタイム性能
+        assert (
+            performance_metrics.realtime_performance_score >= 0.97
+        )  # 97%以上リアルタイム性能
 
     def test_cpu_usage_optimization_integration(self, cpu_optimizer, mock_cpu_state):
         """CPU使用率最適化統合確認
@@ -354,7 +410,7 @@ class TestCPUUsageOptimizationEdgeCases:
             "thermal_throttling_active": True,
             "cpu_temperature_celsius": 85.0,
         }
-        
+
         result = cpu_optimizer["cpu_optimizer"].optimize_cpu_usage_adaptive(
             {
                 "enable_realtime_optimization": True,
@@ -377,7 +433,7 @@ class TestCPUUsageOptimizationEdgeCases:
             "turbo_boost_active": False,
             "power_efficiency_priority": True,
         }
-        
+
         result = cpu_optimizer["cpu_optimizer"].optimize_cpu_frequency_scaling(
             {
                 "enable_frequency_scaling": True,
@@ -388,7 +444,9 @@ class TestCPUUsageOptimizationEdgeCases:
         )
 
         assert result.frequency_scaling_success
-        assert result.frequency_scaling_metrics.frequency_scaling_effectiveness >= 0.75  # 電力制約下でも75%以上
+        assert (
+            result.frequency_scaling_metrics.frequency_scaling_effectiveness >= 0.75
+        )  # 電力制約下でも75%以上
 
     def test_heterogeneous_cpu_optimization(self, cpu_optimizer):
         """異種CPU最適化確認"""
@@ -401,7 +459,7 @@ class TestCPUUsageOptimizationEdgeCases:
             "heterogeneous_scheduling": True,
             "workload_classification_active": True,
         }
-        
+
         result = cpu_optimizer["cpu_optimizer"].optimize_multicore_parallel_processing(
             {
                 "enable_multicore_optimization": True,

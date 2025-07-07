@@ -17,9 +17,9 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: 検証効率・品質重視
 """
 
-import pytest
 import time
-from unittest.mock import Mock, patch
+
+import pytest
 
 from sphinxcontrib.jsontable.adaptive.adaptive_control_verifier import (
     AdaptiveControlVerifier,
@@ -97,7 +97,9 @@ def mock_adaptive_control_system():
 class TestAdaptiveControlVerification:
     """適応制御検証テストクラス"""
 
-    def test_comprehensive_adaptive_control_verification(self, adaptive_control_verifier, mock_adaptive_control_system):
+    def test_comprehensive_adaptive_control_verification(
+        self, adaptive_control_verifier, mock_adaptive_control_system
+    ):
         """包括的適応制御検証確認
 
         全6つの適応制御コンポーネント+統合システムの
@@ -109,7 +111,9 @@ class TestAdaptiveControlVerification:
         - システム整合性確認
         - 企業グレード品質保証
         """
-        result = adaptive_control_verifier["verifier"].verify_comprehensive_adaptive_control_system(
+        result = adaptive_control_verifier[
+            "verifier"
+        ].verify_comprehensive_adaptive_control_system(
             {
                 "enable_comprehensive_verification": True,
                 "verify_all_components": True,
@@ -125,12 +129,24 @@ class TestAdaptiveControlVerification:
         assert result.system_integration_confirmed
 
         verification_metrics = result.comprehensive_verification_metrics
-        assert verification_metrics.overall_adaptive_control_quality >= OVERALL_ADAPTIVE_CONTROL_QUALITY_TARGET
-        assert verification_metrics.component_verification_completeness >= 1.0  # 100%コンポーネント検証完了
-        assert verification_metrics.system_integration_quality >= 0.95  # 95%以上システム統合品質
-        assert verification_metrics.comprehensive_quality_score >= COMPREHENSIVE_QUALITY_TARGET
+        assert (
+            verification_metrics.overall_adaptive_control_quality
+            >= OVERALL_ADAPTIVE_CONTROL_QUALITY_TARGET
+        )
+        assert (
+            verification_metrics.component_verification_completeness >= 1.0
+        )  # 100%コンポーネント検証完了
+        assert (
+            verification_metrics.system_integration_quality >= 0.95
+        )  # 95%以上システム統合品質
+        assert (
+            verification_metrics.comprehensive_quality_score
+            >= COMPREHENSIVE_QUALITY_TARGET
+        )
 
-    def test_enterprise_grade_quality_verification(self, adaptive_control_verifier, mock_adaptive_control_system):
+    def test_enterprise_grade_quality_verification(
+        self, adaptive_control_verifier, mock_adaptive_control_system
+    ):
         """企業グレード品質検証確認
 
         企業グレード適応制御品質基準を満たす
@@ -150,7 +166,9 @@ class TestAdaptiveControlVerification:
             "quality_assurance_verified": True,
         }
 
-        result = adaptive_control_verifier["verifier"].verify_enterprise_grade_adaptive_quality(
+        result = adaptive_control_verifier[
+            "verifier"
+        ].verify_enterprise_grade_adaptive_quality(
             {
                 "enable_enterprise_verification": True,
                 "quality_assurance_enforcement": True,
@@ -166,12 +184,23 @@ class TestAdaptiveControlVerification:
         assert result.compliance_confirmed
 
         enterprise_metrics = result.enterprise_verification_metrics
-        assert enterprise_metrics.enterprise_grade_verification_score >= ENTERPRISE_GRADE_VERIFICATION_TARGET
-        assert enterprise_metrics.quality_assurance_effectiveness >= 0.95  # 95%以上品質保証効果
-        assert enterprise_metrics.compliance_score >= 0.96  # 96%以上コンプライアンススコア
-        assert enterprise_metrics.security_verification_level >= 0.94  # 94%以上セキュリティ検証レベル
+        assert (
+            enterprise_metrics.enterprise_grade_verification_score
+            >= ENTERPRISE_GRADE_VERIFICATION_TARGET
+        )
+        assert (
+            enterprise_metrics.quality_assurance_effectiveness >= 0.95
+        )  # 95%以上品質保証効果
+        assert (
+            enterprise_metrics.compliance_score >= 0.96
+        )  # 96%以上コンプライアンススコア
+        assert (
+            enterprise_metrics.security_verification_level >= 0.94
+        )  # 94%以上セキュリティ検証レベル
 
-    def test_system_reliability_availability_verification(self, adaptive_control_verifier, mock_adaptive_control_system):
+    def test_system_reliability_availability_verification(
+        self, adaptive_control_verifier, mock_adaptive_control_system
+    ):
         """システム信頼性・可用性検証確認
 
         99.9%可用性・信頼性を保証する
@@ -191,7 +220,9 @@ class TestAdaptiveControlVerification:
             "redundancy_level": 3,
         }
 
-        result = adaptive_control_verifier["verifier"].verify_system_reliability_availability(
+        result = adaptive_control_verifier[
+            "verifier"
+        ].verify_system_reliability_availability(
             {
                 "enable_reliability_verification": True,
                 "high_availability_requirement": True,
@@ -208,11 +239,17 @@ class TestAdaptiveControlVerification:
 
         reliability_metrics = result.reliability_verification_metrics
         assert reliability_metrics.system_reliability_score >= SYSTEM_RELIABILITY_TARGET
-        assert reliability_metrics.availability_guarantee_level >= 0.999  # 99.9%以上可用性保証
-        assert reliability_metrics.fault_tolerance_effectiveness >= 0.96  # 96%以上耐障害性
+        assert (
+            reliability_metrics.availability_guarantee_level >= 0.999
+        )  # 99.9%以上可用性保証
+        assert (
+            reliability_metrics.fault_tolerance_effectiveness >= 0.96
+        )  # 96%以上耐障害性
         assert reliability_metrics.recovery_capability_score >= 0.95  # 95%以上回復能力
 
-    def test_performance_scalability_verification(self, adaptive_control_verifier, mock_adaptive_control_system):
+    def test_performance_scalability_verification(
+        self, adaptive_control_verifier, mock_adaptive_control_system
+    ):
         """パフォーマンス・スケーラビリティ検証確認
 
         適応制御システムのパフォーマンスと
@@ -248,12 +285,18 @@ class TestAdaptiveControlVerification:
         assert result.distributed_capability_verified
 
         performance_metrics = result.performance_verification_metrics
-        assert performance_metrics.performance_verification_score >= 0.95  # 95%以上パフォーマンス検証
+        assert (
+            performance_metrics.performance_verification_score >= 0.95
+        )  # 95%以上パフォーマンス検証
         assert performance_metrics.scalability_factor >= 8.0  # 8倍以上スケーラビリティ
         assert performance_metrics.distributed_efficiency >= 0.92  # 92%以上分散効率
-        assert performance_metrics.load_balancing_effectiveness >= 0.90  # 90%以上負荷分散効果
+        assert (
+            performance_metrics.load_balancing_effectiveness >= 0.90
+        )  # 90%以上負荷分散効果
 
-    def test_security_compliance_verification(self, adaptive_control_verifier, mock_adaptive_control_system):
+    def test_security_compliance_verification(
+        self, adaptive_control_verifier, mock_adaptive_control_system
+    ):
         """セキュリティ・コンプライアンス検証確認
 
         適応制御システムのセキュリティと
@@ -289,12 +332,20 @@ class TestAdaptiveControlVerification:
         assert result.access_control_verified
 
         security_metrics = result.security_verification_metrics
-        assert security_metrics.security_verification_score >= 0.95  # 95%以上セキュリティ検証
-        assert security_metrics.compliance_adherence_level >= 0.94  # 94%以上コンプライアンス準拠
-        assert security_metrics.access_control_effectiveness >= 0.96  # 96%以上アクセス制御効果
+        assert (
+            security_metrics.security_verification_score >= 0.95
+        )  # 95%以上セキュリティ検証
+        assert (
+            security_metrics.compliance_adherence_level >= 0.94
+        )  # 94%以上コンプライアンス準拠
+        assert (
+            security_metrics.access_control_effectiveness >= 0.96
+        )  # 96%以上アクセス制御効果
         assert security_metrics.encryption_strength_level >= 0.93  # 93%以上暗号化強度
 
-    def test_operational_readiness_verification(self, adaptive_control_verifier, mock_adaptive_control_system):
+    def test_operational_readiness_verification(
+        self, adaptive_control_verifier, mock_adaptive_control_system
+    ):
         """運用準備度検証確認
 
         適応制御システムの運用準備状況と
@@ -330,12 +381,21 @@ class TestAdaptiveControlVerification:
         assert result.monitoring_setup_verified
 
         operational_metrics = result.operational_verification_metrics
-        assert operational_metrics.operational_readiness_score >= OPERATIONAL_READINESS_TARGET
-        assert operational_metrics.production_readiness_level >= 0.97  # 97%以上本番準備度
+        assert (
+            operational_metrics.operational_readiness_score
+            >= OPERATIONAL_READINESS_TARGET
+        )
+        assert (
+            operational_metrics.production_readiness_level >= 0.97
+        )  # 97%以上本番準備度
         assert operational_metrics.monitoring_completeness >= 0.96  # 96%以上監視完全性
-        assert operational_metrics.maintenance_readiness_score >= 0.95  # 95%以上メンテナンス準備度
+        assert (
+            operational_metrics.maintenance_readiness_score >= 0.95
+        )  # 95%以上メンテナンス準備度
 
-    def test_adaptive_control_verification_performance(self, adaptive_control_verifier, mock_adaptive_control_system):
+    def test_adaptive_control_verification_performance(
+        self, adaptive_control_verifier, mock_adaptive_control_system
+    ):
         """適応制御検証パフォーマンス確認
 
         適応制御検証システムのパフォーマンスと
@@ -369,11 +429,17 @@ class TestAdaptiveControlVerification:
         # パフォーマンス確認
         performance_metrics = result.verification_performance_metrics
         assert performance_metrics.response_time_ms <= VERIFICATION_RESPONSE_TIME_TARGET
-        assert performance_metrics.verification_overhead_percent <= 2.0  # 2%以下検証オーバーヘッド
+        assert (
+            performance_metrics.verification_overhead_percent <= 2.0
+        )  # 2%以下検証オーバーヘッド
         assert performance_metrics.verification_efficiency >= 0.96  # 96%以上検証効率
-        assert performance_metrics.realtime_verification_score >= 0.98  # 98%以上リアルタイム検証性能
+        assert (
+            performance_metrics.realtime_verification_score >= 0.98
+        )  # 98%以上リアルタイム検証性能
 
-    def test_adaptive_control_final_approval(self, adaptive_control_verifier, mock_adaptive_control_system):
+    def test_adaptive_control_final_approval(
+        self, adaptive_control_verifier, mock_adaptive_control_system
+    ):
         """適応制御最終承認確認
 
         全適応制御システムの最終承認と
@@ -385,7 +451,9 @@ class TestAdaptiveControlVerification:
         - 企業グレード基盤確立
         - 運用開始準備完了
         """
-        result = adaptive_control_verifier["verifier"].approve_adaptive_control_system_final(
+        result = adaptive_control_verifier[
+            "verifier"
+        ].approve_adaptive_control_system_final(
             {
                 "enable_final_approval": True,
                 "comprehensive_quality_check": True,
@@ -432,7 +500,9 @@ class TestAdaptiveControlVerificationEdgeCases:
             "integration_completeness": 0.8,  # 80%統合
         }
 
-        result = adaptive_control_verifier["verifier"].verify_comprehensive_adaptive_control_system(
+        result = adaptive_control_verifier[
+            "verifier"
+        ].verify_comprehensive_adaptive_control_system(
             {
                 "enable_comprehensive_verification": True,
                 "handle_partial_failures": True,
@@ -479,7 +549,9 @@ class TestAdaptiveControlVerificationEdgeCases:
             "recovery_time_objective": "15_minutes",
         }
 
-        result = adaptive_control_verifier["verifier"].verify_system_reliability_availability(
+        result = adaptive_control_verifier[
+            "verifier"
+        ].verify_system_reliability_availability(
             {
                 "enable_reliability_verification": True,
                 "disaster_recovery_mode": True,

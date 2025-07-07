@@ -17,9 +17,9 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: スケーリング効率・制御品質重視
 """
 
-import pytest
 import time
-from unittest.mock import Mock, patch
+
+import pytest
 
 from sphinxcontrib.jsontable.adaptive.auto_scaling_manager import (
     AutoScalingManager,
@@ -67,7 +67,7 @@ def mock_load_patterns():
         "low_traffic_hours": ["01:00-06:00", "23:00-24:00"],
         "weekly_patterns": {
             "monday": "high_load",
-            "tuesday": "high_load", 
+            "tuesday": "high_load",
             "wednesday": "medium_load",
             "thursday": "high_load",
             "friday": "peak_load",
@@ -87,7 +87,9 @@ def mock_load_patterns():
 class TestAutoScalingManager:
     """自動スケーリング基盤テストクラス"""
 
-    def test_load_detection_and_evaluation(self, auto_scaling_manager, mock_system_metrics):
+    def test_load_detection_and_evaluation(
+        self, auto_scaling_manager, mock_system_metrics
+    ):
         """負荷検出・評価確認
 
         システム負荷状況を検出・評価し
@@ -115,12 +117,22 @@ class TestAutoScalingManager:
         assert result.scaling_recommendation_generated
 
         detection_metrics = result.load_detection_metrics
-        assert detection_metrics.load_detection_accuracy >= LOAD_DETECTION_ACCURACY_TARGET
-        assert detection_metrics.multidimensional_evaluation_quality >= 0.88  # 88%以上多次元評価品質
-        assert detection_metrics.realtime_monitoring_effectiveness >= 0.94  # 94%以上リアルタイム監視効果
-        assert detection_metrics.predictive_analysis_accuracy >= 0.82  # 82%以上予測分析精度
+        assert (
+            detection_metrics.load_detection_accuracy >= LOAD_DETECTION_ACCURACY_TARGET
+        )
+        assert (
+            detection_metrics.multidimensional_evaluation_quality >= 0.88
+        )  # 88%以上多次元評価品質
+        assert (
+            detection_metrics.realtime_monitoring_effectiveness >= 0.94
+        )  # 94%以上リアルタイム監視効果
+        assert (
+            detection_metrics.predictive_analysis_accuracy >= 0.82
+        )  # 82%以上予測分析精度
 
-    def test_scaling_decision_logic(self, auto_scaling_manager, mock_system_metrics, mock_load_patterns):
+    def test_scaling_decision_logic(
+        self, auto_scaling_manager, mock_system_metrics, mock_load_patterns
+    ):
         """スケーリング判定ロジック確認
 
         負荷状況に基づいて最適なスケーリング戦略を
@@ -136,7 +148,10 @@ class TestAutoScalingManager:
             **mock_system_metrics,
             "load_patterns": mock_load_patterns,
             "scaling_history": {"recent_scalings": 3, "success_rate": 0.95},
-            "business_context": {"critical_operation_hours": True, "maintenance_window": False},
+            "business_context": {
+                "critical_operation_hours": True,
+                "maintenance_window": False,
+            },
         }
 
         result = auto_scaling_manager["manager"].determine_scaling_strategy(
@@ -156,11 +171,19 @@ class TestAutoScalingManager:
 
         decision_metrics = result.scaling_decision_metrics
         assert decision_metrics.decision_accuracy >= 0.90  # 90%以上判定精度
-        assert decision_metrics.intelligent_strategy_quality >= 0.87  # 87%以上インテリジェント戦略品質
-        assert decision_metrics.risk_assessment_thoroughness >= 0.92  # 92%以上リスク評価網羅性
-        assert decision_metrics.safety_control_effectiveness >= 0.95  # 95%以上安全制御効果
+        assert (
+            decision_metrics.intelligent_strategy_quality >= 0.87
+        )  # 87%以上インテリジェント戦略品質
+        assert (
+            decision_metrics.risk_assessment_thoroughness >= 0.92
+        )  # 92%以上リスク評価網羅性
+        assert (
+            decision_metrics.safety_control_effectiveness >= 0.95
+        )  # 95%以上安全制御効果
 
-    def test_processing_capacity_auto_adjustment(self, auto_scaling_manager, mock_system_metrics):
+    def test_processing_capacity_auto_adjustment(
+        self, auto_scaling_manager, mock_system_metrics
+    ):
         """処理能力自動調整確認
 
         判定されたスケーリング戦略に基づいて
@@ -172,7 +195,9 @@ class TestAutoScalingManager:
         - 適応制御統合
         - パフォーマンス最適化
         """
-        result = auto_scaling_manager["manager"].adjust_processing_capacity_automatically(
+        result = auto_scaling_manager[
+            "manager"
+        ].adjust_processing_capacity_automatically(
             {
                 "enable_capacity_adjustment": True,
                 "dynamic_resource_allocation": True,
@@ -189,12 +214,23 @@ class TestAutoScalingManager:
         assert result.adaptive_control_integrated
 
         adjustment_metrics = result.capacity_adjustment_metrics
-        assert adjustment_metrics.processing_capacity_improvement >= PROCESSING_CAPACITY_IMPROVEMENT_TARGET
-        assert adjustment_metrics.dynamic_allocation_effectiveness >= 0.88  # 88%以上動的割り当て効果
-        assert adjustment_metrics.adaptive_integration_quality >= 0.92  # 92%以上適応統合品質
-        assert adjustment_metrics.performance_optimization_score >= 0.90  # 90%以上性能最適化スコア
+        assert (
+            adjustment_metrics.processing_capacity_improvement
+            >= PROCESSING_CAPACITY_IMPROVEMENT_TARGET
+        )
+        assert (
+            adjustment_metrics.dynamic_allocation_effectiveness >= 0.88
+        )  # 88%以上動的割り当て効果
+        assert (
+            adjustment_metrics.adaptive_integration_quality >= 0.92
+        )  # 92%以上適応統合品質
+        assert (
+            adjustment_metrics.performance_optimization_score >= 0.90
+        )  # 90%以上性能最適化スコア
 
-    def test_distributed_scaling_coordination(self, auto_scaling_manager, mock_system_metrics):
+    def test_distributed_scaling_coordination(
+        self, auto_scaling_manager, mock_system_metrics
+    ):
         """分散スケーリング協調確認
 
         分散環境での協調スケーリングと
@@ -231,12 +267,21 @@ class TestAutoScalingManager:
         assert result.high_availability_guaranteed
 
         distributed_metrics = result.distributed_scaling_metrics
-        assert distributed_metrics.distributed_scalability_score >= DISTRIBUTED_SCALABILITY_TARGET
-        assert distributed_metrics.inter_node_coordination_quality >= 0.91  # 91%以上ノード間協調品質
+        assert (
+            distributed_metrics.distributed_scalability_score
+            >= DISTRIBUTED_SCALABILITY_TARGET
+        )
+        assert (
+            distributed_metrics.inter_node_coordination_quality >= 0.91
+        )  # 91%以上ノード間協調品質
         assert distributed_metrics.high_availability_level >= 0.999  # 99.9%以上高可用性
-        assert distributed_metrics.fault_tolerance_effectiveness >= 0.93  # 93%以上フォルトトレランス効果
+        assert (
+            distributed_metrics.fault_tolerance_effectiveness >= 0.93
+        )  # 93%以上フォルトトレランス効果
 
-    def test_enterprise_grade_scaling_quality(self, auto_scaling_manager, mock_system_metrics):
+    def test_enterprise_grade_scaling_quality(
+        self, auto_scaling_manager, mock_system_metrics
+    ):
         """企業グレードスケーリング品質確認
 
         企業グレード品質基準を満たす
@@ -273,12 +318,18 @@ class TestAutoScalingManager:
         assert result.audit_trail_generated
 
         quality_metrics = result.enterprise_quality_metrics
-        assert quality_metrics.enterprise_grade_quality_score >= ENTERPRISE_QUALITY_TARGET
+        assert (
+            quality_metrics.enterprise_grade_quality_score >= ENTERPRISE_QUALITY_TARGET
+        )
         assert quality_metrics.sla_compliance_rate >= 0.999  # 99.9%以上SLA準拠率
         assert quality_metrics.audit_completeness >= 0.96  # 96%以上監査完全性
-        assert quality_metrics.operational_excellence_score >= 0.94  # 94%以上運用エクセレンススコア
+        assert (
+            quality_metrics.operational_excellence_score >= 0.94
+        )  # 94%以上運用エクセレンススコア
 
-    def test_scaling_effectiveness_measurement(self, auto_scaling_manager, mock_system_metrics):
+    def test_scaling_effectiveness_measurement(
+        self, auto_scaling_manager, mock_system_metrics
+    ):
         """スケーリング効果測定確認
 
         自動スケーリングの効果を定量測定し
@@ -306,12 +357,23 @@ class TestAutoScalingManager:
         assert result.continuous_improvement_active
 
         effectiveness_metrics = result.scaling_effectiveness_metrics
-        assert effectiveness_metrics.overall_scaling_effectiveness >= SCALING_EFFECTIVENESS_TARGET
-        assert effectiveness_metrics.quantitative_analysis_quality >= 0.93  # 93%以上定量分析品質
-        assert effectiveness_metrics.improvement_identification_rate >= 0.87  # 87%以上改善特定率
-        assert effectiveness_metrics.roi_measurement_accuracy >= 0.89  # 89%以上ROI測定精度
+        assert (
+            effectiveness_metrics.overall_scaling_effectiveness
+            >= SCALING_EFFECTIVENESS_TARGET
+        )
+        assert (
+            effectiveness_metrics.quantitative_analysis_quality >= 0.93
+        )  # 93%以上定量分析品質
+        assert (
+            effectiveness_metrics.improvement_identification_rate >= 0.87
+        )  # 87%以上改善特定率
+        assert (
+            effectiveness_metrics.roi_measurement_accuracy >= 0.89
+        )  # 89%以上ROI測定精度
 
-    def test_intelligent_scaling_optimization(self, auto_scaling_manager, mock_system_metrics, mock_load_patterns):
+    def test_intelligent_scaling_optimization(
+        self, auto_scaling_manager, mock_system_metrics, mock_load_patterns
+    ):
         """インテリジェントスケーリング最適化確認
 
         機械学習を活用したインテリジェント最適化で
@@ -348,10 +410,14 @@ class TestAutoScalingManager:
         assert result.predictive_scaling_enabled
 
         optimization_metrics = result.intelligent_optimization_metrics
-        assert optimization_metrics.intelligent_optimization_effectiveness >= 0.92  # 92%以上インテリジェント最適化効果
+        assert (
+            optimization_metrics.intelligent_optimization_effectiveness >= 0.92
+        )  # 92%以上インテリジェント最適化効果
         assert optimization_metrics.ml_enhancement_quality >= 0.88  # 88%以上ML強化品質
         assert optimization_metrics.predictive_accuracy >= 0.85  # 85%以上予測精度
-        assert optimization_metrics.adaptive_learning_score >= 0.90  # 90%以上適応学習スコア
+        assert (
+            optimization_metrics.adaptive_learning_score >= 0.90
+        )  # 90%以上適応学習スコア
 
     def test_auto_scaling_performance(self, auto_scaling_manager, mock_system_metrics):
         """自動スケーリングパフォーマンス確認
@@ -387,11 +453,17 @@ class TestAutoScalingManager:
         # パフォーマンス確認
         performance_metrics = result.scaling_performance_metrics
         assert performance_metrics.response_time_ms <= SCALING_RESPONSE_TIME_TARGET
-        assert performance_metrics.control_overhead_percent <= 5.0  # 5%以下制御オーバーヘッド
+        assert (
+            performance_metrics.control_overhead_percent <= 5.0
+        )  # 5%以下制御オーバーヘッド
         assert performance_metrics.scaling_efficiency >= 0.94  # 94%以上スケーリング効率
-        assert performance_metrics.realtime_control_score >= 0.96  # 96%以上リアルタイム制御性能
+        assert (
+            performance_metrics.realtime_control_score >= 0.96
+        )  # 96%以上リアルタイム制御性能
 
-    def test_auto_scaling_foundation_establishment(self, auto_scaling_manager, mock_system_metrics):
+    def test_auto_scaling_foundation_establishment(
+        self, auto_scaling_manager, mock_system_metrics
+    ):
         """自動スケーリング基盤確立確認
 
         自動スケーリング基盤の確立と
@@ -468,7 +540,9 @@ class TestAutoScalingManagerEdgeCases:
             "hardware_limitations": True,
         }
 
-        result = auto_scaling_manager["manager"].adjust_processing_capacity_automatically(
+        result = auto_scaling_manager[
+            "manager"
+        ].adjust_processing_capacity_automatically(
             {
                 "enable_capacity_adjustment": True,
                 "resource_constraint_aware": True,

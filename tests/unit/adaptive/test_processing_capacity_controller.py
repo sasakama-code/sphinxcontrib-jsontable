@@ -17,9 +17,9 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: 処理能力制御効率・応答性重視
 """
 
-import pytest
 import time
-from unittest.mock import Mock, patch
+
+import pytest
 
 from sphinxcontrib.jsontable.adaptive.processing_capacity_controller import (
     ProcessingCapacityController,
@@ -94,7 +94,12 @@ def mock_load_detection_results():
 class TestProcessingCapacityController:
     """処理能力自動調整コントローラーテストクラス"""
 
-    def test_dynamic_capacity_adjustment(self, processing_capacity_controller, mock_current_capacity_metrics, mock_target_capacity_requirements):
+    def test_dynamic_capacity_adjustment(
+        self,
+        processing_capacity_controller,
+        mock_current_capacity_metrics,
+        mock_target_capacity_requirements,
+    ):
         """動的処理能力調整確認
 
         現在の処理能力と目標要件に基づいて
@@ -106,7 +111,9 @@ class TestProcessingCapacityController:
         - リアルタイム処理能力最適化
         - 負荷適応処理能力制御
         """
-        result = processing_capacity_controller["controller"].adjust_processing_capacity_dynamically(
+        result = processing_capacity_controller[
+            "controller"
+        ].adjust_processing_capacity_dynamically(
             {
                 "enable_dynamic_adjustment": True,
                 "realtime_optimization": True,
@@ -123,12 +130,26 @@ class TestProcessingCapacityController:
         assert result.multi_resource_scaling_enabled
 
         adjustment_metrics = result.capacity_adjustment_metrics
-        assert adjustment_metrics.processing_capacity_improvement >= PROCESSING_CAPACITY_ADJUSTMENT_TARGET
-        assert adjustment_metrics.cpu_capacity_adjustment_quality >= 0.90  # 90%以上CPU処理能力調整品質
-        assert adjustment_metrics.memory_capacity_adjustment_quality >= 0.88  # 88%以上メモリ処理能力調整品質
-        assert adjustment_metrics.network_capacity_adjustment_quality >= 0.85  # 85%以上ネットワーク処理能力調整品質
+        assert (
+            adjustment_metrics.processing_capacity_improvement
+            >= PROCESSING_CAPACITY_ADJUSTMENT_TARGET
+        )
+        assert (
+            adjustment_metrics.cpu_capacity_adjustment_quality >= 0.90
+        )  # 90%以上CPU処理能力調整品質
+        assert (
+            adjustment_metrics.memory_capacity_adjustment_quality >= 0.88
+        )  # 88%以上メモリ処理能力調整品質
+        assert (
+            adjustment_metrics.network_capacity_adjustment_quality >= 0.85
+        )  # 85%以上ネットワーク処理能力調整品質
 
-    def test_automatic_scaling_integration(self, processing_capacity_controller, mock_current_capacity_metrics, mock_load_detection_results):
+    def test_automatic_scaling_integration(
+        self,
+        processing_capacity_controller,
+        mock_current_capacity_metrics,
+        mock_load_detection_results,
+    ):
         """自動スケーリング統合確認
 
         AutoScalingManagerとの統合で
@@ -140,7 +161,9 @@ class TestProcessingCapacityController:
         - 負荷検出連携処理能力調整
         - インテリジェント処理能力スケーリング
         """
-        result = processing_capacity_controller["controller"].integrate_with_auto_scaling_manager(
+        result = processing_capacity_controller[
+            "controller"
+        ].integrate_with_auto_scaling_manager(
             {
                 "enable_auto_scaling_integration": True,
                 "load_detection_integration": True,
@@ -157,12 +180,23 @@ class TestProcessingCapacityController:
         assert result.intelligent_scaling_enabled
 
         scaling_metrics = result.automatic_scaling_metrics
-        assert scaling_metrics.auto_scaling_effectiveness >= AUTOMATIC_SCALING_EFFECTIVENESS_TARGET
-        assert scaling_metrics.load_detection_integration_quality >= 0.92  # 92%以上負荷検出統合品質
-        assert scaling_metrics.predictive_scaling_accuracy >= 0.85  # 85%以上予測スケーリング精度
-        assert scaling_metrics.intelligent_decision_quality >= 0.88  # 88%以上インテリジェント判定品質
+        assert (
+            scaling_metrics.auto_scaling_effectiveness
+            >= AUTOMATIC_SCALING_EFFECTIVENESS_TARGET
+        )
+        assert (
+            scaling_metrics.load_detection_integration_quality >= 0.92
+        )  # 92%以上負荷検出統合品質
+        assert (
+            scaling_metrics.predictive_scaling_accuracy >= 0.85
+        )  # 85%以上予測スケーリング精度
+        assert (
+            scaling_metrics.intelligent_decision_quality >= 0.88
+        )  # 88%以上インテリジェント判定品質
 
-    def test_adaptive_control_integration(self, processing_capacity_controller, mock_current_capacity_metrics):
+    def test_adaptive_control_integration(
+        self, processing_capacity_controller, mock_current_capacity_metrics
+    ):
         """適応制御統合確認
 
         適応制御システムとの統合で
@@ -182,7 +216,9 @@ class TestProcessingCapacityController:
             "optimization_context": "enterprise_workload",
         }
 
-        result = processing_capacity_controller["controller"].integrate_adaptive_control_system(
+        result = processing_capacity_controller[
+            "controller"
+        ].integrate_adaptive_control_system(
             {
                 "enable_adaptive_integration": True,
                 "environmental_adaptation": True,
@@ -198,12 +234,23 @@ class TestProcessingCapacityController:
         assert result.realtime_adaptive_control_enabled
 
         adaptive_metrics = result.adaptive_control_metrics
-        assert adaptive_metrics.adaptive_integration_effectiveness >= ADAPTIVE_CONTROL_INTEGRATION_TARGET
-        assert adaptive_metrics.environmental_adaptation_quality >= 0.87  # 87%以上環境適応品質
-        assert adaptive_metrics.realtime_adaptation_responsiveness >= 0.90  # 90%以上リアルタイム適応応答性
-        assert adaptive_metrics.system_optimization_coherence >= 0.85  # 85%以上システム最適化整合性
+        assert (
+            adaptive_metrics.adaptive_integration_effectiveness
+            >= ADAPTIVE_CONTROL_INTEGRATION_TARGET
+        )
+        assert (
+            adaptive_metrics.environmental_adaptation_quality >= 0.87
+        )  # 87%以上環境適応品質
+        assert (
+            adaptive_metrics.realtime_adaptation_responsiveness >= 0.90
+        )  # 90%以上リアルタイム適応応答性
+        assert (
+            adaptive_metrics.system_optimization_coherence >= 0.85
+        )  # 85%以上システム最適化整合性
 
-    def test_resource_utilization_optimization(self, processing_capacity_controller, mock_current_capacity_metrics):
+    def test_resource_utilization_optimization(
+        self, processing_capacity_controller, mock_current_capacity_metrics
+    ):
         """リソース利用最適化確認
 
         CPU・メモリ・ネットワーク・ディスクリソースの
@@ -217,13 +264,20 @@ class TestProcessingCapacityController:
         """
         resource_optimization_config = {
             **mock_current_capacity_metrics,
-            "optimization_targets": ["cpu_efficiency", "memory_efficiency", "network_efficiency", "disk_efficiency"],
+            "optimization_targets": [
+                "cpu_efficiency",
+                "memory_efficiency",
+                "network_efficiency",
+                "disk_efficiency",
+            ],
             "bottleneck_priorities": ["cpu", "memory"],
             "resource_allocation_strategy": "intelligent_balancing",
             "efficiency_improvement_goal": 0.20,  # 20%効率改善目標
         }
 
-        result = processing_capacity_controller["controller"].optimize_resource_utilization(
+        result = processing_capacity_controller[
+            "controller"
+        ].optimize_resource_utilization(
             {
                 "enable_resource_optimization": True,
                 "multi_dimensional_optimization": True,
@@ -239,12 +293,23 @@ class TestProcessingCapacityController:
         assert result.bottleneck_resolution_effective
 
         utilization_metrics = result.resource_utilization_metrics
-        assert utilization_metrics.overall_resource_efficiency >= RESOURCE_UTILIZATION_EFFICIENCY_TARGET
-        assert utilization_metrics.cpu_utilization_optimization >= 0.85  # 85%以上CPU利用最適化
-        assert utilization_metrics.memory_utilization_optimization >= 0.88  # 88%以上メモリ利用最適化
-        assert utilization_metrics.bottleneck_resolution_effectiveness >= 0.90  # 90%以上ボトルネック解消効果
+        assert (
+            utilization_metrics.overall_resource_efficiency
+            >= RESOURCE_UTILIZATION_EFFICIENCY_TARGET
+        )
+        assert (
+            utilization_metrics.cpu_utilization_optimization >= 0.85
+        )  # 85%以上CPU利用最適化
+        assert (
+            utilization_metrics.memory_utilization_optimization >= 0.88
+        )  # 88%以上メモリ利用最適化
+        assert (
+            utilization_metrics.bottleneck_resolution_effectiveness >= 0.90
+        )  # 90%以上ボトルネック解消効果
 
-    def test_processing_capacity_monitoring(self, processing_capacity_controller, mock_current_capacity_metrics):
+    def test_processing_capacity_monitoring(
+        self, processing_capacity_controller, mock_current_capacity_metrics
+    ):
         """処理能力監視確認
 
         処理能力の継続監視と
@@ -256,7 +321,9 @@ class TestProcessingCapacityController:
         - パフォーマンス評価・分析
         - 処理能力最適化フィードバック
         """
-        result = processing_capacity_controller["controller"].monitor_processing_capacity_continuously(
+        result = processing_capacity_controller[
+            "controller"
+        ].monitor_processing_capacity_continuously(
             {
                 "enable_continuous_monitoring": True,
                 "realtime_capacity_tracking": True,
@@ -273,11 +340,19 @@ class TestProcessingCapacityController:
 
         monitoring_metrics = result.capacity_monitoring_metrics
         assert monitoring_metrics.monitoring_effectiveness >= 0.93  # 93%以上監視効果
-        assert monitoring_metrics.realtime_tracking_accuracy >= 0.95  # 95%以上リアルタイムトラッキング精度
-        assert monitoring_metrics.performance_evaluation_quality >= 0.90  # 90%以上パフォーマンス評価品質
-        assert monitoring_metrics.optimization_feedback_relevance >= 0.88  # 88%以上最適化フィードバック関連性
+        assert (
+            monitoring_metrics.realtime_tracking_accuracy >= 0.95
+        )  # 95%以上リアルタイムトラッキング精度
+        assert (
+            monitoring_metrics.performance_evaluation_quality >= 0.90
+        )  # 90%以上パフォーマンス評価品質
+        assert (
+            monitoring_metrics.optimization_feedback_relevance >= 0.88
+        )  # 88%以上最適化フィードバック関連性
 
-    def test_distributed_capacity_coordination(self, processing_capacity_controller, mock_current_capacity_metrics):
+    def test_distributed_capacity_coordination(
+        self, processing_capacity_controller, mock_current_capacity_metrics
+    ):
         """分散処理能力協調確認
 
         分散環境での処理能力協調と
@@ -292,13 +367,24 @@ class TestProcessingCapacityController:
         distributed_config = {
             **mock_current_capacity_metrics,
             "cluster_nodes": 8,
-            "node_capacity_distribution": [0.85, 0.92, 0.78, 0.88, 0.95, 0.80, 0.90, 0.87],
+            "node_capacity_distribution": [
+                0.85,
+                0.92,
+                0.78,
+                0.88,
+                0.95,
+                0.80,
+                0.90,
+                0.87,
+            ],
             "inter_node_coordination": True,
             "cluster_load_balancing": True,
             "distributed_optimization": True,
         }
 
-        result = processing_capacity_controller["controller"].coordinate_distributed_capacity(
+        result = processing_capacity_controller[
+            "controller"
+        ].coordinate_distributed_capacity(
             {
                 "enable_distributed_coordination": True,
                 "inter_node_capacity_balancing": True,
@@ -314,12 +400,22 @@ class TestProcessingCapacityController:
         assert result.cluster_optimization_enabled
 
         distributed_metrics = result.distributed_capacity_metrics
-        assert distributed_metrics.distributed_coordination_effectiveness >= 0.90  # 90%以上分散協調効果
-        assert distributed_metrics.inter_node_balancing_quality >= 0.88  # 88%以上ノード間バランシング品質
-        assert distributed_metrics.cluster_optimization_score >= 0.85  # 85%以上クラスタ最適化スコア
-        assert distributed_metrics.high_availability_guarantee >= 0.999  # 99.9%以上高可用性保証
+        assert (
+            distributed_metrics.distributed_coordination_effectiveness >= 0.90
+        )  # 90%以上分散協調効果
+        assert (
+            distributed_metrics.inter_node_balancing_quality >= 0.88
+        )  # 88%以上ノード間バランシング品質
+        assert (
+            distributed_metrics.cluster_optimization_score >= 0.85
+        )  # 85%以上クラスタ最適化スコア
+        assert (
+            distributed_metrics.high_availability_guarantee >= 0.999
+        )  # 99.9%以上高可用性保証
 
-    def test_enterprise_grade_capacity_quality(self, processing_capacity_controller, mock_current_capacity_metrics):
+    def test_enterprise_grade_capacity_quality(
+        self, processing_capacity_controller, mock_current_capacity_metrics
+    ):
         """企業グレード処理能力品質確認
 
         企業グレード品質基準を満たす
@@ -333,14 +429,19 @@ class TestProcessingCapacityController:
         """
         enterprise_config = {
             **mock_current_capacity_metrics,
-            "sla_requirements": {"capacity_availability": 0.999, "capacity_response_time_ms": 50},
+            "sla_requirements": {
+                "capacity_availability": 0.999,
+                "capacity_response_time_ms": 50,
+            },
             "compliance_standards": ["SOC2", "ISO27001", "PCI-DSS"],
             "audit_logging_enabled": True,
             "enterprise_monitoring": True,
             "business_continuity_mode": True,
         }
 
-        result = processing_capacity_controller["controller"].ensure_enterprise_capacity_quality(
+        result = processing_capacity_controller[
+            "controller"
+        ].ensure_enterprise_capacity_quality(
             {
                 "enable_enterprise_quality": True,
                 "sla_compliance_enforcement": True,
@@ -356,12 +457,19 @@ class TestProcessingCapacityController:
         assert result.audit_trail_generated
 
         quality_metrics = result.enterprise_capacity_quality_metrics
-        assert quality_metrics.enterprise_grade_capacity_score >= ENTERPRISE_GRADE_CAPACITY_QUALITY_TARGET
+        assert (
+            quality_metrics.enterprise_grade_capacity_score
+            >= ENTERPRISE_GRADE_CAPACITY_QUALITY_TARGET
+        )
         assert quality_metrics.sla_compliance_rate >= 0.999  # 99.9%以上SLA準拠率
         assert quality_metrics.audit_completeness >= 0.96  # 96%以上監査完全性
-        assert quality_metrics.business_continuity_score >= 0.94  # 94%以上事業継続性スコア
+        assert (
+            quality_metrics.business_continuity_score >= 0.94
+        )  # 94%以上事業継続性スコア
 
-    def test_capacity_adjustment_performance(self, processing_capacity_controller, mock_current_capacity_metrics):
+    def test_capacity_adjustment_performance(
+        self, processing_capacity_controller, mock_current_capacity_metrics
+    ):
         """処理能力調整パフォーマンス確認
 
         処理能力調整のパフォーマンスと
@@ -375,7 +483,9 @@ class TestProcessingCapacityController:
         """
         start_time = time.time()
 
-        result = processing_capacity_controller["controller"].verify_capacity_adjustment_performance(
+        result = processing_capacity_controller[
+            "controller"
+        ].verify_capacity_adjustment_performance(
             {
                 "enable_performance_verification": True,
                 "target_response_time_ms": CAPACITY_RESPONSE_TIME_TARGET,
@@ -395,11 +505,19 @@ class TestProcessingCapacityController:
         # パフォーマンス確認
         performance_metrics = result.capacity_performance_metrics
         assert performance_metrics.response_time_ms <= CAPACITY_RESPONSE_TIME_TARGET
-        assert performance_metrics.adjustment_overhead_percent <= 3.0  # 3%以下調整オーバーヘッド
-        assert performance_metrics.capacity_control_efficiency >= 0.95  # 95%以上処理能力制御効率
-        assert performance_metrics.realtime_adjustment_score >= 0.97  # 97%以上リアルタイム調整性能
+        assert (
+            performance_metrics.adjustment_overhead_percent <= 3.0
+        )  # 3%以下調整オーバーヘッド
+        assert (
+            performance_metrics.capacity_control_efficiency >= 0.95
+        )  # 95%以上処理能力制御効率
+        assert (
+            performance_metrics.realtime_adjustment_score >= 0.97
+        )  # 97%以上リアルタイム調整性能
 
-    def test_processing_capacity_foundation_establishment(self, processing_capacity_controller, mock_current_capacity_metrics):
+    def test_processing_capacity_foundation_establishment(
+        self, processing_capacity_controller, mock_current_capacity_metrics
+    ):
         """処理能力制御基盤確立確認
 
         処理能力自動調整基盤の確立と
@@ -411,7 +529,9 @@ class TestProcessingCapacityController:
         - 企業グレード処理能力制御品質達成
         - 継続改善基盤確立
         """
-        result = processing_capacity_controller["controller"].establish_capacity_control_foundation(
+        result = processing_capacity_controller[
+            "controller"
+        ].establish_capacity_control_foundation(
             {
                 "verify_all_capacity_features": True,
                 "establish_control_foundation": True,
@@ -453,7 +573,9 @@ class TestProcessingCapacityControllerEdgeCases:
             "emergency_capacity_mode": True,
         }
 
-        result = processing_capacity_controller["controller"].adjust_processing_capacity_dynamically(
+        result = processing_capacity_controller[
+            "controller"
+        ].adjust_processing_capacity_dynamically(
             {
                 "enable_dynamic_adjustment": True,
                 "extreme_demand_handling": True,
@@ -465,7 +587,9 @@ class TestProcessingCapacityControllerEdgeCases:
         # 極端要求でも安定して調整
         assert hasattr(result, "capacity_adjustment_success")
 
-    def test_resource_constraint_capacity_optimization(self, processing_capacity_controller):
+    def test_resource_constraint_capacity_optimization(
+        self, processing_capacity_controller
+    ):
         """リソース制約処理能力最適化確認"""
         # リソース制約下でも効率的に処理能力を最適化できることを確認
         constrained_resources = {
@@ -476,7 +600,9 @@ class TestProcessingCapacityControllerEdgeCases:
             "budget_constraints": True,
         }
 
-        result = processing_capacity_controller["controller"].optimize_resource_utilization(
+        result = processing_capacity_controller[
+            "controller"
+        ].optimize_resource_utilization(
             {
                 "enable_resource_optimization": True,
                 "resource_constraint_aware": True,
@@ -502,7 +628,9 @@ class TestProcessingCapacityControllerEdgeCases:
             "fair_resource_sharing": True,
         }
 
-        result = processing_capacity_controller["controller"].coordinate_distributed_capacity(
+        result = processing_capacity_controller[
+            "controller"
+        ].coordinate_distributed_capacity(
             {
                 "enable_distributed_coordination": True,
                 "multi_tenant_coordination": True,

@@ -17,9 +17,9 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: 検出効率・制御品質重視
 """
 
-import pytest
 import time
-from unittest.mock import Mock, patch
+
+import pytest
 
 from sphinxcontrib.jsontable.adaptive.load_detection_engine import (
     LoadDetectionEngine,
@@ -89,9 +89,21 @@ def mock_load_patterns():
     """モック負荷パターン"""
     return {
         "historical_patterns": {
-            "daily_patterns": ["low", "moderate", "high", "peak", "high", "moderate", "low"],
+            "daily_patterns": [
+                "low",
+                "moderate",
+                "high",
+                "peak",
+                "high",
+                "moderate",
+                "low",
+            ],
             "weekly_trends": ["baseline", "increasing", "peak", "declining", "stable"],
-            "seasonal_factors": {"quarter_end": 1.4, "holidays": 0.6, "maintenance": 0.3},
+            "seasonal_factors": {
+                "quarter_end": 1.4,
+                "holidays": 0.6,
+                "maintenance": 0.3,
+            },
         },
         "real_time_trends": {
             "current_trend": "increasing",
@@ -116,7 +128,9 @@ def mock_load_patterns():
 class TestLoadDetectionEngine:
     """負荷検出エンジンテストクラス"""
 
-    def test_multidimensional_load_detection(self, load_detection_engine, mock_system_load_data):
+    def test_multidimensional_load_detection(
+        self, load_detection_engine, mock_system_load_data
+    ):
         """多次元負荷検出確認
 
         CPU・メモリ・ネットワーク・ディスク・アプリケーション
@@ -145,14 +159,23 @@ class TestLoadDetectionEngine:
         assert result.integrated_load_score_calculated
 
         detection_metrics = result.load_detection_metrics
-        assert detection_metrics.load_detection_accuracy >= LOAD_DETECTION_ACCURACY_TARGET
-        assert detection_metrics.multidimensional_evaluation_quality >= MULTIDIMENSIONAL_EVALUATION_TARGET
+        assert (
+            detection_metrics.load_detection_accuracy >= LOAD_DETECTION_ACCURACY_TARGET
+        )
+        assert (
+            detection_metrics.multidimensional_evaluation_quality
+            >= MULTIDIMENSIONAL_EVALUATION_TARGET
+        )
         assert detection_metrics.cpu_load_score >= 0.70  # 70%以上CPU負荷スコア
         assert detection_metrics.memory_load_score >= 0.65  # 65%以上メモリ負荷スコア
-        assert detection_metrics.network_load_score >= 0.75  # 75%以上ネットワーク負荷スコア
+        assert (
+            detection_metrics.network_load_score >= 0.75
+        )  # 75%以上ネットワーク負荷スコア
         assert detection_metrics.integrated_load_score >= 0.72  # 72%以上統合負荷スコア
 
-    def test_realtime_load_monitoring(self, load_detection_engine, mock_system_load_data):
+    def test_realtime_load_monitoring(
+        self, load_detection_engine, mock_system_load_data
+    ):
         """リアルタイム負荷監視確認
 
         システム負荷をリアルタイムで監視し
@@ -180,12 +203,19 @@ class TestLoadDetectionEngine:
         assert result.trend_analysis_completed
 
         monitoring_metrics = result.realtime_monitoring_metrics
-        assert monitoring_metrics.realtime_monitoring_effectiveness >= REALTIME_MONITORING_TARGET
+        assert (
+            monitoring_metrics.realtime_monitoring_effectiveness
+            >= REALTIME_MONITORING_TARGET
+        )
         assert monitoring_metrics.detection_latency_ms <= 5.0  # 5ms以下検出遅延
         assert monitoring_metrics.monitoring_frequency_hz >= 10.0  # 10Hz以上監視頻度
-        assert monitoring_metrics.change_detection_sensitivity >= 0.92  # 92%以上変化検出感度
+        assert (
+            monitoring_metrics.change_detection_sensitivity >= 0.92
+        )  # 92%以上変化検出感度
 
-    def test_predictive_load_analysis(self, load_detection_engine, mock_system_load_data, mock_load_patterns):
+    def test_predictive_load_analysis(
+        self, load_detection_engine, mock_system_load_data, mock_load_patterns
+    ):
         """予測負荷分析確認
 
         過去データとパターンから未来の負荷を
@@ -220,11 +250,17 @@ class TestLoadDetectionEngine:
 
         analysis_metrics = result.predictive_analysis_metrics
         assert analysis_metrics.prediction_accuracy >= PREDICTIVE_ANALYSIS_TARGET
-        assert analysis_metrics.pattern_recognition_quality >= 0.88  # 88%以上パターン認識品質
+        assert (
+            analysis_metrics.pattern_recognition_quality >= 0.88
+        )  # 88%以上パターン認識品質
         assert analysis_metrics.forecasting_reliability >= 0.82  # 82%以上予測信頼性
-        assert analysis_metrics.ml_enhancement_effectiveness >= 0.78  # 78%以上ML強化効果
+        assert (
+            analysis_metrics.ml_enhancement_effectiveness >= 0.78
+        )  # 78%以上ML強化効果
 
-    def test_intelligent_load_evaluation(self, load_detection_engine, mock_system_load_data):
+    def test_intelligent_load_evaluation(
+        self, load_detection_engine, mock_system_load_data
+    ):
         """インテリジェント負荷評価確認
 
         AI・機械学習を活用した高度な負荷評価で
@@ -253,12 +289,18 @@ class TestLoadDetectionEngine:
         assert result.recommendations_generated
 
         evaluation_metrics = result.intelligent_evaluation_metrics
-        assert evaluation_metrics.intelligent_evaluation_quality >= 0.90  # 90%以上インテリジェント評価品質
+        assert (
+            evaluation_metrics.intelligent_evaluation_quality >= 0.90
+        )  # 90%以上インテリジェント評価品質
         assert evaluation_metrics.ai_analysis_accuracy >= 0.87  # 87%以上AI分析精度
-        assert evaluation_metrics.anomaly_detection_precision >= 0.94  # 94%以上異常検出精度
+        assert (
+            evaluation_metrics.anomaly_detection_precision >= 0.94
+        )  # 94%以上異常検出精度
         assert evaluation_metrics.recommendation_relevance >= 0.85  # 85%以上推奨関連性
 
-    def test_adaptive_threshold_management(self, load_detection_engine, mock_system_load_data):
+    def test_adaptive_threshold_management(
+        self, load_detection_engine, mock_system_load_data
+    ):
         """適応閾値管理確認
 
         システム状況に応じて検出閾値を動的に調整し
@@ -286,12 +328,20 @@ class TestLoadDetectionEngine:
         assert result.context_adaptation_enabled
 
         threshold_metrics = result.adaptive_threshold_metrics
-        assert threshold_metrics.adaptive_adjustment_effectiveness >= 0.92  # 92%以上適応調整効果
-        assert threshold_metrics.threshold_optimization_quality >= 0.89  # 89%以上閾値最適化品質
-        assert threshold_metrics.context_awareness_score >= 0.86  # 86%以上コンテキスト認識スコア
+        assert (
+            threshold_metrics.adaptive_adjustment_effectiveness >= 0.92
+        )  # 92%以上適応調整効果
+        assert (
+            threshold_metrics.threshold_optimization_quality >= 0.89
+        )  # 89%以上閾値最適化品質
+        assert (
+            threshold_metrics.context_awareness_score >= 0.86
+        )  # 86%以上コンテキスト認識スコア
         assert threshold_metrics.precision_improvement_rate >= 0.15  # 15%以上精度向上率
 
-    def test_distributed_load_coordination(self, load_detection_engine, mock_system_load_data):
+    def test_distributed_load_coordination(
+        self, load_detection_engine, mock_system_load_data
+    ):
         """分散負荷協調確認
 
         分散環境での負荷検出協調と
@@ -329,12 +379,22 @@ class TestLoadDetectionEngine:
         assert result.cluster_analysis_completed
 
         coordination_metrics = result.distributed_coordination_metrics
-        assert coordination_metrics.distributed_detection_effectiveness >= 0.94  # 94%以上分散検出効果
-        assert coordination_metrics.node_synchronization_quality >= 0.91  # 91%以上ノード同期品質
-        assert coordination_metrics.cluster_analysis_completeness >= 0.96  # 96%以上クラスタ分析完全性
-        assert coordination_metrics.load_balancing_optimization >= 0.88  # 88%以上負荷分散最適化
+        assert (
+            coordination_metrics.distributed_detection_effectiveness >= 0.94
+        )  # 94%以上分散検出効果
+        assert (
+            coordination_metrics.node_synchronization_quality >= 0.91
+        )  # 91%以上ノード同期品質
+        assert (
+            coordination_metrics.cluster_analysis_completeness >= 0.96
+        )  # 96%以上クラスタ分析完全性
+        assert (
+            coordination_metrics.load_balancing_optimization >= 0.88
+        )  # 88%以上負荷分散最適化
 
-    def test_enterprise_grade_detection_quality(self, load_detection_engine, mock_system_load_data):
+    def test_enterprise_grade_detection_quality(
+        self, load_detection_engine, mock_system_load_data
+    ):
         """企業グレード検出品質確認
 
         企業グレード品質基準を満たす
@@ -370,12 +430,19 @@ class TestLoadDetectionEngine:
         assert result.audit_compliance_verified
 
         quality_metrics = result.enterprise_quality_metrics
-        assert quality_metrics.enterprise_grade_detection_quality >= ENTERPRISE_DETECTION_QUALITY_TARGET
+        assert (
+            quality_metrics.enterprise_grade_detection_quality
+            >= ENTERPRISE_DETECTION_QUALITY_TARGET
+        )
         assert quality_metrics.reliability_score >= 0.998  # 99.8%以上信頼性スコア
         assert quality_metrics.availability_guarantee >= 0.999  # 99.9%以上可用性保証
-        assert quality_metrics.compliance_adherence >= 0.95  # 95%以上コンプライアンス準拠
+        assert (
+            quality_metrics.compliance_adherence >= 0.95
+        )  # 95%以上コンプライアンス準拠
 
-    def test_load_detection_performance(self, load_detection_engine, mock_system_load_data):
+    def test_load_detection_performance(
+        self, load_detection_engine, mock_system_load_data
+    ):
         """負荷検出パフォーマンス確認
 
         負荷検出エンジンのパフォーマンスと
@@ -411,9 +478,13 @@ class TestLoadDetectionEngine:
         assert performance_metrics.response_time_ms <= DETECTION_RESPONSE_TIME_TARGET
         assert performance_metrics.detection_efficiency >= 0.95  # 95%以上検出効率
         assert performance_metrics.overhead_percentage <= 3.0  # 3%以下オーバーヘッド
-        assert performance_metrics.scalability_factor >= 10.0  # 10倍以上スケーラビリティ
+        assert (
+            performance_metrics.scalability_factor >= 10.0
+        )  # 10倍以上スケーラビリティ
 
-    def test_load_detection_integration(self, load_detection_engine, mock_system_load_data):
+    def test_load_detection_integration(
+        self, load_detection_engine, mock_system_load_data
+    ):
         """負荷検出統合確認
 
         AutoScalingManagerとの統合と
@@ -448,12 +519,22 @@ class TestLoadDetectionEngine:
         assert result.system_integration_verified
 
         integration_metrics = result.integration_metrics
-        assert integration_metrics.auto_scaling_integration_effectiveness >= 0.95  # 95%以上AutoScaling統合効果
-        assert integration_metrics.adaptive_control_coordination_quality >= 0.92  # 92%以上適応制御協調品質
-        assert integration_metrics.system_integration_completeness >= 0.94  # 94%以上システム統合完全性
-        assert integration_metrics.end_to_end_operation_efficiency >= 0.90  # 90%以上エンドツーエンド運用効率
+        assert (
+            integration_metrics.auto_scaling_integration_effectiveness >= 0.95
+        )  # 95%以上AutoScaling統合効果
+        assert (
+            integration_metrics.adaptive_control_coordination_quality >= 0.92
+        )  # 92%以上適応制御協調品質
+        assert (
+            integration_metrics.system_integration_completeness >= 0.94
+        )  # 94%以上システム統合完全性
+        assert (
+            integration_metrics.end_to_end_operation_efficiency >= 0.90
+        )  # 90%以上エンドツーエンド運用効率
 
-    def test_load_detection_foundation_establishment(self, load_detection_engine, mock_system_load_data):
+    def test_load_detection_foundation_establishment(
+        self, load_detection_engine, mock_system_load_data
+    ):
         """負荷検出基盤確立確認
 
         負荷検出エンジンの基盤確立と

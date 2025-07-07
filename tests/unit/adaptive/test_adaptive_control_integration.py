@@ -17,9 +17,9 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: 統合効率・制御品質重視
 """
 
-import pytest
 import time
-from unittest.mock import Mock, patch
+
+import pytest
 
 from sphinxcontrib.jsontable.adaptive.adaptive_control_integrator import (
     AdaptiveControlIntegrator,
@@ -87,7 +87,9 @@ def mock_adaptive_components():
 class TestAdaptiveControlIntegration:
     """適応制御統合テストクラス"""
 
-    def test_adaptive_control_components_integration(self, adaptive_integrator, mock_adaptive_components):
+    def test_adaptive_control_components_integration(
+        self, adaptive_integrator, mock_adaptive_components
+    ):
         """適応制御コンポーネント統合確認
 
         6つの適応制御機能を統合し
@@ -99,7 +101,9 @@ class TestAdaptiveControlIntegration:
         - 相乗効果・統合最適化
         - 統一制御プラットフォーム
         """
-        result = adaptive_integrator["integrator"].integrate_adaptive_control_components(
+        result = adaptive_integrator[
+            "integrator"
+        ].integrate_adaptive_control_components(
             {
                 "enable_component_integration": True,
                 "maximize_coordination_effects": True,
@@ -115,12 +119,23 @@ class TestAdaptiveControlIntegration:
         assert result.synergy_optimization_active
 
         integration_metrics = result.adaptive_integration_metrics
-        assert integration_metrics.integration_effectiveness >= INTEGRATION_EFFECTIVENESS_TARGET
-        assert integration_metrics.component_coordination_quality >= 0.90  # 90%以上コンポーネント協調品質
-        assert integration_metrics.synergy_effect_maximization >= 0.87  # 87%以上相乗効果最大化
-        assert integration_metrics.unified_control_platform_quality >= 0.93  # 93%以上統一制御プラットフォーム品質
+        assert (
+            integration_metrics.integration_effectiveness
+            >= INTEGRATION_EFFECTIVENESS_TARGET
+        )
+        assert (
+            integration_metrics.component_coordination_quality >= 0.90
+        )  # 90%以上コンポーネント協調品質
+        assert (
+            integration_metrics.synergy_effect_maximization >= 0.87
+        )  # 87%以上相乗効果最大化
+        assert (
+            integration_metrics.unified_control_platform_quality >= 0.93
+        )  # 93%以上統一制御プラットフォーム品質
 
-    def test_holistic_system_optimization(self, adaptive_integrator, mock_adaptive_components):
+    def test_holistic_system_optimization(
+        self, adaptive_integrator, mock_adaptive_components
+    ):
         """ホリスティックシステム最適化確認
 
         システム全体を統一的に最適化し
@@ -148,12 +163,23 @@ class TestAdaptiveControlIntegration:
         assert result.continuous_optimization_active
 
         optimization_metrics = result.holistic_optimization_metrics
-        assert optimization_metrics.holistic_optimization_effectiveness >= HOLISTIC_OPTIMIZATION_TARGET
-        assert optimization_metrics.system_wide_optimization_quality >= 0.92  # 92%以上システム全体最適化品質
-        assert optimization_metrics.comprehensive_control_effectiveness >= 0.89  # 89%以上包括制御効果
-        assert optimization_metrics.continuous_improvement_score >= 0.86  # 86%以上継続改善スコア
+        assert (
+            optimization_metrics.holistic_optimization_effectiveness
+            >= HOLISTIC_OPTIMIZATION_TARGET
+        )
+        assert (
+            optimization_metrics.system_wide_optimization_quality >= 0.92
+        )  # 92%以上システム全体最適化品質
+        assert (
+            optimization_metrics.comprehensive_control_effectiveness >= 0.89
+        )  # 89%以上包括制御効果
+        assert (
+            optimization_metrics.continuous_improvement_score >= 0.86
+        )  # 86%以上継続改善スコア
 
-    def test_intelligent_adaptive_coordination(self, adaptive_integrator, mock_adaptive_components):
+    def test_intelligent_adaptive_coordination(
+        self, adaptive_integrator, mock_adaptive_components
+    ):
         """インテリジェント適応協調確認
 
         機械学習を活用したインテリジェント制御で
@@ -172,7 +198,9 @@ class TestAdaptiveControlIntegration:
             "intelligent_coordination": True,
         }
 
-        result = adaptive_integrator["integrator"].coordinate_intelligent_adaptive_control(
+        result = adaptive_integrator[
+            "integrator"
+        ].coordinate_intelligent_adaptive_control(
             {
                 "enable_intelligent_coordination": True,
                 "ml_enhanced_control": True,
@@ -188,12 +216,21 @@ class TestAdaptiveControlIntegration:
         assert result.predictive_control_integrated
 
         coordination_metrics = result.intelligent_coordination_metrics
-        assert coordination_metrics.adaptive_coordination_effectiveness >= ADAPTIVE_COORDINATION_TARGET
+        assert (
+            coordination_metrics.adaptive_coordination_effectiveness
+            >= ADAPTIVE_COORDINATION_TARGET
+        )
         assert coordination_metrics.ml_integration_quality >= 0.85  # 85%以上ML統合品質
-        assert coordination_metrics.predictive_control_accuracy >= 0.82  # 82%以上予測制御精度
-        assert coordination_metrics.intelligent_learning_effectiveness >= 0.87  # 87%以上インテリジェント学習効果
+        assert (
+            coordination_metrics.predictive_control_accuracy >= 0.82
+        )  # 82%以上予測制御精度
+        assert (
+            coordination_metrics.intelligent_learning_effectiveness >= 0.87
+        )  # 87%以上インテリジェント学習効果
 
-    def test_distributed_adaptive_scalability(self, adaptive_integrator, mock_adaptive_components):
+    def test_distributed_adaptive_scalability(
+        self, adaptive_integrator, mock_adaptive_components
+    ):
         """分散適応スケーラビリティ確認
 
         分散環境での適応制御統合と
@@ -229,12 +266,18 @@ class TestAdaptiveControlIntegration:
         assert result.distributed_coordination_active
 
         scalability_metrics = result.distributed_scalability_metrics
-        assert scalability_metrics.distributed_adaptation_effectiveness >= 0.95  # 95%以上分散適応効果
+        assert (
+            scalability_metrics.distributed_adaptation_effectiveness >= 0.95
+        )  # 95%以上分散適応効果
         assert scalability_metrics.scalability_factor >= 8.0  # 8倍以上スケーラビリティ
         assert scalability_metrics.high_availability_score >= 0.999  # 99.9%以上高可用性
-        assert scalability_metrics.distributed_coordination_quality >= 0.91  # 91%以上分散協調品質
+        assert (
+            scalability_metrics.distributed_coordination_quality >= 0.91
+        )  # 91%以上分散協調品質
 
-    def test_enterprise_grade_adaptive_quality(self, adaptive_integrator, mock_adaptive_components):
+    def test_enterprise_grade_adaptive_quality(
+        self, adaptive_integrator, mock_adaptive_components
+    ):
         """企業グレード適応品質確認
 
         企業グレード品質基準を満たす
@@ -254,7 +297,9 @@ class TestAdaptiveControlIntegration:
             "sla_monitoring": True,
         }
 
-        result = adaptive_integrator["integrator"].guarantee_enterprise_adaptive_quality(
+        result = adaptive_integrator[
+            "integrator"
+        ].guarantee_enterprise_adaptive_quality(
             {
                 "enable_enterprise_quality": True,
                 "quality_assurance_enforcement": True,
@@ -270,12 +315,22 @@ class TestAdaptiveControlIntegration:
         assert result.sla_monitoring_active
 
         quality_metrics = result.enterprise_quality_metrics
-        assert quality_metrics.enterprise_grade_quality_score >= ENTERPRISE_QUALITY_TARGET
-        assert quality_metrics.quality_assurance_effectiveness >= 0.94  # 94%以上品質保証効果
-        assert quality_metrics.audit_compliance_score >= 0.96  # 96%以上監査コンプライアンス
-        assert quality_metrics.operational_excellence_level >= 0.92  # 92%以上運用エクセレンス
+        assert (
+            quality_metrics.enterprise_grade_quality_score >= ENTERPRISE_QUALITY_TARGET
+        )
+        assert (
+            quality_metrics.quality_assurance_effectiveness >= 0.94
+        )  # 94%以上品質保証効果
+        assert (
+            quality_metrics.audit_compliance_score >= 0.96
+        )  # 96%以上監査コンプライアンス
+        assert (
+            quality_metrics.operational_excellence_level >= 0.92
+        )  # 92%以上運用エクセレンス
 
-    def test_adaptive_control_performance_monitoring(self, adaptive_integrator, mock_adaptive_components):
+    def test_adaptive_control_performance_monitoring(
+        self, adaptive_integrator, mock_adaptive_components
+    ):
         """適応制御パフォーマンス監視確認
 
         適応制御統合のパフォーマンス監視と
@@ -304,11 +359,19 @@ class TestAdaptiveControlIntegration:
 
         monitoring_metrics = result.performance_monitoring_metrics
         assert monitoring_metrics.monitoring_accuracy >= 0.98  # 98%以上監視精度
-        assert monitoring_metrics.realtime_analysis_quality >= 0.95  # 95%以上リアルタイム分析品質
-        assert monitoring_metrics.continuous_optimization_effectiveness >= 0.90  # 90%以上継続最適化効果
-        assert monitoring_metrics.performance_guarantee_level >= 0.96  # 96%以上パフォーマンス保証レベル
+        assert (
+            monitoring_metrics.realtime_analysis_quality >= 0.95
+        )  # 95%以上リアルタイム分析品質
+        assert (
+            monitoring_metrics.continuous_optimization_effectiveness >= 0.90
+        )  # 90%以上継続最適化効果
+        assert (
+            monitoring_metrics.performance_guarantee_level >= 0.96
+        )  # 96%以上パフォーマンス保証レベル
 
-    def test_adaptive_control_integration_performance(self, adaptive_integrator, mock_adaptive_components):
+    def test_adaptive_control_integration_performance(
+        self, adaptive_integrator, mock_adaptive_components
+    ):
         """適応制御統合パフォーマンス確認
 
         適応制御統合のパフォーマンスと
@@ -342,11 +405,17 @@ class TestAdaptiveControlIntegration:
         # パフォーマンス確認
         performance_metrics = result.integration_performance_metrics
         assert performance_metrics.response_time_ms <= INTEGRATION_RESPONSE_TIME_TARGET
-        assert performance_metrics.control_overhead_percent <= 3.0  # 3%以下制御オーバーヘッド
+        assert (
+            performance_metrics.control_overhead_percent <= 3.0
+        )  # 3%以下制御オーバーヘッド
         assert performance_metrics.integration_efficiency >= 0.95  # 95%以上統合効率
-        assert performance_metrics.realtime_adaptation_score >= 0.97  # 97%以上リアルタイム適応性能
+        assert (
+            performance_metrics.realtime_adaptation_score >= 0.97
+        )  # 97%以上リアルタイム適応性能
 
-    def test_adaptive_control_foundation_establishment(self, adaptive_integrator, mock_adaptive_components):
+    def test_adaptive_control_foundation_establishment(
+        self, adaptive_integrator, mock_adaptive_components
+    ):
         """適応制御基盤確立確認
 
         全適応制御機能の統合・基盤確立と
@@ -358,7 +427,9 @@ class TestAdaptiveControlIntegration:
         - 企業グレード適応制御品質達成
         - 継続的改善基盤確立
         """
-        result = adaptive_integrator["integrator"].establish_adaptive_control_foundation(
+        result = adaptive_integrator[
+            "integrator"
+        ].establish_adaptive_control_foundation(
             {
                 "verify_all_adaptive_features": True,
                 "establish_integration_foundation": True,
@@ -398,7 +469,9 @@ class TestAdaptiveControlIntegrationEdgeCases:
             "resource_predictor": {"prediction_accuracy": 0.85},
         }
 
-        result = adaptive_integrator["integrator"].integrate_adaptive_control_components(
+        result = adaptive_integrator[
+            "integrator"
+        ].integrate_adaptive_control_components(
             {
                 "enable_component_integration": True,
                 "partial_integration_mode": True,
@@ -444,7 +517,9 @@ class TestAdaptiveControlIntegrationEdgeCases:
             "service_continuity": True,
         }
 
-        result = adaptive_integrator["integrator"].coordinate_intelligent_adaptive_control(
+        result = adaptive_integrator[
+            "integrator"
+        ].coordinate_intelligent_adaptive_control(
             {
                 "enable_intelligent_coordination": True,
                 "failover_mode": True,

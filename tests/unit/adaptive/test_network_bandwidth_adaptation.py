@@ -17,9 +17,9 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: ネットワーク制御効率・通信品質重視
 """
 
-import pytest
 import time
-from unittest.mock import Mock, patch
+
+import pytest
 
 from sphinxcontrib.jsontable.adaptive.network_bandwidth_adapter import (
     NetworkBandwidthAdapter,
@@ -61,7 +61,9 @@ def mock_network_state():
 class TestNetworkBandwidthAdaptation:
     """ネットワーク帯域適応テストクラス"""
 
-    def test_network_bandwidth_realtime_monitoring(self, network_adapter, mock_network_state):
+    def test_network_bandwidth_realtime_monitoring(
+        self, network_adapter, mock_network_state
+    ):
         """ネットワーク帯域リアルタイム監視確認
 
         ネットワーク帯域をリアルタイムで監視し
@@ -89,12 +91,23 @@ class TestNetworkBandwidthAdaptation:
         assert result.realtime_optimization_enabled
 
         monitoring_metrics = result.network_monitoring_metrics
-        assert monitoring_metrics.network_adaptation_effectiveness >= NETWORK_ADAPTATION_TARGET
-        assert monitoring_metrics.realtime_monitoring_accuracy >= 0.92  # 92%以上リアルタイム監視精度
-        assert monitoring_metrics.adaptive_control_quality >= 0.87  # 87%以上適応制御品質
-        assert monitoring_metrics.dynamic_adjustment_responsiveness >= 0.85  # 85%以上動的調整応答性
+        assert (
+            monitoring_metrics.network_adaptation_effectiveness
+            >= NETWORK_ADAPTATION_TARGET
+        )
+        assert (
+            monitoring_metrics.realtime_monitoring_accuracy >= 0.92
+        )  # 92%以上リアルタイム監視精度
+        assert (
+            monitoring_metrics.adaptive_control_quality >= 0.87
+        )  # 87%以上適応制御品質
+        assert (
+            monitoring_metrics.dynamic_adjustment_responsiveness >= 0.85
+        )  # 85%以上動的調整応答性
 
-    def test_bandwidth_quality_prediction_optimization(self, network_adapter, mock_network_state):
+    def test_bandwidth_quality_prediction_optimization(
+        self, network_adapter, mock_network_state
+    ):
         """帯域品質予測・最適化確認
 
         通信品質を分析・予測し
@@ -106,7 +119,9 @@ class TestNetworkBandwidthAdaptation:
         - 自動最適化機構
         - 効率的通信管理
         """
-        result = network_adapter["network_adapter"].optimize_bandwidth_quality_prediction(
+        result = network_adapter[
+            "network_adapter"
+        ].optimize_bandwidth_quality_prediction(
             {
                 "enable_quality_prediction": True,
                 "bandwidth_analysis_active": True,
@@ -123,12 +138,23 @@ class TestNetworkBandwidthAdaptation:
         assert result.automatic_optimization_enabled
 
         optimization_metrics = result.bandwidth_optimization_metrics
-        assert optimization_metrics.bandwidth_optimization_effectiveness >= BANDWIDTH_OPTIMIZATION_TARGET
-        assert optimization_metrics.quality_prediction_accuracy >= 0.84  # 84%以上品質予測精度
-        assert optimization_metrics.automatic_optimization_quality >= 0.86  # 86%以上自動最適化品質
-        assert optimization_metrics.communication_efficiency_score >= 0.89  # 89%以上通信効率
+        assert (
+            optimization_metrics.bandwidth_optimization_effectiveness
+            >= BANDWIDTH_OPTIMIZATION_TARGET
+        )
+        assert (
+            optimization_metrics.quality_prediction_accuracy >= 0.84
+        )  # 84%以上品質予測精度
+        assert (
+            optimization_metrics.automatic_optimization_quality >= 0.86
+        )  # 86%以上自動最適化品質
+        assert (
+            optimization_metrics.communication_efficiency_score >= 0.89
+        )  # 89%以上通信効率
 
-    def test_distributed_network_coordination(self, network_adapter, mock_network_state):
+    def test_distributed_network_coordination(
+        self, network_adapter, mock_network_state
+    ):
         """分散ネットワーク協調確認
 
         分散環境でのネットワーク協調・負荷分散と
@@ -147,7 +173,7 @@ class TestNetworkBandwidthAdaptation:
             "load_balancing_enabled": True,
             "inter_node_communication": True,
         }
-        
+
         result = network_adapter["network_adapter"].coordinate_distributed_network(
             {
                 "enable_distributed_coordination": True,
@@ -164,10 +190,19 @@ class TestNetworkBandwidthAdaptation:
         assert result.communication_optimization_enabled
 
         coordination_metrics = result.distributed_coordination_metrics
-        assert coordination_metrics.distributed_coordination_effectiveness >= DISTRIBUTED_COORDINATION_TARGET
-        assert coordination_metrics.load_balancing_efficiency >= 0.85  # 85%以上負荷分散効率
-        assert coordination_metrics.inter_node_communication_quality >= 0.80  # 80%以上ノード間通信品質
-        assert coordination_metrics.distributed_management_score >= 0.87  # 87%以上分散管理品質
+        assert (
+            coordination_metrics.distributed_coordination_effectiveness
+            >= DISTRIBUTED_COORDINATION_TARGET
+        )
+        assert (
+            coordination_metrics.load_balancing_efficiency >= 0.85
+        )  # 85%以上負荷分散効率
+        assert (
+            coordination_metrics.inter_node_communication_quality >= 0.80
+        )  # 80%以上ノード間通信品質
+        assert (
+            coordination_metrics.distributed_management_score >= 0.87
+        )  # 87%以上分散管理品質
 
     def test_traffic_control_qos_management(self, network_adapter, mock_network_state):
         """トラフィック制御・QoS管理確認
@@ -188,7 +223,7 @@ class TestNetworkBandwidthAdaptation:
             "qos_policies": ["critical", "high", "medium", "low"],
             "bandwidth_reservation": True,
         }
-        
+
         result = network_adapter["network_adapter"].manage_traffic_control_qos(
             {
                 "enable_traffic_control": True,
@@ -208,9 +243,13 @@ class TestNetworkBandwidthAdaptation:
         assert qos_metrics.traffic_control_effectiveness >= COMMUNICATION_QUALITY_TARGET
         assert qos_metrics.qos_guarantee_quality >= 0.92  # 92%以上QoS保証品質
         assert qos_metrics.priority_management_accuracy >= 0.88  # 88%以上優先度管理精度
-        assert qos_metrics.service_quality_optimization_score >= 0.85  # 85%以上サービス品質最適化
+        assert (
+            qos_metrics.service_quality_optimization_score >= 0.85
+        )  # 85%以上サービス品質最適化
 
-    def test_network_fault_detection_recovery(self, network_adapter, mock_network_state):
+    def test_network_fault_detection_recovery(
+        self, network_adapter, mock_network_state
+    ):
         """ネットワーク障害検出・回復確認
 
         ネットワーク障害を検出・回復し
@@ -229,7 +268,7 @@ class TestNetworkBandwidthAdaptation:
             "failover_capability": True,
             "recovery_mechanisms": ["automatic", "manual"],
         }
-        
+
         result = network_adapter["network_adapter"].detect_recover_network_faults(
             {
                 "enable_fault_detection": True,
@@ -246,10 +285,16 @@ class TestNetworkBandwidthAdaptation:
         assert result.redundancy_control_enabled
 
         fault_recovery_metrics = result.fault_recovery_metrics
-        assert fault_recovery_metrics.fault_detection_accuracy >= 0.95  # 95%以上障害検出精度
+        assert (
+            fault_recovery_metrics.fault_detection_accuracy >= 0.95
+        )  # 95%以上障害検出精度
         assert fault_recovery_metrics.recovery_success_rate >= 0.90  # 90%以上回復成功率
-        assert fault_recovery_metrics.redundancy_effectiveness >= 0.88  # 88%以上冗長化効果
-        assert fault_recovery_metrics.availability_assurance_level >= 0.96  # 96%以上可用性保証
+        assert (
+            fault_recovery_metrics.redundancy_effectiveness >= 0.88
+        )  # 88%以上冗長化効果
+        assert (
+            fault_recovery_metrics.availability_assurance_level >= 0.96
+        )  # 96%以上可用性保証
 
     def test_network_integrated_management(self, network_adapter, mock_network_state):
         """ネットワーク統合管理確認
@@ -263,7 +308,9 @@ class TestNetworkBandwidthAdaptation:
         - 企業グレード通信品質保証
         - 継続的ネットワーク最適化
         """
-        result = network_adapter["network_adapter"].manage_network_integrated_optimization(
+        result = network_adapter[
+            "network_adapter"
+        ].manage_network_integrated_optimization(
             {
                 "enable_integrated_management": True,
                 "comprehensive_optimization": True,
@@ -280,10 +327,18 @@ class TestNetworkBandwidthAdaptation:
         assert result.enterprise_quality_assured
 
         integration_metrics = result.network_integration_metrics
-        assert integration_metrics.overall_network_management_quality >= 0.95  # 95%以上全体ネットワーク管理品質
-        assert integration_metrics.integrated_optimization_effectiveness >= 0.92  # 92%以上統合最適化効果
-        assert integration_metrics.enterprise_quality_compliance >= 0.97  # 97%以上企業品質準拠
-        assert integration_metrics.continuous_improvement_score >= 0.89  # 89%以上継続改善
+        assert (
+            integration_metrics.overall_network_management_quality >= 0.95
+        )  # 95%以上全体ネットワーク管理品質
+        assert (
+            integration_metrics.integrated_optimization_effectiveness >= 0.92
+        )  # 92%以上統合最適化効果
+        assert (
+            integration_metrics.enterprise_quality_compliance >= 0.97
+        )  # 97%以上企業品質準拠
+        assert (
+            integration_metrics.continuous_improvement_score >= 0.89
+        )  # 89%以上継続改善
 
     def test_network_bandwidth_performance(self, network_adapter, mock_network_state):
         """ネットワーク帯域パフォーマンス確認
@@ -298,8 +353,10 @@ class TestNetworkBandwidthAdaptation:
         - リアルタイム通信性能
         """
         start_time = time.time()
-        
-        result = network_adapter["network_adapter"].verify_network_bandwidth_performance(
+
+        result = network_adapter[
+            "network_adapter"
+        ].verify_network_bandwidth_performance(
             {
                 "enable_performance_verification": True,
                 "target_response_time_ms": NETWORK_RESPONSE_TIME_TARGET,
@@ -308,7 +365,7 @@ class TestNetworkBandwidthAdaptation:
                 "realtime_communication_requirement": True,
             }
         )
-        
+
         end_time = time.time()
         response_time_ms = (end_time - start_time) * 1000
 
@@ -319,11 +376,17 @@ class TestNetworkBandwidthAdaptation:
         # パフォーマンス確認
         performance_metrics = result.network_performance_metrics
         assert performance_metrics.response_time_ms <= NETWORK_RESPONSE_TIME_TARGET
-        assert performance_metrics.network_overhead_percent <= 2.0  # 2%以下ネットワークオーバーヘッド
+        assert (
+            performance_metrics.network_overhead_percent <= 2.0
+        )  # 2%以下ネットワークオーバーヘッド
         assert performance_metrics.adaptation_efficiency >= 0.93  # 93%以上適応効率
-        assert performance_metrics.realtime_communication_score >= 0.95  # 95%以上リアルタイム通信性能
+        assert (
+            performance_metrics.realtime_communication_score >= 0.95
+        )  # 95%以上リアルタイム通信性能
 
-    def test_network_bandwidth_adaptation_integration(self, network_adapter, mock_network_state):
+    def test_network_bandwidth_adaptation_integration(
+        self, network_adapter, mock_network_state
+    ):
         """ネットワーク帯域適応統合確認
 
         全ネットワーク帯域適応機能の統合・整合性と
@@ -335,7 +398,9 @@ class TestNetworkBandwidthAdaptation:
         - 企業グレードネットワーク制御品質達成
         - ネットワーク適応基盤確立
         """
-        result = network_adapter["network_adapter"].verify_network_adaptation_integration(
+        result = network_adapter[
+            "network_adapter"
+        ].verify_network_adaptation_integration(
             {
                 "verify_all_adaptation_features": True,
                 "check_system_integration": True,
@@ -377,7 +442,7 @@ class TestNetworkBandwidthAdaptationEdgeCases:
             "congestion_level": "high",
             "quality_score": 0.45,
         }
-        
+
         result = network_adapter["network_adapter"].monitor_network_bandwidth_adaptive(
             {
                 "enable_realtime_monitoring": True,
@@ -401,7 +466,7 @@ class TestNetworkBandwidthAdaptationEdgeCases:
             "distance_km": 35000,
             "buffering_required": True,
         }
-        
+
         result = network_adapter["network_adapter"].coordinate_distributed_network(
             {
                 "enable_distributed_coordination": True,
@@ -412,7 +477,10 @@ class TestNetworkBandwidthAdaptationEdgeCases:
         )
 
         assert result.distributed_coordination_success
-        assert result.distributed_coordination_metrics.distributed_coordination_effectiveness >= 0.70  # 高遅延環境でも70%以上
+        assert (
+            result.distributed_coordination_metrics.distributed_coordination_effectiveness
+            >= 0.70
+        )  # 高遅延環境でも70%以上
 
     def test_network_congestion_adaptive_control(self, network_adapter):
         """ネットワーク輻輳適応制御確認"""
@@ -425,7 +493,7 @@ class TestNetworkBandwidthAdaptationEdgeCases:
             "competing_flows": 150,
             "buffer_utilization": 0.95,
         }
-        
+
         result = network_adapter["network_adapter"].manage_traffic_control_qos(
             {
                 "enable_traffic_control": True,

@@ -26,20 +26,20 @@ CLAUDE.md Code Excellence Compliance:
 - KISS原則: シンプル・直感的API設計
 """
 
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
-import time
-import threading
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+import os
 import platform
 import sys
-import os
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List
 
 # Enterprise-grade monitoring with psutil integration
 try:
     import psutil
+
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
@@ -285,7 +285,7 @@ class SystemResourceMonitor:
         self._disk_config = self._initialize_disk_config()
         self._network_config = self._initialize_network_config()
         self._monitoring_lock = threading.Lock()
-        
+
         # REFACTOR: 企業グレード機能追加
         self._platform_info = self._detect_platform_info()
         self._ml_predictor = self._initialize_ml_predictor()
@@ -335,12 +335,14 @@ class SystemResourceMonitor:
             "bandwidth_monitoring": True,
         }
 
-    def monitor_cpu_usage_realtime(self, options: Dict[str, Any]) -> CPUMonitoringResult:
+    def monitor_cpu_usage_realtime(
+        self, options: Dict[str, Any]
+    ) -> CPUMonitoringResult:
         """CPU使用率リアルタイム監視実装"""
         try:
             # CPU監視処理実装
             monitoring_success = self._execute_cpu_monitoring(options)
-            
+
             if monitoring_success:
                 return CPUMonitoringResult(
                     cpu_monitoring_success=True,
@@ -349,7 +351,7 @@ class SystemResourceMonitor:
                 )
             else:
                 return self._handle_cpu_monitoring_error()
-                
+
         except Exception:
             return self._handle_cpu_monitoring_error()
 
@@ -360,14 +362,14 @@ class SystemResourceMonitor:
             **self._cpu_config,
             **options,
         }
-        
+
         # 監視効果計算
         monitoring_effectiveness = 0.90
         if cpu_config.get("adaptive_control_integration"):
             monitoring_effectiveness += 0.02
         if cpu_config.get("realtime_monitoring"):
             monitoring_effectiveness += 0.01
-            
+
         # REFACTOR: 強化された監視効果計算
         if cpu_config.get("enterprise_grade_monitoring"):
             monitoring_effectiveness += 0.05  # 企業グレード効果
@@ -375,7 +377,7 @@ class SystemResourceMonitor:
             monitoring_effectiveness += 0.03  # ML統合効果
         if self._psutil_available:
             monitoring_effectiveness += 0.02  # psutilリアルデータ効果
-            
+
         return monitoring_effectiveness >= 0.95  # REFACTOR: 高い基準
 
     def _handle_cpu_monitoring_error(self) -> CPUMonitoringResult:
@@ -386,12 +388,14 @@ class SystemResourceMonitor:
             load_status_detection_enabled=True,
         )
 
-    def monitor_memory_usage_continuous(self, options: Dict[str, Any]) -> MemoryMonitoringResult:
+    def monitor_memory_usage_continuous(
+        self, options: Dict[str, Any]
+    ) -> MemoryMonitoringResult:
         """メモリ使用量継続監視実装"""
         try:
             # メモリ監視処理実装
             monitoring_success = self._execute_memory_monitoring(options)
-            
+
             if monitoring_success:
                 return MemoryMonitoringResult(
                     memory_monitoring_success=True,
@@ -400,7 +404,7 @@ class SystemResourceMonitor:
                 )
             else:
                 return self._handle_memory_monitoring_error()
-                
+
         except Exception:
             return self._handle_memory_monitoring_error()
 
@@ -411,14 +415,14 @@ class SystemResourceMonitor:
             **self._memory_config,
             **options,
         }
-        
+
         # 監視効果計算
         monitoring_effectiveness = 0.85
         if memory_config.get("leak_detection_enabled"):
             monitoring_effectiveness += 0.03
         if memory_config.get("dynamic_limit_adjustment"):
             monitoring_effectiveness += 0.02
-            
+
         return monitoring_effectiveness >= 0.85
 
     def _handle_memory_monitoring_error(self) -> MemoryMonitoringResult:
@@ -429,12 +433,14 @@ class SystemResourceMonitor:
             dynamic_adjustment_enabled=True,
         )
 
-    def monitor_disk_usage_optimization(self, options: Dict[str, Any]) -> DiskMonitoringResult:
+    def monitor_disk_usage_optimization(
+        self, options: Dict[str, Any]
+    ) -> DiskMonitoringResult:
         """ディスク使用量監視最適化実装"""
         try:
             # ディスク監視処理実装
             monitoring_success = self._execute_disk_monitoring(options)
-            
+
             if monitoring_success:
                 return DiskMonitoringResult(
                     disk_monitoring_success=True,
@@ -443,7 +449,7 @@ class SystemResourceMonitor:
                 )
             else:
                 return self._handle_disk_monitoring_error()
-                
+
         except Exception:
             return self._handle_disk_monitoring_error()
 
@@ -454,14 +460,14 @@ class SystemResourceMonitor:
             **self._disk_config,
             **options,
         }
-        
+
         # 監視効果計算
         monitoring_effectiveness = 0.80
         if disk_config.get("io_efficiency_monitoring"):
             monitoring_effectiveness += 0.03
         if disk_config.get("capacity_optimization"):
             monitoring_effectiveness += 0.02
-            
+
         return monitoring_effectiveness >= 0.80
 
     def _handle_disk_monitoring_error(self) -> DiskMonitoringResult:
@@ -472,12 +478,14 @@ class SystemResourceMonitor:
             capacity_optimization_enabled=True,
         )
 
-    def monitor_network_usage_optimization(self, options: Dict[str, Any]) -> NetworkMonitoringResult:
+    def monitor_network_usage_optimization(
+        self, options: Dict[str, Any]
+    ) -> NetworkMonitoringResult:
         """ネットワーク使用量監視最適化実装"""
         try:
             # ネットワーク監視処理実装
             monitoring_success = self._execute_network_monitoring(options)
-            
+
             if monitoring_success:
                 return NetworkMonitoringResult(
                     network_monitoring_success=True,
@@ -486,7 +494,7 @@ class SystemResourceMonitor:
                 )
             else:
                 return self._handle_network_monitoring_error()
-                
+
         except Exception:
             return self._handle_network_monitoring_error()
 
@@ -497,14 +505,14 @@ class SystemResourceMonitor:
             **self._network_config,
             **options,
         }
-        
+
         # 監視効果計算
         monitoring_effectiveness = 0.75
         if network_config.get("communication_optimization"):
             monitoring_effectiveness += 0.03
         if network_config.get("distributed_environment_support"):
             monitoring_effectiveness += 0.02
-            
+
         return monitoring_effectiveness >= 0.75
 
     def _handle_network_monitoring_error(self) -> NetworkMonitoringResult:
@@ -515,12 +523,14 @@ class SystemResourceMonitor:
             communication_optimization_enabled=True,
         )
 
-    def monitor_system_wide_resources(self, options: Dict[str, Any]) -> ComprehensiveMonitoringResult:
+    def monitor_system_wide_resources(
+        self, options: Dict[str, Any]
+    ) -> ComprehensiveMonitoringResult:
         """システム全体リソース監視実装"""
         try:
             # システム全体監視処理実装
             monitoring_success = self._execute_comprehensive_monitoring(options)
-            
+
             if monitoring_success:
                 return ComprehensiveMonitoringResult(
                     comprehensive_monitoring_success=True,
@@ -529,7 +539,7 @@ class SystemResourceMonitor:
                 )
             else:
                 return self._handle_comprehensive_monitoring_error()
-                
+
         except Exception:
             return self._handle_comprehensive_monitoring_error()
 
@@ -537,14 +547,14 @@ class SystemResourceMonitor:
         """包括的監視実行"""
         # GREEN実装: 包括的監視処理
         comprehensive_config = options
-        
+
         # 監視効果計算
         monitoring_effectiveness = 0.88
         if comprehensive_config.get("enterprise_grade_monitoring"):
             monitoring_effectiveness += 0.05
         if comprehensive_config.get("adaptive_control_foundation"):
             monitoring_effectiveness += 0.03
-            
+
         return monitoring_effectiveness >= 0.88
 
     def _handle_comprehensive_monitoring_error(self) -> ComprehensiveMonitoringResult:
@@ -555,12 +565,14 @@ class SystemResourceMonitor:
             adaptive_control_foundation_ready=True,
         )
 
-    def establish_adaptive_control_foundation(self, options: Dict[str, Any]) -> AdaptiveIntegrationResult:
+    def establish_adaptive_control_foundation(
+        self, options: Dict[str, Any]
+    ) -> AdaptiveIntegrationResult:
         """適応制御統合基盤実装"""
         try:
             # 適応制御基盤処理実装
             integration_success = self._execute_adaptive_integration(options)
-            
+
             if integration_success:
                 return AdaptiveIntegrationResult(
                     adaptive_integration_success=True,
@@ -569,7 +581,7 @@ class SystemResourceMonitor:
                 )
             else:
                 return self._handle_adaptive_integration_error()
-                
+
         except Exception:
             return self._handle_adaptive_integration_error()
 
@@ -577,14 +589,14 @@ class SystemResourceMonitor:
         """適応統合実行"""
         # GREEN実装: 適応統合処理
         integration_config = options
-        
+
         # 統合効果計算
         integration_effectiveness = 0.85
         if integration_config.get("dynamic_adjustment_mechanisms"):
             integration_effectiveness += 0.03
         if integration_config.get("realtime_optimization_foundation"):
             integration_effectiveness += 0.02
-            
+
         return integration_effectiveness >= 0.85
 
     def _handle_adaptive_integration_error(self) -> AdaptiveIntegrationResult:
@@ -595,12 +607,14 @@ class SystemResourceMonitor:
             realtime_optimization_active=True,
         )
 
-    def verify_monitoring_performance(self, options: Dict[str, Any]) -> MonitoringPerformanceResult:
+    def verify_monitoring_performance(
+        self, options: Dict[str, Any]
+    ) -> MonitoringPerformanceResult:
         """監視パフォーマンス検証実装"""
         try:
             # パフォーマンス検証処理実装
             performance_success = self._execute_performance_verification(options)
-            
+
             if performance_success:
                 return MonitoringPerformanceResult(
                     performance_verification_success=True,
@@ -609,7 +623,7 @@ class SystemResourceMonitor:
                 )
             else:
                 return self._handle_performance_verification_error()
-                
+
         except Exception:
             return self._handle_performance_verification_error()
 
@@ -617,12 +631,12 @@ class SystemResourceMonitor:
         """パフォーマンス検証実行"""
         # GREEN実装: パフォーマンス検証処理
         performance_config = options
-        
+
         # パフォーマンススコア計算
         performance_score = 0.98
         if performance_config.get("enterprise_performance_standard"):
             performance_score += 0.01
-            
+
         return performance_score >= 0.98
 
     def _handle_performance_verification_error(self) -> MonitoringPerformanceResult:
@@ -633,12 +647,14 @@ class SystemResourceMonitor:
             overhead_within_limits=True,
         )
 
-    def verify_monitoring_integration(self, options: Dict[str, Any]) -> MonitoringIntegrationResult:
+    def verify_monitoring_integration(
+        self, options: Dict[str, Any]
+    ) -> MonitoringIntegrationResult:
         """監視統合検証実装"""
         try:
             # 統合検証処理実装
             integration_success = self._execute_integration_verification(options)
-            
+
             if integration_success:
                 return MonitoringIntegrationResult(
                     integration_verification_success=True,
@@ -647,7 +663,7 @@ class SystemResourceMonitor:
                 )
             else:
                 return self._handle_integration_verification_error()
-                
+
         except Exception:
             return self._handle_integration_verification_error()
 
@@ -655,14 +671,14 @@ class SystemResourceMonitor:
         """統合検証実行"""
         # GREEN実装: 統合検証処理
         integration_config = options
-        
+
         # 統合品質スコア計算
         integration_quality = 0.92
         if integration_config.get("validate_overall_quality"):
             integration_quality += 0.02
         if integration_config.get("ensure_adaptive_readiness"):
             integration_quality += 0.01
-            
+
         return integration_quality >= 0.92
 
     def _handle_integration_verification_error(self) -> MonitoringIntegrationResult:
@@ -712,13 +728,15 @@ class SystemResourceMonitor:
             if self._psutil_available:
                 # psutilによるリアルデータ取得
                 cpu_percent = psutil.cpu_percent(interval=0.1)
-                load_avg = os.getloadavg() if hasattr(os, 'getloadavg') else [0.0, 0.0, 0.0]
+                load_avg = (
+                    os.getloadavg() if hasattr(os, "getloadavg") else [0.0, 0.0, 0.0]
+                )
                 cpu_count = psutil.cpu_count()
-                
+
                 return {
                     "cpu_percent": cpu_percent,
                     "load_1min": load_avg[0],
-                    "load_5min": load_avg[1], 
+                    "load_5min": load_avg[1],
                     "load_15min": load_avg[2],
                     "cpu_count": cpu_count,
                     "cpu_freq": psutil.cpu_freq().current if psutil.cpu_freq() else 0.0,
@@ -751,7 +769,7 @@ class SystemResourceMonitor:
                 # psutilによるリアルデータ取得
                 memory = psutil.virtual_memory()
                 swap = psutil.swap_memory()
-                
+
                 return {
                     "memory_percent": memory.percent,
                     "memory_used_gb": memory.used / (1024**3),
@@ -781,25 +799,29 @@ class SystemResourceMonitor:
                 "swap_used_gb": 2.0,
             }
 
-    def predict_resource_usage(self, current_metrics: Dict[str, float]) -> Dict[str, float]:
+    def predict_resource_usage(
+        self, current_metrics: Dict[str, float]
+    ) -> Dict[str, float]:
         """リソース使用量予測（REFACTOR新機能）"""
         try:
             # ML予測による将来のリソース使用量予測
             predicted_metrics = {
                 "predicted_cpu_5min": current_metrics.get("cpu_percent", 50.0) * 1.1,
-                "predicted_memory_5min": current_metrics.get("memory_percent", 60.0) * 1.05,
-                "predicted_disk_usage": current_metrics.get("disk_percent", 70.0) * 1.02,
+                "predicted_memory_5min": current_metrics.get("memory_percent", 60.0)
+                * 1.05,
+                "predicted_disk_usage": current_metrics.get("disk_percent", 70.0)
+                * 1.02,
                 "anomaly_score": 0.15,  # 異常スコア
                 "confidence_score": 0.85,  # 予測信頼度
             }
-            
+
             # 適応的学習による予測精度向上
             if self._ml_predictor.get("adaptive_learning_active"):
                 predicted_metrics["predicted_cpu_5min"] *= 0.98  # 2%改善
                 predicted_metrics["confidence_score"] *= 1.02  # 信頼度向上
-                
+
             return predicted_metrics
-            
+
         except Exception:
             # 予測失敗時のフォールバック値
             return {
@@ -818,25 +840,27 @@ class SystemResourceMonitor:
             "resource_efficient_mode_active": False,
             "overhead_reduction_percentage": 0.0,
         }
-        
+
         try:
             # 監視負荷を動的に調整
             current_load = self.get_real_cpu_metrics().get("cpu_percent", 50.0)
-            
+
             if current_load > 80.0:
                 # 高負荷時は監視頻度を下げる
                 optimization_actions["frequency_adjustment_applied"] = True
                 optimization_actions["overhead_reduction_percentage"] = 40.0
-                
+
             if current_load < 30.0:
                 # 低負荷時は詳細監視を有効化
                 optimization_actions["sampling_optimization_enabled"] = True
-                optimization_actions["overhead_reduction_percentage"] = -20.0  # より詳細監視
-                
+                optimization_actions[
+                    "overhead_reduction_percentage"
+                ] = -20.0  # より詳細監視
+
             optimization_actions["resource_efficient_mode_active"] = True
-            
+
             return optimization_actions
-            
+
         except Exception:
             return optimization_actions
 

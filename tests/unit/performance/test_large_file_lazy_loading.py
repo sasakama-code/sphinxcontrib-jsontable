@@ -61,9 +61,7 @@ def mega_excel_file(tmp_path):
     """超大容量Excelテストファイル作成"""
     import pandas as pd
 
-    with pd.ExcelWriter(
-        tmp_path / "mega_test_file.xlsx", engine="openpyxl"
-    ) as writer:
+    with pd.ExcelWriter(tmp_path / "mega_test_file.xlsx", engine="openpyxl") as writer:
         # Mega1: 超大容量データ（200000行×80列）
         data1 = {
             f"mega_{i}": list(range(i * 2000, i * 2000 + 200000)) for i in range(80)
@@ -127,11 +125,11 @@ class TestLargeFileLazyLoading:
             >= LARGE_FILE_PROCESSING_TARGET
         )
         assert large_file_metrics.memory_efficiency_score >= MEMORY_EFFICIENCY_TARGET
-        assert large_file_metrics.processing_speed_maintenance >= PROCESSING_SPEED_TARGET
-        assert large_file_metrics.file_size_capability_mb >= LARGE_FILE_SIZE_TARGET
         assert (
-            large_file_metrics.large_file_response_time_ms <= RESPONSE_TIME_TARGET
+            large_file_metrics.processing_speed_maintenance >= PROCESSING_SPEED_TARGET
         )
+        assert large_file_metrics.file_size_capability_mb >= LARGE_FILE_SIZE_TARGET
+        assert large_file_metrics.large_file_response_time_ms <= RESPONSE_TIME_TARGET
 
     def test_scalability_assurance_large_files(
         self, large_file_loader, large_excel_file
@@ -186,7 +184,9 @@ class TestLargeFileLazyLoading:
         - 効率的メモリ管理
         - ガベージコレクション最適化
         """
-        result = large_file_loader["large_file_loader"].control_memory_usage_large_files(
+        result = large_file_loader[
+            "large_file_loader"
+        ].control_memory_usage_large_files(
             large_excel_file,
             {
                 "enable_memory_usage_control": True,
@@ -203,7 +203,9 @@ class TestLargeFileLazyLoading:
 
         memory_control_metrics = result.memory_usage_control_metrics
         assert memory_control_metrics.memory_usage_percentage <= 40  # 40%以下メモリ使用
-        assert memory_control_metrics.memory_leak_prevention >= 0.95  # 95%以上リーク防止
+        assert (
+            memory_control_metrics.memory_leak_prevention >= 0.95
+        )  # 95%以上リーク防止
         assert (
             memory_control_metrics.memory_management_efficiency >= 0.85
         )  # 85%以上メモリ管理効率
@@ -266,9 +268,7 @@ class TestLargeFileLazyLoading:
         - 最適化推奨提供
         - 継続監視体制確立
         """
-        result = large_file_loader[
-            "large_file_loader"
-        ].monitor_large_file_performance(
+        result = large_file_loader["large_file_loader"].monitor_large_file_performance(
             mega_excel_file,
             {
                 "enable_large_file_monitoring": True,
@@ -328,11 +328,11 @@ class TestLargeFileLazyLoading:
         )  # 88%以上エラーハンドリング効果
         assert error_handling_metrics.fault_tolerance_score >= 0.90  # 90%以上耐障害性
         assert error_handling_metrics.recovery_success_rate >= 0.85  # 85%以上回復成功率
-        assert error_handling_metrics.safety_assurance_level >= 0.95  # 95%以上安全性保証
+        assert (
+            error_handling_metrics.safety_assurance_level >= 0.95
+        )  # 95%以上安全性保証
 
-    def test_large_file_quality_verification(
-        self, large_file_loader, mega_excel_file
-    ):
+    def test_large_file_quality_verification(self, large_file_loader, mega_excel_file):
         """大容量ファイル品質検証確認
 
         大容量ファイル処理の品質を検証し
@@ -376,14 +376,10 @@ class TestLargeFileLazyLoading:
 class TestLargeFileLazyLoadingEdgeCases:
     """大容量ファイル遅延読み込みエッジケーステスト"""
 
-    def test_extremely_large_file_handling(
-        self, large_file_loader, mega_excel_file
-    ):
+    def test_extremely_large_file_handling(self, large_file_loader, mega_excel_file):
         """超大容量ファイル処理確認"""
         # 超大容量ファイルでも適切に処理できることを確認
-        result = large_file_loader[
-            "large_file_loader"
-        ].process_large_file_lazy_loading(
+        result = large_file_loader["large_file_loader"].process_large_file_lazy_loading(
             mega_excel_file,
             {
                 "enable_large_file_processing": True,
@@ -401,7 +397,9 @@ class TestLargeFileLazyLoadingEdgeCases:
     ):
         """メモリ制約下大容量ファイル処理確認"""
         # メモリ制約がある環境でも適切に処理できることを確認
-        result = large_file_loader["large_file_loader"].control_memory_usage_large_files(
+        result = large_file_loader[
+            "large_file_loader"
+        ].control_memory_usage_large_files(
             mega_excel_file,
             {
                 "enable_memory_usage_control": True,
@@ -414,9 +412,7 @@ class TestLargeFileLazyLoadingEdgeCases:
         assert result.memory_usage_control_success
         assert result.memory_usage_control_metrics.memory_usage_percentage <= 40
 
-    def test_concurrent_large_file_processing(
-        self, large_file_loader, mega_excel_file
-    ):
+    def test_concurrent_large_file_processing(self, large_file_loader, mega_excel_file):
         """並行大容量ファイル処理確認"""
         # 複数の大容量ファイルを並行処理できることを確認
         result = large_file_loader[
@@ -432,9 +428,7 @@ class TestLargeFileLazyLoadingEdgeCases:
         )
 
         assert result.lazy_loading_integration_success
-        assert (
-            result.lazy_loading_integration_metrics.integration_effectiveness >= 0.85
-        )
+        assert result.lazy_loading_integration_metrics.integration_effectiveness >= 0.85
 
 
 if __name__ == "__main__":
