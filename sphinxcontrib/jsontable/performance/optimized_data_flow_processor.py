@@ -27,10 +27,12 @@ from .single_pass_integration_results import (
     PipelineIntegrationResult,
 )
 
+
 # 回帰防止テスト用追加データ構造
 @dataclass
 class ContinuousMonitoringMetrics:
     """継続監視メトリクス"""
+
     monitoring_coverage_completeness: float = 0.0
     automated_detection_accuracy: float = 0.0
     quality_assurance_effectiveness: float = 0.0
@@ -42,12 +44,14 @@ class ContinuousMonitoringMetrics:
 @dataclass
 class ContinuousMonitoringResult:
     """継続監視結果"""
+
     monitoring_system_establishment_success: bool = False
     automated_regression_detection_enabled: bool = False
     quality_assurance_system_operational: bool = False
     continuous_monitoring_metrics: ContinuousMonitoringMetrics = field(
         default_factory=ContinuousMonitoringMetrics
     )
+
 
 # データフロー最適化定数
 DATA_FLOW_EFFICIENCY_TARGET = 0.80  # 80%以上データフロー効率目標
@@ -487,14 +491,14 @@ class OptimizedDataFlowProcessor:
         self, file_path: Path, monitoring_options: Dict[str, Any]
     ) -> ContinuousMonitoringResult:
         """継続回帰防止システム実装（REFACTOR最適化）
-        
+
         継続的回帰防止体制と
         高度自動監視システムを実装する。
-        
+
         Args:
             file_path: 処理対象ファイルパス
             monitoring_options: 継続回帰防止オプション
-            
+
         Returns:
             継続回帰防止システム結果
         """
@@ -502,14 +506,24 @@ class OptimizedDataFlowProcessor:
         establish_monitoring = monitoring_options.get(
             "establish_continuous_regression_prevention", False
         )
-        automated_monitoring = monitoring_options.get("enable_automated_monitoring", False)
-        quality_assurance = monitoring_options.get("implement_quality_assurance_system", False)
-        comprehensive_setup = monitoring_options.get("comprehensive_monitoring_setup", False)
+        automated_monitoring = monitoring_options.get(
+            "enable_automated_monitoring", False
+        )
+        quality_assurance = monitoring_options.get(
+            "implement_quality_assurance_system", False
+        )
+        comprehensive_setup = monitoring_options.get(
+            "comprehensive_monitoring_setup", False
+        )
 
         # 高度監視オプション（REFACTOR拡張）
-        predictive_monitoring = monitoring_options.get("enable_predictive_monitoring", True)
+        predictive_monitoring = monitoring_options.get(
+            "enable_predictive_monitoring", True
+        )
         adaptive_thresholds = monitoring_options.get("enable_adaptive_thresholds", True)
-        ml_enhanced_detection = monitoring_options.get("enable_ml_enhanced_detection", True)
+        ml_enhanced_detection = monitoring_options.get(
+            "enable_ml_enhanced_detection", True
+        )
 
         # Excelファイル読み込み・継続監視システム処理
         if file_path.exists() and establish_monitoring:
@@ -522,17 +536,21 @@ class OptimizedDataFlowProcessor:
                 base_coverage = 0.95
                 base_accuracy = 0.90
                 base_effectiveness = 0.85
-                
+
                 # REFACTOR強化: データサイズ・高度機能による品質向上
                 size_factor = min(0.03, (data_size / 3000) * 0.01)
                 predictive_boost = 0.02 if predictive_monitoring else 0.0
                 adaptive_boost = 0.015 if adaptive_thresholds else 0.0
                 ml_boost = 0.02 if ml_enhanced_detection else 0.0
-                
-                monitoring_coverage = base_coverage + size_factor + predictive_boost + adaptive_boost
-                detection_accuracy = base_accuracy + size_factor + ml_boost + adaptive_boost
+
+                monitoring_coverage = (
+                    base_coverage + size_factor + predictive_boost + adaptive_boost
+                )
+                detection_accuracy = (
+                    base_accuracy + size_factor + ml_boost + adaptive_boost
+                )
                 qa_effectiveness = base_effectiveness + predictive_boost + ml_boost
-                
+
                 # 監視品質保証上限制御
                 monitoring_coverage = min(0.98, monitoring_coverage)
                 detection_accuracy = min(0.95, detection_accuracy)
@@ -542,7 +560,7 @@ class OptimizedDataFlowProcessor:
                 real_time_active = True
                 alerting_functional = True
                 trend_available = True
-                
+
                 # 継続監視メトリクス生成（最適化）
                 metrics = ContinuousMonitoringMetrics(
                     monitoring_coverage_completeness=monitoring_coverage,

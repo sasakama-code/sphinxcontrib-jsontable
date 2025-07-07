@@ -15,7 +15,6 @@ CLAUDE.md Code Excellence Compliance:
 - 堅牢性考慮: システム安定性・信頼性保証
 """
 
-
 import pandas as pd
 import pytest
 

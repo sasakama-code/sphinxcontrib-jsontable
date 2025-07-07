@@ -15,7 +15,6 @@ CLAUDE.md Code Excellence Compliance:
 - パフォーマンス考慮: 状態管理オーバーヘッド削減保証
 """
 
-
 import pandas as pd
 import pytest
 

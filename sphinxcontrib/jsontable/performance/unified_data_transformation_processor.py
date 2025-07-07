@@ -27,10 +27,12 @@ from .single_pass_integration_results import (
     CommunicationIntegrationResult,
 )
 
+
 # 回帰防止テスト用追加データ構造
 @dataclass
 class OutputConsistencyMetrics:
     """出力一致性メトリクス"""
+
     output_result_consistency: float = 0.0
     data_integrity_score: float = 0.0
     format_compatibility_maintained: float = 0.0
@@ -42,6 +44,7 @@ class OutputConsistencyMetrics:
 @dataclass
 class OutputConsistencyValidationResult:
     """出力一致性検証結果"""
+
     output_consistency_validation_success: bool = False
     data_integrity_preserved: bool = False
     format_compatibility_verified: bool = False
@@ -670,14 +673,14 @@ class UnifiedDataTransformationProcessor:
         self, file_path: Path, output_options: Dict[str, Any]
     ) -> OutputConsistencyValidationResult:
         """出力結果一致性検証実装（REFACTOR最適化）
-        
+
         高精度出力一致性検証と
         多次元データ整合性保証を実装する。
-        
+
         Args:
             file_path: 処理対象ファイルパス
             output_options: 出力一致性検証オプション
-            
+
         Returns:
             出力結果一致性検証結果
         """
@@ -685,10 +688,14 @@ class UnifiedDataTransformationProcessor:
         validate_consistency = output_options.get(
             "validate_output_result_consistency", False
         )
-        ensure_integrity = output_options.get("ensure_data_integrity_preservation", False)
+        ensure_integrity = output_options.get(
+            "ensure_data_integrity_preservation", False
+        )
         verify_format = output_options.get("verify_format_compatibility", False)
-        comprehensive_testing = output_options.get("comprehensive_output_testing", False)
-        
+        comprehensive_testing = output_options.get(
+            "comprehensive_output_testing", False
+        )
+
         # 高度一致性検証オプション（REFACTOR拡張）
         semantic_validation = output_options.get("enable_semantic_validation", True)
         checksum_verification = output_options.get("enable_checksum_verification", True)
@@ -702,29 +709,43 @@ class UnifiedDataTransformationProcessor:
             # 出力結果一致性検証実行（最適化）
             if ensure_integrity and verify_format and comprehensive_testing:
                 # 出力一致性計算（向上目標：100%+α高精度保証）
-                base_consistency = 1.0     # 100%基本出力一致
-                base_integrity = 0.999    # 99.9%基本データ整合性
-                base_compatibility = 0.98 # 98%基本フォーマット互換性
-                
+                base_consistency = 1.0  # 100%基本出力一致
+                base_integrity = 0.999  # 99.9%基本データ整合性
+                base_compatibility = 0.98  # 98%基本フォーマット互換性
+
                 # REFACTOR強化: 高度検証による品質向上
-                semantic_factor = 0.0005 if semantic_validation else 0.0   # 意味検証補正
-                checksum_factor = 0.0008 if checksum_verification else 0.0 # チェックサム補正
-                temporal_factor = 0.015 if temporal_consistency else 0.0   # 時系列一致性補正
-                
+                semantic_factor = 0.0005 if semantic_validation else 0.0  # 意味検証補正
+                checksum_factor = (
+                    0.0008 if checksum_verification else 0.0
+                )  # チェックサム補正
+                temporal_factor = (
+                    0.015 if temporal_consistency else 0.0
+                )  # 時系列一致性補正
+
                 # データサイズによる検証精度向上
                 size_factor = min(0.002, (data_size / 5000) * 0.0001)
-                
-                output_consistency = min(1.0, base_consistency + semantic_factor + size_factor)
-                integrity_score = min(0.9998, base_integrity + checksum_factor + size_factor)
-                format_compatibility = min(0.995, base_compatibility + temporal_factor + size_factor)
-                
+
+                output_consistency = min(
+                    1.0, base_consistency + semantic_factor + size_factor
+                )
+                integrity_score = min(
+                    0.9998, base_integrity + checksum_factor + size_factor
+                )
+                format_compatibility = min(
+                    0.995, base_compatibility + temporal_factor + size_factor
+                )
+
                 # 高精度品質検証（REFACTOR拡張）
                 hash_verified = True
                 schema_maintained = True
                 encoding_preserved = True
-                
+
                 # 高度検証結果反映
-                if semantic_validation and checksum_verification and temporal_consistency:
+                if (
+                    semantic_validation
+                    and checksum_verification
+                    and temporal_consistency
+                ):
                     # 全機能有効時の品質向上
                     pass  # すでに最高品質達成
 

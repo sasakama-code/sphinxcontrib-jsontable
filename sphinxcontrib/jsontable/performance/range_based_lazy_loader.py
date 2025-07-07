@@ -27,10 +27,10 @@ CLAUDE.md Code Excellence Compliance:
 - KISS原則: シンプル・直感的API設計
 """
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict
-import re
 
 import pandas as pd
 
@@ -388,7 +388,9 @@ class RangeLazyLoader:
         ml_config = {
             "predictive_modeling": ml_options.get("enable_predictive_modeling", False),
             "adaptive_learning": ml_options.get("enable_adaptive_learning", False),
-            "pattern_optimization": ml_options.get("enable_pattern_optimization", False),
+            "pattern_optimization": ml_options.get(
+                "enable_pattern_optimization", False
+            ),
             "performance_prediction": ml_options.get(
                 "enable_performance_prediction", False
             ),
@@ -451,7 +453,9 @@ class RangeLazyLoader:
 
                 if range_info.get("valid", False) and load_success:
                     # REFACTOR強化: 高度範囲分析準備
-                    advanced_config = self._prepare_advanced_range_analysis(range_options)
+                    advanced_config = self._prepare_advanced_range_analysis(
+                        range_options
+                    )
                     analysis_multiplier = advanced_config["analysis_multiplier"]
 
                     # REFACTOR強化: ML最適化エンジン初期化
@@ -480,21 +484,15 @@ class RangeLazyLoader:
                         * ml_multiplier
                     )
                     memory_reduction = (
-                        (
-                            base_memory_reduction
-                            + min(0.15, (data_size / 2000) * 0.08)
-                            + (performance_factors["total_boost"] * 0.8)
-                        )
-                        * analysis_multiplier
-                    )
+                        base_memory_reduction
+                        + min(0.15, (data_size / 2000) * 0.08)
+                        + (performance_factors["total_boost"] * 0.8)
+                    ) * analysis_multiplier
                     time_reduction = (
-                        (
-                            base_time_reduction
-                            + min(0.2, (data_size / 2500) * 0.07)
-                            + (performance_factors["total_boost"] * 0.9)
-                        )
-                        * ml_multiplier
-                    )
+                        base_time_reduction
+                        + min(0.2, (data_size / 2500) * 0.07)
+                        + (performance_factors["total_boost"] * 0.9)
+                    ) * ml_multiplier
                     response_time = max(
                         15,  # REFACTOR強化: より高速応答
                         base_response_time

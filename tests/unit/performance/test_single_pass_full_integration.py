@@ -15,7 +15,6 @@ CLAUDE.md Code Excellence Compliance:
 - 品質保証: システム全体整合性・信頼性保証
 """
 
-
 import pandas as pd
 import pytest
 
