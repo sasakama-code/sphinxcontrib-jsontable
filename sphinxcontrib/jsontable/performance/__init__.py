@@ -4,6 +4,22 @@ This package contains optimized components for single-pass processing
 architecture and performance improvements.
 """
 
+from .efficient_state_manager import (
+    ConcurrentStateMetrics,
+    ConcurrentStateResult,
+    EfficientStateManager,
+    MemoryStorageMetrics,
+    MemoryStorageResult,
+    OverallStateManagementEffect,
+    StateIntegrationQuality,
+    StateIntegrationResult,
+    StateMonitoringMetrics,
+    StateMonitoringResult,
+    StateTrackingMetrics,
+    StateTrackingResult,
+    StateTransitionMetrics,
+    StateTransitionResult,
+)
 from .optimized_data_flow_processor import (
     BottleneckAnalysisResult,
     DataTransferMetrics,
@@ -38,21 +54,21 @@ from .unified_data_transformation_processor import (
     UnifiedDataTransformationProcessor,
     UnifiedTransformationIntegrationResult,
 )
-from .efficient_state_manager import (
-    ConcurrentStateMetrics,
-    ConcurrentStateResult,
-    EfficientStateManager,
-    MemoryStorageMetrics,
-    MemoryStorageResult,
-    OverallStateManagementEffect,
-    StateIntegrationQuality,
-    StateIntegrationResult,
-    StateMonitoringMetrics,
-    StateMonitoringResult,
-    StateTrackingMetrics,
-    StateTrackingResult,
-    StateTransitionMetrics,
-    StateTransitionResult,
+from .unified_error_handler import (
+    ErrorClassificationMetrics,
+    ErrorClassificationResult,
+    ErrorCoordinationMetrics,
+    ErrorCoordinationResult,
+    ErrorHandlingIntegrationQuality,
+    ErrorHandlingIntegrationResult,
+    ErrorMonitoringMetrics,
+    ErrorMonitoringResult,
+    ErrorRecoveryMetrics,
+    ErrorRecoveryResult,
+    OverallErrorHandlingEffect,
+    SystemResilienceMetrics,
+    SystemResilienceResult,
+    UnifiedErrorHandler,
 )
 
 __all__ = [
@@ -98,4 +114,18 @@ __all__ = [
     "MemoryStorageMetrics",
     "StateIntegrationQuality",
     "OverallStateManagementEffect",
+    "UnifiedErrorHandler",
+    "ErrorClassificationResult",
+    "ErrorRecoveryResult",
+    "ErrorMonitoringResult",
+    "ErrorCoordinationResult",
+    "SystemResilienceResult",
+    "ErrorHandlingIntegrationResult",
+    "ErrorClassificationMetrics",
+    "ErrorRecoveryMetrics",
+    "ErrorMonitoringMetrics",
+    "ErrorCoordinationMetrics",
+    "SystemResilienceMetrics",
+    "ErrorHandlingIntegrationQuality",
+    "OverallErrorHandlingEffect",
 ]
