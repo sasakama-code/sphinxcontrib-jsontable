@@ -52,6 +52,20 @@ from .optimized_index_processor import (
     OptimizedIndexProcessor,
     RangeIndexResult,
 )
+from .optimized_concurrent_processor import (
+    AsyncProcessingMetrics,
+    AsyncProcessingResult,
+    ConcurrentBenchmarkResult,
+    ConcurrentPerformanceMetrics,
+    ConcurrentProcessingResult,
+    OptimizedConcurrentProcessor,
+    ResourceContentionMetrics,
+    ResourceContentionResult,
+    ScalabilityMetrics,
+    ScalabilityResult,
+    ThreadSafetyMetrics,
+    ThreadSafetyResult,
+)
 from .range_parser_optimized import (
     CacheMetrics,
     PerformanceMetrics,
@@ -121,4 +135,16 @@ __all__ = [
     "ConcurrentIndexResult",
     "IndexCacheMetrics",
     "IndexBenchmarkResult",
+    "OptimizedConcurrentProcessor",
+    "ConcurrentProcessingResult",
+    "AsyncProcessingResult",
+    "ThreadSafetyResult",
+    "ResourceContentionResult",
+    "ScalabilityResult",
+    "ConcurrentBenchmarkResult",
+    "ConcurrentPerformanceMetrics",
+    "AsyncProcessingMetrics",
+    "ThreadSafetyMetrics",
+    "ResourceContentionMetrics",
+    "ScalabilityMetrics",
 ]
