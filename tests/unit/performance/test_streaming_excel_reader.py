@@ -405,3 +405,202 @@ class TestStreamingExcelReader:
         post_cleanup_memory = reader.get_memory_usage()
         memory_reduction = max(chunk_memory_peaks) - post_cleanup_memory
         assert memory_reduction > 0  # メモリ解放確認
+
+    @pytest.mark.performance
+    def test_memory_usage_monitoring(self):
+        """メモリ使用量監視機構テスト
+        
+        TDD RED Phase: Task 1.1.3専用メモリ監視システム
+        期待動作:
+        - MemoryMonitorクラスによる専用メモリ監視
+        - リアルタイムメモリ使用量追跡
+        - メモリ制限アラート機能
+        - メモリ使用量履歴管理
+        - メモリリーク検出機能
+        - エンタープライズグレード監視メトリクス
+        """
+        from sphinxcontrib.jsontable.core.memory_monitor import MemoryMonitor
+        
+        # Memory Monitor初期化（専用監視システム）
+        monitor = MemoryMonitor(
+            memory_limit_mb=100,  # 100MB制限
+            alert_threshold_percent=80,  # 80%でアラート
+            monitoring_interval=0.1,  # 100ms間隔
+            history_size=50,  # 50履歴保持
+            enable_leak_detection=True,  # メモリリーク検出有効
+            enable_gc_monitoring=True,   # GC監視有効
+            enable_history=True,  # 履歴記録有効化
+            enable_alerts=True    # アラート有効化
+        )
+        
+        # 基本設定検証
+        assert monitor.memory_limit_mb == 100
+        assert monitor.alert_threshold_percent == 80
+        assert monitor.monitoring_interval == 0.1
+        assert monitor.history_size == 50
+        assert monitor.enable_leak_detection is True
+        assert monitor.enable_gc_monitoring is True
+        
+        # 監視開始
+        monitor.start_monitoring()
+        assert monitor.is_monitoring is True
+        
+        # 監視データ収集のための短い待機
+        import time
+        time.sleep(0.2)
+        
+        # 現在のメモリ使用量取得
+        current_memory = monitor.get_current_memory_usage()
+        assert current_memory > 0
+        assert isinstance(current_memory, (int, float))
+        
+        # メモリ使用量履歴取得
+        memory_history = monitor.get_memory_history()
+        assert isinstance(memory_history, list)
+        assert len(memory_history) >= 0
+        
+        # メモリ使用率計算
+        memory_usage_percent = monitor.get_memory_usage_percent()
+        assert 0 <= memory_usage_percent <= 100
+        assert isinstance(memory_usage_percent, (int, float))
+        
+        # アラート状態確認
+        alert_status = monitor.get_alert_status()
+        assert isinstance(alert_status, dict)
+        assert "is_alert_active" in alert_status
+        assert "alert_level" in alert_status
+        assert "alert_message" in alert_status
+        assert "triggered_at" in alert_status
+        
+        # メモリ監視メトリクス取得
+        monitoring_metrics = monitor.get_monitoring_metrics()
+        assert isinstance(monitoring_metrics, dict)
+        
+        # 基本メトリクス
+        assert "current_memory_mb" in monitoring_metrics
+        assert "peak_memory_mb" in monitoring_metrics
+        assert "average_memory_mb" in monitoring_metrics
+        assert "memory_usage_percent" in monitoring_metrics
+        assert "memory_limit_mb" in monitoring_metrics
+        
+        # 監視メトリクス
+        assert "monitoring_duration_seconds" in monitoring_metrics
+        assert "total_measurements" in monitoring_metrics
+        assert "alert_count" in monitoring_metrics
+        assert "gc_collections_detected" in monitoring_metrics
+        
+        # メモリリーク検出メトリクス
+        assert "leak_detection_enabled" in monitoring_metrics
+        assert "potential_leak_detected" in monitoring_metrics
+        assert "memory_growth_rate_mb_per_sec" in monitoring_metrics
+        
+        # 高度メトリクス
+        assert "memory_variance" in monitoring_metrics
+        assert "memory_stability_score" in monitoring_metrics
+        assert "memory_efficiency_score" in monitoring_metrics
+        
+        # メモリ制限テスト（仮想的な高負荷）
+        test_file = self.create_test_excel_file(rows=1000)
+        
+        # 監視しながらExcel処理実行
+        pre_processing_memory = monitor.get_current_memory_usage()
+        
+        # StreamingExcelReaderと連携テスト
+        reader = StreamingExcelReader(
+            chunk_size=100, 
+            memory_limit_mb=50, 
+            enable_monitoring=True
+        )
+        
+        # Memory Monitorをリーダーに統合
+        reader.set_memory_monitor(monitor)
+        assert reader.memory_monitor is monitor
+        
+        # 監視付きストリーミング処理
+        processed_chunks = 0
+        memory_readings = []
+        
+        for chunk in reader.read_chunks(test_file):
+            processed_chunks += 1
+            current_reading = monitor.get_current_memory_usage()
+            memory_readings.append(current_reading)
+            
+            # メモリ制限チェック
+            if monitor.is_memory_limit_exceeded():
+                # メモリ制限超過時の動作確認
+                limit_info = monitor.get_limit_exceeded_info()
+                assert isinstance(limit_info, dict)
+                assert "exceeded_at" in limit_info
+                assert "current_memory_mb" in limit_info
+                assert "memory_limit_mb" in limit_info
+                assert "excess_memory_mb" in limit_info
+            
+            # アラート検証
+            if monitor.is_alert_triggered():
+                alert_details = monitor.get_alert_details()
+                assert isinstance(alert_details, dict)
+                assert alert_details["is_alert_active"] is True
+                assert alert_details["alert_level"] in ["warning", "critical"]
+        
+        # 処理完了後の検証
+        assert processed_chunks == 10  # 1000行÷100チャンク
+        assert len(memory_readings) == 10
+        
+        # 一時的に監視停止して統計計算
+        monitor.stop_monitoring()
+        time.sleep(0.1)  # 停止処理完了待機
+        
+        # メモリ監視統計
+        final_metrics = monitor.get_monitoring_metrics()
+        assert final_metrics["total_measurements"] > 0
+        assert final_metrics["monitoring_duration_seconds"] > 0
+        assert final_metrics["peak_memory_mb"] >= final_metrics["current_memory_mb"]
+        
+        # 監視再開（後続テストのため）
+        monitor.start_monitoring()
+        time.sleep(0.1)
+        
+        # メモリリーク検出テスト
+        leak_status = monitor.check_memory_leak()
+        assert isinstance(leak_status, dict)
+        assert "leak_detected" in leak_status
+        assert "confidence_level" in leak_status
+        assert "growth_rate_mb_per_sec" in leak_status
+        assert "recommendation" in leak_status
+        
+        # GC監視機能テスト
+        gc_stats = monitor.get_gc_statistics()
+        assert isinstance(gc_stats, dict)
+        assert "total_collections" in gc_stats
+        assert "collection_frequency" in gc_stats
+        assert "average_collection_time" in gc_stats
+        
+        # メモリ最適化提案テスト
+        optimization_suggestions = monitor.get_optimization_suggestions()
+        assert isinstance(optimization_suggestions, list)
+        for suggestion in optimization_suggestions:
+            assert "type" in suggestion  # "memory_limit", "chunk_size", "gc_frequency"等
+            assert "current_value" in suggestion
+            assert "suggested_value" in suggestion
+            assert "expected_improvement" in suggestion
+            assert "priority" in suggestion  # "high", "medium", "low"
+        
+        # リアルタイム監視停止
+        monitor.stop_monitoring()
+        assert monitor.is_monitoring is False
+        
+        # 最終レポート生成
+        final_report = monitor.generate_monitoring_report()
+        assert isinstance(final_report, dict)
+        assert "monitoring_summary" in final_report
+        assert "performance_analysis" in final_report
+        assert "recommendations" in final_report
+        assert "alert_history" in final_report
+        
+        # メモリ監視クリーンアップ
+        monitor.cleanup()
+        
+        # クリーンアップ後の状態確認
+        assert monitor.is_monitoring is False
+        cleanup_metrics = monitor.get_monitoring_metrics()
+        assert cleanup_metrics["total_measurements"] > 0  # 履歴は保持

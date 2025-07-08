@@ -1792,3 +1792,12 @@ class StreamingExcelReader(IStreamingExcelReader):
                 context={"kwargs": kwargs},
                 original_error=e,
             ) from e
+
+    def set_memory_monitor(self, monitor) -> None:
+        """メモリ監視システム設定
+        
+        Args:
+            monitor: MemoryMonitorインスタンス
+        """
+        self.memory_monitor = monitor
+        logger.debug("Memory monitor attached to StreamingExcelReader")

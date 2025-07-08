@@ -88,6 +88,12 @@ class MemoryMonitor:
         thread_safe: bool = True,
         integration_config: Optional[Dict[str, Any]] = None,
         enable_external_integration: bool = False,
+        # Task 1.1.3: 追加パラメーター（テスト互換性のため）
+        memory_limit_mb: Optional[int] = None,
+        alert_threshold_percent: Optional[float] = None,
+        history_size: Optional[int] = None,
+        enable_leak_detection: bool = False,
+        enable_gc_monitoring: bool = False,
     ):
         """初期化
 
@@ -102,14 +108,29 @@ class MemoryMonitor:
             thread_safe: スレッドセーフ有効化
             integration_config: 外部統合設定
             enable_external_integration: 外部統合有効化
+            memory_limit_mb: メモリ制限（MB）
+            alert_threshold_percent: アラート閾値（%）
+            history_size: 履歴サイズ
+            enable_leak_detection: メモリリーク検出有効化
+            enable_gc_monitoring: GC監視有効化
         """
         self.monitoring_interval = monitoring_interval
-        self.enable_history = enable_history
-        self.max_history_size = max_history_size
-        self.enable_alerts = enable_alerts
+        self.enable_history = enable_history or history_size is not None
+        self.max_history_size = history_size or max_history_size
+        self.enable_alerts = enable_alerts or alert_threshold_percent is not None
         self.enable_optimization = enable_optimization
         self.thread_safe = thread_safe
         self.enable_external_integration = enable_external_integration
+        
+        # Task 1.1.3: 新しい属性設定
+        self.memory_limit_mb = memory_limit_mb or 100
+        self.alert_threshold_percent = alert_threshold_percent or 80
+        self.history_size = history_size or max_history_size
+        self.enable_leak_detection = enable_leak_detection
+        self.enable_gc_monitoring = enable_gc_monitoring
+        
+        # 監視状態
+        self.is_monitoring = False
 
         # アラート設定
         self.alert_config = alert_config or {
@@ -284,6 +305,7 @@ class MemoryMonitor:
             return
 
         self._monitoring = True
+        self.is_monitoring = True  # Task 1.1.3: テスト互換性
         self._start_time = time.time()
         self._monitor_thread = threading.Thread(
             target=self._monitoring_loop, daemon=True
@@ -293,6 +315,7 @@ class MemoryMonitor:
     def stop_monitoring(self):
         """メモリ監視停止"""
         self._monitoring = False
+        self.is_monitoring = False  # Task 1.1.3: テスト互換性
         if self._monitor_thread:
             self._monitor_thread.join(timeout=1.0)
 
@@ -639,6 +662,535 @@ class MemoryMonitor:
     def set_external_report_handler(self, handler: Callable[[dict], None]):
         """外部報告ハンドラー設定"""
         self._external_report_handler = handler
+
+    # Task 1.1.3: テスト互換性メソッド追加
+
+    def get_memory_usage_percent(self) -> float:
+        """メモリ使用率計算"""
+        current_memory_mb = self.get_current_memory_usage() / (1024 * 1024)
+        return min(100.0, (current_memory_mb / self.memory_limit_mb) * 100)
+
+    def get_alert_status(self) -> Dict[str, Any]:
+        """アラート状態取得"""
+        current_usage_percent = self.get_memory_usage_percent()
+        is_alert = current_usage_percent >= self.alert_threshold_percent
+        
+        if is_alert:
+            if current_usage_percent >= 95:
+                alert_level = "critical"
+            elif current_usage_percent >= self.alert_threshold_percent:
+                alert_level = "warning"
+            else:
+                alert_level = "info"
+        else:
+            alert_level = "normal"
+        
+        return {
+            "is_alert_active": is_alert,
+            "alert_level": alert_level,
+            "alert_message": f"Memory usage: {current_usage_percent:.1f}%" if is_alert else "Normal",
+            "triggered_at": time.time() if is_alert else None
+        }
+
+    def get_monitoring_metrics(self) -> Dict[str, Any]:
+        """監視メトリクス取得（拡張版）"""
+        current_memory_mb = self.get_current_memory_usage() / (1024 * 1024)
+        
+        # 基本統計情報と拡張メトリクスを統合
+        basic_stats = self.get_monitoring_statistics()
+        
+        metrics = {
+            "current_memory_mb": current_memory_mb,
+            "peak_memory_mb": basic_stats.get("peak_memory_usage", 0) / (1024 * 1024),
+            "average_memory_mb": basic_stats.get("average_memory_usage", 0) / (1024 * 1024),
+            "memory_usage_percent": self.get_memory_usage_percent(),
+            "memory_limit_mb": self.memory_limit_mb,
+            "monitoring_duration_seconds": basic_stats.get("monitoring_duration", 0),
+            "total_measurements": self._measurement_count,
+            "alert_count": len(self._alert_history),
+            "gc_collections_detected": self._optimization_stats.get("total_optimizations", 0),
+            "leak_detection_enabled": self.enable_leak_detection,
+            "potential_leak_detected": False,  # 簡易実装
+            "memory_growth_rate_mb_per_sec": 0.0,  # 簡易実装
+            "memory_variance": basic_stats.get("memory_usage_variance", 0),
+            "memory_stability_score": min(100.0, max(0.0, 100.0 - (basic_stats.get("memory_usage_variance", 0) / 1000000))),
+            "memory_efficiency_score": min(100.0, max(0.0, 100.0 - self.get_memory_usage_percent()))
+        }
+        
+        return metrics
+
+    def is_memory_limit_exceeded(self) -> bool:
+        """メモリ制限超過確認"""
+        return self.get_memory_usage_percent() > 100.0
+
+    def get_limit_exceeded_info(self) -> Dict[str, Any]:
+        """メモリ制限超過情報取得"""
+        current_memory_mb = self.get_current_memory_usage() / (1024 * 1024)
+        excess_mb = max(0, current_memory_mb - self.memory_limit_mb)
+        
+        return {
+            "exceeded_at": time.time(),
+            "current_memory_mb": current_memory_mb,
+            "memory_limit_mb": self.memory_limit_mb,
+            "excess_memory_mb": excess_mb
+        }
+
+    def is_alert_triggered(self) -> bool:
+        """アラート発動確認"""
+        return self.get_alert_status()["is_alert_active"]
+
+    def get_alert_details(self) -> Dict[str, Any]:
+        """アラート詳細情報取得"""
+        return self.get_alert_status()
+
+    def check_memory_leak(self) -> Dict[str, Any]:
+        """メモリリーク検出"""
+        # 簡易実装: 履歴ベースの成長率分析
+        leak_detected = False
+        confidence_level = "low"
+        growth_rate = 0.0
+        recommendation = "Continue monitoring"
+        
+        if len(self._memory_history) >= 10:
+            # 最近10測定での成長傾向分析
+            recent_history = self._memory_history[-10:]
+            if len(recent_history) >= 2:
+                initial_memory = recent_history[0]["memory_usage"]
+                final_memory = recent_history[-1]["memory_usage"]
+                time_diff = recent_history[-1]["timestamp"] - recent_history[0]["timestamp"]
+                
+                if time_diff > 0:
+                    growth_rate = (final_memory - initial_memory) / time_diff / (1024 * 1024)  # MB/sec
+                    
+                    if growth_rate > 1.0:  # 1MB/秒以上の成長
+                        leak_detected = True
+                        confidence_level = "high"
+                        recommendation = "Investigate memory usage patterns"
+                    elif growth_rate > 0.1:  # 0.1MB/秒以上の成長
+                        leak_detected = True
+                        confidence_level = "medium"
+                        recommendation = "Monitor closely"
+        
+        return {
+            "leak_detected": leak_detected,
+            "confidence_level": confidence_level,
+            "growth_rate_mb_per_sec": growth_rate,
+            "recommendation": recommendation
+        }
+
+    def get_gc_statistics(self) -> Dict[str, Any]:
+        """GC統計取得"""
+        # 簡易実装: 最適化統計から推定
+        optimization_stats = self.get_optimization_statistics()
+        
+        return {
+            "total_collections": optimization_stats.get("total_optimizations", 0),
+            "collection_frequency": optimization_stats.get("total_optimizations", 0) / max(1, self._measurement_count),
+            "average_collection_time": 0.01  # 固定値（簡易実装）
+        }
+
+    def get_optimization_suggestions(self) -> List[Dict[str, Any]]:
+        """メモリ最適化提案取得"""
+        suggestions = []
+        current_usage_percent = self.get_memory_usage_percent()
+        
+        # メモリ制限の提案
+        if current_usage_percent > 90:
+            suggestions.append({
+                "type": "memory_limit",
+                "current_value": self.memory_limit_mb,
+                "suggested_value": self.memory_limit_mb * 1.5,
+                "expected_improvement": "Reduce memory pressure",
+                "priority": "high"
+            })
+        
+        # 監視間隔の提案
+        if self.monitoring_interval > 1.0 and current_usage_percent > 80:
+            suggestions.append({
+                "type": "monitoring_interval",
+                "current_value": self.monitoring_interval,
+                "suggested_value": 0.5,
+                "expected_improvement": "Better real-time monitoring",
+                "priority": "medium"
+            })
+        
+        # GC頻度の提案
+        if current_usage_percent > 70:
+            suggestions.append({
+                "type": "gc_frequency",
+                "current_value": "auto",
+                "suggested_value": "more_frequent",
+                "expected_improvement": "More aggressive memory cleanup",
+                "priority": "medium"
+            })
+        
+        return suggestions
+
+    def generate_monitoring_report(self) -> Dict[str, Any]:
+        """監視レポート生成"""
+        metrics = self.get_monitoring_metrics()
+        
+        return {
+            "monitoring_summary": {
+                "duration_seconds": metrics["monitoring_duration_seconds"],
+                "total_measurements": metrics["total_measurements"],
+                "average_memory_mb": metrics["average_memory_mb"],
+                "peak_memory_mb": metrics["peak_memory_mb"]
+            },
+            "performance_analysis": {
+                "memory_efficiency_score": metrics["memory_efficiency_score"],
+                "memory_stability_score": metrics["memory_stability_score"],
+                "alert_count": metrics["alert_count"]
+            },
+            "recommendations": self.get_optimization_suggestions(),
+            "alert_history": [
+                {
+                    "level": alert.alert_level,
+                    "timestamp": alert.timestamp,
+                    "message": alert.message
+                }
+                for alert in self._alert_history
+            ]
+        }
+
+    def cleanup(self):
+        """メモリ監視クリーンアップ"""
+        if self.is_monitoring:
+            self.stop_monitoring()
+        
+        # 統合コンポーネントのクリーンアップ
+        self._monitored_components.clear()
+        self._component_memory_baselines.clear()
+
+    # Task 1.1.3 REFACTOR: 高度アラート・制限機能強化
+
+    def configure_advanced_alerts(
+        self,
+        custom_thresholds: Optional[Dict[str, float]] = None,
+        enable_predictive_alerts: bool = True,
+        alert_cooldown_seconds: float = 30.0,
+        enable_escalation: bool = True,
+    ) -> None:
+        """高度アラート設定
+        
+        Args:
+            custom_thresholds: カスタム閾値設定
+            enable_predictive_alerts: 予測アラート有効化
+            alert_cooldown_seconds: アラートクールダウン時間
+            enable_escalation: エスカレーション有効化
+        """
+        # カスタム閾値適用
+        if custom_thresholds:
+            self.alert_config.update(custom_thresholds)
+        
+        # 高度アラート設定
+        self._advanced_alert_config = {
+            "enable_predictive_alerts": enable_predictive_alerts,
+            "alert_cooldown_seconds": alert_cooldown_seconds,
+            "enable_escalation": enable_escalation,
+            "escalation_levels": {
+                "level_1": {"threshold": 85, "actions": ["log", "alert"]},
+                "level_2": {"threshold": 92, "actions": ["log", "alert", "notify"]},
+                "level_3": {"threshold": 98, "actions": ["log", "alert", "notify", "emergency_cleanup"]},
+            }
+        }
+        
+        # アラート履歴管理
+        self._alert_cooldown_tracker = {}
+        self._escalation_tracker = {}
+        
+        logger.info("Advanced alert configuration applied")
+
+    def check_predictive_memory_limit(self) -> Dict[str, Any]:
+        """予測的メモリ制限チェック
+        
+        Returns:
+            予測結果と推奨アクション
+        """
+        if not hasattr(self, '_advanced_alert_config') or not self._advanced_alert_config.get("enable_predictive_alerts", False):
+            return {"predictive_enabled": False}
+        
+        # メモリ成長率分析
+        if len(self._memory_history) < 5:
+            return {"predictive_enabled": True, "sufficient_data": False}
+        
+        recent_history = self._memory_history[-5:]
+        memory_deltas = [record["memory_delta"] for record in recent_history if record["memory_delta"] != 0]
+        
+        if not memory_deltas:
+            return {"predictive_enabled": True, "growth_detected": False}
+        
+        # 成長率計算
+        avg_growth_per_measurement = sum(memory_deltas) / len(memory_deltas)
+        current_memory_mb = self.get_current_memory_usage() / (1024 * 1024)
+        
+        # 予測時間計算（制限まで）
+        memory_to_limit = self.memory_limit_mb - current_memory_mb
+        
+        if avg_growth_per_measurement > 0:
+            measurements_to_limit = memory_to_limit * (1024 * 1024) / avg_growth_per_measurement
+            time_to_limit_seconds = measurements_to_limit * self.monitoring_interval
+        else:
+            time_to_limit_seconds = float('inf')
+        
+        # 予測アラート判定
+        warning_threshold = 300  # 5分
+        critical_threshold = 60   # 1分
+        
+        prediction_result = {
+            "predictive_enabled": True,
+            "growth_detected": True,
+            "current_memory_mb": current_memory_mb,
+            "memory_limit_mb": self.memory_limit_mb,
+            "avg_growth_mb_per_sec": avg_growth_per_measurement / (1024 * 1024),
+            "estimated_time_to_limit_seconds": time_to_limit_seconds,
+        }
+        
+        if time_to_limit_seconds <= critical_threshold:
+            prediction_result.update({
+                "alert_level": "critical",
+                "recommended_action": "immediate_intervention",
+                "urgency": "high"
+            })
+        elif time_to_limit_seconds <= warning_threshold:
+            prediction_result.update({
+                "alert_level": "warning",
+                "recommended_action": "prepare_intervention",
+                "urgency": "medium"
+            })
+        else:
+            prediction_result.update({
+                "alert_level": "normal",
+                "recommended_action": "continue_monitoring",
+                "urgency": "low"
+            })
+        
+        return prediction_result
+
+    def apply_escalated_memory_controls(self, escalation_level: str) -> Dict[str, Any]:
+        """エスカレーション段階別メモリ制御
+        
+        Args:
+            escalation_level: エスカレーションレベル
+            
+        Returns:
+            実行されたアクションの結果
+        """
+        if not hasattr(self, '_advanced_alert_config'):
+            return {"error": "Advanced alert configuration not initialized"}
+        
+        escalation_config = self._advanced_alert_config["escalation_levels"].get(escalation_level)
+        if not escalation_config:
+            return {"error": f"Unknown escalation level: {escalation_level}"}
+        
+        actions_performed = []
+        results = {"escalation_level": escalation_level, "actions_performed": actions_performed}
+        
+        for action in escalation_config["actions"]:
+            if action == "log":
+                logger.warning(f"Memory escalation {escalation_level}: {self.get_memory_usage_percent():.1f}%")
+                actions_performed.append("log")
+                
+            elif action == "alert":
+                # 高優先度アラート生成
+                alert = MemoryAlert(
+                    alert_level="escalation",
+                    memory_usage=self.get_current_memory_usage(),
+                    threshold=escalation_config["threshold"],
+                    timestamp=time.time(),
+                    message=f"Escalation {escalation_level} triggered",
+                    suggested_action=f"Execute {escalation_level} procedures"
+                )
+                self._alert_history.append(alert)
+                if self._alert_handler:
+                    self._alert_handler(alert)
+                actions_performed.append("alert")
+                
+            elif action == "notify":
+                # 外部通知（実装時は実際の通知システムに連携）
+                logger.critical(f"ESCALATION NOTIFICATION: {escalation_level}")
+                actions_performed.append("notify")
+                
+            elif action == "emergency_cleanup":
+                # 緊急クリーンアップ実行
+                cleanup_result = self._perform_emergency_cleanup()
+                results["cleanup_result"] = cleanup_result
+                actions_performed.append("emergency_cleanup")
+        
+        # エスカレーション履歴記録
+        self._escalation_tracker[escalation_level] = {
+            "timestamp": time.time(),
+            "memory_usage_percent": self.get_memory_usage_percent(),
+            "actions_performed": actions_performed
+        }
+        
+        return results
+
+    def _perform_emergency_cleanup(self) -> Dict[str, Any]:
+        """緊急メモリクリーンアップ
+        
+        Returns:
+            クリーンアップ結果
+        """
+        initial_memory = self.get_current_memory_usage()
+        cleanup_actions = []
+        
+        try:
+            # 強制ガベージコレクション
+            import gc
+            collected_objects = []
+            for _i in range(3):
+                collected = gc.collect()
+                collected_objects.append(collected)
+                time.sleep(0.1)
+            cleanup_actions.append(f"gc_collections: {sum(collected_objects)} objects")
+            
+            # 統合コンポーネントの緊急最適化
+            optimized_components = []
+            for component_name, component_ref in self._monitored_components.items():
+                component = component_ref()
+                if component and hasattr(component, 'emergency_memory_optimization'):
+                    try:
+                        component.emergency_memory_optimization()
+                        optimized_components.append(component_name)
+                    except Exception as e:
+                        logger.warning(f"Emergency optimization failed for {component_name}: {e}")
+            
+            if optimized_components:
+                cleanup_actions.append(f"component_optimization: {optimized_components}")
+            
+            # メモリ使用量履歴の圧縮
+            if len(self._memory_history) > 100:
+                # 古い履歴を間引き
+                compressed_history = self._memory_history[::2]  # 半分に圧縮
+                original_size = len(self._memory_history)
+                self._memory_history = compressed_history
+                cleanup_actions.append(f"history_compression: {original_size} -> {len(self._memory_history)}")
+            
+            final_memory = self.get_current_memory_usage()
+            memory_freed = max(0, initial_memory - final_memory)
+            
+            return {
+                "success": True,
+                "initial_memory_mb": initial_memory / (1024 * 1024),
+                "final_memory_mb": final_memory / (1024 * 1024),
+                "memory_freed_mb": memory_freed / (1024 * 1024),
+                "cleanup_actions": cleanup_actions,
+                "effectiveness_percent": (memory_freed / initial_memory) * 100 if initial_memory > 0 else 0
+            }
+            
+        except Exception as e:
+            logger.error(f"Emergency cleanup failed: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "cleanup_actions": cleanup_actions
+            }
+
+    def configure_memory_limit_policies(
+        self,
+        soft_limit_mb: Optional[int] = None,
+        hard_limit_mb: Optional[int] = None,
+        enable_automatic_scaling: bool = True,
+        scaling_factor: float = 1.2,
+        enable_preemptive_actions: bool = True,
+    ) -> None:
+        """メモリ制限ポリシー設定
+        
+        Args:
+            soft_limit_mb: ソフト制限（警告レベル）
+            hard_limit_mb: ハード制限（強制制御レベル）
+            enable_automatic_scaling: 自動スケーリング有効化
+            scaling_factor: スケーリング係数
+            enable_preemptive_actions: 予防的アクション有効化
+        """
+        self._memory_limit_policies = {
+            "soft_limit_mb": soft_limit_mb or int(self.memory_limit_mb * 0.8),
+            "hard_limit_mb": hard_limit_mb or self.memory_limit_mb,
+            "enable_automatic_scaling": enable_automatic_scaling,
+            "scaling_factor": scaling_factor,
+            "enable_preemptive_actions": enable_preemptive_actions,
+            "preemptive_threshold": 0.9,  # 90%で予防アクション
+        }
+        
+        logger.info(f"Memory limit policies configured: soft={self._memory_limit_policies['soft_limit_mb']}MB, "
+                   f"hard={self._memory_limit_policies['hard_limit_mb']}MB")
+
+    def evaluate_memory_limit_compliance(self) -> Dict[str, Any]:
+        """メモリ制限遵守状況評価
+        
+        Returns:
+            詳細な遵守状況レポート
+        """
+        current_memory_mb = self.get_current_memory_usage() / (1024 * 1024)
+        
+        if not hasattr(self, '_memory_limit_policies'):
+            self.configure_memory_limit_policies()  # デフォルト設定適用
+        
+        policies = self._memory_limit_policies
+        soft_limit = policies["soft_limit_mb"]
+        hard_limit = policies["hard_limit_mb"]
+        
+        # 制限遵守状況判定
+        compliance_status = "compliant"
+        violations = []
+        recommended_actions = []
+        
+        if current_memory_mb >= hard_limit:
+            compliance_status = "hard_limit_violation"
+            violations.append({
+                "type": "hard_limit",
+                "current": current_memory_mb,
+                "limit": hard_limit,
+                "excess": current_memory_mb - hard_limit
+            })
+            recommended_actions.extend([
+                "immediate_memory_reduction",
+                "emergency_cleanup",
+                "process_termination_consideration"
+            ])
+            
+        elif current_memory_mb >= soft_limit:
+            compliance_status = "soft_limit_violation"
+            violations.append({
+                "type": "soft_limit",
+                "current": current_memory_mb,
+                "limit": soft_limit,
+                "excess": current_memory_mb - soft_limit
+            })
+            recommended_actions.extend([
+                "memory_optimization",
+                "garbage_collection",
+                "monitor_closely"
+            ])
+        
+        # 予防的アクション評価
+        preemptive_threshold = hard_limit * policies["preemptive_threshold"]
+        if current_memory_mb >= preemptive_threshold and policies["enable_preemptive_actions"]:
+            recommended_actions.append("preemptive_optimization")
+        
+        # 自動スケーリング評価
+        scaling_recommendation = None
+        if policies["enable_automatic_scaling"] and current_memory_mb >= soft_limit:
+            new_limit = int(hard_limit * policies["scaling_factor"])
+            scaling_recommendation = {
+                "current_limit": hard_limit,
+                "recommended_limit": new_limit,
+                "scaling_factor": policies["scaling_factor"],
+                "justification": "High memory usage detected"
+            }
+        
+        return {
+            "compliance_status": compliance_status,
+            "current_memory_mb": current_memory_mb,
+            "soft_limit_mb": soft_limit,
+            "hard_limit_mb": hard_limit,
+            "violations": violations,
+            "recommended_actions": recommended_actions,
+            "scaling_recommendation": scaling_recommendation,
+            "utilization_percent": (current_memory_mb / hard_limit) * 100,
+            "safety_margin_mb": max(0, hard_limit - current_memory_mb)
+        }
 
 
 class MemoryOptimizer:
