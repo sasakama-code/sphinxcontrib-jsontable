@@ -724,7 +724,7 @@ class AutoScalingManager:
         """負荷評価実行（企業グレード）"""
         try:
             # 負荷パターン分析
-            load_patterns = self._analyze_load_patterns(options)
+            _ = self._analyze_load_patterns(options)
 
             # 予測分析
             if options.get("predictive_analysis"):

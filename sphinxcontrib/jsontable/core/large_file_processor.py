@@ -138,7 +138,7 @@ class LargeFileProcessor:
         # 統合コンポーネント初期化
         self._initialize_components()
 
-        # REFACTOR: エンタープライズグレード統計データ
+        # REFACTOR: エンタープライズグレード統計データ（精密計測強化）
         self._stats = {
             # 基本統計
             "total_processing_time": 0.0,
@@ -170,6 +170,21 @@ class LargeFileProcessor:
             "availability_score": 1.0,
             "reliability_index": 1.0,
             "performance_consistency": 1.0,
+            
+            # REFACTOR: 精密計測統計（エンタープライズ監査対応）
+            "processing_start_timestamp": 0.0,
+            "processing_end_timestamp": 0.0,
+            "memory_samples_collected": 0,
+            "performance_bottlenecks": [],
+            "optimization_triggers": {},
+            "system_resource_usage": {},
+            "audit_checkpoints": [],
+            "quality_metrics": {
+                "accuracy": 1.0,
+                "completeness": 1.0,
+                "consistency": 1.0,
+                "timeliness": 1.0,
+            }
         }
 
         # メモリ監視
@@ -269,15 +284,56 @@ class LargeFileProcessor:
             chunk_count = 0
             recovery_attempts = 0
 
+            # GREEN: 最適化設定をチャンク処理に反映
+            if optimized_config["memory_conservative"]:
+                # チャンクサイズを実際に適用
+                self.chunk_processor.chunk_size = optimized_config["chunk_size"]
+                self.streaming_reader.chunk_size = optimized_config["chunk_size"]
+
             # チャンク最適化処理（ストリーミング統合）
             for optimized_chunk in self.chunk_processor.process_chunks(file_path):
                 processed_chunks.append(optimized_chunk)
                 chunk_count += 1
 
-                # 効率的メモリ監視（10チャンクごと）
-                if chunk_count % 10 == 0:
+                # GREEN: 適応的メモリ監視とガベージコレクション
+                gc_frequency = optimized_config.get("gc_frequency", 10)
+                if chunk_count % gc_frequency == 0:
+                    # 現在のメモリ使用量チェック
                     current_memory = self._get_memory_usage()
+                    current_memory_mb = current_memory / 1024 / 1024
                     self._peak_memory = max(self._peak_memory, current_memory)
+                    
+                    # GREEN: メモリ制限チェックと積極的クリーンアップ
+                    if current_memory_mb > self.memory_limit_mb * 0.8:  # 80%超の場合
+                        # 積極的ガベージコレクション
+                        collected = gc.collect()
+                        self.logger.info(f"Aggressive GC: freed {collected} objects at chunk {chunk_count}")
+                        
+                        # メモリ圧迫が続く場合の緊急処置
+                        post_gc_memory = self._get_memory_usage() / 1024 / 1024
+                        if post_gc_memory > self.memory_limit_mb * 0.9:  # 90%以上
+                            # GREEN: チャンクサイズをより小さく削減（最小100）
+                            new_chunk_size = max(100, optimized_config["chunk_size"] // 3)
+                            self.chunk_processor.chunk_size = new_chunk_size
+                            self.streaming_reader.chunk_size = new_chunk_size
+                            optimized_config["chunk_size"] = new_chunk_size
+                            
+                            # GREEN: メモリプールの緊急クリーンアップ
+                            if hasattr(self.memory_pool, 'clear_all_pools'):
+                                self.memory_pool.clear_all_pools()
+                            elif hasattr(self.memory_pool, '_clear_emergency'):
+                                self.memory_pool._clear_emergency()
+                            
+                            # GREEN: 処理済みチャンクの即座解放
+                            if len(processed_chunks) > 3:  # 最新3つ以外解放
+                                chunks_to_clear = processed_chunks[:-3]
+                                for chunk in chunks_to_clear:
+                                    if hasattr(chunk, 'data') and chunk.data is not None:
+                                        chunk.data = None
+                                processed_chunks = processed_chunks[-3:]  # 最新3つのみ保持
+                            
+                            self.logger.warning(f"Emergency measures: chunk size {new_chunk_size}, cleared {len(chunks_to_clear) if 'chunks_to_clear' in locals() else 0} chunks")
+                            result.memory_optimizations_applied += 1
 
                 # 最適化されたメモリプール活用
                 if (
@@ -292,6 +348,25 @@ class LargeFileProcessor:
                     if pooled_df.from_pool:
                         self._stats["memory_pool_hits"] += 1
                     self.memory_pool.release_dataframe(pooled_df)
+                
+                # GREEN: メモリ保守的モードでのチャンクデータ即座解放
+                if optimized_config.get("memory_conservative", False):
+                    # チャンクデータのサイズを取得して統計に加算
+                    if hasattr(optimized_chunk, "data") and optimized_chunk.data is not None:
+                        # 行数をカウント
+                        if hasattr(optimized_chunk.data, "shape"):
+                            chunk_rows = len(optimized_chunk.data)
+                        elif isinstance(optimized_chunk.data, list):
+                            chunk_rows = len(optimized_chunk.data)
+                        else:
+                            chunk_rows = 1
+                        
+                        # 即座にデータ解放（メモリ節約）
+                        optimized_chunk.data = None
+                        
+                        # 軽量な情報のみ保持
+                        optimized_chunk.row_count = chunk_rows
+                        optimized_chunk.processed = True
 
             # 統計更新（一括処理で効率化）
             self._stats["streaming_reader_usage"] = chunk_count
@@ -308,10 +383,13 @@ class LargeFileProcessor:
             self._stats["overall_efficiency"] = 1.2  # 20%改善（基本値）
             self._stats["memory_optimization"] = 1.1  # 10%改善（基本値）
 
-            # 処理結果作成
+            # GREEN: 処理結果作成（データ解放対応）
             total_rows = 0
             for chunk in processed_chunks:
-                if hasattr(chunk, "data") and chunk.data is not None:
+                # GREEN: 解放されたチャンクの行数復元
+                if hasattr(chunk, 'row_count'):
+                    total_rows += chunk.row_count
+                elif hasattr(chunk, "data") and chunk.data is not None:
                     if hasattr(chunk.data, "shape"):
                         # DataFrameの場合
                         total_rows += len(chunk.data)
@@ -462,7 +540,7 @@ class LargeFileProcessor:
     def _optimize_processing_config(
         self, file_path: Path, processing_mode: str, edge_cases: List[str]
     ) -> Dict[str, Any]:
-        """処理設定適応最適化"""
+        """処理設定適応最適化（GREEN: ストレスメモリ制限強化）"""
         config = {
             "chunk_size": self.streaming_chunk_size,
             "memory_conservative": False,
@@ -470,20 +548,38 @@ class LargeFileProcessor:
             "monitoring_interval": 1.0,
         }
         
+        # GREEN: より厳格なメモリ制限対応
+        file_size_mb = self._get_file_size_mb(file_path)
+        current_memory = self._get_memory_usage() / 1024 / 1024
+        memory_pressure_ratio = current_memory / self.memory_limit_mb
+        
         # エッジケースに応じた設定調整
         if "extremely_large_file" in edge_cases:
-            config["chunk_size"] = max(1000, self.streaming_chunk_size // 2)
+            config["chunk_size"] = max(800, self.streaming_chunk_size // 3)  # より小さく
             config["memory_conservative"] = True
-            config["gc_frequency"] = 5
+            config["gc_frequency"] = 3  # より頻繁に
         elif "pre_existing_memory_pressure" in edge_cases:
-            config["chunk_size"] = max(500, self.streaming_chunk_size // 4)
+            config["chunk_size"] = max(400, self.streaming_chunk_size // 5)  # さらに小さく
             config["memory_conservative"] = True
-            config["monitoring_interval"] = 0.5
+            config["monitoring_interval"] = 0.2  # より頻繁な監視
+            config["gc_frequency"] = 2
         
-        # 処理モード調整
+        # GREEN: 処理モード調整（メモリ保守的強化）
         if processing_mode == "memory_conservative":
-            config["chunk_size"] = min(config["chunk_size"], 2000)
-            config["gc_frequency"] = 3
+            # ファイルサイズとメモリ制限に基づく動的調整
+            if file_size_mb > 5.0:  # 5MB超の場合
+                config["chunk_size"] = min(1000, self.streaming_chunk_size // 4)
+            else:
+                config["chunk_size"] = min(1500, self.streaming_chunk_size // 2)
+            
+            config["memory_conservative"] = True
+            config["gc_frequency"] = 2  # 非常に頻繁なGC
+            config["monitoring_interval"] = 0.1  # 高頻度監視
+            
+            # GREEN: メモリ圧迫が高い場合のさらなる最適化
+            if memory_pressure_ratio > 0.7:  # 70%以上の使用率
+                config["chunk_size"] = max(300, config["chunk_size"] // 2)
+                config["gc_frequency"] = 1  # 毎チャンクGC
         elif processing_mode == "speed_priority":
             config["chunk_size"] = self.streaming_chunk_size * 2
             config["gc_frequency"] = 20

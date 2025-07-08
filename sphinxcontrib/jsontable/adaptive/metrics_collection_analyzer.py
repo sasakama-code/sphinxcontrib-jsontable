@@ -1271,11 +1271,7 @@ class MetricsCollectionAnalyzer:
         self, metrics_data: Dict[str, Any], analysis_options: Optional[Dict[str, Any]]
     ) -> MetricsAnalysisResult:
         """内部包括分析処理（企業グレード並行処理版）"""
-        start_time = time.time()
         analysis_timestamp = datetime.now()
-
-        # 並行分析タスク定義
-        analysis_tasks = []
 
         # 各分析を並行実行
         def run_collection_analysis():
@@ -1519,8 +1515,6 @@ class MetricsCollectionAnalyzer:
             quality_issues=[],
             quality_recommendations=["データ品質維持", "継続最適化"],  # REFACTOR強化
         )
-
-        processing_duration = (time.time() - start_time) * 1000
 
         analysis_result = MetricsAnalysisResult(
             analysis_timestamp=analysis_timestamp,

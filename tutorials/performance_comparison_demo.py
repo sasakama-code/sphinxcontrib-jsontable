@@ -20,6 +20,7 @@ import argparse
 import json
 import sys
 import time
+import traceback
 import tracemalloc
 from datetime import datetime
 from pathlib import Path
@@ -235,10 +236,10 @@ class PerformanceDemo:
         memory_improvements = [self.results["comparison"][size]["memory_improvement"] for size in sizes]
         
         # Create comprehensive visualization
-        fig = plt.figure(figsize=(20, 16))
+        _ = plt.figure(figsize=(20, 16))
         
         # 1. Processing Time Comparison
-        ax1 = plt.subplot(3, 3, 1)
+        _ = plt.subplot(3, 3, 1)
         plt.plot(sizes, legacy_times, 'o-', label='Legacy (Before)', linewidth=3, markersize=8, color='#d62728')
         plt.plot(sizes, optimized_times, 'o-', label='Optimized (After)', linewidth=3, markersize=8, color='#2ca02c')
         plt.xlabel('Data Size (records)', fontsize=12)
@@ -250,7 +251,7 @@ class PerformanceDemo:
         plt.yscale('log')
         
         # 2. Memory Usage Comparison
-        ax2 = plt.subplot(3, 3, 2)
+        _ = plt.subplot(3, 3, 2)
         plt.plot(sizes, legacy_memory, 's-', label='Legacy (Before)', linewidth=3, markersize=8, color='#d62728')
         plt.plot(sizes, optimized_memory, 's-', label='Optimized (After)', linewidth=3, markersize=8, color='#2ca02c')
         plt.xlabel('Data Size (records)', fontsize=12)
@@ -261,7 +262,7 @@ class PerformanceDemo:
         plt.xscale('log')
         
         # 3. Speed Improvement Percentage
-        ax3 = plt.subplot(3, 3, 3)
+        _ = plt.subplot(3, 3, 3)
         bars = plt.bar(range(len(sizes)), speed_improvements, color='#1f77b4', alpha=0.8, edgecolor='black')
         plt.xlabel('Data Size (records)', fontsize=12)
         plt.ylabel('Speed Improvement (%)', fontsize=12)
@@ -269,13 +270,13 @@ class PerformanceDemo:
         plt.xticks(range(len(sizes)), [f'{size:,}' for size in sizes], rotation=45)
         plt.grid(True, alpha=0.3)
         # Add value labels on bars
-        for i, bar in enumerate(bars):
+        for _i, bar in enumerate(bars):
             height = bar.get_height()
             plt.text(bar.get_x() + bar.get_width()/2., height + 0.5,
                      f'{height:.1f}%', ha='center', va='bottom', fontweight='bold')
         
         # 4. Memory Improvement Percentage
-        ax4 = plt.subplot(3, 3, 4)
+        _ = plt.subplot(3, 3, 4)
         bars = plt.bar(range(len(sizes)), memory_improvements, color='#ff7f0e', alpha=0.8, edgecolor='black')
         plt.xlabel('Data Size (records)', fontsize=12)
         plt.ylabel('Memory Reduction (%)', fontsize=12)
@@ -283,13 +284,13 @@ class PerformanceDemo:
         plt.xticks(range(len(sizes)), [f'{size:,}' for size in sizes], rotation=45)
         plt.grid(True, alpha=0.3)
         # Add value labels on bars
-        for i, bar in enumerate(bars):
+        for _i, bar in enumerate(bars):
             height = bar.get_height()
             plt.text(bar.get_x() + bar.get_width()/2., height + 0.5,
                      f'{height:.1f}%', ha='center', va='bottom', fontweight='bold')
         
         # 5. Scaling Efficiency
-        ax5 = plt.subplot(3, 3, 5)
+        _ = plt.subplot(3, 3, 5)
         legacy_scaling = [t / sizes[0] for t in legacy_times]
         optimized_scaling = [t / sizes[0] for t in optimized_times]
         plt.plot(sizes, legacy_scaling, 'o-', label='Legacy Scaling', linewidth=3, markersize=8, color='#d62728')
@@ -302,7 +303,7 @@ class PerformanceDemo:
         plt.xscale('log')
         
         # 6. Combined Improvement Heatmap
-        ax6 = plt.subplot(3, 3, 6)
+        _ = plt.subplot(3, 3, 6)
         improvement_matrix = np.array([speed_improvements, memory_improvements])
         im = plt.imshow(improvement_matrix, cmap='RdYlGn', aspect='auto')
         plt.colorbar(im, label='Improvement (%)')
@@ -311,7 +312,7 @@ class PerformanceDemo:
         plt.title('🎯 Overall Improvement Heatmap', fontsize=14, fontweight='bold')
         
         # 7. Time vs Memory Trade-off
-        ax7 = plt.subplot(3, 3, 7)
+        _ = plt.subplot(3, 3, 7)
         plt.scatter(legacy_times, legacy_memory, s=100, alpha=0.7, label='Legacy', color='#d62728')
         plt.scatter(optimized_times, optimized_memory, s=100, alpha=0.7, label='Optimized', color='#2ca02c')
         for i, size in enumerate(sizes):

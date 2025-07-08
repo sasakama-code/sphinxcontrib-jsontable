@@ -1283,7 +1283,7 @@ class MonitoringDataPersistence:
 
         # データ処理統計
         total_records = 0
-        for category, data in monitoring_data.items():
+        for _category, data in monitoring_data.items():
             if isinstance(data, list):
                 total_records += len(data)
             elif isinstance(data, dict):

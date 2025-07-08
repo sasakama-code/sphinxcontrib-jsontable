@@ -838,8 +838,6 @@ class AlertNotificationSystem:
     ) -> AlertResult:
         """ML強化異常検出実行"""
 
-        start_time = time.time()
-
         # ML異常検出シミュレーション
         anomaly_scores = [0.95, 0.87, 0.92, 0.89, 0.94]
         pattern_classifications = ["normal", "anomaly", "warning", "normal", "anomaly"]
@@ -848,8 +846,6 @@ class AlertNotificationSystem:
             {"metric": "cpu", "predicted_value": 89.3, "confidence": 0.88},
         ]
         adaptive_thresholds = {"memory_usage": 90.0, "cpu_usage": 85.0}
-
-        processing_time = time.time() - start_time
 
         # ML品質指標
         anomaly_detection_accuracy = 0.98  # GREEN基本値
@@ -889,8 +885,6 @@ class AlertNotificationSystem:
     ) -> AlertResult:
         """企業グレード通知実行"""
 
-        start_time = time.time()
-
         # 企業通知処理シミュレーション
         delivery_confirmations = {"critical": True, "warning": True}
         escalation_status = {"critical": "escalated", "warning": "pending"}
@@ -906,8 +900,6 @@ class AlertNotificationSystem:
                 "channel": "email",
             },
         ]
-
-        processing_time = time.time() - start_time
 
         # 企業品質指標
         delivery_success_rate = 0.999  # GREEN基本値
@@ -989,8 +981,6 @@ class AlertNotificationSystem:
     ) -> AlertResult:
         """統合アラート処理実行"""
 
-        start_time = time.time()
-
         # 統合処理シミュレーション
         correlated_alerts = [
             {"alert_id": "alert_001", "correlation_score": 0.95},
@@ -1005,8 +995,6 @@ class AlertNotificationSystem:
             {"insight": "memory_cpu_correlation", "confidence": 0.94},
         ]
         integration_health = {"monitor_sync": 0.98, "metrics_sync": 0.96}
-
-        processing_time = time.time() - start_time
 
         # 統合品質指標
         integration_success_rate = 0.98  # GREEN基本値
@@ -1047,8 +1035,6 @@ class AlertNotificationSystem:
     ) -> AlertResult:
         """インテリジェントアラート処理実行"""
 
-        start_time = time.time()
-
         # インテリジェント処理シミュレーション
         filtered_alerts = raw_alerts[:10]  # フィルタリング結果
         priority_rankings = [
@@ -1058,8 +1044,6 @@ class AlertNotificationSystem:
         duplicate_groups = [["alert_003", "alert_015"], ["alert_007", "alert_022"]]
         context_insights = {"business_impact": "high", "trend": "increasing"}
         business_impact_scores = {"alert_001": 0.94, "alert_002": 0.78}
-
-        processing_time = time.time() - start_time
 
         # インテリジェント品質指標
         filtering_effectiveness = 0.90  # GREEN基本値
@@ -1145,8 +1129,6 @@ class AlertNotificationSystem:
     ) -> AlertResult:
         """エッジケース耐性テスト"""
 
-        start_time = time.time()
-
         # エッジケース処理シミュレーション
         time.sleep(0.1)  # シミュレーション遅延
 
@@ -1184,8 +1166,6 @@ class AlertNotificationSystem:
     ) -> AlertResult:
         """品質検証実行"""
 
-        start_time = time.time()
-
         # 品質検証シミュレーション
         sla_compliance_status = {
             "delivery": 0.999,
@@ -1197,8 +1177,6 @@ class AlertNotificationSystem:
             "Enhance ML model accuracy",
             "Improve notification delivery speed",
         ]
-
-        processing_time = time.time() - start_time
 
         # 品質指標
         overall_quality_score = 0.96  # GREEN基本値

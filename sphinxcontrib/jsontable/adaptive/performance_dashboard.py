@@ -979,12 +979,7 @@ class PerformanceDashboard:
     ) -> VisualizationResult:
         """リアルタイムデータストリーム処理"""
 
-        start_time = time.time()
-
         # リアルタイム処理シミュレーション
-        processed_count = len(data_stream)
-        total_processing_time = time.time() - start_time
-
         # リアルタイム性能指標計算
         frame_rate_achieved = 58.0  # 58fps
         update_latency_ms = 25.0  # 25ms
@@ -1023,8 +1018,6 @@ class PerformanceDashboard:
     ) -> VisualizationResult:
         """統合ダッシュボード処理実行"""
 
-        start_time = time.time()
-
         # 統合処理シミュレーション
         unified_dashboard_view = {
             "overall_health": 0.94,
@@ -1046,8 +1039,6 @@ class PerformanceDashboard:
             "processing_stages": 5,
             "latency_breakdown": {"monitor": 10, "analyze": 15, "alert": 8},
         }
-
-        processing_time = time.time() - start_time
 
         # 統合品質指標
         integration_success_rate = 0.98  # GREEN基本値
@@ -1089,8 +1080,6 @@ class PerformanceDashboard:
     ) -> VisualizationResult:
         """UI インタラクション処理"""
 
-        start_time = time.time()
-
         # インタラクション処理シミュレーション
         interaction_responses = []
         for interaction in interactions:
@@ -1105,8 +1094,6 @@ class PerformanceDashboard:
         layout_changes = {"widgets_moved": 3, "size_changes": 2, "theme_applied": True}
         widget_configurations = {"active_widgets": 8, "custom_widgets": 2}
         theme_settings = {"current_theme": "enterprise", "custom_colors": True}
-
-        processing_time = time.time() - start_time
 
         # インタラクション品質指標
         interaction_responsiveness = 0.98  # GREEN基本値
@@ -1147,8 +1134,6 @@ class PerformanceDashboard:
         start_time = time.time()
 
         # デバイス適応処理シミュレーション
-        device_type = device_config.get("device", "unknown")
-
         layout_adaptation = {
             "layout_optimized": True,
             "breakpoint_applied": device_config.get("width", 1024),
@@ -1169,8 +1154,6 @@ class PerformanceDashboard:
             "background_processing": "minimal",
             "refresh_rate_adaptive": True,
         }
-
-        processing_time = time.time() - start_time
 
         # デバイス別品質指標
         layout_adaptation_accuracy = 0.96  # GREEN基本値
@@ -1214,15 +1197,11 @@ class PerformanceDashboard:
         data_points = visualization_data.get("time_series_data", {}).get(
             "data_points", 100000
         )
-        charts_count = len(visualization_data.get("chart_components", []))
-
         # GPU利用率とメモリ使用量計算
         gpu_utilization = 0.75  # 75%
         memory_usage = min(512, data_points / 200)  # 最大512MB
         cpu_efficiency = 0.88  # 88%
         frame_rate_achieved = 58.0  # 58fps
-
-        processing_time = time.time() - start_time
 
         # レンダリング品質指標
         rendering_quality_score = 0.96  # GREEN基本値
