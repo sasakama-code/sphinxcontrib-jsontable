@@ -15,16 +15,21 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.util import logging as sphinx_logging
 
+from ..errors.user_friendly_error_handler import UserFriendlyErrorHandler
 from .backward_compatibility import (
     DEFAULT_ENCODING,
     DEFAULT_MAX_ROWS,
     NO_JSON_SOURCE_ERROR,
 )
 from .base_directive import BaseDirective
+
+# Issue #48, #49, #50: Import new enhancement modules
+from .column_customizer import ColumnCustomizer
+from .data_type_renderer import DataTypeRenderer
+from .interactive_table_builder import InteractiveTableBuilder
 from .json_processor import JsonProcessor
 from .table_converter import TableConverter
 from .validators import JsonTableError, ValidationUtils
-from ..errors.user_friendly_error_handler import UserFriendlyErrorHandler
 
 # Type definitions
 JsonData = list[Any] | dict[str, Any]
@@ -64,8 +69,9 @@ class JsonTableDirective(BaseDirective):
     required_arguments = 0
     optional_arguments = 1
 
-    # Complete option specification - 100% compatible with original
+    # Complete option specification - 100% compatible with original + Issue #48,#49,#50 enhancements
     option_spec: ClassVar[dict[str, Any]] = {
+        # Original options (100% backward compatible)
         "header": directives.flag,
         "encoding": directives.unchanged,
         "limit": directives.nonnegative_int,
@@ -79,6 +85,24 @@ class JsonTableDirective(BaseDirective):
         "merge-cells": directives.unchanged,
         "merge-headers": directives.unchanged,
         "json-cache": directives.flag,
+        # Issue #48: Column Customization Options
+        "columns": directives.unchanged,  # Column selection: "name,age,score"
+        "column-order": directives.unchanged,  # Column ordering: "score,name,age"
+        "column-widths": directives.unchanged,  # Column widths: "30%,40%,30%"
+        # Issue #49: Data Type Rendering Options
+        "data-format": directives.unchanged,  # Format style: "auto", "raw", "enhanced"
+        "auto-format": directives.flag,  # Enable automatic type detection
+        "boolean-style": directives.unchanged,  # Boolean style: "checkmark", "badge", "text"
+        "date-format": directives.unchanged,  # Date format: "localized", "iso", "short"
+        "number-format": directives.unchanged,  # Number format: "formatted", "raw", "scientific"
+        # Issue #50: Interactive Sorting Options
+        "sortable": directives.flag,  # Enable sorting functionality
+        "sort-columns": directives.unchanged,  # Sortable columns: "name,score"
+        "default-sort": directives.unchanged,  # Default sort: "column:direction"
+        "javascript-library": directives.unchanged,  # JS library: "datatables", "custom", "none"
+        "enable-search": directives.flag,  # Enable search functionality
+        "enable-pagination": directives.flag,  # Enable pagination
+        "page-length": directives.nonnegative_int,  # Rows per page
     }
 
     def _initialize_processors(self) -> None:
@@ -100,7 +124,7 @@ class JsonTableDirective(BaseDirective):
         if hasattr(srcdir, "_mock_name"):  # Mock object detection
             srcdir = "/tmp/test_docs"
         self.base_path = Path(srcdir)
-        
+
         # Initialize user-friendly error handler for enhanced UX
         self.ux_error_handler = UserFriendlyErrorHandler()
 
@@ -135,11 +159,36 @@ class JsonTableDirective(BaseDirective):
         # Initialize table converter
         self.table_converter = TableConverter(default_max_rows)
 
+        # Issue #48: Initialize Column Customizer
+        self.column_customizer = ColumnCustomizer()
+
+        # Issue #49: Initialize Data Type Renderer with options
+        data_renderer_options = {
+            "auto_format": self.options.get("auto-format", True),
+            "boolean_style": self.options.get("boolean-style", "checkmark"),
+            "date_format": self.options.get("date-format", "localized"),
+            "number_format": self.options.get("number-format", "formatted"),
+            "url_target": "_blank",
+        }
+        self.data_type_renderer = DataTypeRenderer(**data_renderer_options)
+
+        # Issue #50: Initialize Interactive Table Builder with options
+        interactive_options = {
+            "javascript_library": self.options.get("javascript-library", "datatables"),
+            "enable_search": self.options.get("enable-search", True),
+            "enable_pagination": self.options.get("enable-pagination", True),
+            "page_length": self.options.get("page-length", 25),
+            "responsive": True,
+        }
+        self.interactive_table_builder = InteractiveTableBuilder(**interactive_options)
+
         # Backward compatibility aliases
         self.converter = self.table_converter
         self.builder = self.table_builder
 
-        logger.info("JsonTableDirective processors initialized successfully")
+        logger.info(
+            "JsonTableDirective processors initialized successfully (with Issue #48,#49,#50 enhancements)"
+        )
 
     def _load_data(self) -> JsonData:
         """Load data from file argument or inline content."""
@@ -263,10 +312,78 @@ class JsonTableDirective(BaseDirective):
                 else:
                     table_data = table_data[:limit]
 
-            # Step 5: Build docutils table
-            table_nodes = self.table_builder.build_table(table_data)
+            # Step 5: Issue #48 - Apply column customization
+            column_widths = {}
+            if any(
+                opt in self.options
+                for opt in ["columns", "column-order", "column-widths"]
+            ):
+                logger.debug("Applying column customization")
+                table_data, column_widths = self.column_customizer.customize_columns(
+                    table_data,
+                    columns=self.options.get("columns"),
+                    column_order=self.options.get("column-order"),
+                    column_widths=self.options.get("column-widths"),
+                )
+                logger.debug(
+                    f"Column customization applied: {len(table_data[0]) if table_data else 0} columns"
+                )
 
-            logger.info("JsonTableDirective execution completed successfully")
+            # Step 6: Issue #49 - Apply data type rendering
+            if self.options.get("auto-format") or self.options.get("data-format"):
+                logger.debug("Applying data type rendering")
+                table_data = self.data_type_renderer.render_table_data(
+                    table_data, data_format=self.options.get("data-format")
+                )
+                logger.debug("Data type rendering applied")
+
+            # Step 7: Issue #50 - Build interactive table with sorting
+            if self.options.get("sortable") or self.options.get("javascript-library"):
+                logger.debug("Building interactive table with sorting")
+
+                # Parse sort columns and default sort
+                sort_columns = None
+                if self.options.get("sort-columns"):
+                    sort_columns = [
+                        col.strip() for col in self.options["sort-columns"].split(",")
+                    ]
+
+                default_sort = None
+                if self.options.get("default-sort"):
+                    sort_spec = self.options["default-sort"]
+                    if ":" in sort_spec:
+                        col, direction = sort_spec.split(":", 1)
+                        default_sort = {
+                            "column": col.strip(),
+                            "direction": direction.strip(),
+                        }
+
+                table_nodes = self.interactive_table_builder.build_interactive_table(
+                    table_data,
+                    sortable=self.options.get("sortable", True),
+                    sort_columns=sort_columns,
+                    default_sort=default_sort,
+                    css_classes=["jsontable-enhanced"] if column_widths else None,
+                )
+
+                logger.debug("Interactive table built successfully")
+            else:
+                # Step 7 (Alternative): Build standard docutils table
+                logger.debug("Building standard docutils table")
+                table_nodes = self.table_builder.build_table(
+                    table_data, has_header=include_header
+                )
+
+            # Apply column widths to CSS if specified
+            if column_widths and table_nodes:
+                self._apply_column_widths_to_table(
+                    table_nodes[0] if isinstance(table_nodes, list) else table_nodes,
+                    column_widths,
+                )
+
+            logger.info(
+                "JsonTableDirective execution completed successfully (with Issue #48,#49,#50 enhancements)"
+            )
             return table_nodes
 
         except (JsonTableError, FileNotFoundError) as e:
@@ -274,13 +391,15 @@ class JsonTableDirective(BaseDirective):
             try:
                 # Try user-friendly error formatting first
                 ux_response = self.ux_error_handler.create_user_friendly_response(
-                    e, context="JsonTable directive", file_path=self.arguments[0] if self.arguments else None
+                    e,
+                    context="JsonTable directive",
+                    file_path=self.arguments[0] if self.arguments else None,
                 )
                 error_msg = self._format_user_friendly_error(ux_response)
             except Exception:
                 # Fallback to original error handling
                 error_msg = ValidationUtils.format_error("JsonTable directive error", e)
-            
+
             logger.error(error_msg)
             return [self._create_error_node(error_msg)]
 
@@ -491,10 +610,10 @@ class JsonTableDirective(BaseDirective):
 
     def _format_user_friendly_error(self, ux_response: dict[str, Any]) -> str:
         """Format user-friendly error response for display in documentation.
-        
+
         Args:
             ux_response: User-friendly error response from UserFriendlyErrorHandler
-            
+
         Returns:
             Formatted error message with guidance
         """
@@ -502,120 +621,128 @@ class JsonTableDirective(BaseDirective):
         error_parts = [
             f"❌ {ux_response['user_friendly_message']}",
             "",
-            "🔧 **Quick Solutions:**"
+            "🔧 **Quick Solutions:**",
         ]
-        
+
         # Add quick fixes
-        for i, fix in enumerate(ux_response.get('quick_fixes', [])[:3], 1):
+        for i, fix in enumerate(ux_response.get("quick_fixes", [])[:3], 1):
             error_parts.append(f"   {i}. {fix}")
-        
+
         # Add resolution steps if there are many
-        if len(ux_response.get('resolution_steps', [])) > 3:
-            error_parts.extend([
-                "",
-                "📋 **Step-by-step guide:**"
-            ])
-            for step in ux_response.get('resolution_steps', [])[:4]:
+        if len(ux_response.get("resolution_steps", [])) > 3:
+            error_parts.extend(["", "📋 **Step-by-step guide:**"])
+            for step in ux_response.get("resolution_steps", [])[:4]:
                 error_parts.append(f"   {step}")
-        
+
         # Add estimated fix time
-        if 'estimated_fix_time' in ux_response:
-            error_parts.extend([
-                "",
-                f"⏱️ **Estimated fix time:** {ux_response['estimated_fix_time']}"
-            ])
-        
+        if "estimated_fix_time" in ux_response:
+            error_parts.extend(
+                ["", f"⏱️ **Estimated fix time:** {ux_response['estimated_fix_time']}"]
+            )
+
         # Add documentation links
-        doc_links = ux_response.get('documentation_links', [])
+        doc_links = ux_response.get("documentation_links", [])
         if doc_links:
-            error_parts.extend([
-                "",
-                "📚 **Helpful guides:**"
-            ])
+            error_parts.extend(["", "📚 **Helpful guides:**"])
             for link in doc_links[:2]:
                 error_parts.append(f"   • {link}")
-        
+
         return "\n".join(error_parts)
 
-    def format_excel_errors(self, error: Exception) -> str:
-        """Enhanced Excel error formatting with user-friendly guidance.
-        
-        Args:
-            error: Exception that occurred
-            
-        Returns:
-            User-friendly formatted error message
+
+    def _apply_column_widths_to_table(
+        self, table_node: nodes.table, column_widths: dict[str, str]
+    ) -> None:
         """
-        logger.debug(f"Formatting Excel error: {type(error).__name__}: {error}")
-        
+        Apply column width specifications to table node.
+
+        This method adds CSS width specifications to table columns for enhanced
+        presentation control when column customization is used.
+
+        Args:
+            table_node: Docutils table node to modify
+            column_widths: Column name to width mapping (e.g., {"name": "40%", "age": "20%"})
+
+        Note:
+            This method modifies the table node in-place by adding CSS classes
+            and style attributes for column width control.
+        """
+        if not column_widths or not table_node:
+            return
+
+        logger.debug(f"Applying column widths to table: {column_widths}")
+
         try:
-            # Try user-friendly error handling first
-            file_path = self.arguments[0] if self.arguments else None
-            ux_response = self.ux_error_handler.create_user_friendly_response(
-                error, context="Excel processing", file_path=file_path
-            )
-            return self._format_user_friendly_error(ux_response)
-            
+            # Find the tgroup element
+            tgroup = None
+            for child in table_node.children:
+                if isinstance(child, nodes.tgroup):
+                    tgroup = child
+                    break
+
+            if not tgroup:
+                logger.warning("Could not find tgroup element in table")
+                return
+
+            # Find colspec elements and update widths
+            colspecs = [
+                child for child in tgroup.children if isinstance(child, nodes.colspec)
+            ]
+
+            # Find header row to map column names to indices
+            thead = None
+            for child in tgroup.children:
+                if isinstance(child, nodes.thead):
+                    thead = child
+                    break
+
+            if not thead:
+                logger.warning("Could not find thead element for column mapping")
+                return
+
+            # Extract header row
+            header_row = None
+            for child in thead.children:
+                if isinstance(child, nodes.row):
+                    header_row = child
+                    break
+
+            if not header_row:
+                logger.warning("Could not find header row")
+                return
+
+            # Map column names to indices
+            column_indices = {}
+            for i, entry in enumerate(header_row.children):
+                if isinstance(entry, nodes.entry):
+                    # Extract text content from the entry
+                    text_content = ""
+                    for para in entry.children:
+                        if isinstance(para, nodes.paragraph):
+                            text_content = para.astext()
+                            break
+                    column_indices[text_content] = i
+
+            # Apply widths to colspec elements
+            for column_name, width in column_widths.items():
+                if column_name in column_indices:
+                    col_index = column_indices[column_name]
+                    if col_index < len(colspecs):
+                        colspec = colspecs[col_index]
+                        # Set width attribute for HTML rendering
+                        colspec["width"] = width
+                        logger.debug(
+                            f"Applied width {width} to column '{column_name}' (index {col_index})"
+                        )
+
+            # Add CSS class to table for styling
+            if "classes" not in table_node:
+                table_node["classes"] = []
+            if "jsontable-custom-widths" not in table_node["classes"]:
+                table_node["classes"].append("jsontable-custom-widths")
+
+            logger.debug("Column widths applied successfully")
+
         except Exception as e:
-            logger.warning(f"User-friendly error formatting failed: {e}")
-            # Fallback to original error formatting
-            return self._format_legacy_excel_error(error)
-
-    def _format_legacy_excel_error(self, error: Exception) -> str:
-        """Legacy Excel error formatting (fallback).
-        
-        Args:
-            error: Exception that occurred
-            
-        Returns:
-            Formatted error message using legacy method
-        """
-        error_type = type(error).__name__
-        error_message = str(error)
-
-        # エラーメッセージのサニタイゼーション（機密情報除去）
-        sanitized_message = self._sanitize_error_message(error_message)
-
-        # エラータイプ別の整形（メッセージ内容も確認）
-        if (
-            "FileNotFoundError" in error_type
-            or "not found" in sanitized_message.lower()
-        ):
-            return f"Excel file not found: {sanitized_message}"
-        elif (
-            "PermissionError" in error_type
-            or "permission" in sanitized_message.lower()
-            or "not readable" in sanitized_message.lower()
-        ):
-            return f"Cannot access Excel file (permission denied): {sanitized_message}"
-        elif "ValidationError" in error_type or "ValueError" in error_type:
-            return f"Excel file validation error: {sanitized_message}"
-        elif "ProcessingError" in error_type or "processing" in error_type.lower():
-            return f"Excel processing error: {sanitized_message}"
-        elif "SecurityError" in error_type or "security" in sanitized_message.lower():
-            return f"Excel security error: {sanitized_message}"
-        elif "HeaderError" in error_type:
-            return f"Excel header configuration error: {sanitized_message}"
-        elif "RangeError" in error_type:
-            return f"Excel range specification error: {sanitized_message}"
-        elif "JsonTableError" in error_type:
-            # JsonTableErrorの内容を分析してより具体的なメッセージを提供
-            if "security" in sanitized_message.lower():
-                return f"Excel security error: {sanitized_message}"
-            elif "file" in sanitized_message.lower() and (
-                "not found" in sanitized_message.lower()
-                or "not exist" in sanitized_message.lower()
-            ):
-                return f"Excel file not found: {sanitized_message}"
-            elif (
-                "readable" in sanitized_message.lower()
-                or "permission" in sanitized_message.lower()
-            ):
-                return (
-                    f"Cannot access Excel file (permission denied): {sanitized_message}"
-                )
-            else:
-                return f"Excel processing error: {sanitized_message}"
-        else:
-            # 汎用エラーの場合は特に慎重にサニタイズ
-            return f"Excel processing failed ({error_type}): {sanitized_message}"
+            logger.warning(f"Failed to apply column widths: {e}")
+            # Don't raise exception - width application is optional enhancement
