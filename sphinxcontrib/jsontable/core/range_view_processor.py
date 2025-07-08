@@ -265,13 +265,14 @@ class RangeViewProcessor:
 
                 except Exception as e:
                     logger.warning(f"View optimization failed, using fallback: {e}")
-                    # フォールバック処理
-                    chunk_df = df.iloc[start_row:actual_end_row].copy()
-                    data = chunk_df.to_dict("records")
+                    # フォールバック処理（REFACTOR: copy()回避）
+                    view_df = df.iloc[start_row:actual_end_row]
+                    data = view_df.to_dict("records")
+                    self._view_stats["fallback_activations"] += 1
             else:
-                # 従来方式（フォールバック）
-                chunk_df = df.iloc[start_row:actual_end_row].copy()
-                data = chunk_df.to_dict("records")
+                # 従来方式（REFACTOR: ビュー操作最適化）
+                view_df = df.iloc[start_row:actual_end_row]
+                data = view_df.to_dict("records")
 
             view_creation_time = time.perf_counter() - view_start_time
             final_memory = self.get_memory_usage()
@@ -425,13 +426,14 @@ class RangeViewProcessor:
     def _fallback_traditional_method(
         self, file_path: Union[str, Path], start_row: int, end_row: int
     ) -> RangeViewData:
-        """従来方式フォールバック"""
+        """従来方式フォールバック（REFACTOR: ビュー操作最適化）"""
         file_path = Path(file_path)
         df = pd.read_excel(file_path)
 
         actual_end_row = min(end_row, len(df))
-        chunk_df = df.iloc[start_row:actual_end_row].copy()
-        data = chunk_df.to_dict("records")
+        # REFACTOR: copy()回避でメモリ効率改善
+        view_df = df.iloc[start_row:actual_end_row]
+        data = view_df.to_dict("records")
 
         view_id = f"fallback_{file_path}_{start_row}_{actual_end_row}"
 

@@ -935,6 +935,10 @@ class StreamingExcelReader(IStreamingExcelReader):
         )
         self.chunk_memory_pool = ChunkMemoryPool() if large_file_mode else None
         self.streaming_monitor = StreamingMonitor() if enable_monitoring else None
+        
+        # Task 1.1.4 REFACTOR: 範囲処理ビュー操作統合
+        self.range_view_processor = None
+        self.enable_range_view_optimization = True
 
         logger.debug(
             f"StreamingExcelReader initialized: chunk_size={chunk_size}, "
@@ -1334,10 +1338,19 @@ class StreamingExcelReader(IStreamingExcelReader):
 
                 try:
                     end_idx = min(start_idx + self.chunk_size, total_rows)
-                    chunk_df = df.iloc[start_idx:end_idx]
-
-                    # DataFrameを辞書リストに変換
-                    chunk_data_list = chunk_df.to_dict("records")
+                    
+                    # Task 1.1.4 REFACTOR: 範囲ビュー処理器統合最適化
+                    if (self.range_view_processor and 
+                        self.enable_range_view_optimization and
+                        hasattr(self.range_view_processor, '_chunked_dict_conversion')):
+                        # 範囲ビュー処理器を使用した最適化変換
+                        chunk_df = df.iloc[start_idx:end_idx]
+                        chunk_data_list = self.range_view_processor._chunked_dict_conversion(chunk_df)
+                        logger.debug(f"Range view optimization applied for chunk {chunk_id}")
+                    else:
+                        # 標準方式（既存互換性保持）
+                        chunk_df = df.iloc[start_idx:end_idx]
+                        chunk_data_list = chunk_df.to_dict("records")
 
                     # メモリ使用量チェック
                     current_memory = self.get_memory_usage()
@@ -1801,3 +1814,58 @@ class StreamingExcelReader(IStreamingExcelReader):
         """
         self.memory_monitor = monitor
         logger.debug("Memory monitor attached to StreamingExcelReader")
+
+    def set_range_view_processor(self, processor) -> None:
+        """範囲ビュー処理器設定（Task 1.1.4 REFACTOR）
+        
+        Args:
+            processor: RangeViewProcessorインスタンス
+        """
+        self.range_view_processor = processor
+        # ストリーミングリーダーとの統合設定
+        if hasattr(processor, 'set_streaming_reader'):
+            processor.set_streaming_reader(self)
+        logger.debug("Range view processor attached to StreamingExcelReader")
+    
+    def get_range_view_optimization_stats(self) -> Dict[str, Any]:
+        """範囲ビュー最適化統計取得（Task 1.1.4 REFACTOR）
+        
+        Returns:
+            Dict[str, Any]: 範囲ビュー最適化の統計情報
+        """
+        if not self.range_view_processor:
+            return {
+                "range_view_enabled": False,
+                "optimization_active": False,
+                "performance_improvement": 0.0,
+                "memory_efficiency": 0.0
+            }
+        
+        # 範囲ビュー処理器から統計取得
+        view_stats = self.range_view_processor.get_view_statistics()
+        performance_stats = self.range_view_processor.get_performance_comparison()
+        
+        return {
+            "range_view_enabled": True,
+            "optimization_active": self.enable_range_view_optimization,
+            "view_operations_count": view_stats.get("view_operations_count", 0),
+            "memory_efficiency_ratio": view_stats.get("memory_efficiency_ratio", 0.0),
+            "performance_improvement": performance_stats.get("speedup_ratio", 1.0),
+            "memory_reduction": performance_stats.get("memory_reduction_ratio", 0.0),
+            "cache_hit_ratio": view_stats.get("cache_hit_ratio", 0.0),
+            "integration_status": "active" if self.range_view_processor else "disabled"
+        }
+    
+    def enable_range_view_optimizations(self, enable: bool = True) -> None:
+        """範囲ビュー最適化の有効/無効切り替え（Task 1.1.4 REFACTOR）
+        
+        Args:
+            enable: 最適化を有効にするかどうか
+        """
+        self.enable_range_view_optimization = enable
+        status = "enabled" if enable else "disabled"
+        logger.info(f"Range view optimization {status}")
+        
+        # 範囲ビュー処理器にも通知
+        if self.range_view_processor:
+            self.range_view_processor.enable_view_optimization = enable
