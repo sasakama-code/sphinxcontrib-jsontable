@@ -18,11 +18,7 @@ Task 3.3.1: リアルタイム監視基盤実装
 """
 
 import tempfile
-import threading
-import time
-from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
 from unittest.mock import Mock
 
 import pytest
@@ -138,7 +134,9 @@ class TestRealtimePerformanceMonitor:
         assert distributed_metrics.cross_node_synchronization >= 0.90
         assert distributed_metrics.distributed_data_consistency >= 0.87
 
-        print(f"Realtime monitoring precision: {performance_metrics.monitoring_precision:.1%}")
+        print(
+            f"Realtime monitoring precision: {performance_metrics.monitoring_precision:.1%}"
+        )
         print(f"Collection latency: {performance_metrics.collection_latency_ms:.1f}ms")
 
     @pytest.mark.performance
@@ -195,7 +193,9 @@ class TestRealtimePerformanceMonitor:
 
         # インテリジェント最適化確認
         optimization_results = adaptive_session.intelligent_optimization_results
-        assert optimization_results.monitoring_efficiency_improvement >= 0.25  # 25%以上改善
+        assert (
+            optimization_results.monitoring_efficiency_improvement >= 0.25
+        )  # 25%以上改善
         assert optimization_results.resource_utilization_optimization >= 0.20  # 20%以上
         assert optimization_results.alert_accuracy_enhancement >= 0.30  # 30%以上
         assert optimization_results.operational_cost_reduction >= 0.15  # 15%以上
@@ -206,8 +206,12 @@ class TestRealtimePerformanceMonitor:
         assert predictive_analysis.capacity_forecasting_precision >= 0.85  # 85%以上
         assert predictive_analysis.performance_degradation_prediction >= 0.88  # 88%以上
 
-        print(f"ML prediction accuracy: {ml_integration_metrics.prediction_accuracy:.1%}")
-        print(f"Optimization effectiveness: {optimization_results.monitoring_efficiency_improvement:.1%}")
+        print(
+            f"ML prediction accuracy: {ml_integration_metrics.prediction_accuracy:.1%}"
+        )
+        print(
+            f"Optimization effectiveness: {optimization_results.monitoring_efficiency_improvement:.1%}"
+        )
 
     @pytest.mark.performance
     def test_enterprise_monitoring_integration(self):
@@ -344,7 +348,9 @@ class TestRealtimePerformanceMonitor:
         assert processing_performance.processing_throughput >= 50000  # 5万件/秒以上
         assert processing_performance.processing_latency_ms < 20  # 20ms以下
         assert processing_performance.memory_efficiency >= 0.85  # 85%以上効率
-        assert processing_performance.parallel_processing_speedup >= 3.0  # 3倍以上高速化
+        assert (
+            processing_performance.parallel_processing_speedup >= 3.0
+        )  # 3倍以上高速化
 
         # 時系列分析確認
         time_series_analysis = analytics_session.time_series_analysis_results
@@ -365,8 +371,12 @@ class TestRealtimePerformanceMonitor:
         assert pattern_mining.pattern_classification_accuracy >= 0.85  # 85%以上
         assert pattern_mining.behavioral_pattern_identification >= 0.80  # 80%以上
 
-        print(f"Processing throughput: {processing_performance.processing_throughput:,} points/sec")
-        print(f"Trend detection accuracy: {time_series_analysis.trend_detection_accuracy:.1%}")
+        print(
+            f"Processing throughput: {processing_performance.processing_throughput:,} points/sec"
+        )
+        print(
+            f"Trend detection accuracy: {time_series_analysis.trend_detection_accuracy:.1%}"
+        )
 
     @pytest.mark.performance
     def test_monitoring_alert_notification_system(self):
@@ -506,7 +516,9 @@ class TestRealtimePerformanceMonitor:
         assert visualization_session.realtime_updates_working is True
 
         # 可視化性能確認
-        visualization_performance = visualization_session.visualization_performance_metrics
+        visualization_performance = (
+            visualization_session.visualization_performance_metrics
+        )
         assert visualization_performance.rendering_fps >= 30  # 30FPS以上
         assert visualization_performance.update_latency_ms < 1500  # 1.5秒以下
         assert visualization_performance.memory_usage_mb < 500  # 500MB以下
@@ -606,8 +618,12 @@ class TestRealtimePerformanceMonitor:
         assert scalability_metrics.vertical_scaling_efficiency >= 0.85  # 85%以上
         assert scalability_metrics.distributed_coordination_overhead < 0.15  # 15%以下
 
-        print(f"End-to-end response time: {end_to_end_performance.overall_response_time_ms:.1f}ms")
-        print(f"Monitoring throughput: {end_to_end_performance.monitoring_throughput:,}/sec")
+        print(
+            f"End-to-end response time: {end_to_end_performance.overall_response_time_ms:.1f}ms"
+        )
+        print(
+            f"Monitoring throughput: {end_to_end_performance.monitoring_throughput:,}/sec"
+        )
 
     @pytest.mark.performance
     def test_monitoring_foundation_verification(self):
@@ -698,7 +714,9 @@ class TestRealtimePerformanceMonitor:
         assert continuous_improvement.innovation_pipeline_established is True
 
         print(f"Overall quality score: {quality_assurance.overall_quality_score:.1%}")
-        print(f"Enterprise compliance: {quality_assurance.enterprise_grade_compliance:.1%}")
+        print(
+            f"Enterprise compliance: {quality_assurance.enterprise_grade_compliance:.1%}"
+        )
 
 
 class TestRealtimePerformanceMonitorEdgeCases:
@@ -792,7 +810,9 @@ class TestRealtimePerformanceMonitorEdgeCases:
         recovery_performance = recovery_session.recovery_performance_metrics
         assert recovery_performance.mean_recovery_time_seconds < 60  # 60秒以下
         assert recovery_performance.data_loss_percentage < 0.01  # 0.01%以下
-        assert recovery_performance.service_availability_during_recovery >= 0.95  # 95%以上
+        assert (
+            recovery_performance.service_availability_during_recovery >= 0.95
+        )  # 95%以上
 
     @pytest.mark.performance
     def test_long_duration_monitoring_stability(self):

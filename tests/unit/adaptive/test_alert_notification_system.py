@@ -18,11 +18,9 @@ Task 3.3.3: アラート・通知機能実装
 """
 
 import tempfile
-import threading
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
 from unittest.mock import Mock
 
 import pytest
@@ -98,10 +96,10 @@ class TestAlertNotificationSystem:
         # 大量パフォーマンス異常データシミュレーション
         performance_data = {
             "memory_usage": [85.5, 92.3, 96.7, 98.1, 99.2],  # メモリ使用率上昇
-            "cpu_usage": [45.2, 78.9, 89.4, 95.6, 97.8],     # CPU使用率上昇
-            "response_time": [150, 340, 580, 920, 1250],      # 応答時間悪化
-            "error_rate": [0.1, 0.3, 0.8, 1.5, 2.3],         # エラー率上昇
-            "throughput": [1000, 850, 650, 400, 200],         # スループット低下
+            "cpu_usage": [45.2, 78.9, 89.4, 95.6, 97.8],  # CPU使用率上昇
+            "response_time": [150, 340, 580, 920, 1250],  # 応答時間悪化
+            "error_rate": [0.1, 0.3, 0.8, 1.5, 2.3],  # エラー率上昇
+            "throughput": [1000, 850, 650, 400, 200],  # スループット低下
         }
 
         # 包括的アラート・通知分析実行
@@ -110,17 +108,17 @@ class TestAlertNotificationSystem:
             performance_data=performance_data,
             analysis_depth="comprehensive",
             alert_sensitivity="high",
-            notification_urgency="immediate"
+            notification_urgency="immediate",
         )
         execution_time = time.time() - start_time
 
         # 基本機能検証
         assert alert_result is not None
-        assert hasattr(alert_result, 'performance_alerts')
-        assert hasattr(alert_result, 'anomaly_alerts')
-        assert hasattr(alert_result, 'threshold_alerts')
-        assert hasattr(alert_result, 'trend_alerts')
-        assert hasattr(alert_result, 'notification_results')
+        assert hasattr(alert_result, "performance_alerts")
+        assert hasattr(alert_result, "anomaly_alerts")
+        assert hasattr(alert_result, "threshold_alerts")
+        assert hasattr(alert_result, "trend_alerts")
+        assert hasattr(alert_result, "notification_results")
 
         # パフォーマンス要件検証
         assert execution_time < 0.05  # 50ms以下の応答時間
@@ -159,10 +157,18 @@ class TestAlertNotificationSystem:
 
         # 複雑な時系列パフォーマンスデータ
         time_series_data = {
-            "timestamps": [datetime.now() - timedelta(minutes=i) for i in range(60, 0, -1)],
-            "memory_patterns": [55 + 30 * abs(i - 30) / 30 + (i % 5) * 2 for i in range(60)],
-            "cpu_patterns": [40 + 20 * (i / 60) + 10 * (i % 10 == 0) for i in range(60)],
-            "network_patterns": [100 + 50 * (i % 15 == 0) - 20 * (i % 7 == 0) for i in range(60)],
+            "timestamps": [
+                datetime.now() - timedelta(minutes=i) for i in range(60, 0, -1)
+            ],
+            "memory_patterns": [
+                55 + 30 * abs(i - 30) / 30 + (i % 5) * 2 for i in range(60)
+            ],
+            "cpu_patterns": [
+                40 + 20 * (i / 60) + 10 * (i % 10 == 0) for i in range(60)
+            ],
+            "network_patterns": [
+                100 + 50 * (i % 15 == 0) - 20 * (i % 7 == 0) for i in range(60)
+            ],
             "seasonal_patterns": [50 + 30 * (i % 12 < 6) for i in range(60)],
         }
 
@@ -170,23 +176,31 @@ class TestAlertNotificationSystem:
         start_time = time.time()
         ml_alert_result = ml_alert_system.execute_ml_anomaly_detection(
             time_series_data=time_series_data,
-            detection_algorithms=["isolation_forest", "lstm_autoencoder", "statistical_outlier"],
+            detection_algorithms=[
+                "isolation_forest",
+                "lstm_autoencoder",
+                "statistical_outlier",
+            ],
             ensemble_voting="weighted",
-            prediction_horizon_minutes=30
+            prediction_horizon_minutes=30,
         )
         ml_execution_time = time.time() - start_time
 
         # ML機能検証
         assert ml_alert_result is not None
-        assert hasattr(ml_alert_result, 'anomaly_scores')
-        assert hasattr(ml_alert_result, 'pattern_classifications')
-        assert hasattr(ml_alert_result, 'predictive_alerts')
-        assert hasattr(ml_alert_result, 'adaptive_thresholds')
+        assert hasattr(ml_alert_result, "anomaly_scores")
+        assert hasattr(ml_alert_result, "pattern_classifications")
+        assert hasattr(ml_alert_result, "predictive_alerts")
+        assert hasattr(ml_alert_result, "adaptive_thresholds")
 
         # ML品質検証
         assert ml_execution_time < 0.1  # 100ms以下の処理時間
-        assert ml_alert_result.anomaly_detection_accuracy >= 0.98  # 98%以上の異常検出精度
-        assert ml_alert_result.pattern_recognition_accuracy >= 0.96  # 96%以上のパターン認識精度
+        assert (
+            ml_alert_result.anomaly_detection_accuracy >= 0.98
+        )  # 98%以上の異常検出精度
+        assert (
+            ml_alert_result.pattern_recognition_accuracy >= 0.96
+        )  # 96%以上のパターン認識精度
         assert ml_alert_result.predictive_accuracy >= 0.90  # 90%以上の予測精度
 
         # ML統合品質検証
@@ -252,25 +266,33 @@ class TestAlertNotificationSystem:
             escalation_rules={
                 "critical": {"initial_timeout": 300, "escalation_levels": 3},
                 "warning": {"initial_timeout": 1800, "escalation_levels": 1},
-            }
+            },
         )
         notification_time = time.time() - start_time
 
         # 通知機能検証
         assert notification_result is not None
-        assert hasattr(notification_result, 'delivery_confirmations')
-        assert hasattr(notification_result, 'escalation_status')
-        assert hasattr(notification_result, 'audit_trail')
-        assert hasattr(notification_result, 'compliance_verification')
+        assert hasattr(notification_result, "delivery_confirmations")
+        assert hasattr(notification_result, "escalation_status")
+        assert hasattr(notification_result, "audit_trail")
+        assert hasattr(notification_result, "compliance_verification")
 
         # 企業要件検証
         assert notification_time < 0.02  # 20ms以下の処理時間
-        assert notification_result.delivery_success_rate >= 0.999  # 99.9%以上の配信成功率
-        assert notification_result.critical_alert_response_time <= 5  # 5秒以内の緊急アラート配信
-        assert notification_result.escalation_effectiveness >= 0.95  # 95%以上のエスカレーション有効性
+        assert (
+            notification_result.delivery_success_rate >= 0.999
+        )  # 99.9%以上の配信成功率
+        assert (
+            notification_result.critical_alert_response_time <= 5
+        )  # 5秒以内の緊急アラート配信
+        assert (
+            notification_result.escalation_effectiveness >= 0.95
+        )  # 95%以上のエスカレーション有効性
 
         # 企業統合品質検証
-        assert notification_result.enterprise_integration_quality >= 0.97  # 97%以上の企業統合品質
+        assert (
+            notification_result.enterprise_integration_quality >= 0.97
+        )  # 97%以上の企業統合品質
         assert notification_result.security_compliance_verified
         assert notification_result.audit_requirements_satisfied
 
@@ -301,15 +323,17 @@ class TestAlertNotificationSystem:
         # 大量リアルタイムアラートストリーム
         alert_stream = []
         for i in range(1000):
-            alert_stream.append({
-                "alert_id": f"alert_{i}",
-                "timestamp": datetime.now(),
-                "severity": "high" if i % 10 == 0 else "medium",
-                "metric": "response_time" if i % 3 == 0 else "memory_usage",
-                "value": 95 + (i % 20),
-                "threshold": 90,
-                "source_system": f"node_{i % 5}",
-            })
+            alert_stream.append(
+                {
+                    "alert_id": f"alert_{i}",
+                    "timestamp": datetime.now(),
+                    "severity": "high" if i % 10 == 0 else "medium",
+                    "metric": "response_time" if i % 3 == 0 else "memory_usage",
+                    "value": 95 + (i % 20),
+                    "threshold": 90,
+                    "source_system": f"node_{i % 5}",
+                }
+            )
 
         # リアルタイム処理性能測定
         start_time = time.time()
@@ -323,19 +347,23 @@ class TestAlertNotificationSystem:
 
         # リアルタイム性能検証
         assert realtime_result is not None
-        assert hasattr(realtime_result, 'processed_alerts_count')
-        assert hasattr(realtime_result, 'average_processing_latency')
-        assert hasattr(realtime_result, 'throughput_per_second')
-        assert hasattr(realtime_result, 'queue_utilization')
+        assert hasattr(realtime_result, "processed_alerts_count")
+        assert hasattr(realtime_result, "average_processing_latency")
+        assert hasattr(realtime_result, "throughput_per_second")
+        assert hasattr(realtime_result, "queue_utilization")
 
         # パフォーマンス要件検証
         assert total_processing_time < 2.0  # 2秒以内で1000アラート処理
         assert realtime_result.average_processing_latency <= 0.01  # 10ms以下の平均遅延
-        assert realtime_result.throughput_per_second >= 500  # 500アラート/秒以上の処理能力
+        assert (
+            realtime_result.throughput_per_second >= 500
+        )  # 500アラート/秒以上の処理能力
         assert realtime_result.queue_utilization < 0.8  # 80%未満のキュー使用率
 
         # リアルタイム品質検証
-        assert realtime_result.realtime_processing_efficiency >= 0.98  # 98%以上の処理効率
+        assert (
+            realtime_result.realtime_processing_efficiency >= 0.98
+        )  # 98%以上の処理効率
         assert realtime_result.alert_ordering_preserved
         assert realtime_result.no_alert_loss_confirmed
 
@@ -377,7 +405,10 @@ class TestAlertNotificationSystem:
             },
             "system_health": {
                 "overall_status": "warning",
-                "component_status": {"excel_processor": "healthy", "api_gateway": "degraded"},
+                "component_status": {
+                    "excel_processor": "healthy",
+                    "api_gateway": "degraded",
+                },
                 "sla_compliance": 0.94,
             },
         }
@@ -394,19 +425,25 @@ class TestAlertNotificationSystem:
 
         # 統合機能検証
         assert integration_result is not None
-        assert hasattr(integration_result, 'correlated_alerts')
-        assert hasattr(integration_result, 'unified_dashboard_data')
-        assert hasattr(integration_result, 'cross_system_insights')
-        assert hasattr(integration_result, 'integration_health')
+        assert hasattr(integration_result, "correlated_alerts")
+        assert hasattr(integration_result, "unified_dashboard_data")
+        assert hasattr(integration_result, "cross_system_insights")
+        assert hasattr(integration_result, "integration_health")
 
         # 統合品質検証
         assert integration_time < 0.15  # 150ms以下の統合処理時間
-        assert integration_result.integration_success_rate >= 0.98  # 98%以上の統合成功率
+        assert (
+            integration_result.integration_success_rate >= 0.98
+        )  # 98%以上の統合成功率
         assert integration_result.correlation_accuracy >= 0.95  # 95%以上の相関分析精度
-        assert integration_result.unified_view_quality >= 0.96  # 96%以上の統合ビュー品質
+        assert (
+            integration_result.unified_view_quality >= 0.96
+        )  # 96%以上の統合ビュー品質
 
         # エンドツーエンド検証
-        assert integration_result.end_to_end_latency <= 0.2  # 200ms以下のエンドツーエンド遅延
+        assert (
+            integration_result.end_to_end_latency <= 0.2
+        )  # 200ms以下のエンドツーエンド遅延
         assert integration_result.monitoring_coverage >= 0.99  # 99%以上の監視カバレッジ
         assert integration_result.alert_completeness >= 0.97  # 97%以上のアラート完全性
 
@@ -448,7 +485,10 @@ class TestAlertNotificationSystem:
                 "severity": "high",
                 "metric": "response_time",
                 "value": 1500,
-                "business_context": {"service": "excel_processing", "customer_tier": "enterprise"},
+                "business_context": {
+                    "service": "excel_processing",
+                    "customer_tier": "enterprise",
+                },
                 "historical_pattern": "recurring_daily",
             },
             {
@@ -457,53 +497,70 @@ class TestAlertNotificationSystem:
                 "severity": "medium",
                 "metric": "memory_usage",
                 "value": 85,
-                "business_context": {"service": "data_pipeline", "customer_tier": "standard"},
+                "business_context": {
+                    "service": "data_pipeline",
+                    "customer_tier": "standard",
+                },
                 "historical_pattern": "new_anomaly",
             },
             # 50個の追加アラートデータ...
         ]
         for i in range(3, 53):
-            raw_alerts.append({
-                "id": f"alert_{i:03d}",
-                "type": "system_metric" if i % 2 == 0 else "application_metric",
-                "severity": "low" if i % 5 == 0 else "medium",
-                "metric": f"metric_{i % 10}",
-                "value": 50 + (i % 40),
-                "business_context": {
-                    "service": f"service_{i % 5}",
-                    "customer_tier": "standard" if i % 3 == 0 else "enterprise",
-                },
-                "historical_pattern": "normal" if i % 7 == 0 else "unusual",
-            })
+            raw_alerts.append(
+                {
+                    "id": f"alert_{i:03d}",
+                    "type": "system_metric" if i % 2 == 0 else "application_metric",
+                    "severity": "low" if i % 5 == 0 else "medium",
+                    "metric": f"metric_{i % 10}",
+                    "value": 50 + (i % 40),
+                    "business_context": {
+                        "service": f"service_{i % 5}",
+                        "customer_tier": "standard" if i % 3 == 0 else "enterprise",
+                    },
+                    "historical_pattern": "normal" if i % 7 == 0 else "unusual",
+                }
+            )
 
         # インテリジェントフィルタリング・優先度付け実行
         start_time = time.time()
-        filtering_result = intelligent_alert_system.execute_intelligent_alert_processing(
-            raw_alerts=raw_alerts,
-            filtering_strategy="ml_based",
-            prioritization_algorithm="business_impact_weighted",
-            duplicate_detection_threshold=0.9,
-            context_analysis_depth="comprehensive",
+        filtering_result = (
+            intelligent_alert_system.execute_intelligent_alert_processing(
+                raw_alerts=raw_alerts,
+                filtering_strategy="ml_based",
+                prioritization_algorithm="business_impact_weighted",
+                duplicate_detection_threshold=0.9,
+                context_analysis_depth="comprehensive",
+            )
         )
         filtering_time = time.time() - start_time
 
         # インテリジェント機能検証
         assert filtering_result is not None
-        assert hasattr(filtering_result, 'filtered_alerts')
-        assert hasattr(filtering_result, 'priority_rankings')
-        assert hasattr(filtering_result, 'duplicate_groups')
-        assert hasattr(filtering_result, 'context_insights')
-        assert hasattr(filtering_result, 'business_impact_scores')
+        assert hasattr(filtering_result, "filtered_alerts")
+        assert hasattr(filtering_result, "priority_rankings")
+        assert hasattr(filtering_result, "duplicate_groups")
+        assert hasattr(filtering_result, "context_insights")
+        assert hasattr(filtering_result, "business_impact_scores")
 
         # フィルタリング品質検証
         assert filtering_time < 0.5  # 500ms以下の処理時間
-        assert filtering_result.filtering_effectiveness >= 0.90  # 90%以上のフィルタリング有効性
-        assert filtering_result.prioritization_accuracy >= 0.95  # 95%以上の優先度付け精度
-        assert filtering_result.duplicate_detection_accuracy >= 0.98  # 98%以上の重複検出精度
+        assert (
+            filtering_result.filtering_effectiveness >= 0.90
+        )  # 90%以上のフィルタリング有効性
+        assert (
+            filtering_result.prioritization_accuracy >= 0.95
+        )  # 95%以上の優先度付け精度
+        assert (
+            filtering_result.duplicate_detection_accuracy >= 0.98
+        )  # 98%以上の重複検出精度
 
         # インテリジェント品質検証
-        assert filtering_result.context_analysis_quality >= 0.93  # 93%以上のコンテキスト分析品質
-        assert filtering_result.business_impact_accuracy >= 0.91  # 91%以上のビジネス影響評価精度
+        assert (
+            filtering_result.context_analysis_quality >= 0.93
+        )  # 93%以上のコンテキスト分析品質
+        assert (
+            filtering_result.business_impact_accuracy >= 0.91
+        )  # 91%以上のビジネス影響評価精度
         assert filtering_result.learning_optimization_active
 
     @pytest.mark.performance
@@ -535,15 +592,21 @@ class TestAlertNotificationSystem:
         # 大量アラートデータ生成
         massive_alert_stream = []
         for i in range(10000):
-            massive_alert_stream.append({
-                "alert_id": f"volume_alert_{i}",
-                "timestamp": datetime.now(),
-                "severity": "high" if i % 100 == 0 else "medium" if i % 10 == 0 else "low",
-                "metric_name": f"metric_{i % 20}",
-                "metric_value": 50 + (i % 50),
-                "source_node": f"node_{i % 10}",
-                "alert_type": "threshold" if i % 3 == 0 else "anomaly",
-            })
+            massive_alert_stream.append(
+                {
+                    "alert_id": f"volume_alert_{i}",
+                    "timestamp": datetime.now(),
+                    "severity": "high"
+                    if i % 100 == 0
+                    else "medium"
+                    if i % 10 == 0
+                    else "low",
+                    "metric_name": f"metric_{i % 20}",
+                    "metric_value": 50 + (i % 50),
+                    "source_node": f"node_{i % 10}",
+                    "alert_type": "threshold" if i % 3 == 0 else "anomaly",
+                }
+            )
 
         # 大量アラート処理実行
         start_time = time.time()
@@ -557,11 +620,11 @@ class TestAlertNotificationSystem:
 
         # スケーラビリティ検証
         assert scalability_result is not None
-        assert hasattr(scalability_result, 'total_processed')
-        assert hasattr(scalability_result, 'processing_throughput')
-        assert hasattr(scalability_result, 'memory_efficiency')
-        assert hasattr(scalability_result, 'cpu_utilization')
-        assert hasattr(scalability_result, 'distributed_coordination')
+        assert hasattr(scalability_result, "total_processed")
+        assert hasattr(scalability_result, "processing_throughput")
+        assert hasattr(scalability_result, "memory_efficiency")
+        assert hasattr(scalability_result, "cpu_utilization")
+        assert hasattr(scalability_result, "distributed_coordination")
 
         # 大量処理性能検証
         assert total_processing_time < 60.0  # 60秒以内で10,000アラート処理
@@ -571,7 +634,9 @@ class TestAlertNotificationSystem:
 
         # スケーラビリティ品質検証
         assert scalability_result.distributed_efficiency >= 0.90  # 90%以上の分散効率
-        assert scalability_result.load_balancing_effectiveness >= 0.95  # 95%以上の負荷分散有効性
+        assert (
+            scalability_result.load_balancing_effectiveness >= 0.95
+        )  # 95%以上の負荷分散有効性
         assert scalability_result.backpressure_control_active
 
     @pytest.mark.error_handling
@@ -603,7 +668,10 @@ class TestAlertNotificationSystem:
         edge_case_scenarios = {
             "extreme_load": {"alert_rate": 1000, "duration_seconds": 30},
             "network_failure": {"failure_probability": 0.3, "recovery_time": 10},
-            "partial_system_outage": {"affected_components": ["email", "slack"], "duration": 60},
+            "partial_system_outage": {
+                "affected_components": ["email", "slack"],
+                "duration": 60,
+            },
             "memory_pressure": {"available_memory_gb": 0.5, "gc_pressure": "high"},
             "disk_space_critical": {"available_space_mb": 100, "log_rotation": True},
         }
@@ -630,10 +698,10 @@ class TestAlertNotificationSystem:
             execution_time = scenario_result["execution_time"]
 
             assert result is not None
-            assert hasattr(result, 'resilience_score')
-            assert hasattr(result, 'recovery_effectiveness')
-            assert hasattr(result, 'data_integrity_maintained')
-            assert hasattr(result, 'service_continuity')
+            assert hasattr(result, "resilience_score")
+            assert hasattr(result, "recovery_effectiveness")
+            assert hasattr(result, "data_integrity_maintained")
+            assert hasattr(result, "service_continuity")
 
             # 耐性品質検証
             assert execution_time < 35.0  # 35秒以内のテスト完了
@@ -698,11 +766,11 @@ class TestAlertNotificationSystem:
 
         # 品質検証結果検証
         assert quality_result is not None
-        assert hasattr(quality_result, 'overall_quality_score')
-        assert hasattr(quality_result, 'sla_compliance_status')
-        assert hasattr(quality_result, 'compliance_verification')
-        assert hasattr(quality_result, 'audit_trail')
-        assert hasattr(quality_result, 'improvement_recommendations')
+        assert hasattr(quality_result, "overall_quality_score")
+        assert hasattr(quality_result, "sla_compliance_status")
+        assert hasattr(quality_result, "compliance_verification")
+        assert hasattr(quality_result, "audit_trail")
+        assert hasattr(quality_result, "improvement_recommendations")
 
         # 品質要件検証
         assert quality_validation_time < 0.1  # 100ms以下の検証時間
@@ -712,5 +780,7 @@ class TestAlertNotificationSystem:
 
         # 品質保証検証
         assert quality_result.quality_consistency >= 0.96  # 96%以上の品質一貫性
-        assert quality_result.audit_trail_completeness >= 0.99  # 99%以上の監査証跡完全性
+        assert (
+            quality_result.audit_trail_completeness >= 0.99
+        )  # 99%以上の監査証跡完全性
         assert quality_result.continuous_improvement_active  # 継続的改善活動中

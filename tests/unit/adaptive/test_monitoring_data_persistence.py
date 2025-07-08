@@ -18,11 +18,9 @@ Task 3.3.5: 監視データ永続化実装
 """
 
 import tempfile
-import threading
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
 from unittest.mock import Mock
 
 import pytest
@@ -104,7 +102,7 @@ class TestMonitoringDataPersistence:
                     "metric_name": "cpu_usage",
                     "value": 50 + 30 * (i % 20) / 20,
                     "source": f"server_{i % 10}",
-                    "tags": {"environment": "production", "region": "us-east-1"}
+                    "tags": {"environment": "production", "region": "us-east-1"},
                 }
                 for i in range(100000)  # 10万データポイント
             ],
@@ -120,8 +118,13 @@ class TestMonitoringDataPersistence:
             ],
             "performance_analytics": {
                 "aggregated_metrics": {
-                    "hourly_averages": [{"hour": i, "avg_cpu": 65.5, "avg_memory": 78.2} for i in range(24)],
-                    "daily_summaries": [{"day": i, "max_cpu": 95.2, "min_cpu": 15.8} for i in range(30)],
+                    "hourly_averages": [
+                        {"hour": i, "avg_cpu": 65.5, "avg_memory": 78.2}
+                        for i in range(24)
+                    ],
+                    "daily_summaries": [
+                        {"day": i, "max_cpu": 95.2, "min_cpu": 15.8} for i in range(30)
+                    ],
                 },
                 "trend_data": {
                     "cpu_trend": "increasing",
@@ -137,16 +140,16 @@ class TestMonitoringDataPersistence:
             monitoring_data=monitoring_dataset,
             persistence_strategy="enterprise_grade",
             compression_level="high",
-            durability_level="maximum"
+            durability_level="maximum",
         )
         persistence_time = time.time() - start_time
 
         # 基本機能検証
         assert persistence_result is not None
-        assert hasattr(persistence_result, 'stored_records_count')
-        assert hasattr(persistence_result, 'compression_ratio')
-        assert hasattr(persistence_result, 'storage_efficiency')
-        assert hasattr(persistence_result, 'query_performance')
+        assert hasattr(persistence_result, "stored_records_count")
+        assert hasattr(persistence_result, "compression_ratio")
+        assert hasattr(persistence_result, "storage_efficiency")
+        assert hasattr(persistence_result, "query_performance")
 
         # パフォーマンス要件検証
         assert persistence_time < 5.0  # 5秒以内で10万件保存
@@ -155,7 +158,9 @@ class TestMonitoringDataPersistence:
         assert persistence_result.query_response_time <= 0.1  # 100ms以下のクエリ応答
 
         # 企業グレード品質検証
-        assert persistence_result.enterprise_persistence_quality >= 0.98  # 98%以上の企業永続化品質
+        assert (
+            persistence_result.enterprise_persistence_quality >= 0.98
+        )  # 98%以上の企業永続化品質
         assert persistence_result.acid_compliance_verified  # ACID準拠確認
         assert persistence_result.data_integrity_maintained  # データ整合性維持
 
@@ -188,14 +193,16 @@ class TestMonitoringDataPersistence:
         high_density_timeseries = []
         base_time = datetime.now()
         for i in range(500000):  # 50万データポイント
-            high_density_timeseries.append({
-                "timestamp": base_time - timedelta(seconds=i),
-                "cpu_usage": 40 + 30 * (i % 100) / 100,
-                "memory_usage": 60 + 25 * (i % 80) / 80,
-                "disk_io": 20 + 50 * (i % 60) / 60,
-                "network_io": 100 + 80 * (i % 120) / 120,
-                "server_id": f"srv_{i % 50}",
-            })
+            high_density_timeseries.append(
+                {
+                    "timestamp": base_time - timedelta(seconds=i),
+                    "cpu_usage": 40 + 30 * (i % 100) / 100,
+                    "memory_usage": 60 + 25 * (i % 80) / 80,
+                    "disk_io": 20 + 50 * (i % 60) / 60,
+                    "network_io": 100 + 80 * (i % 120) / 120,
+                    "server_id": f"srv_{i % 50}",
+                }
+            )
 
         # 時系列データ最適化保存実行
         start_time = time.time()
@@ -203,16 +210,16 @@ class TestMonitoringDataPersistence:
             timeseries_data=high_density_timeseries,
             optimization_strategy="time_based_partitioning",
             compression_strategy="delta_compression",
-            indexing_strategy="temporal_indexing"
+            indexing_strategy="temporal_indexing",
         )
         storage_time = time.time() - start_time
 
         # 時系列最適化検証
         assert timeseries_result is not None
-        assert hasattr(timeseries_result, 'compression_efficiency')
-        assert hasattr(timeseries_result, 'index_efficiency')
-        assert hasattr(timeseries_result, 'query_optimization')
-        assert hasattr(timeseries_result, 'storage_compactness')
+        assert hasattr(timeseries_result, "compression_efficiency")
+        assert hasattr(timeseries_result, "index_efficiency")
+        assert hasattr(timeseries_result, "query_optimization")
+        assert hasattr(timeseries_result, "storage_compactness")
 
         # 性能要件検証
         assert storage_time < 10.0  # 10秒以内で50万件保存
@@ -221,9 +228,13 @@ class TestMonitoringDataPersistence:
         assert timeseries_result.storage_compactness >= 0.75  # 75%以上のストレージ密度
 
         # 時系列品質検証
-        assert timeseries_result.temporal_query_performance >= 0.95  # 95%以上の時間クエリ性能
+        assert (
+            timeseries_result.temporal_query_performance >= 0.95
+        )  # 95%以上の時間クエリ性能
         assert timeseries_result.aggregation_performance >= 0.90  # 90%以上の集約性能
-        assert timeseries_result.downsampling_accuracy >= 0.98  # 98%以上のダウンサンプリング精度
+        assert (
+            timeseries_result.downsampling_accuracy >= 0.98
+        )  # 98%以上のダウンサンプリング精度
 
     @pytest.mark.integration
     def test_high_availability_disaster_recovery_system(self):
@@ -282,16 +293,16 @@ class TestMonitoringDataPersistence:
             critical_data=critical_monitoring_data,
             availability_level="99.99%",
             recovery_strategy="zero_downtime",
-            data_durability="maximum"
+            data_durability="maximum",
         )
         ha_dr_time = time.time() - start_time
 
         # 高可用性機能検証
         assert ha_dr_result is not None
-        assert hasattr(ha_dr_result, 'replication_status')
-        assert hasattr(ha_dr_result, 'failover_readiness')
-        assert hasattr(ha_dr_result, 'backup_status')
-        assert hasattr(ha_dr_result, 'recovery_capabilities')
+        assert hasattr(ha_dr_result, "replication_status")
+        assert hasattr(ha_dr_result, "failover_readiness")
+        assert hasattr(ha_dr_result, "backup_status")
+        assert hasattr(ha_dr_result, "recovery_capabilities")
 
         # 可用性要件検証
         assert ha_dr_time < 3.0  # 3秒以内のHA/DR設定
@@ -300,8 +311,12 @@ class TestMonitoringDataPersistence:
         assert ha_dr_result.rpo_compliance <= 60  # 1分以下のRPO
 
         # 災害復旧品質検証
-        assert ha_dr_result.replication_consistency >= 0.99  # 99%以上のレプリケーション整合性
-        assert ha_dr_result.failover_success_rate >= 0.98  # 98%以上のフェイルオーバー成功率
+        assert (
+            ha_dr_result.replication_consistency >= 0.99
+        )  # 99%以上のレプリケーション整合性
+        assert (
+            ha_dr_result.failover_success_rate >= 0.98
+        )  # 98%以上のフェイルオーバー成功率
         assert ha_dr_result.data_durability >= 0.999999  # 99.9999%以上のデータ耐久性
 
     @pytest.mark.performance
@@ -336,7 +351,10 @@ class TestMonitoringDataPersistence:
             {
                 "query_type": "time_range_aggregation",
                 "query": {
-                    "time_range": {"start": datetime.now() - timedelta(hours=24), "end": datetime.now()},
+                    "time_range": {
+                        "start": datetime.now() - timedelta(hours=24),
+                        "end": datetime.now(),
+                    },
                     "metrics": ["cpu_usage", "memory_usage", "disk_io"],
                     "aggregation": "avg",
                     "group_by": ["server_id", "hour"],
@@ -388,20 +406,22 @@ class TestMonitoringDataPersistence:
             execution_time = performance_data["execution_time"]
 
             assert result is not None
-            assert hasattr(result, 'query_performance_metrics')
-            assert hasattr(result, 'optimization_applied')
-            assert hasattr(result, 'cache_utilization')
-            assert hasattr(result, 'execution_plan')
+            assert hasattr(result, "query_performance_metrics")
+            assert hasattr(result, "optimization_applied")
+            assert hasattr(result, "cache_utilization")
+            assert hasattr(result, "execution_plan")
 
             # クエリ性能検証
             assert execution_time < 5.0  # 5秒以内のクエリ実行
-            assert result.query_optimization_effectiveness >= 0.85  # 85%以上の最適化有効性
+            assert (
+                result.query_optimization_effectiveness >= 0.85
+            )  # 85%以上の最適化有効性
             assert result.index_utilization >= 0.80  # 80%以上のインデックス活用
             assert result.cache_hit_ratio >= 0.60  # 60%以上のキャッシュヒット率
 
         # 総合クエリ性能検証
         overall_query_performance = sum(
-            result["result"].query_performance_score 
+            result["result"].query_performance_score
             for result in query_performance_results.values()
         ) / len(query_performance_results)
         assert overall_query_performance >= 0.90  # 90%以上の総合クエリ性能
@@ -430,7 +450,10 @@ class TestMonitoringDataPersistence:
                 retention_policies={
                     "hot_data": {"duration_days": 30, "storage_tier": "ssd"},
                     "warm_data": {"duration_days": 365, "storage_tier": "hdd"},
-                    "cold_data": {"duration_days": 2555, "storage_tier": "archive"},  # 7年
+                    "cold_data": {
+                        "duration_days": 2555,
+                        "storage_tier": "archive",
+                    },  # 7年
                 },
             )
         )
@@ -481,21 +504,27 @@ class TestMonitoringDataPersistence:
 
         # ライフサイクル管理検証
         assert lifecycle_result is not None
-        assert hasattr(lifecycle_result, 'tiering_effectiveness')
-        assert hasattr(lifecycle_result, 'retention_compliance')
-        assert hasattr(lifecycle_result, 'cost_optimization')
-        assert hasattr(lifecycle_result, 'automation_efficiency')
+        assert hasattr(lifecycle_result, "tiering_effectiveness")
+        assert hasattr(lifecycle_result, "retention_compliance")
+        assert hasattr(lifecycle_result, "cost_optimization")
+        assert hasattr(lifecycle_result, "automation_efficiency")
 
         # ライフサイクル性能検証
         assert lifecycle_time < 2.0  # 2秒以内のライフサイクル処理
         assert lifecycle_result.tiering_effectiveness >= 0.90  # 90%以上の階層化有効性
-        assert lifecycle_result.retention_compliance >= 0.98  # 98%以上の保持コンプライアンス
+        assert (
+            lifecycle_result.retention_compliance >= 0.98
+        )  # 98%以上の保持コンプライアンス
         assert lifecycle_result.cost_optimization >= 0.75  # 75%以上のコスト最適化
 
         # データ管理品質検証
-        assert lifecycle_result.automated_archiving_success >= 0.95  # 95%以上の自動アーカイブ成功
+        assert (
+            lifecycle_result.automated_archiving_success >= 0.95
+        )  # 95%以上の自動アーカイブ成功
         assert lifecycle_result.deletion_accuracy >= 0.99  # 99%以上の削除精度
-        assert lifecycle_result.compliance_verification >= 0.97  # 97%以上のコンプライアンス検証
+        assert (
+            lifecycle_result.compliance_verification >= 0.97
+        )  # 97%以上のコンプライアンス検証
 
     @pytest.mark.performance
     def test_enterprise_security_compliance_features(self):
@@ -568,25 +597,29 @@ class TestMonitoringDataPersistence:
 
         # 企業セキュリティ・コンプライアンス実行
         start_time = time.time()
-        security_result = security_compliance_persistence.execute_secure_compliant_persistence(
-            confidential_data=confidential_data_scenarios,
-            security_level="maximum",
-            compliance_frameworks=["GDPR", "SOX", "HIPAA", "PCI_DSS"],
-            privacy_protection_level="strict",
+        security_result = (
+            security_compliance_persistence.execute_secure_compliant_persistence(
+                confidential_data=confidential_data_scenarios,
+                security_level="maximum",
+                compliance_frameworks=["GDPR", "SOX", "HIPAA", "PCI_DSS"],
+                privacy_protection_level="strict",
+            )
         )
         security_time = time.time() - start_time
 
         # セキュリティ機能検証
         assert security_result is not None
-        assert hasattr(security_result, 'encryption_status')
-        assert hasattr(security_result, 'access_control_status')
-        assert hasattr(security_result, 'audit_trail_status')
-        assert hasattr(security_result, 'compliance_status')
+        assert hasattr(security_result, "encryption_status")
+        assert hasattr(security_result, "access_control_status")
+        assert hasattr(security_result, "audit_trail_status")
+        assert hasattr(security_result, "compliance_status")
 
         # セキュリティ要件検証
         assert security_time < 3.0  # 3秒以内のセキュア処理
         assert security_result.encryption_coverage >= 1.0  # 100%の暗号化カバレッジ
-        assert security_result.access_control_effectiveness >= 0.99  # 99%以上のアクセス制御有効性
+        assert (
+            security_result.access_control_effectiveness >= 0.99
+        )  # 99%以上のアクセス制御有効性
         assert security_result.audit_completeness >= 0.99  # 99%以上の監査完全性
 
         # コンプライアンス検証
@@ -596,9 +629,13 @@ class TestMonitoringDataPersistence:
         assert security_result.pci_dss_compliance_score >= 0.96  # 96%以上のPCI DSS準拠
 
         # プライバシー保護検証
-        assert security_result.data_masking_effectiveness >= 0.95  # 95%以上のデータマスキング有効性
+        assert (
+            security_result.data_masking_effectiveness >= 0.95
+        )  # 95%以上のデータマスキング有効性
         assert security_result.anonymization_quality >= 0.90  # 90%以上の匿名化品質
-        assert security_result.privacy_protection_score >= 0.97  # 97%以上のプライバシー保護スコア
+        assert (
+            security_result.privacy_protection_score >= 0.97
+        )  # 97%以上のプライバシー保護スコア
 
     @pytest.mark.performance
     def test_scalable_distributed_storage_architecture(self):
@@ -644,7 +681,11 @@ class TestMonitoringDataPersistence:
                 "warm_data_percentage": 30,
                 "cold_data_percentage": 60,
                 "peak_concurrent_users": 10000,
-                "query_complexity_distribution": {"simple": 60, "complex": 30, "analytical": 10},
+                "query_complexity_distribution": {
+                    "simple": 60,
+                    "complex": 30,
+                    "analytical": 10,
+                },
             },
             "performance_requirements": {
                 "max_query_latency_ms": 100,
@@ -666,25 +707,39 @@ class TestMonitoringDataPersistence:
 
         # 分散スケーラビリティ検証
         assert scalability_result is not None
-        assert hasattr(scalability_result, 'scaling_effectiveness')
-        assert hasattr(scalability_result, 'load_distribution_quality')
-        assert hasattr(scalability_result, 'fault_tolerance_level')
-        assert hasattr(scalability_result, 'performance_consistency')
+        assert hasattr(scalability_result, "scaling_effectiveness")
+        assert hasattr(scalability_result, "load_distribution_quality")
+        assert hasattr(scalability_result, "fault_tolerance_level")
+        assert hasattr(scalability_result, "performance_consistency")
 
         # スケーラビリティ性能検証
         assert scalability_time < 1.0  # 1秒以内のスケーラビリティテスト
-        assert scalability_result.horizontal_scaling_efficiency >= 0.90  # 90%以上の水平スケーリング効率
-        assert scalability_result.load_balancing_effectiveness >= 0.95  # 95%以上の負荷分散有効性
-        assert scalability_result.throughput_scalability >= 0.85  # 85%以上のスループットスケーラビリティ
+        assert (
+            scalability_result.horizontal_scaling_efficiency >= 0.90
+        )  # 90%以上の水平スケーリング効率
+        assert (
+            scalability_result.load_balancing_effectiveness >= 0.95
+        )  # 95%以上の負荷分散有効性
+        assert (
+            scalability_result.throughput_scalability >= 0.85
+        )  # 85%以上のスループットスケーラビリティ
 
         # 分散システム品質検証
-        assert scalability_result.fault_tolerance_score >= 0.98  # 98%以上の故障耐性スコア
-        assert scalability_result.self_healing_capability >= 0.90  # 90%以上の自己修復能力
+        assert (
+            scalability_result.fault_tolerance_score >= 0.98
+        )  # 98%以上の故障耐性スコア
+        assert (
+            scalability_result.self_healing_capability >= 0.90
+        )  # 90%以上の自己修復能力
         assert scalability_result.performance_consistency >= 0.95  # 95%以上の性能一貫性
 
         # 大規模対応検証
-        assert scalability_result.petabyte_scale_readiness >= 0.85  # 85%以上のペタバイト対応準備
-        assert scalability_result.unlimited_scalability_potential >= 0.80  # 80%以上の無制限スケーラビリティ可能性
+        assert (
+            scalability_result.petabyte_scale_readiness >= 0.85
+        )  # 85%以上のペタバイト対応準備
+        assert (
+            scalability_result.unlimited_scalability_potential >= 0.80
+        )  # 80%以上の無制限スケーラビリティ可能性
 
     @pytest.mark.unit
     def test_persistence_quality_assurance_validation(self):
@@ -734,7 +789,11 @@ class TestMonitoringDataPersistence:
                 "expected_consistency": 0.99,
             },
             "durability_test": {
-                "failure_simulation": ["power_loss", "disk_failure", "network_partition"],
+                "failure_simulation": [
+                    "power_loss",
+                    "disk_failure",
+                    "network_partition",
+                ],
                 "recovery_validation": True,
                 "data_loss_tolerance": 0,
                 "expected_durability": 0.999999,
@@ -769,10 +828,10 @@ class TestMonitoringDataPersistence:
             validation_time = qa_data["validation_time"]
 
             assert result is not None
-            assert hasattr(result, 'quality_score')
-            assert hasattr(result, 'validation_passed')
-            assert hasattr(result, 'metrics_collected')
-            assert hasattr(result, 'compliance_status')
+            assert hasattr(result, "quality_score")
+            assert hasattr(result, "validation_passed")
+            assert hasattr(result, "metrics_collected")
+            assert hasattr(result, "compliance_status")
 
             # 品質要件検証
             assert validation_time < 10.0  # 10秒以内の品質検証
@@ -794,10 +853,10 @@ class TestMonitoringDataPersistence:
         )
 
         assert final_qa_result is not None
-        assert hasattr(final_qa_result, 'overall_quality_rating')
-        assert hasattr(final_qa_result, 'compliance_summary')
-        assert hasattr(final_qa_result, 'improvement_recommendations')
-        assert hasattr(final_qa_result, 'quality_certification')
+        assert hasattr(final_qa_result, "overall_quality_rating")
+        assert hasattr(final_qa_result, "compliance_summary")
+        assert hasattr(final_qa_result, "improvement_recommendations")
+        assert hasattr(final_qa_result, "quality_certification")
 
         # 最終品質保証検証
         assert final_qa_result.overall_quality_rating >= 0.98  # 98%以上の総合品質評価

@@ -18,11 +18,7 @@ Task 3.3.2: メトリクス収集・分析実装
 """
 
 import tempfile
-import threading
-import time
-from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
 from unittest.mock import Mock
 
 import pytest
@@ -235,7 +231,9 @@ class TestMetricsCollectionAnalysis:
         assert ai_optimization.resource_efficiency_gain >= 0.15  # 15%以上効率化
 
         print(f"ML prediction accuracy: {prediction_quality.forecast_accuracy:.1%}")
-        print(f"Anomaly detection precision: {anomaly_detection.detection_precision:.1%}")
+        print(
+            f"Anomaly detection precision: {anomaly_detection.detection_precision:.1%}"
+        )
 
     @pytest.mark.performance
     def test_enterprise_grade_data_processing(self):
@@ -396,8 +394,12 @@ class TestMetricsCollectionAnalysis:
         assert bayesian_results.uncertainty_quantification >= 0.80  # 80%以上
         assert bayesian_results.model_selection_accuracy >= 0.75  # 75%以上
 
-        print(f"Correlation detection accuracy: {correlation_metrics.correlation_detection_accuracy:.1%}")
-        print(f"Causal discovery success: {causal_inference.causal_discovery_success_rate:.1%}")
+        print(
+            f"Correlation detection accuracy: {correlation_metrics.correlation_detection_accuracy:.1%}"
+        )
+        print(
+            f"Causal discovery success: {causal_inference.causal_discovery_success_rate:.1%}"
+        )
 
     @pytest.mark.performance
     def test_real_time_streaming_analysis(self):
@@ -449,9 +451,13 @@ class TestMetricsCollectionAnalysis:
         # ストリーミング性能確認
         streaming_performance = streaming_session.streaming_performance_metrics
         assert streaming_performance.processing_latency_ms < 10  # 10ms以下
-        assert streaming_performance.throughput_events_per_second >= 100000  # 10万/秒以上
+        assert (
+            streaming_performance.throughput_events_per_second >= 100000
+        )  # 10万/秒以上
         assert streaming_performance.memory_usage_efficiency >= 0.85  # 85%以上効率
-        assert streaming_performance.cpu_utilization_optimization >= 0.80  # 80%以上最適化
+        assert (
+            streaming_performance.cpu_utilization_optimization >= 0.80
+        )  # 80%以上最適化
 
         # 動的ウィンドウ処理確認
         windowing_results = streaming_session.windowing_analysis_results
@@ -478,7 +484,9 @@ class TestMetricsCollectionAnalysis:
         assert fault_tolerance.data_loss_prevention_rate >= 0.999  # 99.9%以上
 
         print(f"Streaming latency: {streaming_performance.processing_latency_ms:.1f}ms")
-        print(f"Throughput: {streaming_performance.throughput_events_per_second:,} events/sec")
+        print(
+            f"Throughput: {streaming_performance.throughput_events_per_second:,} events/sec"
+        )
 
     @pytest.mark.performance
     def test_forecasting_trend_analysis(self):
@@ -556,7 +564,9 @@ class TestMetricsCollectionAnalysis:
         business_forecasting = forecasting_session.business_forecasting_results
         assert business_forecasting.demand_forecast_accuracy >= 0.80  # 80%以上
         assert business_forecasting.capacity_planning_precision >= 0.85  # 85%以上
-        assert business_forecasting.resource_optimization_effectiveness >= 0.75  # 75%以上
+        assert (
+            business_forecasting.resource_optimization_effectiveness >= 0.75
+        )  # 75%以上
 
         print(f"Forecast accuracy: {forecasting_accuracy.point_forecast_accuracy:.1%}")
         print(f"Trend detection: {trend_analysis.trend_detection_accuracy:.1%}")

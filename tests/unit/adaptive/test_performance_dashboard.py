@@ -18,11 +18,9 @@ Task 3.3.4: パフォーマンスダッシュボード実装
 """
 
 import tempfile
-import threading
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
 from unittest.mock import Mock
 
 import pytest
@@ -97,16 +95,26 @@ class TestPerformanceDashboard:
         # 大量監視データシミュレーション
         monitoring_data = {
             "realtime_metrics": {
-                "timestamps": [datetime.now() - timedelta(seconds=i) for i in range(3600, 0, -1)],
-                "memory_usage": [50 + 30 * (i % 10) / 10 + (i % 100) / 100 for i in range(3600)],
-                "cpu_usage": [30 + 40 * (i % 15) / 15 + (i % 50) / 50 for i in range(3600)],
+                "timestamps": [
+                    datetime.now() - timedelta(seconds=i) for i in range(3600, 0, -1)
+                ],
+                "memory_usage": [
+                    50 + 30 * (i % 10) / 10 + (i % 100) / 100 for i in range(3600)
+                ],
+                "cpu_usage": [
+                    30 + 40 * (i % 15) / 15 + (i % 50) / 50 for i in range(3600)
+                ],
                 "network_io": [100 + 50 * (i % 20) / 20 for i in range(3600)],
                 "disk_io": [25 + 75 * (i % 8) / 8 for i in range(3600)],
             },
             "metrics_analysis": {
                 "trend_data": {"increasing": 45, "decreasing": 30, "stable": 25},
                 "anomaly_scores": [0.1, 0.3, 0.8, 0.2, 0.9, 0.1, 0.4],
-                "correlation_matrix": [[1.0, 0.7, 0.3], [0.7, 1.0, 0.5], [0.3, 0.5, 1.0]],
+                "correlation_matrix": [
+                    [1.0, 0.7, 0.3],
+                    [0.7, 1.0, 0.5],
+                    [0.3, 0.5, 1.0],
+                ],
                 "forecasting_data": {"horizon_hours": 24, "confidence": 0.92},
             },
             "alert_data": {
@@ -115,8 +123,16 @@ class TestPerformanceDashboard:
                 "critical_alerts": 2,
                 "warning_alerts": 6,
                 "alert_history": [
-                    {"timestamp": datetime.now(), "severity": "high", "metric": "memory"},
-                    {"timestamp": datetime.now(), "severity": "medium", "metric": "cpu"},
+                    {
+                        "timestamp": datetime.now(),
+                        "severity": "high",
+                        "metric": "memory",
+                    },
+                    {
+                        "timestamp": datetime.now(),
+                        "severity": "medium",
+                        "metric": "cpu",
+                    },
                 ],
             },
         }
@@ -127,27 +143,35 @@ class TestPerformanceDashboard:
             monitoring_data=monitoring_data,
             visualization_depth="comprehensive",
             rendering_quality="enterprise",
-            interaction_level="advanced"
+            interaction_level="advanced",
         )
         rendering_time = time.time() - start_time
 
         # 基本機能検証
         assert dashboard_result is not None
-        assert hasattr(dashboard_result, 'visualization_components')
-        assert hasattr(dashboard_result, 'interactive_charts')
-        assert hasattr(dashboard_result, 'dashboard_widgets')
-        assert hasattr(dashboard_result, 'realtime_data_sources')
+        assert hasattr(dashboard_result, "visualization_components")
+        assert hasattr(dashboard_result, "interactive_charts")
+        assert hasattr(dashboard_result, "dashboard_widgets")
+        assert hasattr(dashboard_result, "realtime_data_sources")
 
         # パフォーマンス要件検証
         assert rendering_time < 0.1  # 100ms以下のレンダリング時間
-        assert dashboard_result.rendering_performance >= 0.95  # 95%以上のレンダリング性能
+        assert (
+            dashboard_result.rendering_performance >= 0.95
+        )  # 95%以上のレンダリング性能
         assert dashboard_result.data_update_latency <= 0.05  # 50ms以下のデータ更新遅延
-        assert dashboard_result.visualization_throughput >= 10000  # 1万件/秒以上の可視化スループット
+        assert (
+            dashboard_result.visualization_throughput >= 10000
+        )  # 1万件/秒以上の可視化スループット
 
         # 企業グレード品質検証
-        assert dashboard_result.enterprise_visualization_quality >= 0.98  # 98%以上の企業可視化品質
+        assert (
+            dashboard_result.enterprise_visualization_quality >= 0.98
+        )  # 98%以上の企業可視化品質
         assert dashboard_result.user_experience_score >= 0.95  # 95%以上のUXスコア
-        assert dashboard_result.accessibility_compliance >= 0.97  # 97%以上のアクセシビリティ準拠
+        assert (
+            dashboard_result.accessibility_compliance >= 0.97
+        )  # 97%以上のアクセシビリティ準拠
 
     @pytest.mark.integration
     def test_realtime_data_visualization_performance(self):
@@ -176,13 +200,15 @@ class TestPerformanceDashboard:
         # 高頻度ストリーミングデータ
         streaming_data = []
         for i in range(1000):  # 1000データポイント
-            streaming_data.append({
-                "timestamp": datetime.now(),
-                "cpu_usage": 40 + 30 * (i % 10) / 10,
-                "memory_usage": 60 + 25 * (i % 8) / 8,
-                "network_throughput": 100 + 50 * (i % 15) / 15,
-                "response_time": 50 + 100 * (i % 12) / 12,
-            })
+            streaming_data.append(
+                {
+                    "timestamp": datetime.now(),
+                    "cpu_usage": 40 + 30 * (i % 10) / 10,
+                    "memory_usage": 60 + 25 * (i % 8) / 8,
+                    "network_throughput": 100 + 50 * (i % 15) / 15,
+                    "response_time": 50 + 100 * (i % 12) / 12,
+                }
+            )
 
         # リアルタイム可視化性能測定
         start_time = time.time()
@@ -190,16 +216,16 @@ class TestPerformanceDashboard:
             data_stream=streaming_data,
             visualization_mode="streaming",
             update_frequency=20,  # 20Hz
-            optimization_level="maximum"
+            optimization_level="maximum",
         )
         total_processing_time = time.time() - start_time
 
         # リアルタイム性能検証
         assert realtime_result is not None
-        assert hasattr(realtime_result, 'frame_rate_achieved')
-        assert hasattr(realtime_result, 'update_latency_ms')
-        assert hasattr(realtime_result, 'memory_efficiency')
-        assert hasattr(realtime_result, 'cpu_utilization')
+        assert hasattr(realtime_result, "frame_rate_achieved")
+        assert hasattr(realtime_result, "update_latency_ms")
+        assert hasattr(realtime_result, "memory_efficiency")
+        assert hasattr(realtime_result, "cpu_utilization")
 
         # 性能要件検証
         assert total_processing_time < 1.0  # 1秒以内で1000ポイント処理
@@ -208,9 +234,13 @@ class TestPerformanceDashboard:
         assert realtime_result.memory_efficiency >= 0.90  # 90%以上のメモリ効率
 
         # リアルタイム品質検証
-        assert realtime_result.streaming_stability >= 0.98  # 98%以上のストリーミング安定性
+        assert (
+            realtime_result.streaming_stability >= 0.98
+        )  # 98%以上のストリーミング安定性
         assert realtime_result.data_loss_rate <= 0.01  # 1%以下のデータ損失率
-        assert realtime_result.animation_smoothness >= 0.95  # 95%以上のアニメーション滑らかさ
+        assert (
+            realtime_result.animation_smoothness >= 0.95
+        )  # 95%以上のアニメーション滑らかさ
 
     @pytest.mark.integration
     def test_integrated_monitoring_dashboard_system(self):
@@ -268,20 +298,30 @@ class TestPerformanceDashboard:
 
         # 統合機能検証
         assert integration_result is not None
-        assert hasattr(integration_result, 'unified_dashboard_view')
-        assert hasattr(integration_result, 'cross_system_correlations')
-        assert hasattr(integration_result, 'integrated_insights')
-        assert hasattr(integration_result, 'end_to_end_flow_visualization')
+        assert hasattr(integration_result, "unified_dashboard_view")
+        assert hasattr(integration_result, "cross_system_correlations")
+        assert hasattr(integration_result, "integrated_insights")
+        assert hasattr(integration_result, "end_to_end_flow_visualization")
 
         # 統合品質検証
         assert integration_time < 0.2  # 200ms以下の統合処理時間
-        assert integration_result.integration_success_rate >= 0.98  # 98%以上の統合成功率
-        assert integration_result.data_synchronization_accuracy >= 0.99  # 99%以上のデータ同期精度
-        assert integration_result.unified_view_coherence >= 0.96  # 96%以上の統一ビュー一貫性
+        assert (
+            integration_result.integration_success_rate >= 0.98
+        )  # 98%以上の統合成功率
+        assert (
+            integration_result.data_synchronization_accuracy >= 0.99
+        )  # 99%以上のデータ同期精度
+        assert (
+            integration_result.unified_view_coherence >= 0.96
+        )  # 96%以上の統一ビュー一貫性
 
         # エンドツーエンド検証
-        assert integration_result.end_to_end_latency <= 0.15  # 150ms以下のエンドツーエンド遅延
-        assert integration_result.system_correlation_accuracy >= 0.94  # 94%以上のシステム相関精度
+        assert (
+            integration_result.end_to_end_latency <= 0.15
+        )  # 150ms以下のエンドツーエンド遅延
+        assert (
+            integration_result.system_correlation_accuracy >= 0.94
+        )  # 94%以上のシステム相関精度
         assert integration_result.monitoring_coverage >= 0.99  # 99%以上の監視カバレッジ
 
     @pytest.mark.performance
@@ -312,12 +352,30 @@ class TestPerformanceDashboard:
 
         # インタラクション操作シミュレーション
         ui_interactions = [
-            {"action": "drag_widget", "widget_id": "cpu_chart", "new_position": {"x": 100, "y": 200}},
+            {
+                "action": "drag_widget",
+                "widget_id": "cpu_chart",
+                "new_position": {"x": 100, "y": 200},
+            },
             {"action": "zoom_chart", "chart_id": "memory_trend", "zoom_level": 1.5},
-            {"action": "apply_filter", "filter_type": "time_range", "start": "2024-01-01", "end": "2024-01-02"},
+            {
+                "action": "apply_filter",
+                "filter_type": "time_range",
+                "start": "2024-01-01",
+                "end": "2024-01-02",
+            },
             {"action": "change_theme", "theme_name": "dark_enterprise"},
-            {"action": "resize_widget", "widget_id": "alert_panel", "width": 400, "height": 300},
-            {"action": "add_widget", "widget_type": "network_monitor", "position": {"x": 50, "y": 50}},
+            {
+                "action": "resize_widget",
+                "widget_id": "alert_panel",
+                "width": 400,
+                "height": 300,
+            },
+            {
+                "action": "add_widget",
+                "widget_type": "network_monitor",
+                "position": {"x": 50, "y": 50},
+            },
             {"action": "save_layout", "layout_name": "custom_monitoring_view"},
         ]
 
@@ -333,21 +391,29 @@ class TestPerformanceDashboard:
 
         # UI機能検証
         assert ui_result is not None
-        assert hasattr(ui_result, 'interaction_responses')
-        assert hasattr(ui_result, 'layout_changes')
-        assert hasattr(ui_result, 'widget_configurations')
-        assert hasattr(ui_result, 'theme_settings')
+        assert hasattr(ui_result, "interaction_responses")
+        assert hasattr(ui_result, "layout_changes")
+        assert hasattr(ui_result, "widget_configurations")
+        assert hasattr(ui_result, "theme_settings")
 
         # インタラクション品質検証
         assert ui_processing_time < 0.05  # 50ms以下のUI応答時間
-        assert ui_result.interaction_responsiveness >= 0.98  # 98%以上のインタラクション応答性
-        assert ui_result.gesture_recognition_accuracy >= 0.95  # 95%以上のジェスチャー認識精度
+        assert (
+            ui_result.interaction_responsiveness >= 0.98
+        )  # 98%以上のインタラクション応答性
+        assert (
+            ui_result.gesture_recognition_accuracy >= 0.95
+        )  # 95%以上のジェスチャー認識精度
         assert ui_result.touch_sensitivity >= 0.97  # 97%以上のタッチ感度
 
         # ユーザビリティ検証
         assert ui_result.user_experience_score >= 0.96  # 96%以上のUXスコア
-        assert ui_result.customization_flexibility >= 0.94  # 94%以上のカスタマイズ柔軟性
-        assert ui_result.accessibility_compliance >= 0.98  # 98%以上のアクセシビリティ準拠
+        assert (
+            ui_result.customization_flexibility >= 0.94
+        )  # 94%以上のカスタマイズ柔軟性
+        assert (
+            ui_result.accessibility_compliance >= 0.98
+        )  # 98%以上のアクセシビリティ準拠
 
     @pytest.mark.performance
     def test_mobile_responsive_dashboard_compatibility(self):
@@ -376,10 +442,34 @@ class TestPerformanceDashboard:
 
         # 多デバイスシミュレーション
         device_scenarios = [
-            {"device": "mobile_phone", "width": 375, "height": 667, "dpi": 326, "touch": True},
-            {"device": "tablet", "width": 1024, "height": 768, "dpi": 264, "touch": True},
-            {"device": "desktop", "width": 1920, "height": 1080, "dpi": 96, "touch": False},
-            {"device": "mobile_landscape", "width": 667, "height": 375, "dpi": 326, "touch": True},
+            {
+                "device": "mobile_phone",
+                "width": 375,
+                "height": 667,
+                "dpi": 326,
+                "touch": True,
+            },
+            {
+                "device": "tablet",
+                "width": 1024,
+                "height": 768,
+                "dpi": 264,
+                "touch": True,
+            },
+            {
+                "device": "desktop",
+                "width": 1920,
+                "height": 1080,
+                "dpi": 96,
+                "touch": False,
+            },
+            {
+                "device": "mobile_landscape",
+                "width": 667,
+                "height": 375,
+                "dpi": 326,
+                "touch": True,
+            },
         ]
 
         mobile_compatibility_results = {}
@@ -404,20 +494,22 @@ class TestPerformanceDashboard:
             rendering_time = device_data["rendering_time"]
 
             assert result is not None
-            assert hasattr(result, 'layout_adaptation')
-            assert hasattr(result, 'touch_optimization')
-            assert hasattr(result, 'performance_metrics')
-            assert hasattr(result, 'battery_efficiency')
+            assert hasattr(result, "layout_adaptation")
+            assert hasattr(result, "touch_optimization")
+            assert hasattr(result, "performance_metrics")
+            assert hasattr(result, "battery_efficiency")
 
             # デバイス別性能検証
             assert rendering_time < 0.3  # 300ms以下のデバイス適応時間
-            assert result.layout_adaptation_accuracy >= 0.95  # 95%以上のレイアウト適応精度
+            assert (
+                result.layout_adaptation_accuracy >= 0.95
+            )  # 95%以上のレイアウト適応精度
             assert result.touch_responsiveness >= 0.96  # 96%以上のタッチ応答性
             assert result.resolution_optimization >= 0.94  # 94%以上の解像度最適化
 
         # 総合モバイル品質検証
         overall_mobile_quality = sum(
-            result["result"].mobile_compatibility_score 
+            result["result"].mobile_compatibility_score
             for result in mobile_compatibility_results.values()
         ) / len(mobile_compatibility_results)
         assert overall_mobile_quality >= 0.95  # 95%以上の総合モバイル品質
@@ -467,20 +559,22 @@ class TestPerformanceDashboard:
 
         # 高性能レンダリング実行
         start_time = time.time()
-        rendering_result = high_performance_dashboard.execute_high_performance_rendering(
-            visualization_data=massive_visualization_data,
-            rendering_strategy="gpu_optimized",
-            quality_level="enterprise",
-            optimization_mode="maximum_performance",
+        rendering_result = (
+            high_performance_dashboard.execute_high_performance_rendering(
+                visualization_data=massive_visualization_data,
+                rendering_strategy="gpu_optimized",
+                quality_level="enterprise",
+                optimization_mode="maximum_performance",
+            )
         )
         total_rendering_time = time.time() - start_time
 
         # 高性能レンダリング検証
         assert rendering_result is not None
-        assert hasattr(rendering_result, 'gpu_utilization')
-        assert hasattr(rendering_result, 'frame_rate_achieved')
-        assert hasattr(rendering_result, 'memory_usage')
-        assert hasattr(rendering_result, 'cpu_efficiency')
+        assert hasattr(rendering_result, "gpu_utilization")
+        assert hasattr(rendering_result, "frame_rate_achieved")
+        assert hasattr(rendering_result, "memory_usage")
+        assert hasattr(rendering_result, "cpu_efficiency")
 
         # 性能要件検証
         assert total_rendering_time < 2.0  # 2秒以内で10万ポイント描画
@@ -489,7 +583,9 @@ class TestPerformanceDashboard:
         assert rendering_result.memory_usage <= 512  # 512MB以下のメモリ使用
 
         # レンダリング品質検証
-        assert rendering_result.rendering_quality_score >= 0.96  # 96%以上のレンダリング品質
+        assert (
+            rendering_result.rendering_quality_score >= 0.96
+        )  # 96%以上のレンダリング品質
         assert rendering_result.visual_fidelity >= 0.98  # 98%以上の視覚的忠実度
         assert rendering_result.performance_efficiency >= 0.94  # 94%以上の性能効率
 
@@ -526,7 +622,11 @@ class TestPerformanceDashboard:
             {
                 "scenario": "enterprise_branding",
                 "theme": "enterprise",
-                "brand_colors": {"primary": "#1f2937", "secondary": "#3b82f6", "accent": "#10b981"},
+                "brand_colors": {
+                    "primary": "#1f2937",
+                    "secondary": "#3b82f6",
+                    "accent": "#10b981",
+                },
                 "logo_url": "https://company.com/logo.png",
                 "language": "ja",
             },
@@ -572,21 +672,25 @@ class TestPerformanceDashboard:
             customization_time = scenario_data["customization_time"]
 
             assert result is not None
-            assert hasattr(result, 'customization_applied')
-            assert hasattr(result, 'theme_consistency')
-            assert hasattr(result, 'brand_compliance')
-            assert hasattr(result, 'accessibility_score')
+            assert hasattr(result, "customization_applied")
+            assert hasattr(result, "theme_consistency")
+            assert hasattr(result, "brand_compliance")
+            assert hasattr(result, "accessibility_score")
 
             # カスタマイズ品質検証
             assert customization_time < 0.5  # 500ms以下のカスタマイズ適用時間
-            assert result.customization_success_rate >= 0.98  # 98%以上のカスタマイズ成功率
+            assert (
+                result.customization_success_rate >= 0.98
+            )  # 98%以上のカスタマイズ成功率
             assert result.theme_consistency >= 0.96  # 96%以上のテーマ一貫性
             assert result.visual_coherence >= 0.95  # 95%以上の視覚的統一性
 
         # 企業ブランディング検証
         enterprise_result = customization_results["enterprise_branding"]["result"]
         assert enterprise_result.brand_compliance >= 0.97  # 97%以上のブランド準拠
-        assert enterprise_result.corporate_identity_maintained  # 企業アイデンティティ維持
+        assert (
+            enterprise_result.corporate_identity_maintained
+        )  # 企業アイデンティティ維持
 
     @pytest.mark.performance
     def test_enterprise_dashboard_integration_quality(self):
@@ -623,7 +727,11 @@ class TestPerformanceDashboard:
             "user_authentication": {
                 "sso_provider": "enterprise_sso",
                 "user_roles": ["admin", "analyst", "viewer"],
-                "permissions": {"admin": ["read", "write", "delete"], "analyst": ["read", "write"], "viewer": ["read"]},
+                "permissions": {
+                    "admin": ["read", "write", "delete"],
+                    "analyst": ["read", "write"],
+                    "viewer": ["read"],
+                },
                 "session_timeout": 3600,  # 1時間
             },
             "security_requirements": {
@@ -651,26 +759,40 @@ class TestPerformanceDashboard:
 
         # 企業統合検証
         assert enterprise_result is not None
-        assert hasattr(enterprise_result, 'security_compliance_score')
-        assert hasattr(enterprise_result, 'audit_trail_completeness')
-        assert hasattr(enterprise_result, 'access_control_effectiveness')
-        assert hasattr(enterprise_result, 'scalability_metrics')
+        assert hasattr(enterprise_result, "security_compliance_score")
+        assert hasattr(enterprise_result, "audit_trail_completeness")
+        assert hasattr(enterprise_result, "access_control_effectiveness")
+        assert hasattr(enterprise_result, "scalability_metrics")
 
         # 企業品質要件検証
         assert validation_time < 1.0  # 1秒以内の検証完了
-        assert enterprise_result.security_compliance_score >= 0.98  # 98%以上のセキュリティ準拠
-        assert enterprise_result.audit_trail_completeness >= 0.99  # 99%以上の監査証跡完全性
-        assert enterprise_result.access_control_effectiveness >= 0.97  # 97%以上のアクセス制御有効性
+        assert (
+            enterprise_result.security_compliance_score >= 0.98
+        )  # 98%以上のセキュリティ準拠
+        assert (
+            enterprise_result.audit_trail_completeness >= 0.99
+        )  # 99%以上の監査証跡完全性
+        assert (
+            enterprise_result.access_control_effectiveness >= 0.97
+        )  # 97%以上のアクセス制御有効性
 
         # コンプライアンス検証
-        assert enterprise_result.compliance_validation_passed  # コンプライアンス検証合格
+        assert (
+            enterprise_result.compliance_validation_passed
+        )  # コンプライアンス検証合格
         assert enterprise_result.gdpr_compliance >= 0.98  # 98%以上のGDPR準拠
         assert enterprise_result.sox_compliance >= 0.97  # 97%以上のSOX準拠
 
         # スケーラビリティ検証
-        assert enterprise_result.horizontal_scalability >= 0.95  # 95%以上の水平スケーラビリティ
-        assert enterprise_result.high_availability_score >= 0.99  # 99%以上の高可用性スコア
-        assert enterprise_result.disaster_recovery_readiness >= 0.96  # 96%以上の災害復旧準備
+        assert (
+            enterprise_result.horizontal_scalability >= 0.95
+        )  # 95%以上の水平スケーラビリティ
+        assert (
+            enterprise_result.high_availability_score >= 0.99
+        )  # 99%以上の高可用性スコア
+        assert (
+            enterprise_result.disaster_recovery_readiness >= 0.96
+        )  # 96%以上の災害復旧準備
 
     @pytest.mark.unit
     def test_dashboard_quality_assurance_validation(self):
@@ -739,11 +861,11 @@ class TestPerformanceDashboard:
 
         # 品質保証検証結果検証
         assert qa_result is not None
-        assert hasattr(qa_result, 'overall_quality_score')
-        assert hasattr(qa_result, 'usability_assessment')
-        assert hasattr(qa_result, 'performance_assessment')
-        assert hasattr(qa_result, 'compatibility_assessment')
-        assert hasattr(qa_result, 'accessibility_assessment')
+        assert hasattr(qa_result, "overall_quality_score")
+        assert hasattr(qa_result, "usability_assessment")
+        assert hasattr(qa_result, "performance_assessment")
+        assert hasattr(qa_result, "compatibility_assessment")
+        assert hasattr(qa_result, "accessibility_assessment")
 
         # 品質要件検証
         assert qa_validation_time < 0.2  # 200ms以下の品質検証時間
@@ -752,11 +874,17 @@ class TestPerformanceDashboard:
         assert qa_result.performance_score >= 0.93  # 93%以上のパフォーマンススコア
 
         # 詳細品質検証
-        assert qa_result.accessibility_compliance >= 0.97  # 97%以上のアクセシビリティ準拠
-        assert qa_result.cross_browser_compatibility >= 0.96  # 96%以上のクロスブラウザ互換性
+        assert (
+            qa_result.accessibility_compliance >= 0.97
+        )  # 97%以上のアクセシビリティ準拠
+        assert (
+            qa_result.cross_browser_compatibility >= 0.96
+        )  # 96%以上のクロスブラウザ互換性
         assert qa_result.mobile_compatibility >= 0.95  # 95%以上のモバイル互換性
 
         # 品質保証プロセス検証
         assert qa_result.testing_coverage >= 0.90  # 90%以上のテストカバレッジ
-        assert qa_result.automated_testing_effectiveness >= 0.94  # 94%以上の自動テスト有効性
+        assert (
+            qa_result.automated_testing_effectiveness >= 0.94
+        )  # 94%以上の自動テスト有効性
         assert qa_result.continuous_improvement_active  # 継続的改善活動中

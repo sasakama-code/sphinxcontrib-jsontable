@@ -159,7 +159,9 @@ class TestIndexOperationsOptimized:
         # パフォーマンス指標確認
         performance_metrics = hash_result.performance_metrics
         assert isinstance(performance_metrics, IndexPerformanceMetrics)
-        assert performance_metrics.index_creation_time_ms < 500  # 500ms未満（環境依存性考慮）
+        assert (
+            performance_metrics.index_creation_time_ms < 500
+        )  # 500ms未満（環境依存性考慮）
         assert performance_metrics.average_search_time_ms < 50  # 50ms未満
         assert performance_metrics.search_throughput >= 1000  # 1000件/秒以上
 

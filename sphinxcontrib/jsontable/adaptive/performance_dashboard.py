@@ -31,18 +31,18 @@ CLAUDE.md Code Excellence Compliance:
 import hashlib
 import json
 import logging
-import os
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
 
 class DashboardTheme(Enum):
     """ダッシュボードテーマ"""
+
     LIGHT = "light"
     DARK = "dark"
     ENTERPRISE = "enterprise"
@@ -52,19 +52,19 @@ class DashboardTheme(Enum):
 @dataclass
 class DashboardConfiguration:
     """ダッシュボード設定"""
-    
+
     # 基本可視化機能
     enable_realtime_visualization: bool = True
     enable_interactive_charts: bool = True
     enable_custom_views: bool = True
     enable_high_performance_rendering: bool = True
-    
+
     # 統合機能
     enable_monitoring_integration: bool = True
     enable_metrics_integration: bool = True
     enable_alert_integration: bool = True
     enable_enterprise_features: bool = True
-    
+
     # リアルタイム処理
     enable_realtime_streaming: bool = True
     enable_high_frequency_updates: bool = True
@@ -74,13 +74,13 @@ class DashboardConfiguration:
     realtime_update_interval_ms: int = 50
     max_data_points: int = 50000
     target_frame_rate: int = 60
-    
+
     # 統合設定
     enable_cross_system_correlation: bool = True
     enable_unified_view: bool = True
     enable_end_to_end_visualization: bool = True
     integration_sync_interval_ms: int = 100
-    
+
     # インタラクション機能
     enable_drag_and_drop: bool = True
     enable_zoom_and_pan: bool = True
@@ -92,7 +92,7 @@ class DashboardConfiguration:
     enable_touch_support: bool = True
     enable_gesture_recognition: bool = True
     enable_responsive_design: bool = True
-    
+
     # モバイル対応
     enable_mobile_compatibility: bool = True
     enable_mobile_optimization: bool = True
@@ -103,7 +103,7 @@ class DashboardConfiguration:
     enable_resolution_adaptation: bool = True
     enable_battery_optimization: bool = True
     mobile_breakpoints: Dict[str, int] = None
-    
+
     # 高性能レンダリング
     enable_gpu_acceleration: bool = True
     enable_webgl_rendering: bool = True
@@ -114,7 +114,7 @@ class DashboardConfiguration:
     enable_differential_rendering: bool = True
     enable_async_drawing: bool = True
     memory_optimization_level: str = "aggressive"
-    
+
     # カスタマイズ機能
     enable_color_customization: bool = True
     enable_layout_templates: bool = True
@@ -127,7 +127,7 @@ class DashboardConfiguration:
     enable_multilingual_support: bool = True
     available_themes: List[str] = None
     supported_languages: List[str] = None
-    
+
     # 企業統合
     enable_security_integration: bool = True
     enable_audit_logging: bool = True
@@ -143,7 +143,7 @@ class DashboardConfiguration:
     enable_disaster_recovery: bool = True
     security_level: str = "enterprise"
     compliance_standards: List[str] = None
-    
+
     # 品質保証
     enable_quality_monitoring: bool = True
     enable_usability_testing: bool = True
@@ -156,18 +156,18 @@ class DashboardConfiguration:
     enable_improvement_tracking: bool = True
     quality_threshold: float = 0.95
     testing_coverage_target: float = 0.90
-    
+
     def __post_init__(self):
         """設定後処理"""
         if self.mobile_breakpoints is None:
             self.mobile_breakpoints = {"small": 320, "medium": 768, "large": 1024}
-        
+
         if self.available_themes is None:
             self.available_themes = ["light", "dark", "enterprise", "accessibility"]
-        
+
         if self.supported_languages is None:
             self.supported_languages = ["en", "ja", "zh", "ko", "es"]
-        
+
         if self.compliance_standards is None:
             self.compliance_standards = ["SOX", "GDPR", "HIPAA"]
 
@@ -175,7 +175,7 @@ class DashboardConfiguration:
 @dataclass
 class DashboardWidget:
     """ダッシュボードウィジェット"""
-    
+
     widget_id: str
     widget_type: str
     title: str
@@ -185,7 +185,7 @@ class DashboardWidget:
     configuration: Dict[str, Any]
     visible: bool = True
     interactive: bool = True
-    
+
     def __post_init__(self):
         if self.configuration is None:
             self.configuration = {}
@@ -194,14 +194,14 @@ class DashboardWidget:
 @dataclass
 class InteractiveChart:
     """インタラクティブチャート"""
-    
+
     chart_id: str
     chart_type: str
     data_series: List[Dict[str, Any]]
     axes_config: Dict[str, Any]
     interaction_config: Dict[str, Any]
     styling_config: Dict[str, Any]
-    
+
     def __post_init__(self):
         if self.data_series is None:
             self.data_series = []
@@ -216,14 +216,14 @@ class InteractiveChart:
 @dataclass
 class RealtimeDataSource:
     """リアルタイムデータソース"""
-    
+
     source_id: str
     source_type: str
     connection_config: Dict[str, Any]
     update_frequency_ms: int
     data_format: str
     enabled: bool = True
-    
+
     def __post_init__(self):
         if self.connection_config is None:
             self.connection_config = {}
@@ -232,13 +232,13 @@ class RealtimeDataSource:
 @dataclass
 class VisualizationComponent:
     """可視化コンポーネント"""
-    
+
     component_id: str
     component_type: str
     render_config: Dict[str, Any]
     data_binding: Dict[str, Any]
     interaction_handlers: List[str]
-    
+
     def __post_init__(self):
         if self.render_config is None:
             self.render_config = {}
@@ -251,23 +251,23 @@ class VisualizationComponent:
 @dataclass
 class VisualizationResult:
     """可視化結果"""
-    
+
     # 基本可視化コンポーネント
     visualization_components: List[VisualizationComponent]
     interactive_charts: List[InteractiveChart]
     dashboard_widgets: List[DashboardWidget]
     realtime_data_sources: List[RealtimeDataSource]
-    
+
     # パフォーマンス指標
     rendering_performance: float
     data_update_latency: float
     visualization_throughput: float
-    
+
     # 企業品質指標
     enterprise_visualization_quality: float
     user_experience_score: float
     accessibility_compliance: float
-    
+
     # リアルタイム性能指標
     frame_rate_achieved: float = 0.0
     update_latency_ms: float = 0.0
@@ -276,7 +276,7 @@ class VisualizationResult:
     streaming_stability: float = 0.0
     data_loss_rate: float = 0.0
     animation_smoothness: float = 0.0
-    
+
     # 統合指標
     unified_dashboard_view: Dict[str, Any] = None
     cross_system_correlations: List[Dict[str, Any]] = None
@@ -288,7 +288,7 @@ class VisualizationResult:
     end_to_end_latency: float = 0.0
     system_correlation_accuracy: float = 0.0
     monitoring_coverage: float = 0.0
-    
+
     # インタラクション指標
     interaction_responses: List[Dict[str, Any]] = None
     layout_changes: Dict[str, Any] = None
@@ -298,7 +298,7 @@ class VisualizationResult:
     gesture_recognition_accuracy: float = 0.0
     touch_sensitivity: float = 0.0
     customization_flexibility: float = 0.0
-    
+
     # モバイル対応指標
     layout_adaptation: Dict[str, Any] = None
     touch_optimization: Dict[str, Any] = None
@@ -308,7 +308,7 @@ class VisualizationResult:
     touch_responsiveness: float = 0.0
     resolution_optimization: float = 0.0
     mobile_compatibility_score: float = 0.0
-    
+
     # 高性能レンダリング指標
     gpu_utilization: float = 0.0
     memory_usage: float = 0.0
@@ -316,7 +316,7 @@ class VisualizationResult:
     rendering_quality_score: float = 0.0
     visual_fidelity: float = 0.0
     performance_efficiency: float = 0.0
-    
+
     # カスタマイズ指標
     customization_applied: bool = False
     theme_consistency: float = 0.0
@@ -325,7 +325,7 @@ class VisualizationResult:
     customization_success_rate: float = 0.0
     visual_coherence: float = 0.0
     corporate_identity_maintained: bool = False
-    
+
     # 企業統合指標
     security_compliance_score: float = 0.0
     audit_trail_completeness: float = 0.0
@@ -337,7 +337,7 @@ class VisualizationResult:
     horizontal_scalability: float = 0.0
     high_availability_score: float = 0.0
     disaster_recovery_readiness: float = 0.0
-    
+
     # 品質保証指標
     overall_quality_score: float = 0.0
     usability_assessment: Dict[str, Any] = None
@@ -351,7 +351,7 @@ class VisualizationResult:
     testing_coverage: float = 0.0
     automated_testing_effectiveness: float = 0.0
     continuous_improvement_active: bool = False
-    
+
     def __post_init__(self):
         """結果後処理"""
         if self.visualization_components is None:
@@ -404,13 +404,13 @@ class PerformanceDashboard:
     def __init__(self, dashboard_config: Optional[DashboardConfiguration] = None):
         """パフォーマンスダッシュボード初期化"""
         self._config = dashboard_config or DashboardConfiguration()
-        
+
         # 基本初期化
         self._widgets: List[DashboardWidget] = []
         self._charts: List[InteractiveChart] = []
         self._data_sources: List[RealtimeDataSource] = []
         self._visualization_components: List[VisualizationComponent] = []
-        
+
         # REFACTOR Phase: 企業グレード初期化
         self._initialize_enterprise_logging()
         self._initialize_concurrent_rendering()
@@ -424,7 +424,7 @@ class PerformanceDashboard:
         """企業グレードロギング初期化"""
         self._logger = logging.getLogger(f"{__name__}.PerformanceDashboard")
         self._logger.setLevel(logging.INFO)
-        
+
         # セキュリティ監査ログ
         self._security_audit_log = []
         self._performance_metrics_log = []
@@ -434,16 +434,16 @@ class PerformanceDashboard:
             "failed_renders": 0,
             "average_render_time": 0.0,
         }
-        
+
     def _initialize_concurrent_rendering(self):
         """並行レンダリング初期化"""
         self._thread_pool = ThreadPoolExecutor(
             max_workers=8,  # 高性能レンダリング用
-            thread_name_prefix="DashboardRenderWorker"
+            thread_name_prefix="DashboardRenderWorker",
         )
         self._rendering_semaphore = threading.Semaphore(8)
         self._rendering_queue_lock = threading.RLock()
-        
+
     def _initialize_visualization_cache(self):
         """可視化キャッシュ初期化"""
         self._visualization_cache = {}
@@ -456,7 +456,7 @@ class PerformanceDashboard:
             "evictions": 0,
             "render_cache_savings": 0.0,
         }
-        
+
     def _initialize_defensive_programming(self):
         """防御的プログラミング初期化"""
         self._input_validators = {
@@ -470,7 +470,7 @@ class PerformanceDashboard:
             "str": lambda x: isinstance(x, str),
             "number": lambda x: isinstance(x, (int, float)),
         }
-        
+
     def _initialize_error_handling(self):
         """エラーハンドリング初期化"""
         self._error_recovery_strategies = {
@@ -483,7 +483,7 @@ class PerformanceDashboard:
         self._retry_counts = {}
         self._circuit_breaker_states = {}
         self._max_retry_attempts = 3
-        
+
     def _initialize_security_audit(self):
         """セキュリティ監査初期化"""
         self._security_context = {
@@ -501,7 +501,7 @@ class PerformanceDashboard:
             "audit_events": 0,
             "suspicious_activities": 0,
         }
-        
+
     def _initialize_resource_management(self):
         """リソース管理初期化"""
         self._resource_monitors = {
@@ -528,11 +528,11 @@ class PerformanceDashboard:
             # スレッドプール終了
             if hasattr(self, "_thread_pool"):
                 self._thread_pool.shutdown(wait=True, timeout=10.0)
-            
+
             # キャッシュクリア
             if hasattr(self, "_visualization_cache"):
                 self._visualization_cache.clear()
-            
+
             # クリーンアップハンドラー実行
             if hasattr(self, "_cleanup_handlers"):
                 for handler in self._cleanup_handlers:
@@ -540,7 +540,7 @@ class PerformanceDashboard:
                         handler()
                     except Exception:
                         pass  # デストラクタでは例外を隠蔽
-                        
+
         except Exception:
             pass  # デストラクタでは例外を隠蔽
 
@@ -548,85 +548,96 @@ class PerformanceDashboard:
         """監視データ検証"""
         if not isinstance(data, dict):
             return False
-        
+
         # 基本構造確認
         expected_keys = ["realtime_metrics", "metrics_analysis", "alert_data"]
         for key in expected_keys:
             if key in data and not isinstance(data[key], dict):
                 return False
-        
+
         # メトリクスデータ検証
         if "realtime_metrics" in data:
             metrics = data["realtime_metrics"]
             if "timestamps" in metrics and not isinstance(metrics["timestamps"], list):
                 return False
-        
+
         return True
-    
+
     def _validate_dashboard_config(self, config: Any) -> bool:
         """ダッシュボード設定検証"""
         return isinstance(config, DashboardConfiguration)
-    
+
     def _validate_visualization_data(self, data: Any) -> bool:
         """可視化データ検証"""
         if not isinstance(data, dict):
             return False
-        
+
         # データポイント数制限確認
         if "time_series_data" in data:
             ts_data = data["time_series_data"]
             if isinstance(ts_data, dict) and "data_points" in ts_data:
                 data_points = ts_data["data_points"]
-                if isinstance(data_points, int) and data_points > 1000000:  # 100万ポイント制限
+                if (
+                    isinstance(data_points, int) and data_points > 1000000
+                ):  # 100万ポイント制限
                     return False
-        
+
         return True
 
-    def _recover_from_rendering_failure(self, error: Exception, context: Dict[str, Any]) -> bool:
+    def _recover_from_rendering_failure(
+        self, error: Exception, context: Dict[str, Any]
+    ) -> bool:
         """レンダリング失敗からの回復"""
         try:
             error_key = f"render_{context.get('render_id', 'unknown')}"
             retry_count = self._retry_counts.get(error_key, 0)
-            
+
             if retry_count < self._max_retry_attempts:
                 self._retry_counts[error_key] = retry_count + 1
                 # 指数バックオフで再試行
-                time.sleep(2 ** retry_count * 0.1)  # 0.1, 0.2, 0.4秒
+                time.sleep(2**retry_count * 0.1)  # 0.1, 0.2, 0.4秒
                 return True
             else:
                 # 最大リトライ回数に達した場合はサーキットブレーカーを開く
                 self._circuit_breaker_states[error_key] = "open"
                 return False
-                
+
         except Exception:
             return False
-    
-    def _recover_from_cache_corruption(self, error: Exception, context: Dict[str, Any]) -> bool:
+
+    def _recover_from_cache_corruption(
+        self, error: Exception, context: Dict[str, Any]
+    ) -> bool:
         """キャッシュ破損からの回復"""
         try:
             with self._cache_lock:
                 self._visualization_cache.clear()
                 self._cache_timestamps.clear()
-                self._cache_performance_stats["evictions"] += len(self._visualization_cache)
+                self._cache_performance_stats["evictions"] += len(
+                    self._visualization_cache
+                )
             return True
         except Exception:
             return False
-    
-    def _recover_from_thread_pool_exhaustion(self, error: Exception, context: Dict[str, Any]) -> bool:
+
+    def _recover_from_thread_pool_exhaustion(
+        self, error: Exception, context: Dict[str, Any]
+    ) -> bool:
         """スレッドプール枯渇からの回復"""
         try:
             # 新しいスレッドプールを作成
             old_pool = self._thread_pool
             self._thread_pool = ThreadPoolExecutor(
-                max_workers=8,
-                thread_name_prefix="DashboardRenderWorker"
+                max_workers=8, thread_name_prefix="DashboardRenderWorker"
             )
             old_pool.shutdown(wait=False)
             return True
         except Exception:
             return False
-    
-    def _recover_from_memory_pressure(self, error: Exception, context: Dict[str, Any]) -> bool:
+
+    def _recover_from_memory_pressure(
+        self, error: Exception, context: Dict[str, Any]
+    ) -> bool:
         """メモリ圧迫からの回復"""
         try:
             # キャッシュサイズを削減
@@ -635,10 +646,9 @@ class PerformanceDashboard:
                 if cache_size > 500:
                     # 古いエントリの半分を削除
                     sorted_items = sorted(
-                        self._cache_timestamps.items(),
-                        key=lambda x: x[1]
+                        self._cache_timestamps.items(), key=lambda x: x[1]
                     )
-                    to_remove = [item[0] for item in sorted_items[:cache_size // 2]]
+                    to_remove = [item[0] for item in sorted_items[: cache_size // 2]]
                     for key in to_remove:
                         self._visualization_cache.pop(key, None)
                         self._cache_timestamps.pop(key, None)
@@ -646,8 +656,10 @@ class PerformanceDashboard:
             return True
         except Exception:
             return False
-    
-    def _recover_from_gpu_failure(self, error: Exception, context: Dict[str, Any]) -> bool:
+
+    def _recover_from_gpu_failure(
+        self, error: Exception, context: Dict[str, Any]
+    ) -> bool:
         """GPU失敗からの回復"""
         try:
             # CPU フォールバックモードに切り替え
@@ -663,7 +675,9 @@ class PerformanceDashboard:
             "timestamp": datetime.now(),
             "event_type": event_type,
             "details": details,
-            "hash": hashlib.sha256(json.dumps(details, sort_keys=True).encode()).hexdigest()[:16]
+            "hash": hashlib.sha256(
+                json.dumps(details, sort_keys=True).encode()
+            ).hexdigest()[:16],
         }
         self._security_events.append(event)
         self._security_metrics["audit_events"] += 1
@@ -672,25 +686,42 @@ class PerformanceDashboard:
         """リソース使用量更新"""
         try:
             import psutil
+
             process = psutil.Process()
-            self._resource_monitors["memory_usage"] = process.memory_info().rss / 1024 / 1024  # MB
+            self._resource_monitors["memory_usage"] = (
+                process.memory_info().rss / 1024 / 1024
+            )  # MB
             self._resource_monitors["cpu_usage"] = process.cpu_percent()
             self._resource_monitors["thread_count"] = process.num_threads()
             self._resource_monitors["cache_size"] = len(self._visualization_cache)
-            self._resource_monitors["active_renders"] = self._thread_pool._threads.__len__() if hasattr(self._thread_pool, "_threads") else 0
+            self._resource_monitors["active_renders"] = (
+                self._thread_pool._threads.__len__()
+                if hasattr(self._thread_pool, "_threads")
+                else 0
+            )
         except ImportError:
             # psutil不可用時は基本的な監視
             self._resource_monitors["cache_size"] = len(self._visualization_cache)
-            self._resource_monitors["thread_count"] = self._thread_pool._threads.__len__() if hasattr(self._thread_pool, "_threads") else 0
+            self._resource_monitors["thread_count"] = (
+                self._thread_pool._threads.__len__()
+                if hasattr(self._thread_pool, "_threads")
+                else 0
+            )
 
-    def _get_from_visualization_cache(self, cache_key: str) -> Optional[VisualizationResult]:
+    def _get_from_visualization_cache(
+        self, cache_key: str
+    ) -> Optional[VisualizationResult]:
         """可視化キャッシュから結果取得"""
         try:
             with self._cache_lock:
                 if cache_key in self._visualization_cache:
                     # TTL確認
                     timestamp = self._cache_timestamps.get(cache_key)
-                    if timestamp and (datetime.now() - timestamp).total_seconds() < self._cache_ttl_seconds:
+                    if (
+                        timestamp
+                        and (datetime.now() - timestamp).total_seconds()
+                        < self._cache_ttl_seconds
+                    ):
                         self._cache_performance_stats["hits"] += 1
                         return self._visualization_cache[cache_key]
                     else:
@@ -698,30 +729,37 @@ class PerformanceDashboard:
                         self._visualization_cache.pop(cache_key, None)
                         self._cache_timestamps.pop(cache_key, None)
                         self._cache_performance_stats["evictions"] += 1
-                
+
                 self._cache_performance_stats["misses"] += 1
                 return None
-                
+
         except Exception:
             return None
 
-    def _store_in_visualization_cache(self, cache_key: str, result: VisualizationResult):
+    def _store_in_visualization_cache(
+        self, cache_key: str, result: VisualizationResult
+    ):
         """可視化キャッシュに結果保存"""
         try:
             with self._cache_lock:
                 # キャッシュサイズ制限確認
-                if len(self._visualization_cache) >= self._resource_limits["max_cache_entries"]:
+                if (
+                    len(self._visualization_cache)
+                    >= self._resource_limits["max_cache_entries"]
+                ):
                     # 最古エントリを削除
-                    oldest_key = min(self._cache_timestamps.keys(), 
-                                   key=lambda k: self._cache_timestamps[k])
+                    oldest_key = min(
+                        self._cache_timestamps.keys(),
+                        key=lambda k: self._cache_timestamps[k],
+                    )
                     self._visualization_cache.pop(oldest_key, None)
                     self._cache_timestamps.pop(oldest_key, None)
                     self._cache_performance_stats["evictions"] += 1
-                
+
                 # 新しいエントリを追加
                 self._visualization_cache[cache_key] = result
                 self._cache_timestamps[cache_key] = datetime.now()
-                
+
         except Exception:
             pass  # キャッシュエラーはレンダリング処理を阻害しない
 
@@ -730,121 +768,143 @@ class PerformanceDashboard:
         try:
             # monitoring_dataの構造とサイズからキーを生成
             data_structure = {}
-            
+
             for key, value in monitoring_data.items():
                 if isinstance(value, dict):
                     data_structure[key] = {
                         "type": "dict",
                         "keys": list(value.keys()),
-                        "size": len(value)
+                        "size": len(value),
                     }
                 elif isinstance(value, list):
                     data_structure[key] = {
-                        "type": "list", 
+                        "type": "list",
                         "length": len(value),
-                        "first_type": type(value[0]).__name__ if value else "empty"
+                        "first_type": type(value[0]).__name__ if value else "empty",
                     }
                 else:
                     data_structure[key] = {
                         "type": type(value).__name__,
-                        "value": str(value)[:50]  # 最初の50文字のみ
+                        "value": str(value)[:50],  # 最初の50文字のみ
                     }
-            
+
             # 引数も含める
             key_data = {
                 "data_structure": data_structure,
                 "args": args,
-                "timestamp_minute": datetime.now().strftime("%Y%m%d%H%M")  # 分単位でキャッシュ
+                "timestamp_minute": datetime.now().strftime(
+                    "%Y%m%d%H%M"
+                ),  # 分単位でキャッシュ
             }
-            
-            return hashlib.md5(json.dumps(key_data, sort_keys=True).encode()).hexdigest()
-            
+
+            return hashlib.md5(
+                json.dumps(key_data, sort_keys=True).encode()
+            ).hexdigest()
+
         except Exception:
             # フォールバック: 引数のみでキー生成
-            fallback_data = {"args": args, "timestamp": int(time.time() // 60)}  # 1分単位
-            return hashlib.md5(json.dumps(fallback_data, sort_keys=True).encode()).hexdigest()
+            fallback_data = {
+                "args": args,
+                "timestamp": int(time.time() // 60),
+            }  # 1分単位
+            return hashlib.md5(
+                json.dumps(fallback_data, sort_keys=True).encode()
+            ).hexdigest()
 
     def execute_comprehensive_visualization(
         self,
         monitoring_data: Dict[str, Any],
         visualization_depth: str = "comprehensive",
         rendering_quality: str = "enterprise",
-        interaction_level: str = "advanced"
+        interaction_level: str = "advanced",
     ) -> VisualizationResult:
         """包括的ダッシュボード可視化実行（REFACTOR企業グレード版）"""
-        
+
         start_time = time.time()
-        
+
         # REFACTOR: 防御的プログラミング - 入力検証
         if not self._validate_monitoring_data(monitoring_data):
             raise ValueError("Invalid monitoring data format")
-        
+
         # REFACTOR: セキュリティ監査ログ
-        self._log_security_event("visualization_started", {
-            "visualization_depth": visualization_depth,
-            "rendering_quality": rendering_quality,
-            "interaction_level": interaction_level,
-            "data_size": len(str(monitoring_data))
-        })
-        
+        self._log_security_event(
+            "visualization_started",
+            {
+                "visualization_depth": visualization_depth,
+                "rendering_quality": rendering_quality,
+                "interaction_level": interaction_level,
+                "data_size": len(str(monitoring_data)),
+            },
+        )
+
         # REFACTOR: キャッシュ確認
-        cache_key = self._generate_cache_key(monitoring_data, visualization_depth, rendering_quality)
+        cache_key = self._generate_cache_key(
+            monitoring_data, visualization_depth, rendering_quality
+        )
         cached_result = self._get_from_visualization_cache(cache_key)
-        
+
         if cached_result:
             # キャッシュヒット - 即座に結果返却
             cached_result.rendering_performance = 0.99  # キャッシュ効果
-            cached_result.data_update_latency = 0.008   # 8ms（キャッシュ）
+            cached_result.data_update_latency = 0.008  # 8ms（キャッシュ）
             self._cache_performance_stats["render_cache_savings"] += 1
             return cached_result
-        
+
         try:
             # REFACTOR: 並行処理での可視化コンポーネント作成
             with self._rendering_semaphore:
                 render_futures = []
-                
+
                 # 並行レンダリング実行
                 render_futures.append(
-                    self._thread_pool.submit(self._create_visualization_components, monitoring_data)
+                    self._thread_pool.submit(
+                        self._create_visualization_components, monitoring_data
+                    )
                 )
                 render_futures.append(
-                    self._thread_pool.submit(self._create_interactive_charts, monitoring_data)
+                    self._thread_pool.submit(
+                        self._create_interactive_charts, monitoring_data
+                    )
                 )
                 render_futures.append(
-                    self._thread_pool.submit(self._create_dashboard_widgets, monitoring_data)
+                    self._thread_pool.submit(
+                        self._create_dashboard_widgets, monitoring_data
+                    )
                 )
                 render_futures.append(
-                    self._thread_pool.submit(self._create_realtime_data_sources, monitoring_data)
+                    self._thread_pool.submit(
+                        self._create_realtime_data_sources, monitoring_data
+                    )
                 )
-                
+
                 # 結果収集
                 visualization_components = render_futures[0].result(timeout=10.0)
                 interactive_charts = render_futures[1].result(timeout=10.0)
                 dashboard_widgets = render_futures[2].result(timeout=10.0)
                 realtime_data_sources = render_futures[3].result(timeout=10.0)
-            
+
             processing_time = time.time() - start_time
-            
+
             # REFACTOR: 企業グレード品質指標計算（強化版）
-            rendering_performance = 0.99   # REFACTOR大幅向上値
-            data_update_latency = 0.025     # 25ms（REFACTOR向上）
+            rendering_performance = 0.99  # REFACTOR大幅向上値
+            data_update_latency = 0.025  # 25ms（REFACTOR向上）
             visualization_throughput = 18000  # 18,000件/秒（REFACTOR向上）
             enterprise_visualization_quality = 0.995  # REFACTOR大幅向上値
-            user_experience_score = 0.98    # REFACTOR向上値
-            accessibility_compliance = 0.99 # REFACTOR向上値
-            
+            user_experience_score = 0.98  # REFACTOR向上値
+            accessibility_compliance = 0.99  # REFACTOR向上値
+
             # REFACTOR: レンダリング統計更新
             self._rendering_statistics["total_renders"] += 1
             self._rendering_statistics["successful_renders"] += 1
             self._rendering_statistics["average_render_time"] = (
-                (self._rendering_statistics["average_render_time"] * 
-                 (self._rendering_statistics["total_renders"] - 1) + processing_time) / 
-                self._rendering_statistics["total_renders"]
-            )
-            
+                self._rendering_statistics["average_render_time"]
+                * (self._rendering_statistics["total_renders"] - 1)
+                + processing_time
+            ) / self._rendering_statistics["total_renders"]
+
             # REFACTOR: リソース使用量更新
             self._update_resource_usage()
-            
+
             # 結果作成
             result = VisualizationResult(
                 visualization_components=visualization_components,
@@ -858,33 +918,36 @@ class PerformanceDashboard:
                 user_experience_score=user_experience_score,
                 accessibility_compliance=accessibility_compliance,
             )
-            
+
             # REFACTOR: 結果をキャッシュに保存
             self._store_in_visualization_cache(cache_key, result)
-            
+
             # REFACTOR: セキュリティ監査成功ログ
-            self._log_security_event("visualization_completed", {
-                "processing_time": processing_time,
-                "components_created": len(visualization_components),
-                "charts_created": len(interactive_charts),
-                "widgets_created": len(dashboard_widgets)
-            })
-            
+            self._log_security_event(
+                "visualization_completed",
+                {
+                    "processing_time": processing_time,
+                    "components_created": len(visualization_components),
+                    "charts_created": len(interactive_charts),
+                    "widgets_created": len(dashboard_widgets),
+                },
+            )
+
             return result
-            
+
         except Exception as e:
             # REFACTOR: 企業グレードエラー処理
             error_context = {
                 "method": "execute_comprehensive_visualization",
                 "monitoring_data_size": len(str(monitoring_data)),
                 "visualization_depth": visualization_depth,
-                "render_id": f"viz_{int(time.time())}"
+                "render_id": f"viz_{int(time.time())}",
             }
-            
+
             # レンダリング統計更新（失敗）
             self._rendering_statistics["total_renders"] += 1
             self._rendering_statistics["failed_renders"] += 1
-            
+
             if self._recover_from_rendering_failure(e, error_context):
                 # 回復成功時は縮退モードで結果を返す
                 return VisualizationResult(
@@ -893,7 +956,7 @@ class PerformanceDashboard:
                     dashboard_widgets=[],
                     realtime_data_sources=[],
                     rendering_performance=0.75,  # 縮退モード時は品質低下
-                    data_update_latency=0.08,    # 80ms（縮退モード）
+                    data_update_latency=0.08,  # 80ms（縮退モード）
                     visualization_throughput=5000,  # 5,000件/秒（縮退モード）
                     enterprise_visualization_quality=0.80,
                     user_experience_score=0.75,
@@ -901,10 +964,10 @@ class PerformanceDashboard:
                 )
             else:
                 # 回復失敗時は例外を再発生
-                self._log_security_event("visualization_failed", {
-                    "error": str(e),
-                    "error_type": type(e).__name__
-                })
+                self._log_security_event(
+                    "visualization_failed",
+                    {"error": str(e), "error_type": type(e).__name__},
+                )
                 raise
 
     def process_realtime_data_stream(
@@ -912,16 +975,16 @@ class PerformanceDashboard:
         data_stream: List[Dict[str, Any]],
         visualization_mode: str = "streaming",
         update_frequency: int = 20,
-        optimization_level: str = "maximum"
+        optimization_level: str = "maximum",
     ) -> VisualizationResult:
         """リアルタイムデータストリーム処理"""
-        
+
         start_time = time.time()
-        
+
         # リアルタイム処理シミュレーション
         processed_count = len(data_stream)
         total_processing_time = time.time() - start_time
-        
+
         # リアルタイム性能指標計算
         frame_rate_achieved = 58.0  # 58fps
         update_latency_ms = 25.0  # 25ms
@@ -930,7 +993,7 @@ class PerformanceDashboard:
         streaming_stability = 0.98  # 98%
         data_loss_rate = 0.005  # 0.5%
         animation_smoothness = 0.96  # 96%
-        
+
         return VisualizationResult(
             visualization_components=[],
             interactive_charts=[],
@@ -956,12 +1019,12 @@ class PerformanceDashboard:
         integrated_data: Dict[str, Any],
         correlation_analysis: bool = True,
         unified_rendering: bool = True,
-        cross_system_insights: bool = True
+        cross_system_insights: bool = True,
     ) -> VisualizationResult:
         """統合ダッシュボード処理実行"""
-        
+
         start_time = time.time()
-        
+
         # 統合処理シミュレーション
         unified_dashboard_view = {
             "overall_health": 0.94,
@@ -983,9 +1046,9 @@ class PerformanceDashboard:
             "processing_stages": 5,
             "latency_breakdown": {"monitor": 10, "analyze": 15, "alert": 8},
         }
-        
+
         processing_time = time.time() - start_time
-        
+
         # 統合品質指標
         integration_success_rate = 0.98  # GREEN基本値
         data_synchronization_accuracy = 0.99  # GREEN基本値
@@ -993,7 +1056,7 @@ class PerformanceDashboard:
         end_to_end_latency = 0.12  # 120ms
         system_correlation_accuracy = 0.94  # GREEN基本値
         monitoring_coverage = 0.99  # GREEN基本値
-        
+
         return VisualizationResult(
             visualization_components=[],
             interactive_charts=[],
@@ -1022,35 +1085,35 @@ class PerformanceDashboard:
         interactions: List[Dict[str, Any]],
         interaction_mode: str = "real_time",
         responsiveness_level: str = "high",
-        touch_optimization: bool = True
+        touch_optimization: bool = True,
     ) -> VisualizationResult:
         """UI インタラクション処理"""
-        
+
         start_time = time.time()
-        
+
         # インタラクション処理シミュレーション
         interaction_responses = []
         for interaction in interactions:
             response = {
-                "interaction_id": f"resp_{len(interaction_responses)+1}",
+                "interaction_id": f"resp_{len(interaction_responses) + 1}",
                 "action": interaction.get("action", "unknown"),
                 "status": "completed",
                 "response_time_ms": 8,
             }
             interaction_responses.append(response)
-        
+
         layout_changes = {"widgets_moved": 3, "size_changes": 2, "theme_applied": True}
         widget_configurations = {"active_widgets": 8, "custom_widgets": 2}
         theme_settings = {"current_theme": "enterprise", "custom_colors": True}
-        
+
         processing_time = time.time() - start_time
-        
+
         # インタラクション品質指標
         interaction_responsiveness = 0.98  # GREEN基本値
         gesture_recognition_accuracy = 0.95  # GREEN基本値
         touch_sensitivity = 0.97  # GREEN基本値
         customization_flexibility = 0.94  # GREEN基本値
-        
+
         return VisualizationResult(
             visualization_components=[],
             interactive_charts=[],
@@ -1077,15 +1140,15 @@ class PerformanceDashboard:
         device_config: Dict[str, Any],
         optimization_level: str = "maximum",
         responsive_adaptation: bool = True,
-        touch_optimization: bool = True
+        touch_optimization: bool = True,
     ) -> VisualizationResult:
         """デバイス別レンダリング"""
-        
+
         start_time = time.time()
-        
+
         # デバイス適応処理シミュレーション
         device_type = device_config.get("device", "unknown")
-        
+
         layout_adaptation = {
             "layout_optimized": True,
             "breakpoint_applied": device_config.get("width", 1024),
@@ -1106,15 +1169,15 @@ class PerformanceDashboard:
             "background_processing": "minimal",
             "refresh_rate_adaptive": True,
         }
-        
+
         processing_time = time.time() - start_time
-        
+
         # デバイス別品質指標
         layout_adaptation_accuracy = 0.96  # GREEN基本値
         touch_responsiveness = 0.97  # GREEN基本値
         resolution_optimization = 0.95  # GREEN基本値
         mobile_compatibility_score = 0.96  # GREEN基本値
-        
+
         return VisualizationResult(
             visualization_components=[],
             interactive_charts=[],
@@ -1141,29 +1204,31 @@ class PerformanceDashboard:
         visualization_data: Dict[str, Any],
         rendering_strategy: str = "gpu_optimized",
         quality_level: str = "enterprise",
-        optimization_mode: str = "maximum_performance"
+        optimization_mode: str = "maximum_performance",
     ) -> VisualizationResult:
         """高性能レンダリング実行"""
-        
+
         start_time = time.time()
-        
+
         # 高性能レンダリング処理シミュレーション
-        data_points = visualization_data.get("time_series_data", {}).get("data_points", 100000)
+        data_points = visualization_data.get("time_series_data", {}).get(
+            "data_points", 100000
+        )
         charts_count = len(visualization_data.get("chart_components", []))
-        
+
         # GPU利用率とメモリ使用量計算
         gpu_utilization = 0.75  # 75%
         memory_usage = min(512, data_points / 200)  # 最大512MB
         cpu_efficiency = 0.88  # 88%
         frame_rate_achieved = 58.0  # 58fps
-        
+
         processing_time = time.time() - start_time
-        
+
         # レンダリング品質指標
         rendering_quality_score = 0.96  # GREEN基本値
         visual_fidelity = 0.98  # GREEN基本値
         performance_efficiency = 0.94  # GREEN基本値
-        
+
         return VisualizationResult(
             visualization_components=[],
             interactive_charts=[],
@@ -1189,27 +1254,27 @@ class PerformanceDashboard:
         customization_config: Dict[str, Any],
         validation_level: str = "strict",
         preview_mode: bool = False,
-        save_to_profile: bool = True
+        save_to_profile: bool = True,
     ) -> VisualizationResult:
         """カスタマイズ適用"""
-        
+
         start_time = time.time()
-        
+
         # カスタマイズ処理シミュレーション
         scenario_type = customization_config.get("scenario", "default")
-        
+
         customization_applied = True
         theme_consistency = 0.96  # GREEN基本値
         brand_compliance = 0.97 if scenario_type == "enterprise_branding" else 0.85
         visual_coherence = 0.95  # GREEN基本値
         corporate_identity_maintained = scenario_type == "enterprise_branding"
-        
+
         processing_time = time.time() - start_time
-        
+
         # カスタマイズ品質指標
         customization_success_rate = 0.98  # GREEN基本値
         accessibility_score = 0.98 if scenario_type == "accessibility_mode" else 0.85
-        
+
         return VisualizationResult(
             visualization_components=[],
             interactive_charts=[],
@@ -1235,25 +1300,25 @@ class PerformanceDashboard:
         environment_config: Dict[str, Any],
         validation_depth: str = "comprehensive",
         compliance_verification: bool = True,
-        security_audit: bool = True
+        security_audit: bool = True,
     ) -> VisualizationResult:
         """企業統合品質検証"""
-        
+
         start_time = time.time()
-        
+
         # 企業統合検証シミュレーション
         security_requirements = environment_config.get("security_requirements", {})
         compliance_validation = environment_config.get("compliance_validation", {})
-        
+
         scalability_metrics = {
             "concurrent_users": 1000,
             "data_throughput": "10GB/hour",
             "response_time_p99": 150,  # ms
             "availability": 0.9995,
         }
-        
+
         processing_time = time.time() - start_time
-        
+
         # 企業品質指標
         security_compliance_score = 0.98  # GREEN基本値
         audit_trail_completeness = 0.99  # GREEN基本値
@@ -1264,7 +1329,7 @@ class PerformanceDashboard:
         horizontal_scalability = 0.95  # GREEN基本値
         high_availability_score = 0.99  # GREEN基本値
         disaster_recovery_readiness = 0.96  # GREEN基本値
-        
+
         return VisualizationResult(
             visualization_components=[],
             interactive_charts=[],
@@ -1293,12 +1358,12 @@ class PerformanceDashboard:
         validation_data: Dict[str, Any],
         validation_scope: str = "comprehensive",
         automated_testing: bool = True,
-        continuous_monitoring: bool = True
+        continuous_monitoring: bool = True,
     ) -> VisualizationResult:
         """品質保証検証実行"""
-        
+
         start_time = time.time()
-        
+
         # 品質保証検証シミュレーション
         usability_assessment = {
             "task_completion_rate": 0.97,
@@ -1320,9 +1385,9 @@ class PerformanceDashboard:
             "screen_reader": 0.96,
             "keyboard_navigation": 0.99,
         }
-        
+
         processing_time = time.time() - start_time
-        
+
         # 品質指標
         overall_quality_score = 0.96  # GREEN基本値
         usability_score = 0.95  # GREEN基本値
@@ -1332,7 +1397,7 @@ class PerformanceDashboard:
         testing_coverage = 0.90  # GREEN基本値
         automated_testing_effectiveness = 0.94  # GREEN基本値
         continuous_improvement_active = True
-        
+
         return VisualizationResult(
             visualization_components=[],
             interactive_charts=[],
@@ -1358,87 +1423,111 @@ class PerformanceDashboard:
             continuous_improvement_active=continuous_improvement_active,
         )
 
-    def _create_visualization_components(self, monitoring_data: Dict[str, Any]) -> List[VisualizationComponent]:
+    def _create_visualization_components(
+        self, monitoring_data: Dict[str, Any]
+    ) -> List[VisualizationComponent]:
         """可視化コンポーネント作成"""
         components = []
-        
+
         # CPUモニターコンポーネント
-        components.append(VisualizationComponent(
-            component_id="cpu_monitor",
-            component_type="realtime_chart",
-            render_config={"chart_type": "line", "update_interval": 1000},
-            data_binding={"metric": "cpu_usage", "source": "realtime_metrics"},
-            interaction_handlers=["zoom", "pan", "tooltip"]
-        ))
-        
+        components.append(
+            VisualizationComponent(
+                component_id="cpu_monitor",
+                component_type="realtime_chart",
+                render_config={"chart_type": "line", "update_interval": 1000},
+                data_binding={"metric": "cpu_usage", "source": "realtime_metrics"},
+                interaction_handlers=["zoom", "pan", "tooltip"],
+            )
+        )
+
         # メモリ使用量チャートコンポーネント
-        components.append(VisualizationComponent(
-            component_id="memory_chart",
-            component_type="area_chart",
-            render_config={"gradient": True, "threshold_lines": [80, 90]},
-            data_binding={"metric": "memory_usage", "source": "realtime_metrics"},
-            interaction_handlers=["drill_down", "filter"]
-        ))
-        
+        components.append(
+            VisualizationComponent(
+                component_id="memory_chart",
+                component_type="area_chart",
+                render_config={"gradient": True, "threshold_lines": [80, 90]},
+                data_binding={"metric": "memory_usage", "source": "realtime_metrics"},
+                interaction_handlers=["drill_down", "filter"],
+            )
+        )
+
         return components
 
-    def _create_interactive_charts(self, monitoring_data: Dict[str, Any]) -> List[InteractiveChart]:
+    def _create_interactive_charts(
+        self, monitoring_data: Dict[str, Any]
+    ) -> List[InteractiveChart]:
         """インタラクティブチャート作成"""
         charts = []
-        
+
         # CPUトレンドチャート
-        charts.append(InteractiveChart(
-            chart_id="cpu_trend_chart",
-            chart_type="line_chart",
-            data_series=[
-                {"name": "CPU Usage", "data": [45, 52, 48, 67, 75], "color": "#3b82f6"}
-            ],
-            axes_config={"x_axis": "time", "y_axis": "percentage"},
-            interaction_config={"zoom": True, "pan": True, "hover": True},
-            styling_config={"theme": "enterprise", "grid": True}
-        ))
-        
+        charts.append(
+            InteractiveChart(
+                chart_id="cpu_trend_chart",
+                chart_type="line_chart",
+                data_series=[
+                    {
+                        "name": "CPU Usage",
+                        "data": [45, 52, 48, 67, 75],
+                        "color": "#3b82f6",
+                    }
+                ],
+                axes_config={"x_axis": "time", "y_axis": "percentage"},
+                interaction_config={"zoom": True, "pan": True, "hover": True},
+                styling_config={"theme": "enterprise", "grid": True},
+            )
+        )
+
         return charts
 
-    def _create_dashboard_widgets(self, monitoring_data: Dict[str, Any]) -> List[DashboardWidget]:
+    def _create_dashboard_widgets(
+        self, monitoring_data: Dict[str, Any]
+    ) -> List[DashboardWidget]:
         """ダッシュボードウィジェット作成"""
         widgets = []
-        
+
         # CPU使用率ウィジェット
-        widgets.append(DashboardWidget(
-            widget_id="cpu_widget",
-            widget_type="gauge",
-            title="CPU Usage",
-            position={"x": 0, "y": 0},
-            size={"width": 300, "height": 200},
-            data_source="realtime_metrics",
-            configuration={"threshold": 80, "units": "%"}
-        ))
-        
+        widgets.append(
+            DashboardWidget(
+                widget_id="cpu_widget",
+                widget_type="gauge",
+                title="CPU Usage",
+                position={"x": 0, "y": 0},
+                size={"width": 300, "height": 200},
+                data_source="realtime_metrics",
+                configuration={"threshold": 80, "units": "%"},
+            )
+        )
+
         # アラートパネルウィジェット
-        widgets.append(DashboardWidget(
-            widget_id="alert_panel",
-            widget_type="alert_list",
-            title="Active Alerts",
-            position={"x": 320, "y": 0},
-            size={"width": 400, "height": 300},
-            data_source="alert_system",
-            configuration={"max_alerts": 10, "auto_refresh": True}
-        ))
-        
+        widgets.append(
+            DashboardWidget(
+                widget_id="alert_panel",
+                widget_type="alert_list",
+                title="Active Alerts",
+                position={"x": 320, "y": 0},
+                size={"width": 400, "height": 300},
+                data_source="alert_system",
+                configuration={"max_alerts": 10, "auto_refresh": True},
+            )
+        )
+
         return widgets
 
-    def _create_realtime_data_sources(self, monitoring_data: Dict[str, Any]) -> List[RealtimeDataSource]:
+    def _create_realtime_data_sources(
+        self, monitoring_data: Dict[str, Any]
+    ) -> List[RealtimeDataSource]:
         """リアルタイムデータソース作成"""
         sources = []
-        
+
         # 監視メトリクスソース
-        sources.append(RealtimeDataSource(
-            source_id="monitoring_metrics",
-            source_type="websocket",
-            connection_config={"endpoint": "/api/metrics/stream", "protocol": "ws"},
-            update_frequency_ms=1000,
-            data_format="json"
-        ))
-        
+        sources.append(
+            RealtimeDataSource(
+                source_id="monitoring_metrics",
+                source_type="websocket",
+                connection_config={"endpoint": "/api/metrics/stream", "protocol": "ws"},
+                update_frequency_ms=1000,
+                data_format="json",
+            )
+        )
+
         return sources
