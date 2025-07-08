@@ -261,3 +261,147 @@ class TestStreamingExcelReader:
         reader.configure(chunk_size=500, memory_limit_mb=100)
         assert reader.chunk_size == 500
         assert reader.memory_limit_mb == 100
+
+    @pytest.mark.performance  
+    def test_chunk_processing_large_file(self):
+        """大容量Excelファイル専用チャンク処理テスト
+        
+        TDD RED Phase: Task 1.1.2専用高度チャンク処理
+        期待動作:
+        - 50,000行以上の大容量ファイル処理
+        - 高精度メモリ監視とチャンク効率測定  
+        - 大容量ファイル特有のエラーハンドリング
+        - 並列処理準備アーキテクチャ
+        """
+        # 大容量テストファイル作成（50,000行）
+        large_file = self.create_test_excel_file(rows=50000, filename="massive_test.xlsx")
+        
+        # 大容量ファイル専用設定
+        reader = StreamingExcelReader(
+            chunk_size=200,  # 小さなチャンク（メモリ効率重視）
+            memory_limit_mb=500,  # 大容量対応
+            enable_monitoring=True,
+            enable_security_validation=True,
+            gc_frequency=2  # 頻繁なGC（メモリ効率）
+        )
+        
+        # 大容量ファイル検証要件
+        workbook_info = reader.validate_streaming_requirements(large_file)
+        assert workbook_info.file_size > 1 * 1024 * 1024  # 1MB以上（50K行相当）
+        
+        # 高度メモリ監視開始
+        initial_memory = reader.get_memory_usage()
+        chunk_memory_peaks = []
+        chunk_processing_times = []
+        chunk_efficiency_ratios = []
+        
+        # 大容量チャンク処理実行
+        total_rows = 0
+        chunk_count = 0
+        
+        for chunk in reader.read_chunks(large_file):
+            # チャンクデータ検証
+            assert chunk.chunk_id == chunk_count
+            assert len(chunk.data) == 200  # 最後のチャンク以外
+            assert chunk.start_row == chunk_count * 200
+            assert chunk.end_row == (chunk_count * 200) + len(chunk.data) - 1
+            
+            # 高度メタデータ検証
+            assert chunk.processing_time is not None
+            assert chunk.processing_time > 0
+            assert chunk.memory_usage is not None
+            assert chunk.row_count == len(chunk.data)
+            assert not chunk.is_empty
+            
+            # メモリ効率性指標検証
+            memory_efficiency = chunk.memory_efficiency_ratio
+            if memory_efficiency is not None and memory_efficiency > 0:
+                chunk_efficiency_ratios.append(memory_efficiency)
+            
+            # メモリピーク記録
+            current_memory = reader.get_memory_usage()
+            chunk_memory_peaks.append(current_memory)
+            chunk_processing_times.append(chunk.processing_time)
+            
+            # 大容量ファイル特有の進捗確認
+            total_rows += len(chunk.data)
+            chunk_count += 1
+            
+            # メモリ制限遵守確認（大容量対応）
+            memory_increase = current_memory - initial_memory
+            assert memory_increase <= reader.memory_limit_mb * 1024 * 1024
+            
+            # 1000チャンクごとに中間検証（大容量特有）
+            if chunk_count % 1000 == 0:
+                metrics = reader.get_performance_metrics()
+                assert metrics["total_chunks_processed"] == chunk_count
+                assert metrics["throughput_rows_per_second"] > 0
+        
+        # 大容量処理完了検証
+        assert total_rows == 50000
+        assert chunk_count == 250  # 50,000 ÷ 200
+        
+        # 高度パフォーマンスメトリクス検証
+        final_metrics = reader.get_performance_metrics()
+        
+        # 基本メトリクス
+        assert final_metrics["total_rows_processed"] == 50000
+        assert final_metrics["total_chunks_processed"] == 250
+        assert final_metrics["total_processing_time"] > 0
+        assert final_metrics["throughput_rows_per_second"] > 1000  # 最低スループット要件
+        
+        # 大容量特有メトリクス
+        assert final_metrics["average_chunk_time"] > 0
+        assert final_metrics["memory_efficiency_average"] > 0
+        assert final_metrics["gc_collections_performed"] >= 125  # gc_frequency=2で125回以上
+        
+        # 追加拡張メトリクス（Task 1.1.2特有）
+        assert "memory_usage_variance" in final_metrics
+        assert "processing_time_variance" in final_metrics  
+        assert "rows_per_mb" in final_metrics
+        
+        # メモリ効率性基準（データが収集できた場合のみ）
+        if chunk_efficiency_ratios:
+            average_efficiency = sum(chunk_efficiency_ratios) / len(chunk_efficiency_ratios)
+            assert average_efficiency < 1000  # 1行あたり1KB未満（効率要件）
+        
+        # 処理時間安定性確認
+        time_variance = final_metrics["processing_time_variance"]
+        assert time_variance < 0.1  # 処理時間の安定性
+        
+        # メモリ使用量安定性確認（大容量ファイル考慮）
+        memory_variance = final_metrics["memory_usage_variance"]
+        assert memory_variance < 2000000000  # メモリ使用量の安定性（2GB変動以内）
+        
+        # 大容量ファイル特有のスループット要件
+        rows_per_mb = final_metrics["rows_per_mb"]
+        assert rows_per_mb > 100  # 1MBあたり100行以上（効率要件）
+        
+        # 高度チャンク処理機能検証（Task 1.1.2特有機能）
+        # 並列チャンク処理機能チェック
+        assert hasattr(reader, "enable_parallel_processing")
+        assert hasattr(reader, "get_parallel_metrics")
+        
+        # チャンク間依存関係管理チェック
+        assert hasattr(reader, "chunk_dependency_manager")
+        assert hasattr(reader, "validate_chunk_dependencies")
+        
+        # 高度メモリプール機能チェック
+        assert hasattr(reader, "chunk_memory_pool")
+        assert hasattr(reader, "optimize_memory_allocation")
+        
+        # リアルタイムストリーミング監視チェック
+        assert hasattr(reader, "streaming_monitor")
+        assert hasattr(reader, "get_realtime_metrics")
+        
+        # 大容量ファイル専用設定チェック
+        assert hasattr(reader, "large_file_mode")
+        assert hasattr(reader, "configure_large_file_processing")
+        
+        # リソースクリーンアップ検証
+        reader.close()
+        
+        # クリーンアップ後のメモリ使用量確認
+        post_cleanup_memory = reader.get_memory_usage()
+        memory_reduction = max(chunk_memory_peaks) - post_cleanup_memory
+        assert memory_reduction > 0  # メモリ解放確認
