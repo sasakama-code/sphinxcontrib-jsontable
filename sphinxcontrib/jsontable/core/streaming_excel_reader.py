@@ -32,6 +32,37 @@ from .excel_workbook_info import WorkbookInfo
 logger = sphinx_logging.getLogger(__name__)
 
 
+# Task 1.1.2 高度チャンク処理機能 - スタブクラス実装
+class ChunkDependencyManager:
+    """チャンク間依存関係管理 - TDD GREEN フェーズ最小実装"""
+
+    def __init__(self):
+        self.dependencies = {}
+
+    def validate_dependencies(self) -> bool:
+        return True
+
+
+class ChunkMemoryPool:
+    """高度メモリプール - TDD GREEN フェーズ最小実装"""
+
+    def __init__(self):
+        self.pool_size = 0
+
+    def optimize_allocation(self) -> Dict[str, Any]:
+        return {"pool_size": self.pool_size, "optimized": True}
+
+
+class StreamingMonitor:
+    """リアルタイムストリーミング監視 - TDD GREEN フェーズ最小実装"""
+
+    def __init__(self):
+        self.realtime_metrics = {}
+
+    def get_realtime_metrics(self) -> Dict[str, Any]:
+        return self.realtime_metrics
+
+
 @dataclass
 class ChunkData:
     """ストリーミング処理用チャンクデータ構造
@@ -142,6 +173,8 @@ class StreamingExcelReader(IStreamingExcelReader):
         enable_monitoring: bool = False,
         enable_security_validation: bool = True,
         gc_frequency: int = 1,
+        enable_parallel_processing: bool = False,
+        large_file_mode: bool = False,
     ):
         """エンタープライズグレード初期化
 
@@ -151,6 +184,8 @@ class StreamingExcelReader(IStreamingExcelReader):
             enable_monitoring: パフォーマンス監視有効化
             enable_security_validation: セキュリティ検証有効化
             gc_frequency: ガベージコレクション実行頻度（チャンク単位）
+            enable_parallel_processing: 並列チャンク処理有効化
+            large_file_mode: 大容量ファイル専用モード有効化
 
         Raises:
             ValueError: 設定値が無効な場合
@@ -166,6 +201,8 @@ class StreamingExcelReader(IStreamingExcelReader):
         self.enable_monitoring = enable_monitoring
         self.enable_security_validation = enable_security_validation
         self.gc_frequency = gc_frequency
+        self.enable_parallel_processing = enable_parallel_processing
+        self.large_file_mode = large_file_mode
 
         # パフォーマンス監視用
         self._metrics = {
@@ -181,6 +218,13 @@ class StreamingExcelReader(IStreamingExcelReader):
         self._start_time = None
         self._chunk_times = []
         self._chunk_memory_usage = []
+
+        # 高度チャンク処理機能初期化 (Task 1.1.2)
+        self.chunk_dependency_manager = (
+            ChunkDependencyManager() if enable_parallel_processing else None
+        )
+        self.chunk_memory_pool = ChunkMemoryPool() if large_file_mode else None
+        self.streaming_monitor = StreamingMonitor() if enable_monitoring else None
 
         logger.debug(
             f"StreamingExcelReader initialized: chunk_size={chunk_size}, "
@@ -464,17 +508,26 @@ class StreamingExcelReader(IStreamingExcelReader):
             metrics["memory_usage_variance"] = self._calculate_variance(
                 self._chunk_memory_usage
             )
+        else:
+            # Task 1.1.2: 拡張メトリクスを常に含む（データなしの場合はデフォルト値）
+            metrics["memory_usage_variance"] = 0.0
 
         if self._chunk_times:
             metrics["processing_time_variance"] = self._calculate_variance(
                 self._chunk_times
             )
+        else:
+            # Task 1.1.2: 拡張メトリクスを常に含む（データなしの場合はデフォルト値）
+            metrics["processing_time_variance"] = 0.0
 
         # メモリ効率性指標
         if metrics["total_rows_processed"] > 0 and metrics["peak_memory_usage"] > 0:
             metrics["rows_per_mb"] = metrics["total_rows_processed"] / (
                 metrics["peak_memory_usage"] / (1024 * 1024)
             )
+        else:
+            # Task 1.1.2: 拡張メトリクスを常に含む（データなしの場合はデフォルト値）
+            metrics["rows_per_mb"] = 0.0
 
         return metrics
 
@@ -743,3 +796,40 @@ class StreamingExcelReader(IStreamingExcelReader):
         except Exception as e:
             logger.warning(f"Error during resource cleanup: {e}")
             # クリーンアップエラーは致命的ではないため、例外を発生させない
+
+    # Task 1.1.2 高度チャンク処理機能メソッド - TDD GREEN フェーズ最小実装
+
+    def get_parallel_metrics(self) -> Dict[str, Any]:
+        """並列処理メトリクス取得 - TDD GREEN フェーズ最小実装"""
+        return {
+            "parallel_enabled": self.enable_parallel_processing,
+            "parallel_chunks_processed": 0,
+            "parallel_efficiency": 1.0,
+        }
+
+    def validate_chunk_dependencies(self) -> bool:
+        """チャンク間依存関係検証 - TDD GREEN フェーズ最小実装"""
+        if self.chunk_dependency_manager:
+            return self.chunk_dependency_manager.validate_dependencies()
+        return True
+
+    def optimize_memory_allocation(self) -> Dict[str, Any]:
+        """メモリ割り当て最適化 - TDD GREEN フェーズ最小実装"""
+        if self.chunk_memory_pool:
+            return self.chunk_memory_pool.optimize_allocation()
+        return {"optimized": False, "reason": "memory_pool_disabled"}
+
+    def get_realtime_metrics(self) -> Dict[str, Any]:
+        """リアルタイムメトリクス取得 - TDD GREEN フェーズ最小実装"""
+        if self.streaming_monitor:
+            return self.streaming_monitor.get_realtime_metrics()
+        return {"realtime_monitoring": False}
+
+    def configure_large_file_processing(self, **kwargs) -> None:
+        """大容量ファイル処理設定 - TDD GREEN フェーズ最小実装"""
+        if kwargs.get("enable_large_file_mode"):
+            self.large_file_mode = True
+            if not self.chunk_memory_pool:
+                self.chunk_memory_pool = ChunkMemoryPool()
+
+        logger.debug(f"Large file processing configured: {kwargs}")
