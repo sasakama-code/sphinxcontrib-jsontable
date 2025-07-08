@@ -10,7 +10,6 @@ Run this script to generate sample data files for testing.
 """
 
 import json
-import os
 from pathlib import Path
 
 # Create sample data directory

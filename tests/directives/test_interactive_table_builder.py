@@ -27,13 +27,15 @@ CLAUDE.md Code Excellence Compliance:
 - SOLID Principles: Clear test structure with separation of concerns
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
-import re
+from unittest.mock import Mock
 
-from sphinxcontrib.jsontable.directives.interactive_table_builder import InteractiveTableBuilder
-from sphinxcontrib.jsontable.directives.validators import JsonTableError
+import pytest
 from docutils import nodes
+
+from sphinxcontrib.jsontable.directives.interactive_table_builder import (
+    InteractiveTableBuilder,
+)
+from sphinxcontrib.jsontable.directives.validators import JsonTableError
 
 
 class TestInteractiveTableBuilder:
@@ -379,7 +381,7 @@ class TestInteractiveTableBuilder:
         result = builder.build_interactive_table(
             sample_table_data,
             sortable=True,
-            css_classes=["custom-class", "another-class"]
+            css_classes=["custom-class", "table-striped"]
         )
         
         table_node = self._extract_table_node(result)
@@ -390,7 +392,7 @@ class TestInteractiveTableBuilder:
         
         # Expected: Custom classes applied
         assert "custom-class" in classes
-        assert "another-class" in classes
+        assert "table-striped" in classes
         
         # Expected: DataTables class for DataTables.js integration
         if builder.javascript_library == "datatables":
@@ -705,7 +707,7 @@ class TestInteractiveTableBuilderPerformance:
         import time
         start_time = time.perf_counter()
         
-        result = builder.build_interactive_table(data, sortable=True)
+        builder.build_interactive_table(data, sortable=True)
         
         end_time = time.perf_counter()
         
@@ -723,7 +725,7 @@ class TestInteractiveTableBuilderPerformance:
         
         tracemalloc.start()
         
-        result = builder.build_interactive_table(data, sortable=True)
+        builder.build_interactive_table(data, sortable=True)
         
         current, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()

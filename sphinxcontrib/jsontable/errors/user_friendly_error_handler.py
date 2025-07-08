@@ -11,13 +11,12 @@ CLAUDE.md Code Excellence Compliance:
 
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from .error_handler_core import ErrorHandlerCore
-from .error_types import ErrorSeverity, HandlingResult, RecoveryStrategy
+from .error_types import RecoveryStrategy
 from .excel_errors import (
     DataConversionError,
-    ExcelProcessingError,
     FileAccessError,
     RangeValidationError,
     SecurityValidationError,

@@ -27,8 +27,9 @@ CLAUDE.md Code Excellence Compliance:
 - SOLID Principles: Clear test structure with separation of concerns
 """
 
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
 
 from sphinxcontrib.jsontable.directives.data_type_renderer import DataTypeRenderer
 from sphinxcontrib.jsontable.directives.directive_core import JsonTableDirective

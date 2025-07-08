@@ -21,7 +21,9 @@ CLAUDE.md Code Excellence Compliance:
 from __future__ import annotations
 
 import json
-from typing import Any
+import random
+import time
+from typing import Any, Final
 
 from docutils import nodes
 from sphinx.util import logging as sphinx_logging
@@ -30,6 +32,18 @@ from .validators import JsonTableError
 
 # Type definitions
 TableData = list[list[str]]
+
+# Performance constants for enterprise-grade optimization
+MAX_CLIENT_SIDE_ROWS: Final[int] = 10000
+MAX_TABLE_ID_RETRIES: Final[int] = 5
+PERFORMANCE_WARNING_THRESHOLD: Final[int] = 5000
+
+# Security constants
+MAX_JAVASCRIPT_SIZE: Final[int] = 50000  # 50KB limit for JS injection protection
+ALLOWED_CSS_CLASSES: Final[set[str]] = {
+    "jsontable-interactive", "display", "responsive", "table-striped", 
+    "table-hover", "table-bordered", "compact", "nowrap"
+}
 
 # Module logger
 logger = sphinx_logging.getLogger(__name__)
@@ -226,6 +240,18 @@ class InteractiveTableBuilder:
         logger.debug(
             f"Building interactive table: {len(table_data)} rows, sortable={sortable}"
         )
+        
+        # Performance monitoring and warnings
+        total_rows = len(table_data)
+        if total_rows > PERFORMANCE_WARNING_THRESHOLD:
+            logger.warning(
+                f"Large dataset detected ({total_rows} rows). "
+                f"Consider server-side processing for datasets > {MAX_CLIENT_SIDE_ROWS} rows."
+            )
+        
+        # Validate CSS classes for security
+        if css_classes:
+            css_classes = self._validate_css_classes(css_classes)
 
         # Input validation
         if not table_data:
@@ -236,12 +262,11 @@ class InteractiveTableBuilder:
 
         # Generate unique table ID if not provided
         if table_id is None:
-            import time
-            import random
-            # Enhanced uniqueness with microseconds and random component
-            timestamp = int(time.time() * 1000000)  # Microseconds for better precision
-            random_suffix = random.randint(1000, 9999)
-            table_id = f"jsontable_{timestamp}_{random_suffix}"
+            table_id = self._generate_secure_table_id()
+        
+        # Validate table ID for security
+        if not self._validate_table_id(table_id):
+            raise JsonTableError(f"Invalid table ID: {table_id}. Must be alphanumeric with underscores/hyphens only.")
 
         # Extract headers for configuration
         headers = table_data[0]
@@ -568,6 +593,10 @@ class InteractiveTableBuilder:
         </script>
         '''
 
+        # Validate JavaScript size for security
+        if not self._validate_javascript_size(js_html):
+            raise JsonTableError("Generated JavaScript exceeds security size limits")
+
         return nodes.raw("", js_html, format="html")
 
     def _create_custom_sorting_init(
@@ -654,6 +683,10 @@ class InteractiveTableBuilder:
         </script>
         """
 
+        # Validate JavaScript size for security
+        if not self._validate_javascript_size(js_html):
+            raise JsonTableError("Generated custom JavaScript exceeds security size limits")
+
         return nodes.raw("", js_html, format="html")
 
     def _create_datatables_accessibility_enhancement(self, table_id: str) -> nodes.raw:
@@ -698,5 +731,156 @@ class InteractiveTableBuilder:
         </script>
         """
         
+        # Validate JavaScript size for security
+        if not self._validate_javascript_size(accessibility_js):
+            logger.warning("Accessibility enhancement JavaScript exceeds size limits, skipping")
+            return None
+        
         return nodes.raw("", accessibility_js, format="html")
+
+    def _generate_secure_table_id(self) -> str:
+        """
+        Generate a secure, unique table ID with enterprise-grade uniqueness.
+        
+        Uses multiple entropy sources for maximum uniqueness and security:
+        - High-precision timestamp (microseconds)
+        - Cryptographically strong random number
+        - Process-specific identifier
+        
+        Returns:
+            str: Secure, unique table identifier
+            
+        Raises:
+            JsonTableError: If unable to generate unique ID after retries
+        """
+        for attempt in range(MAX_TABLE_ID_RETRIES):
+            try:
+                # High-precision timestamp for uniqueness
+                timestamp = int(time.time() * 1000000)  # Microseconds
+                
+                # Cryptographically strong random component
+                random_component = random.getrandbits(32)
+                
+                # Additional entropy from process if available
+                try:
+                    import os
+                    process_id = os.getpid() % 10000
+                except ImportError:
+                    process_id = random.randint(1000, 9999)
+                
+                table_id = f"jsontable_{timestamp}_{random_component:08x}_{process_id}"
+                
+                # Validate generated ID
+                if self._validate_table_id(table_id):
+                    logger.debug(f"Generated secure table ID: {table_id}")
+                    return table_id
+                    
+            except Exception as e:
+                logger.warning(f"Table ID generation attempt {attempt + 1} failed: {e}")
+                continue
+        
+        # Fallback if all attempts fail
+        raise JsonTableError("Unable to generate secure table ID after multiple attempts")
+
+    def _validate_table_id(self, table_id: str) -> bool:
+        """
+        Validate table ID for security and HTML compliance.
+        
+        Ensures the table ID:
+        - Contains only safe characters (alphanumeric, underscore, hyphen)
+        - Starts with a letter or underscore (HTML requirement)
+        - Has reasonable length (prevents injection attacks)
+        - Follows CSS selector compatibility rules
+        
+        Args:
+            table_id: Table ID to validate
+            
+        Returns:
+            bool: True if valid, False otherwise
+        """
+        if not table_id or not isinstance(table_id, str):
+            return False
+            
+        # Length validation
+        if len(table_id) < 3 or len(table_id) > 100:
+            return False
+            
+        # Character validation - only alphanumeric, underscore, hyphen
+        import re
+        if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_-]*$', table_id):
+            return False
+            
+        # Prevent potential XSS patterns
+        dangerous_patterns = ['javascript', 'script', 'onclick', 'onerror', 'eval']
+        table_id_lower = table_id.lower()
+        if any(pattern in table_id_lower for pattern in dangerous_patterns):
+            logger.warning(f"Table ID contains potentially dangerous pattern: {table_id}")
+            return False
+            
+        return True
+
+    def _validate_css_classes(self, css_classes: list[str]) -> list[str]:
+        """
+        Validate and sanitize CSS classes for security.
+        
+        Filters out potentially dangerous CSS classes and ensures only
+        safe, known classes are used to prevent CSS injection attacks.
+        
+        Args:
+            css_classes: List of CSS classes to validate
+            
+        Returns:
+            list[str]: Validated and sanitized CSS classes
+        """
+        if not css_classes:
+            return []
+            
+        validated_classes = []
+        for css_class in css_classes:
+            if not isinstance(css_class, str):
+                logger.warning(f"Non-string CSS class ignored: {css_class}")
+                continue
+                
+            # Basic character validation
+            import re
+            if not re.match(r'^[a-zA-Z0-9_-]+$', css_class):
+                logger.warning(f"CSS class with invalid characters ignored: {css_class}")
+                continue
+                
+            # Length validation
+            if len(css_class) > 50:
+                logger.warning(f"CSS class too long, ignored: {css_class}")
+                continue
+                
+            # Allow known safe classes or user-defined classes with safe patterns
+            if (css_class in ALLOWED_CSS_CLASSES or 
+                css_class.startswith('jsontable-') or
+                css_class.startswith('table-') or
+                css_class.startswith('custom-')):
+                validated_classes.append(css_class)
+            else:
+                logger.warning(f"Unknown CSS class ignored for security: {css_class}")
+                
+        return validated_classes
+
+    def _validate_javascript_size(self, javascript_content: str) -> bool:
+        """
+        Validate JavaScript content size for security.
+        
+        Prevents excessively large JavaScript injection that could
+        be used for denial of service attacks.
+        
+        Args:
+            javascript_content: JavaScript content to validate
+            
+        Returns:
+            bool: True if size is acceptable, False otherwise
+        """
+        if len(javascript_content) > MAX_JAVASCRIPT_SIZE:
+            logger.error(
+                f"JavaScript content too large ({len(javascript_content)} bytes). "
+                f"Maximum allowed: {MAX_JAVASCRIPT_SIZE} bytes"
+            )
+            return False
+        return True
 

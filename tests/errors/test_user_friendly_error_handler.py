@@ -8,17 +8,19 @@ CLAUDE.md Test Excellence Compliance:
 - User experience validation
 """
 
-import pytest
 from pathlib import Path
-from unittest.mock import Mock
 
-from sphinxcontrib.jsontable.errors.user_friendly_error_handler import UserFriendlyErrorHandler
+import pytest
+
 from sphinxcontrib.jsontable.errors.excel_errors import (
+    DataConversionError,
     FileAccessError,
-    WorksheetNotFoundError,
     RangeValidationError,
     SecurityValidationError,
-    DataConversionError,
+    WorksheetNotFoundError,
+)
+from sphinxcontrib.jsontable.errors.user_friendly_error_handler import (
+    UserFriendlyErrorHandler,
 )
 
 
