@@ -237,8 +237,11 @@ class InteractiveTableBuilder:
         # Generate unique table ID if not provided
         if table_id is None:
             import time
-
-            table_id = f"jsontable_{int(time.time() * 1000)}"
+            import random
+            # Enhanced uniqueness with microseconds and random component
+            timestamp = int(time.time() * 1000000)  # Microseconds for better precision
+            random_suffix = random.randint(1000, 9999)
+            table_id = f"jsontable_{timestamp}_{random_suffix}"
 
         # Extract headers for configuration
         headers = table_data[0]
@@ -278,6 +281,12 @@ class InteractiveTableBuilder:
             )
             if js_node:
                 nodes_list.append(js_node)
+        
+        # Add accessibility enhancement for DataTables
+        if self.javascript_library == "datatables" and sortable:
+            accessibility_js = self._create_datatables_accessibility_enhancement(table_id)
+            if accessibility_js:
+                nodes_list.append(accessibility_js)
 
         logger.info(
             f"Interactive table built successfully: ID={table_id}, nodes={len(nodes_list)}"
@@ -368,9 +377,9 @@ class InteractiveTableBuilder:
             entry = nodes.entry()
 
             # Determine if this column is sortable
-            column_sortable = sortable and (
+            column_sortable = (sortable and self.javascript_library != "none" and (
                 sort_columns is None or cell_data in sort_columns
-            )
+            ))
 
             # Add sorting attributes
             if column_sortable:
@@ -646,3 +655,48 @@ class InteractiveTableBuilder:
         """
 
         return nodes.raw("", js_html, format="html")
+
+    def _create_datatables_accessibility_enhancement(self, table_id: str) -> nodes.raw:
+        """
+        Create DataTables accessibility enhancement script.
+        
+        Adds keyboard navigation and enhanced ARIA support for DataTables.
+        
+        Args:
+            table_id: Table identifier for targeting
+            
+        Returns:
+            nodes.raw: Accessibility enhancement script
+        """
+        accessibility_js = f"""
+        <script>
+        $(document).ready(function() {{
+            // Enhanced keyboard navigation for DataTables
+            $('#{table_id} thead th').on('keydown', function(e) {{
+                if (e.key === 'Enter' || e.key === ' ') {{
+                    e.preventDefault();
+                    $(this).click();
+                }}
+            }});
+            
+            // Update ARIA attributes on sort
+            $('#{table_id}').on('order.dt', function() {{
+                var api = $.fn.dataTable.Api(this);
+                var order = api.order();
+                
+                // Reset all headers
+                $('#{table_id} thead th').attr('aria-sort', 'none');
+                
+                // Set current sort direction
+                if (order.length > 0) {{
+                    var colIdx = order[0][0];
+                    var direction = order[0][1] === 'asc' ? 'ascending' : 'descending';
+                    $('#{table_id} thead th').eq(colIdx).attr('aria-sort', direction);
+                }}
+            }});
+        }});
+        </script>
+        """
+        
+        return nodes.raw("", accessibility_js, format="html")
+
