@@ -24,6 +24,7 @@ from .base_directive import BaseDirective
 from .json_processor import JsonProcessor
 from .table_converter import TableConverter
 from .validators import JsonTableError, ValidationUtils
+from ..errors.user_friendly_error_handler import UserFriendlyErrorHandler
 
 # Type definitions
 JsonData = list[Any] | dict[str, Any]
@@ -99,6 +100,9 @@ class JsonTableDirective(BaseDirective):
         if hasattr(srcdir, "_mock_name"):  # Mock object detection
             srcdir = "/tmp/test_docs"
         self.base_path = Path(srcdir)
+        
+        # Initialize user-friendly error handler for enhanced UX
+        self.ux_error_handler = UserFriendlyErrorHandler()
 
         logger.debug(
             f"Initializing JsonTableDirective: encoding={encoding}, "
@@ -266,8 +270,17 @@ class JsonTableDirective(BaseDirective):
             return table_nodes
 
         except (JsonTableError, FileNotFoundError) as e:
-            # Original error handling pattern
-            error_msg = ValidationUtils.format_error("JsonTable directive error", e)
+            # Enhanced user-friendly error handling
+            try:
+                # Try user-friendly error formatting first
+                ux_response = self.ux_error_handler.create_user_friendly_response(
+                    e, context="JsonTable directive", file_path=self.arguments[0] if self.arguments else None
+                )
+                error_msg = self._format_user_friendly_error(ux_response)
+            except Exception:
+                # Fallback to original error handling
+                error_msg = ValidationUtils.format_error("JsonTable directive error", e)
+            
             logger.error(error_msg)
             return [self._create_error_node(error_msg)]
 
@@ -475,3 +488,134 @@ class JsonTableDirective(BaseDirective):
             sanitized = sanitized[:200] + "..."
 
         return sanitized
+
+    def _format_user_friendly_error(self, ux_response: dict[str, Any]) -> str:
+        """Format user-friendly error response for display in documentation.
+        
+        Args:
+            ux_response: User-friendly error response from UserFriendlyErrorHandler
+            
+        Returns:
+            Formatted error message with guidance
+        """
+        # Start with the user-friendly message
+        error_parts = [
+            f"❌ {ux_response['user_friendly_message']}",
+            "",
+            "🔧 **Quick Solutions:**"
+        ]
+        
+        # Add quick fixes
+        for i, fix in enumerate(ux_response.get('quick_fixes', [])[:3], 1):
+            error_parts.append(f"   {i}. {fix}")
+        
+        # Add resolution steps if there are many
+        if len(ux_response.get('resolution_steps', [])) > 3:
+            error_parts.extend([
+                "",
+                "📋 **Step-by-step guide:**"
+            ])
+            for step in ux_response.get('resolution_steps', [])[:4]:
+                error_parts.append(f"   {step}")
+        
+        # Add estimated fix time
+        if 'estimated_fix_time' in ux_response:
+            error_parts.extend([
+                "",
+                f"⏱️ **Estimated fix time:** {ux_response['estimated_fix_time']}"
+            ])
+        
+        # Add documentation links
+        doc_links = ux_response.get('documentation_links', [])
+        if doc_links:
+            error_parts.extend([
+                "",
+                "📚 **Helpful guides:**"
+            ])
+            for link in doc_links[:2]:
+                error_parts.append(f"   • {link}")
+        
+        return "\n".join(error_parts)
+
+    def format_excel_errors(self, error: Exception) -> str:
+        """Enhanced Excel error formatting with user-friendly guidance.
+        
+        Args:
+            error: Exception that occurred
+            
+        Returns:
+            User-friendly formatted error message
+        """
+        logger.debug(f"Formatting Excel error: {type(error).__name__}: {error}")
+        
+        try:
+            # Try user-friendly error handling first
+            file_path = self.arguments[0] if self.arguments else None
+            ux_response = self.ux_error_handler.create_user_friendly_response(
+                error, context="Excel processing", file_path=file_path
+            )
+            return self._format_user_friendly_error(ux_response)
+            
+        except Exception as e:
+            logger.warning(f"User-friendly error formatting failed: {e}")
+            # Fallback to original error formatting
+            return self._format_legacy_excel_error(error)
+
+    def _format_legacy_excel_error(self, error: Exception) -> str:
+        """Legacy Excel error formatting (fallback).
+        
+        Args:
+            error: Exception that occurred
+            
+        Returns:
+            Formatted error message using legacy method
+        """
+        error_type = type(error).__name__
+        error_message = str(error)
+
+        # エラーメッセージのサニタイゼーション（機密情報除去）
+        sanitized_message = self._sanitize_error_message(error_message)
+
+        # エラータイプ別の整形（メッセージ内容も確認）
+        if (
+            "FileNotFoundError" in error_type
+            or "not found" in sanitized_message.lower()
+        ):
+            return f"Excel file not found: {sanitized_message}"
+        elif (
+            "PermissionError" in error_type
+            or "permission" in sanitized_message.lower()
+            or "not readable" in sanitized_message.lower()
+        ):
+            return f"Cannot access Excel file (permission denied): {sanitized_message}"
+        elif "ValidationError" in error_type or "ValueError" in error_type:
+            return f"Excel file validation error: {sanitized_message}"
+        elif "ProcessingError" in error_type or "processing" in error_type.lower():
+            return f"Excel processing error: {sanitized_message}"
+        elif "SecurityError" in error_type or "security" in sanitized_message.lower():
+            return f"Excel security error: {sanitized_message}"
+        elif "HeaderError" in error_type:
+            return f"Excel header configuration error: {sanitized_message}"
+        elif "RangeError" in error_type:
+            return f"Excel range specification error: {sanitized_message}"
+        elif "JsonTableError" in error_type:
+            # JsonTableErrorの内容を分析してより具体的なメッセージを提供
+            if "security" in sanitized_message.lower():
+                return f"Excel security error: {sanitized_message}"
+            elif "file" in sanitized_message.lower() and (
+                "not found" in sanitized_message.lower()
+                or "not exist" in sanitized_message.lower()
+            ):
+                return f"Excel file not found: {sanitized_message}"
+            elif (
+                "readable" in sanitized_message.lower()
+                or "permission" in sanitized_message.lower()
+            ):
+                return (
+                    f"Cannot access Excel file (permission denied): {sanitized_message}"
+                )
+            else:
+                return f"Excel processing error: {sanitized_message}"
+        else:
+            # 汎用エラーの場合は特に慎重にサニタイズ
+            return f"Excel processing failed ({error_type}): {sanitized_message}"
