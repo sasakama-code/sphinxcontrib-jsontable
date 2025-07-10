@@ -28,15 +28,8 @@ import pytest
 # REDフェーズ: 存在しないクラスをインポート（意図的にエラー）
 try:
     from sphinxcontrib.jsontable.adaptive.monitoring_data_persistence import (
-        CompressionConfiguration,
         DatabaseConfiguration,
-        DataRetentionPolicy,
         MonitoringDataPersistence,
-        PersistenceResult,
-        QueryOptimizer,
-        QueryResult,
-        StorageConfiguration,
-        TimeSeriesData,
     )
 
     MONITORING_DATA_PERSISTENCE_AVAILABLE = True

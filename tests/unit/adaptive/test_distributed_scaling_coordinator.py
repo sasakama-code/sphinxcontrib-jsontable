@@ -632,7 +632,7 @@ class TestDistributedScalingCoordinator:
         )
 
         end_time = time.time()
-        response_time_ms = (end_time - start_time) * 1000
+        _ = (end_time - start_time) * 1000  # response_time_ms for future use
 
         assert result.performance_verification_success
         assert result.response_time_compliant

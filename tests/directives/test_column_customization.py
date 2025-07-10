@@ -372,11 +372,11 @@ class TestJsonTableDirectiveIntegration:
         Should include new column customization options with correct types.
         """
         # TODO: Verify option_spec includes new options
-        expected_new_options = [
-            "columns",
-            "column-order", 
-            "column-widths"
-        ]
+        # expected_new_options = [
+        #     "columns",
+        #     "column-order", 
+        #     "column-widths"
+        # ]
         
         pytest.skip("Option spec validation - will be implemented in GREEN phase")
 

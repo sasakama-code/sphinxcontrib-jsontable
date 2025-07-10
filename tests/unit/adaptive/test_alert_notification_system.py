@@ -30,14 +30,6 @@ try:
     from sphinxcontrib.jsontable.adaptive.alert_notification_system import (
         AlertConfiguration,
         AlertNotificationSystem,
-        AlertRule,
-        AlertSeverity,
-        AnomalyAlert,
-        NotificationChannel,
-        NotificationResult,
-        PerformanceAlert,
-        ThresholdAlert,
-        TrendAlert,
     )
 
     ALERT_NOTIFICATION_SYSTEM_AVAILABLE = True
@@ -693,7 +685,7 @@ class TestAlertNotificationSystem:
             }
 
         # エッジケース耐性検証
-        for scenario_name, scenario_result in edge_case_results.items():
+        for _, scenario_result in edge_case_results.items():
             result = scenario_result["result"]
             execution_time = scenario_result["execution_time"]
 

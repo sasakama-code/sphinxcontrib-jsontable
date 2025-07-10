@@ -19,7 +19,6 @@ Task 3.3.2: メトリクス収集・分析実装
 
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock
 
 import pytest
 
@@ -58,11 +57,6 @@ class TestMetricsCollectionAnalysis:
     def setup_method(self):
         """各テストメソッドの前に実行される設定."""
         self.temp_dir = Path(tempfile.mkdtemp())
-
-        # モックコンポーネント作成
-        self.mock_data_collector = Mock()
-        self.mock_statistical_analyzer = Mock()
-        self.mock_ml_analyzer = Mock()
 
     def teardown_method(self):
         """各テストメソッドの後に実行されるクリーンアップ."""

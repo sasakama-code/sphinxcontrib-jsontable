@@ -40,17 +40,6 @@ import psutil
 import pytest
 
 try:
-    from sphinxcontrib.jsontable.adaptive.metrics_collection_analyzer import (
-        MetricsCollectionAnalyzer,
-    )
-    from sphinxcontrib.jsontable.adaptive.monitoring_data_persistence import (
-        MonitoringDataPersistence,
-    )
-    from sphinxcontrib.jsontable.adaptive.realtime_performance_monitor import (
-        RealtimePerformanceMonitor,
-    )
-    from sphinxcontrib.jsontable.directives.directive_core import JsonTableDirective
-
     PERFORMANCE_COMPONENTS_AVAILABLE = True
 except ImportError:
     PERFORMANCE_COMPONENTS_AVAILABLE = False
@@ -737,7 +726,7 @@ class TestPhase4PerformanceBenchmark:
                 cache_misses += 1
 
             # 企業グレードキャッシュヒットテスト（高頻度アクセス）
-            for round_num in range(10):  # 10回ラウンド実行
+            for _ in range(10):  # 10回ラウンド実行
                 for key in test_keys:
                     start_time = time.perf_counter()
 

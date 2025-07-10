@@ -325,7 +325,7 @@ class TestDataTypeRenderer:
         
         # Expected: Malicious content escaped or rejected
         for i, row in enumerate(result[1:], 1):
-            for j, cell in enumerate(row):
+            for _, cell in enumerate(row):
                 # No raw script tags should be present
                 assert "<script>" not in cell
                 
@@ -418,7 +418,7 @@ class TestDataTypeRenderer:
         
         tracemalloc.start()
         
-        result = renderer.render_table_data(large_table_data)
+        _ = renderer.render_table_data(large_table_data)
         
         current, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
@@ -709,7 +709,7 @@ class TestDataTypeRenderingPerformance:
         
         tracemalloc.start()
         
-        result = renderer.render_table_data(test_data)
+        _ = renderer.render_table_data(test_data)
         
         current, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()

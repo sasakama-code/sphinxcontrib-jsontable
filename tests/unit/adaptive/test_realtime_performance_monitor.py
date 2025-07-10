@@ -19,7 +19,6 @@ Task 3.3.1: リアルタイム監視基盤実装
 
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock
 
 import pytest
 
@@ -51,11 +50,6 @@ class TestRealtimePerformanceMonitor:
     def setup_method(self):
         """各テストメソッドの前に実行される設定."""
         self.temp_dir = Path(tempfile.mkdtemp())
-
-        # モックコンポーネント作成
-        self.mock_metrics_collector = Mock()
-        self.mock_alert_manager = Mock()
-        self.mock_visualization_engine = Mock()
 
     def teardown_method(self):
         """各テストメソッドの後に実行されるクリーンアップ."""

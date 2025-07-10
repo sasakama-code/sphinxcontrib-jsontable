@@ -29,13 +29,7 @@ import pytest
 try:
     from sphinxcontrib.jsontable.adaptive.performance_dashboard import (
         DashboardConfiguration,
-        DashboardTheme,
-        DashboardWidget,
-        InteractiveChart,
         PerformanceDashboard,
-        RealtimeDataSource,
-        VisualizationComponent,
-        VisualizationResult,
     )
 
     PERFORMANCE_DASHBOARD_AVAILABLE = True
