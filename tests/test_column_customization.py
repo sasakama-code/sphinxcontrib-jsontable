@@ -3,7 +3,7 @@ Test cases for column customization features (Issue #48).
 
 This module tests the new column customization functionality including:
 - columns: Specify visible columns
-- column-order: Define column order  
+- column-order: Define column order
 - column-widths: Set column widths
 - hide-columns: Hide specific columns
 """
@@ -113,7 +113,9 @@ class TestTableConverterColumnConfig:
     
     def test_apply_column_config_visible_columns(self):
         """Test apply_column_config with visible_columns filter."""
-        from sphinxcontrib.jsontable.directives.table_converter import TableConverter
+        from sphinxcontrib.jsontable.directives.table_converter import (
+            TableConverter,
+        )
         
         converter = TableConverter()
         keys = ["name", "age", "city", "country"]
@@ -124,7 +126,9 @@ class TestTableConverterColumnConfig:
 
     def test_apply_column_config_hidden_columns(self):
         """Test apply_column_config with hidden_columns filter."""
-        from sphinxcontrib.jsontable.directives.table_converter import TableConverter
+        from sphinxcontrib.jsontable.directives.table_converter import (
+            TableConverter,
+        )
         
         converter = TableConverter()
         keys = ["name", "age", "city", "country"]
@@ -135,18 +139,27 @@ class TestTableConverterColumnConfig:
 
     def test_apply_column_config_column_order(self):
         """Test apply_column_config with column_order."""
-        from sphinxcontrib.jsontable.directives.table_converter import TableConverter
+        from sphinxcontrib.jsontable.directives.table_converter import (
+            TableConverter,
+        )
         
         converter = TableConverter()
         keys = ["name", "age", "city", "country"]
         config = {"column_order": ["country", "name", "city"]}
         
         result = converter._apply_column_config(keys, config)
-        assert result == ["country", "name", "city", "age"]  # ordered + remaining
+        assert result == [
+            "country",
+            "name",
+            "city",
+            "age",
+        ]  # ordered + remaining
 
     def test_apply_column_config_combined(self):
         """Test apply_column_config with multiple filters."""
-        from sphinxcontrib.jsontable.directives.table_converter import TableConverter
+        from sphinxcontrib.jsontable.directives.table_converter import (
+            TableConverter,
+        )
         
         converter = TableConverter()
         keys = ["name", "age", "city", "country", "id"]
@@ -157,7 +170,7 @@ class TestTableConverterColumnConfig:
         }
         
         result = converter._apply_column_config(keys, config)
-        # Should have: visible(name,age,city,country) - hidden(age) = name,city,country
+        # Should have: visible(name,age,city,country) - hidden(age) = name,city,country  # noqa: E501
         # Ordered as: country, name, city
         assert result == ["country", "name", "city"]
 
@@ -167,7 +180,9 @@ class TestTableBuilderColumnWidths:
     
     def test_create_colspec_nodes_default_widths(self):
         """Test colspec creation with default widths."""
-        from sphinxcontrib.jsontable.directives.table_builder import TableBuilder
+        from sphinxcontrib.jsontable.directives.table_builder import (
+            TableBuilder,
+        )
         
         builder = TableBuilder()
         colspecs = builder._create_colspec_nodes(3)
@@ -177,7 +192,9 @@ class TestTableBuilderColumnWidths:
 
     def test_create_colspec_nodes_custom_widths(self):
         """Test colspec creation with custom widths."""
-        from sphinxcontrib.jsontable.directives.table_builder import TableBuilder
+        from sphinxcontrib.jsontable.directives.table_builder import (
+            TableBuilder,
+        )
         
         builder = TableBuilder()
         colspecs = builder._create_colspec_nodes(3, [2, 1, 3])
@@ -189,7 +206,9 @@ class TestTableBuilderColumnWidths:
 
     def test_create_colspec_nodes_partial_widths(self):
         """Test colspec creation with fewer widths than columns."""
-        from sphinxcontrib.jsontable.directives.table_builder import TableBuilder
+        from sphinxcontrib.jsontable.directives.table_builder import (
+            TableBuilder,
+        )
         
         builder = TableBuilder()
         colspecs = builder._create_colspec_nodes(4, [2, 3])

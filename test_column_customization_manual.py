@@ -10,13 +10,17 @@ import os
 import sys
 
 # Add the package to the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'sphinxcontrib'))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(__file__), "sphinxcontrib")
+)
 
 def test_column_config_extraction():
     """Test column configuration extraction."""
     print("Testing column configuration extraction...")
-    
-    from sphinxcontrib.jsontable.directives.directive_core import JsonTableDirective
+
+    from sphinxcontrib.jsontable.directives.directive_core import (
+        JsonTableDirective,
+    )
     
     # Create a minimal directive instance
     directive = JsonTableDirective.__new__(JsonTableDirective)
@@ -24,7 +28,7 @@ def test_column_config_extraction():
         "columns": "name,age,city",
         "column-order": "city,name,age",
         "column-widths": "2,1,3",
-        "hide-columns": "id,timestamp"
+        "hide-columns": "id,timestamp",
     }
     
     try:
@@ -47,8 +51,10 @@ def test_column_config_extraction():
 def test_table_converter_column_config():
     """Test table converter column configuration."""
     print("\nTesting table converter column configuration...")
-    
-    from sphinxcontrib.jsontable.directives.table_converter import TableConverter
+
+    from sphinxcontrib.jsontable.directives.table_converter import (
+        TableConverter,
+    )
     
     try:
         converter = TableConverter()
@@ -62,7 +68,11 @@ def test_table_converter_column_config():
         }
         
         result = converter._apply_column_config(keys, config)
-        expected = ["country", "name", "city"]  # country first, then name, then remaining
+        expected = [
+            "country",
+            "name",
+            "city",
+        ]  # country first, then name, then remaining
         print(f"✓ Column config applied: {keys} -> {result}")
         
         assert result == expected, f"Expected {expected}, got {result}"
@@ -77,8 +87,10 @@ def test_table_converter_column_config():
 def test_table_builder_column_widths():
     """Test table builder column widths."""
     print("\nTesting table builder column widths...")
-    
-    from sphinxcontrib.jsontable.directives.table_builder import TableBuilder
+
+    from sphinxcontrib.jsontable.directives.table_builder import (
+        TableBuilder,
+    )
     
     try:
         builder = TableBuilder()
@@ -106,8 +118,10 @@ def test_table_builder_column_widths():
 def test_object_array_conversion():
     """Test object array conversion with column config."""
     print("\nTesting object array conversion with column config...")
-    
-    from sphinxcontrib.jsontable.directives.table_converter import TableConverter
+
+    from sphinxcontrib.jsontable.directives.table_converter import (
+        TableConverter,
+    )
     
     try:
         converter = TableConverter()
@@ -115,7 +129,7 @@ def test_object_array_conversion():
         # Test data
         data = [
             {"name": "Alice", "age": 25, "city": "Tokyo", "country": "Japan"},
-            {"name": "Bob", "age": 30, "city": "NYC", "country": "USA"}
+            {"name": "Bob", "age": 30, "city": "NYC", "country": "USA"},
         ]
         
         # Test with column config
@@ -128,7 +142,11 @@ def test_object_array_conversion():
         
         # Expected: header row + 2 data rows
         assert len(result) == 3
-        assert result[0] == ["country", "city", "name"]  # header in specified order
+        assert result[0] == [
+            "country",
+            "city",
+            "name",
+        ]  # header in specified order
         assert result[1] == ["Japan", "Tokyo", "Alice"]
         assert result[2] == ["USA", "NYC", "Bob"]
         
@@ -152,7 +170,7 @@ def main():
         test_column_config_extraction,
         test_table_converter_column_config,
         test_table_builder_column_widths,
-        test_object_array_conversion
+        test_object_array_conversion,
     ]
     
     passed = 0

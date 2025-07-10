@@ -77,10 +77,16 @@ class TableConverter:
         self.max_rows = max_rows or DEFAULT_MAX_ROWS
         self.performance_mode = performance_mode
         logger.debug(
-            f"TableConverter initialized with max_rows={self.max_rows}, performance_mode={performance_mode}"
+            f"TableConverter initialized with max_rows={self.max_rows}, "
+            f"performance_mode={performance_mode}"
         )
 
-    def convert(self, data: JsonData, include_header: bool | None = None, column_config: dict[str, Any] | None = None) -> TableData:
+    def convert(
+        self,
+        data: JsonData,
+        include_header: bool | None = None,
+        column_config: dict[str, Any] | None = None,
+    ) -> TableData:
         """
         Convert JSON data to tabular format with comprehensive validation and optimization.
 
@@ -205,23 +211,27 @@ class TableConverter:
         logger.debug(f"Conversion completed: {len(result)} rows")
         return result
 
-    def _convert_single_object(self, data: dict, column_config: dict[str, Any] | None = None) -> TableData:
+    def _convert_single_object(
+        self, data: dict, column_config: dict[str, Any] | None = None
+    ) -> TableData:
         """Convert single object to table format."""
         if not data:
             return []
 
         keys = sorted(data.keys())
-        
+
         # Apply column configuration
         if column_config:
             keys = self._apply_column_config(keys, column_config)
-        
+
         header = keys
         values = [self._safe_str(data.get(key, "")) for key in keys]
 
         return [header, values]
 
-    def _convert_array(self, data: list, column_config: dict[str, Any] | None = None) -> TableData:
+    def _convert_array(
+        self, data: list, column_config: dict[str, Any] | None = None
+    ) -> TableData:
         """Convert array to table format."""
         if not data:
             return []
@@ -232,7 +242,9 @@ class TableConverter:
         else:
             return self._convert_2d_array(data, column_config)
 
-    def _convert_object_array(self, data: list, column_config: dict[str, Any] | None = None) -> TableData:
+    def _convert_object_array(
+        self, data: list, column_config: dict[str, Any] | None = None
+    ) -> TableData:
         """Convert array of objects to table format."""
         if not data:
             return []
@@ -245,7 +257,7 @@ class TableConverter:
 
         # Sort keys for consistent output
         sorted_keys = sorted(all_keys)
-        
+
         # Apply column configuration
         if column_config:
             sorted_keys = self._apply_column_config(sorted_keys, column_config)
@@ -263,7 +275,9 @@ class TableConverter:
 
         return result
 
-    def _convert_2d_array(self, data: list, column_config: dict[str, Any] | None = None) -> TableData:
+    def _convert_2d_array(
+        self, data: list, column_config: dict[str, Any] | None = None
+    ) -> TableData:
         """Convert 2D array to table format."""
         if not data:
             return []
@@ -290,7 +304,9 @@ class TableConverter:
 
         return result
 
-    def _apply_column_config(self, keys: list[str], column_config: dict[str, Any]) -> list[str]:
+    def _apply_column_config(
+        self, keys: list[str], column_config: dict[str, Any]
+    ) -> list[str]:
         """Apply column configuration to column keys for object arrays.
         
         Args:
@@ -328,11 +344,13 @@ class TableConverter:
                     ordered_keys.append(key)
             
             result_keys = ordered_keys
-        
+
         logger.debug(f"Applied column config: {keys} -> {result_keys}")
         return result_keys
     
-    def _apply_column_config_to_2d_array(self, data: TableData, column_config: dict[str, Any]) -> TableData:
+    def _apply_column_config_to_2d_array(
+        self, data: TableData, column_config: dict[str, Any]
+    ) -> TableData:
         """Apply column configuration to 2D array data.
         
         Args:
@@ -387,7 +405,10 @@ class TableConverter:
             filtered_row = [row[i] if i < len(row) else "" for i in column_indices]
             result.append(filtered_row)
         
-        logger.debug(f"Applied column config to 2D array: {len(data[0])} -> {len(result[0])} columns")
+        logger.debug(
+            f"Applied column config to 2D array: {len(data[0])} -> "
+            f"{len(result[0])} columns"
+        )
         return result
     
     def _safe_str(self, value) -> str:
