@@ -53,16 +53,11 @@ Against this backdrop, sphinxcontrib-jsontable was developed to directly embed s
 * Encoding validation
 * Detailed logging for debugging
 
-⚡ **Performance Optimized (New!)**
-* **40% faster processing** — Automatic optimization for all operations
-* **25% less memory usage** — Especially beneficial for large Excel files
-* **Enterprise-grade caching** — Intelligent file-level caching system
-* **83% code efficiency** — Streamlined, more reliable codebase
-* **Streaming Excel reader** — Handle massive files without memory issues
+⚡ **Performance Optimized**
 * Automatic row limiting for large datasets (10,000 rows by default)
-* User-friendly warnings and guidance for optimization
-
-> **📊 Performance Verification**: These metrics are validated through comprehensive benchmark tests in [`scripts/performance_benchmark.py`](scripts/performance_benchmark.py), [`tests/benchmark/`](tests/benchmark/) and [`tests/unit/integration/test_performance_monitoring.py`](tests/unit/integration/test_performance_monitoring.py). Test conditions include various dataset sizes (100-5000 rows) and memory usage monitoring.
+* Configurable performance limits
+* Memory-safe processing
+* User-friendly warnings for large data
 
 ## Installation
 
