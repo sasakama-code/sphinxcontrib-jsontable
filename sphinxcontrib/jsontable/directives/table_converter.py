@@ -308,65 +308,65 @@ class TableConverter:
         self, keys: list[str], column_config: dict[str, Any]
     ) -> list[str]:
         """Apply column configuration to column keys for object arrays.
-        
+
         Args:
             keys: List of column keys (sorted)
             column_config: Column configuration dictionary
-            
+
         Returns:
             List of column keys after applying configuration
         """
         result_keys = list(keys)
-        
+
         # Apply visible_columns filter
         if "visible_columns" in column_config:
             visible_columns = column_config["visible_columns"]
             result_keys = [key for key in result_keys if key in visible_columns]
-        
+
         # Apply hidden_columns filter
         if "hidden_columns" in column_config:
             hidden_columns = column_config["hidden_columns"]
             result_keys = [key for key in result_keys if key not in hidden_columns]
-        
+
         # Apply column_order
         if "column_order" in column_config:
             column_order = column_config["column_order"]
             ordered_keys = []
-            
+
             # First, add columns in specified order
             for ordered_key in column_order:
                 if ordered_key in result_keys:
                     ordered_keys.append(ordered_key)
-            
+
             # Then, add any remaining columns not in the order specification
             for key in result_keys:
                 if key not in ordered_keys:
                     ordered_keys.append(key)
-            
+
             result_keys = ordered_keys
 
         logger.debug(f"Applied column config: {keys} -> {result_keys}")
         return result_keys
-    
+
     def _apply_column_config_to_2d_array(
         self, data: TableData, column_config: dict[str, Any]
     ) -> TableData:
         """Apply column configuration to 2D array data.
-        
+
         Args:
             data: 2D array table data
             column_config: Column configuration dictionary
-            
+
         Returns:
             2D array with column configuration applied
         """
         if not data:
             return data
-        
+
         # For 2D arrays, we need to work with column indices
         # We assume the first row contains headers if available
         header_row = data[0]
-        
+
         # Create column indices to keep
         column_indices = list(range(len(header_row)))
 
@@ -374,14 +374,18 @@ class TableConverter:
         if "visible_columns" in column_config:
             visible_columns = column_config["visible_columns"]
             column_indices = [
-                i for i, header in enumerate(header_row) if header in visible_columns
+                i
+                for i, header in enumerate(header_row)
+                if header in visible_columns
             ]
 
         # Apply hidden_columns filter (by header names)
         if "hidden_columns" in column_config:
             hidden_columns = column_config["hidden_columns"]
             column_indices = [
-                i for i, header in enumerate(header_row) if header not in hidden_columns
+                i
+                for i, header in enumerate(header_row)
+                if header not in hidden_columns
             ]
 
         # Apply column_order (by header names)
@@ -406,7 +410,9 @@ class TableConverter:
         # Apply column filtering to all rows
         result = []
         for row in data:
-            filtered_row = [row[i] if i < len(row) else "" for i in column_indices]
+            filtered_row = [
+                row[i] if i < len(row) else "" for i in column_indices
+            ]
             result.append(filtered_row)
 
         logger.debug(

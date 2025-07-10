@@ -103,7 +103,10 @@ class TableBuilder:
         )
 
     def build_table(
-        self, table_data: TableData, has_header: bool = True, column_widths: list[int] | None = None
+        self,
+        table_data: TableData,
+        has_header: bool = True,
+        column_widths: list[int] | None = None,
     ) -> list[nodes.table]:
         """
         Build enterprise-grade docutils.nodes.table from 2D list of strings.
@@ -189,7 +192,10 @@ class TableBuilder:
         return table_nodes[0]
 
     def _build_table_internal(
-        self, table_data: TableData, has_header: bool = True, column_widths: list[int] | None = None
+        self,
+        table_data: TableData,
+        has_header: bool = True,
+        column_widths: list[int] | None = None,
     ) -> nodes.table:
         """
         Internal method to build docutils table structure.
@@ -228,7 +234,9 @@ class TableBuilder:
         table += tgroup
         return table
 
-    def _create_table_structure(self, cols: int, column_widths: list[int] | None = None) -> nodes.table:
+    def _create_table_structure(
+        self, cols: int, column_widths: list[int] | None = None
+    ) -> nodes.table:
         """
         Create a table structure with given number of columns.
 
@@ -249,7 +257,9 @@ class TableBuilder:
 
         return table
 
-    def _create_colspec_nodes(self, col_count: int, column_widths: list[int] | None = None) -> list[nodes.colspec]:
+    def _create_colspec_nodes(
+        self, col_count: int, column_widths: list[int] | None = None
+    ) -> list[nodes.colspec]:
         """
         Create column specification nodes.
 
@@ -274,9 +284,9 @@ class TableBuilder:
                 logger.debug(f"Setting column {i} width to {width}")
             else:
                 width = 1
-            
+
             colspecs.append(nodes.colspec(colwidth=width))
-        
+
         return colspecs
 
     def _add_header(self, table: nodes.table, header_data: list[str]) -> None:

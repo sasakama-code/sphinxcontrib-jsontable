@@ -28,7 +28,7 @@ def test_column_config_extraction():
         "column-widths": "2,1,3",
         "hide-columns": "id,timestamp",
     }
-    
+
     try:
         config = directive._extract_column_config()
         print(f"✓ Column config extracted: {config}")
@@ -39,11 +39,11 @@ def test_column_config_extraction():
         assert config["column_widths"] == [2, 1, 3]
         assert config["hidden_columns"] == ["id", "timestamp"]
         print("✓ All config values correct")
-        
+
     except Exception as e:
         print(f"✗ Column config extraction failed: {e}")
         return False
-    
+
     return True
 
 def test_table_converter_column_config():
@@ -53,10 +53,10 @@ def test_table_converter_column_config():
     from sphinxcontrib.jsontable.directives.table_converter import (
         TableConverter,
     )
-    
+
     try:
         converter = TableConverter()
-        
+
         # Test apply_column_config
         keys = ["name", "age", "city", "country"]
         config = {
@@ -122,24 +122,24 @@ def test_object_array_conversion():
     from sphinxcontrib.jsontable.directives.table_converter import (
         TableConverter,
     )
-    
+
     try:
         converter = TableConverter()
-        
+
         # Test data
         data = [
             {"name": "Alice", "age": 25, "city": "Tokyo", "country": "Japan"},
             {"name": "Bob", "age": 30, "city": "NYC", "country": "USA"},
         ]
-        
+
         # Test with column config
         column_config = {
             "visible_columns": ["name", "city", "country"],
             "column_order": ["country", "city", "name"]
         }
-        
+
         result = converter.convert(data, column_config=column_config)
-        
+
         # Expected: header row + 2 data rows
         assert len(result) == 3
         assert result[0] == [
@@ -149,33 +149,33 @@ def test_object_array_conversion():
         ]  # header in specified order
         assert result[1] == ["Japan", "Tokyo", "Alice"]
         assert result[2] == ["USA", "NYC", "Bob"]
-        
+
         print("✓ Object array conversion with column config successful")
         print(f"  Header: {result[0]}")
         print(f"  Row 1: {result[1]}")
         print(f"  Row 2: {result[2]}")
-        
+
     except Exception as e:
         print(f"✗ Object array conversion failed: {e}")
         return False
-    
+
     return True
 
 def main():
     """Run all tests."""
     print("Column Customization Feature Test Suite")
     print("=" * 50)
-    
+
     tests = [
         test_column_config_extraction,
         test_table_converter_column_config,
         test_table_builder_column_widths,
         test_object_array_conversion,
     ]
-    
+
     passed = 0
     failed = 0
-    
+
     for test in tests:
         try:
             if test():
@@ -185,10 +185,10 @@ def main():
         except Exception as e:
             print(f"✗ Test {test.__name__} failed with exception: {e}")
             failed += 1
-    
+
     print("\n" + "=" * 50)
     print(f"Test Results: {passed} passed, {failed} failed")
-    
+
     if failed == 0:
         print("🎉 All tests passed!")
         return 0

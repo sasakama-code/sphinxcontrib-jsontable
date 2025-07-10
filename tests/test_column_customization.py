@@ -110,17 +110,17 @@ class TestColumnCustomization:
 
 class TestTableConverterColumnConfig:
     """Test suite for TableConverter column configuration methods."""
-    
+
     def test_apply_column_config_visible_columns(self):
         """Test apply_column_config with visible_columns filter."""
         from sphinxcontrib.jsontable.directives.table_converter import (
             TableConverter,
         )
-        
+
         converter = TableConverter()
         keys = ["name", "age", "city", "country"]
         config = {"visible_columns": ["name", "city"]}
-        
+
         result = converter._apply_column_config(keys, config)
         assert result == ["name", "city"]
 
@@ -129,11 +129,11 @@ class TestTableConverterColumnConfig:
         from sphinxcontrib.jsontable.directives.table_converter import (
             TableConverter,
         )
-        
+
         converter = TableConverter()
         keys = ["name", "age", "city", "country"]
         config = {"hidden_columns": ["age", "country"]}
-        
+
         result = converter._apply_column_config(keys, config)
         assert result == ["city", "name"]  # remaining columns, sorted
 
@@ -142,11 +142,11 @@ class TestTableConverterColumnConfig:
         from sphinxcontrib.jsontable.directives.table_converter import (
             TableConverter,
         )
-        
+
         converter = TableConverter()
         keys = ["name", "age", "city", "country"]
         config = {"column_order": ["country", "name", "city"]}
-        
+
         result = converter._apply_column_config(keys, config)
         assert result == [
             "country",
@@ -160,7 +160,7 @@ class TestTableConverterColumnConfig:
         from sphinxcontrib.jsontable.directives.table_converter import (
             TableConverter,
         )
-        
+
         converter = TableConverter()
         keys = ["name", "age", "city", "country", "id"]
         config = {
@@ -168,25 +168,25 @@ class TestTableConverterColumnConfig:
             "hidden_columns": ["age"],
             "column_order": ["country", "name"]
         }
-        
+
         result = converter._apply_column_config(keys, config)
-        # Should have: visible(name,age,city,country) - hidden(age) = name,city,country  # noqa: E501
+        # Should have: visible(name,age,city,country) - hidden(age) = name,city,country
         # Ordered as: country, name, city
         assert result == ["country", "name", "city"]
 
 
 class TestTableBuilderColumnWidths:
     """Test suite for TableBuilder column width functionality."""
-    
+
     def test_create_colspec_nodes_default_widths(self):
         """Test colspec creation with default widths."""
         from sphinxcontrib.jsontable.directives.table_builder import (
             TableBuilder,
         )
-        
+
         builder = TableBuilder()
         colspecs = builder._create_colspec_nodes(3)
-        
+
         assert len(colspecs) == 3
         assert all(colspec.attributes["colwidth"] == 1 for colspec in colspecs)
 
@@ -195,10 +195,10 @@ class TestTableBuilderColumnWidths:
         from sphinxcontrib.jsontable.directives.table_builder import (
             TableBuilder,
         )
-        
+
         builder = TableBuilder()
         colspecs = builder._create_colspec_nodes(3, [2, 1, 3])
-        
+
         assert len(colspecs) == 3
         assert colspecs[0].attributes["colwidth"] == 2
         assert colspecs[1].attributes["colwidth"] == 1
@@ -209,10 +209,10 @@ class TestTableBuilderColumnWidths:
         from sphinxcontrib.jsontable.directives.table_builder import (
             TableBuilder,
         )
-        
+
         builder = TableBuilder()
         colspecs = builder._create_colspec_nodes(4, [2, 3])
-        
+
         assert len(colspecs) == 4
         assert colspecs[0].attributes["colwidth"] == 2
         assert colspecs[1].attributes["colwidth"] == 3
