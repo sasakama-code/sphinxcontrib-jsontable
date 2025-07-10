@@ -6,8 +6,8 @@ This script tests the new column customization functionality without requiring
 the full pytest setup.
 """
 
-import sys
 import os
+import sys
 
 # Add the package to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'sphinxcontrib'))
@@ -17,7 +17,6 @@ def test_column_config_extraction():
     print("Testing column configuration extraction...")
     
     from sphinxcontrib.jsontable.directives.directive_core import JsonTableDirective
-    from unittest.mock import Mock
     
     # Create a minimal directive instance
     directive = JsonTableDirective.__new__(JsonTableDirective)

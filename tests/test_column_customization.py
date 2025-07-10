@@ -8,8 +8,9 @@ This module tests the new column customization functionality including:
 - hide-columns: Hide specific columns
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from sphinxcontrib.jsontable.directives import JsonTableDirective
 

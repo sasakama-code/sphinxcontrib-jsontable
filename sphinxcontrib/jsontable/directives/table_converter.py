@@ -348,7 +348,6 @@ class TableConverter:
         # For 2D arrays, we need to work with column indices
         # We assume the first row contains headers if available
         header_row = data[0]
-        data_rows = data[1:] if len(data) > 1 else []
         
         # Create column indices to keep
         column_indices = list(range(len(header_row)))
