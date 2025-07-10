@@ -1131,8 +1131,6 @@ class PerformanceDashboard:
     ) -> VisualizationResult:
         """デバイス別レンダリング"""
 
-        start_time = time.time()
-
         # デバイス適応処理シミュレーション
         layout_adaptation = {
             "layout_optimized": True,
@@ -1191,8 +1189,6 @@ class PerformanceDashboard:
     ) -> VisualizationResult:
         """高性能レンダリング実行"""
 
-        start_time = time.time()
-
         # 高性能レンダリング処理シミュレーション
         data_points = visualization_data.get("time_series_data", {}).get(
             "data_points", 100000
@@ -1237,8 +1233,6 @@ class PerformanceDashboard:
     ) -> VisualizationResult:
         """カスタマイズ適用"""
 
-        start_time = time.time()
-
         # カスタマイズ処理シミュレーション
         scenario_type = customization_config.get("scenario", "default")
 
@@ -1247,8 +1241,6 @@ class PerformanceDashboard:
         brand_compliance = 0.97 if scenario_type == "enterprise_branding" else 0.85
         visual_coherence = 0.95  # GREEN基本値
         corporate_identity_maintained = scenario_type == "enterprise_branding"
-
-        processing_time = time.time() - start_time
 
         # カスタマイズ品質指標
         customization_success_rate = 0.98  # GREEN基本値
@@ -1283,20 +1275,13 @@ class PerformanceDashboard:
     ) -> VisualizationResult:
         """企業統合品質検証"""
 
-        start_time = time.time()
-
         # 企業統合検証シミュレーション
-        security_requirements = environment_config.get("security_requirements", {})
-        compliance_validation = environment_config.get("compliance_validation", {})
-
         scalability_metrics = {
             "concurrent_users": 1000,
             "data_throughput": "10GB/hour",
             "response_time_p99": 150,  # ms
             "availability": 0.9995,
         }
-
-        processing_time = time.time() - start_time
 
         # 企業品質指標
         security_compliance_score = 0.98  # GREEN基本値
@@ -1341,8 +1326,6 @@ class PerformanceDashboard:
     ) -> VisualizationResult:
         """品質保証検証実行"""
 
-        start_time = time.time()
-
         # 品質保証検証シミュレーション
         usability_assessment = {
             "task_completion_rate": 0.97,
@@ -1364,8 +1347,6 @@ class PerformanceDashboard:
             "screen_reader": 0.96,
             "keyboard_navigation": 0.99,
         }
-
-        processing_time = time.time() - start_time
 
         # 品質指標
         overall_quality_score = 0.96  # GREEN基本値

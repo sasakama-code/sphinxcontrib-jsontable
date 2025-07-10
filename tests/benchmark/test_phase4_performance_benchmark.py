@@ -192,7 +192,6 @@ class TestPhase4PerformanceBenchmark:
 
         if format_type == "xlsx":
             # Excel形式の大容量ファイル作成
-            data = []
             headers = [
                 "ID",
                 "Name",
@@ -279,21 +278,6 @@ class TestPhase4PerformanceBenchmark:
         - 並行処理性能: 100同時ユーザー・リソース効率・競合制御・分散処理
         - 企業グレード品質: 99%可用性・障害復旧・監視統合・運用効率
         """
-        # 企業グレードパフォーマンス監視システム初期化（失敗予定）
-        enterprise_performance_monitor = RealtimePerformanceMonitor(
-            monitoring_config={
-                "enable_enterprise_grade_monitoring": True,
-                "enable_high_frequency_sampling": True,
-                "enable_distributed_monitoring": True,
-                "enable_predictive_analysis": True,
-                "monitoring_precision_microseconds": True,
-                "enterprise_sla_enforcement": True,
-                "target_throughput_rps": 1000.0,
-                "max_latency_tolerance_ms": 10.0,
-                "availability_requirement": 99.99,
-            }
-        )
-
         # 企業グレード最適化パフォーマンステストデータ準備
         large_scale_test_scenario = {
             "concurrent_users": 500,  # REFACTOR: 500並行ユーザーで高負荷テスト

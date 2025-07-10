@@ -34,3 +34,32 @@ from .unified_error_handler import (
     UnifiedErrorMonitor,
     UnifiedPipelineErrorHandler,
 )
+
+__all__ = [
+    # Pipeline Performance Analyzer
+    "ComprehensivePerformanceReport",
+    "DuplicationEliminationReport", 
+    "IntegratedPipelineMetrics",
+    "MemoryUsageComparison",
+    "PerformanceComparisonResult",
+    "PipelinePerformanceAnalyzer",
+    "ProcessingStageComparison",
+    # Pipeline Regression Validator
+    "BackwardCompatibilityVerification",
+    "ComprehensiveRegressionReport",
+    "EdgeCasePreservationVerification",
+    "ErrorHandlingConsistencyCheck",
+    "FunctionalityComparisonResult",
+    "OutputConsistencyAnalysis",
+    "PerformanceRegressionCheck",
+    "PipelineRegressionValidator",
+    "RegressionTestResult",
+    # Unified Data Conversion
+    "ConversionOptimizationResult",
+    "UnifiedConversionResult",
+    "UnifiedDataConversionEngine",
+    # Unified Error Handler
+    "PipelineErrorClassification",
+    "UnifiedErrorMonitor",
+    "UnifiedPipelineErrorHandler",
+]

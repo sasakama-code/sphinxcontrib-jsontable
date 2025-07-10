@@ -46,7 +46,7 @@ from .optimized_index_processor import (
     RangeIndexResult,
 )
 from .optimized_security_scanner import (
-    BenchmarkComparisonResult,
+    BenchmarkComparisonResult as SecurityBenchmarkComparisonResult,
     ConcurrentSecurityResult,
     OptimizedSecurityScanner,
     SecurityOptimizationMetrics,

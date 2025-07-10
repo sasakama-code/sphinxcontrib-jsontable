@@ -488,7 +488,7 @@ class UserFriendlyErrorHandler(ErrorHandlerCore):
                 if end_row and int(end_row[0]) > 1000:
                     steps.append("7. 📊 Large row range detected - consider using `:limit:` instead")
                     fixes.append("Use `:limit: 100` instead of large range")
-            except:
+            except (ValueError, IndexError, AttributeError):
                 steps.append("8. 🔍 Range format appears incorrect")
                 fixes.append("Use format like `:range: A1:E20`")
         
@@ -518,5 +518,5 @@ class UserFriendlyErrorHandler(ErrorHandlerCore):
                 ]
             
             return context
-        except:
+        except (OSError, PermissionError, AttributeError):
             return {"analysis_failed": True}

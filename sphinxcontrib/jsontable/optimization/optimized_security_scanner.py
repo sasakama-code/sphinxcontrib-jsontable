@@ -813,7 +813,7 @@ class OptimizedSecurityScanner:
 
                     # 追加の非効率処理
                     for pattern in ["SYSTEM", "CALL", "HTTP", "FTP"]:
-                        pattern.lower() in value.lower()
+                        _ = pattern.lower() in value.lower()
 
         # メモリ使用量シミュレート（より多くのメモリ消費）
         dummy_data = [df.copy() for _ in range(20)]  # 20回コピーで大幅メモリ消費

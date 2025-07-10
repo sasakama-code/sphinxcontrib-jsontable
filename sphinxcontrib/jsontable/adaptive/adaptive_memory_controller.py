@@ -19,7 +19,6 @@ CLAUDE.md Code Excellence Compliance:
 - KISS原則: シンプル・直感的API設計
 """
 
-import threading
 from dataclasses import dataclass
 from typing import Any, Dict
 
