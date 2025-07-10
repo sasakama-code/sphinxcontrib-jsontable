@@ -7,6 +7,7 @@ from external files or inline content as HTML tables in Sphinx documentation.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from .directives import DEFAULT_MAX_ROWS, JsonTableDirective
@@ -39,6 +40,12 @@ def setup(app: Sphinx) -> dict[str, Any]:
         "env",  # Rebuild environment when changed
         [int],  # Type validation
     )
+
+    # Register static assets for sorting functionality
+    static_path = Path(__file__).parent / "static"
+    app.config.html_static_path.append(str(static_path))
+    app.add_css_file("jsontable.css")
+    app.add_js_file("jsontable.js")
 
     return {
         "version": __version__,

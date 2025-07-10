@@ -239,6 +239,10 @@ class TableBuilder:
             nodes.table with tgroup and colspec elements
         """
         table = nodes.table()
+        # Add CSS classes for sorting functionality
+        table['classes'] = ['jsontable']
+        table['data-sortable'] = 'true'
+        
         tgroup = nodes.tgroup(cols=cols)
         table += tgroup
 
@@ -275,7 +279,7 @@ class TableBuilder:
             header_data: List of header cell strings
         """
         thead = nodes.thead()
-        header_row = self._create_table_row(header_data)
+        header_row = self._create_header_row(header_data)
         thead += header_row
         table[0] += thead
 
@@ -344,6 +348,44 @@ class TableBuilder:
                     text_content = repr(cell_data)  # Safe fallback representation
 
             # Create paragraph node with optimized text content
+            entry += nodes.paragraph(text=text_content)
+            row += entry
+
+        return row
+
+    def _create_header_row(self, header_data: list[str]) -> nodes.row:
+        """
+        Create a header row with sortable header cells.
+
+        Args:
+            header_data: List of header cell strings
+
+        Returns:
+            nodes.row containing header cells with sorting attributes
+        """
+        row = nodes.row()
+
+        for cell_data in header_data:
+            # Create header entry (th element)
+            entry = nodes.entry()
+            entry['morerows'] = 0
+            entry['morecols'] = 0
+            
+            # Add sorting attributes for JavaScript
+            entry['data-sortable'] = 'true'
+
+            # Handle cell data safely
+            if cell_data is None:
+                text_content = ""
+                logger.debug("Converted None header cell to empty string")
+            else:
+                try:
+                    text_content = str(cell_data)
+                except (UnicodeDecodeError, UnicodeEncodeError) as e:
+                    logger.warning(f"Header cell encoding issue, using fallback: {e}")
+                    text_content = repr(cell_data)
+
+            # Create paragraph node for header content
             entry += nodes.paragraph(text=text_content)
             row += entry
 
