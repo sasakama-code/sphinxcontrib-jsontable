@@ -46,6 +46,7 @@ Against this backdrop, sphinxcontrib-jsontable was developed to directly embed s
 * Row limiting for large datasets
 * Custom file encoding support
 * Responsive table formatting
+* **Column Customization**: Show/hide columns, custom ordering, and width control
 
 🔒 **Robust & Safe**
 * Path traversal protection
@@ -193,6 +194,18 @@ Financial Report
    :limit: 100
 ```
 
+**Column Customization:**
+```rst
+Employee Report (Customized View)
+=================================
+
+.. jsontable:: data/employees.json
+   :columns: name,department,email
+   :column-order: department,name,email
+   :column-widths: 2,3,4
+   :hide-columns: id,created_at
+```
+
 **In Markdown (with myst-parser):**
 ````markdown
 # User Database
@@ -334,6 +347,10 @@ sphinxcontrib-jsontable provides comprehensive Excel file support with advanced 
 | `merge-headers` | string | Multi-row header merging | `:merge-headers: true` |
 | `json-cache` | flag | Enable caching | `:json-cache:` |
 | `auto-header` | flag | Auto header detection | `:auto-header:` |
+| `columns` | string | Show specific columns | `:columns: name,age,city` |
+| `column-order` | string | Custom column order | `:column-order: city,name,age` |
+| `column-widths` | string | Column width ratios | `:column-widths: 2,1,3` |
+| `hide-columns` | string | Hide specific columns | `:hide-columns: id,timestamp` |
 
 ### Complete Directive Options
 
@@ -354,6 +371,10 @@ The `jsontable` directive supports all these options for maximum flexibility:
    :merge-cells: expand  # Merged cell processing (expand/ignore/first-value)
    :merge-headers:       # Hierarchical header merging
    :json-cache:          # Enable JSON caching for performance
+   :columns: name,age    # Show only specified columns (comma-separated)
+   :column-order: age,name  # Custom column order (comma-separated)
+   :column-widths: 2,3,1    # Column width ratios (comma-separated integers)
+   :hide-columns: id,timestamp  # Hide specific columns (comma-separated)
 ```
 
 ## Comprehensive Usage Guide

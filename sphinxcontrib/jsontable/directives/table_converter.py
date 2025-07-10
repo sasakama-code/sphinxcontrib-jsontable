@@ -77,10 +77,16 @@ class TableConverter:
         self.max_rows = max_rows or DEFAULT_MAX_ROWS
         self.performance_mode = performance_mode
         logger.debug(
-            f"TableConverter initialized with max_rows={self.max_rows}, performance_mode={performance_mode}"
+            f"TableConverter initialized with max_rows={self.max_rows}, "
+            f"performance_mode={performance_mode}"
         )
 
-    def convert(self, data: JsonData, include_header: bool | None = None) -> TableData:
+    def convert(
+        self,
+        data: JsonData,
+        include_header: bool | None = None,
+        column_config: dict[str, Any] | None = None,
+    ) -> TableData:
         """
         Convert JSON data to tabular format with comprehensive validation and optimization.
 
@@ -172,9 +178,9 @@ class TableConverter:
 
         # Route to appropriate conversion method
         if isinstance(data, dict):
-            result = self._convert_single_object(data)
+            result = self._convert_single_object(data, column_config)
         elif isinstance(data, list):
-            result = self._convert_array(data)
+            result = self._convert_array(data, column_config)
         else:
             raise JsonTableError(INVALID_JSON_DATA_ERROR)
 
@@ -205,29 +211,40 @@ class TableConverter:
         logger.debug(f"Conversion completed: {len(result)} rows")
         return result
 
-    def _convert_single_object(self, data: dict) -> TableData:
+    def _convert_single_object(
+        self, data: dict, column_config: dict[str, Any] | None = None
+    ) -> TableData:
         """Convert single object to table format."""
         if not data:
             return []
 
         keys = sorted(data.keys())
+
+        # Apply column configuration
+        if column_config:
+            keys = self._apply_column_config(keys, column_config)
+
         header = keys
         values = [self._safe_str(data.get(key, "")) for key in keys]
 
         return [header, values]
 
-    def _convert_array(self, data: list) -> TableData:
+    def _convert_array(
+        self, data: list, column_config: dict[str, Any] | None = None
+    ) -> TableData:
         """Convert array to table format."""
         if not data:
             return []
 
         # Check if it's an array of objects
         if data and isinstance(data[0], dict):
-            return self._convert_object_array(data)
+            return self._convert_object_array(data, column_config)
         else:
-            return self._convert_2d_array(data)
+            return self._convert_2d_array(data, column_config)
 
-    def _convert_object_array(self, data: list) -> TableData:
+    def _convert_object_array(
+        self, data: list, column_config: dict[str, Any] | None = None
+    ) -> TableData:
         """Convert array of objects to table format."""
         if not data:
             return []
@@ -240,6 +257,10 @@ class TableConverter:
 
         # Sort keys for consistent output
         sorted_keys = sorted(all_keys)
+
+        # Apply column configuration
+        if column_config:
+            sorted_keys = self._apply_column_config(sorted_keys, column_config)
 
         # Build header row
         result = [sorted_keys]
@@ -254,7 +275,9 @@ class TableConverter:
 
         return result
 
-    def _convert_2d_array(self, data: list) -> TableData:
+    def _convert_2d_array(
+        self, data: list, column_config: dict[str, Any] | None = None
+    ) -> TableData:
         """Convert 2D array to table format."""
         if not data:
             return []
@@ -275,6 +298,127 @@ class TableConverter:
 
             result.append(normalized_row)
 
+        # Apply column configuration to 2D array
+        if column_config and result:
+            result = self._apply_column_config_to_2d_array(result, column_config)
+
+        return result
+
+    def _apply_column_config(
+        self, keys: list[str], column_config: dict[str, Any]
+    ) -> list[str]:
+        """Apply column configuration to column keys for object arrays.
+
+        Args:
+            keys: List of column keys (sorted)
+            column_config: Column configuration dictionary
+
+        Returns:
+            List of column keys after applying configuration
+        """
+        result_keys = list(keys)
+
+        # Apply visible_columns filter
+        if "visible_columns" in column_config:
+            visible_columns = column_config["visible_columns"]
+            result_keys = [key for key in result_keys if key in visible_columns]
+
+        # Apply hidden_columns filter
+        if "hidden_columns" in column_config:
+            hidden_columns = column_config["hidden_columns"]
+            result_keys = [key for key in result_keys if key not in hidden_columns]
+
+        # Apply column_order
+        if "column_order" in column_config:
+            column_order = column_config["column_order"]
+            ordered_keys = []
+
+            # First, add columns in specified order
+            for ordered_key in column_order:
+                if ordered_key in result_keys:
+                    ordered_keys.append(ordered_key)
+
+            # Then, add any remaining columns not in the order specification
+            for key in result_keys:
+                if key not in ordered_keys:
+                    ordered_keys.append(key)
+
+            result_keys = ordered_keys
+
+        logger.debug(f"Applied column config: {keys} -> {result_keys}")
+        return result_keys
+
+    def _apply_column_config_to_2d_array(
+        self, data: TableData, column_config: dict[str, Any]
+    ) -> TableData:
+        """Apply column configuration to 2D array data.
+
+        Args:
+            data: 2D array table data
+            column_config: Column configuration dictionary
+
+        Returns:
+            2D array with column configuration applied
+        """
+        if not data:
+            return data
+
+        # For 2D arrays, we need to work with column indices
+        # We assume the first row contains headers if available
+        header_row = data[0]
+
+        # Create column indices to keep
+        column_indices = list(range(len(header_row)))
+
+        # Apply visible_columns filter (by header names)
+        if "visible_columns" in column_config:
+            visible_columns = column_config["visible_columns"]
+            column_indices = [
+                i
+                for i, header in enumerate(header_row)
+                if header in visible_columns
+            ]
+
+        # Apply hidden_columns filter (by header names)
+        if "hidden_columns" in column_config:
+            hidden_columns = column_config["hidden_columns"]
+            column_indices = [
+                i
+                for i, header in enumerate(header_row)
+                if header not in hidden_columns
+            ]
+
+        # Apply column_order (by header names)
+        if "column_order" in column_config:
+            column_order = column_config["column_order"]
+            ordered_indices = []
+
+            # First, add columns in specified order
+            for ordered_header in column_order:
+                for i, header in enumerate(header_row):
+                    if header == ordered_header and i in column_indices:
+                        ordered_indices.append(i)
+                        break
+
+            # Then, add any remaining columns not in the order specification
+            for i in column_indices:
+                if i not in ordered_indices:
+                    ordered_indices.append(i)
+
+            column_indices = ordered_indices
+
+        # Apply column filtering to all rows
+        result = []
+        for row in data:
+            filtered_row = [
+                row[i] if i < len(row) else "" for i in column_indices
+            ]
+            result.append(filtered_row)
+
+        logger.debug(
+            f"Applied column config to 2D array: {len(data[0])} -> "
+            f"{len(result[0])} columns"
+        )
         return result
 
     def _safe_str(self, value) -> str:

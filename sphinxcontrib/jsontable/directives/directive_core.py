@@ -78,6 +78,11 @@ class JsonTableDirective(BaseDirective):
         "merge-cells": directives.unchanged,
         "merge-headers": directives.unchanged,
         "json-cache": directives.flag,
+        # Column customization options
+        "columns": directives.unchanged,
+        "column-order": directives.unchanged,
+        "column-widths": directives.unchanged,
+        "hide-columns": directives.unchanged,
     }
 
     def _initialize_processors(self) -> None:
@@ -106,7 +111,9 @@ class JsonTableDirective(BaseDirective):
         )
 
         # Initialize JSON processor
-        self.json_processor = JsonProcessor(base_path=self.base_path, encoding=encoding)
+        self.json_processor = JsonProcessor(
+            base_path=self.base_path, encoding=encoding
+        )
 
         # Initialize JsonDataLoader for backward compatibility
         from . import JsonDataLoader
@@ -124,7 +131,9 @@ class JsonTableDirective(BaseDirective):
                 logger.debug("Excel processor initialized successfully")
             except ImportError:
                 self.excel_processor = None
-                logger.warning("Excel processor unavailable despite EXCEL_SUPPORT=True")
+                logger.warning(
+                    "Excel processor unavailable despite EXCEL_SUPPORT=True"
+                )
         else:
             self.excel_processor = None
 
@@ -248,10 +257,15 @@ class JsonTableDirective(BaseDirective):
                 f"Processing options: include_header={include_header}, limit={limit}"
             )
 
-            # Step 3: Convert to table format
-            table_data = self.table_converter.convert(json_data)
+            # Step 3: Extract column configuration
+            column_config = self._extract_column_config()
 
-            # Step 4: Apply directive options to table data
+            # Step 4: Convert to table format with column configuration
+            table_data = self.table_converter.convert(
+                json_data, column_config=column_config
+            )
+
+            # Step 5: Apply directive options to table data
             if limit is not None:
                 # Apply row limit (keep header if present)
                 if include_header and len(table_data) > 1:
@@ -259,8 +273,11 @@ class JsonTableDirective(BaseDirective):
                 else:
                     table_data = table_data[:limit]
 
-            # Step 5: Build docutils table
-            table_nodes = self.table_builder.build_table(table_data)
+            # Step 6: Build docutils table with column widths
+            column_widths = column_config.get("column_widths")
+            table_nodes = self.table_builder.build_table(
+                table_data, column_widths=column_widths
+            )
 
             logger.info("JsonTableDirective execution completed successfully")
             return table_nodes
@@ -364,6 +381,58 @@ class JsonTableDirective(BaseDirective):
 
         logger.debug(f"Generated processing config: {processing_config}")
         return processing_config
+
+    def _extract_column_config(self) -> dict[str, Any]:
+        """Extract column customization configuration from directive options.
+
+        Returns:
+            Dictionary containing column configuration with keys:
+            - visible_columns: List of column names to display
+            - column_order: List of column names in desired order
+            - column_widths: List of column widths (integers)
+            - hidden_columns: List of column names to hide
+        """
+        column_config = {}
+
+        # Parse columns option (comma-separated list of column names)
+        if "columns" in self.options:
+            columns_str = self.options["columns"].strip()
+            if columns_str:
+                column_config["visible_columns"] = [
+                    col.strip() for col in columns_str.split(",") if col.strip()
+                ]
+
+        # Parse column-order option
+        if "column-order" in self.options:
+            order_str = self.options["column-order"].strip()
+            if order_str:
+                column_config["column_order"] = [
+                    col.strip() for col in order_str.split(",") if col.strip()
+                ]
+
+        # Parse column-widths option
+        if "column-widths" in self.options:
+            widths_str = self.options["column-widths"].strip()
+            if widths_str:
+                try:
+                    column_config["column_widths"] = [
+                        int(width.strip())
+                        for width in widths_str.split(",")
+                        if width.strip()
+                    ]
+                except ValueError as e:
+                    logger.warning(f"Invalid column-widths format: {e}")
+
+        # Parse hide-columns option
+        if "hide-columns" in self.options:
+            hide_str = self.options["hide-columns"].strip()
+            if hide_str:
+                column_config["hidden_columns"] = [
+                    col.strip() for col in hide_str.split(",") if col.strip()
+                ]
+
+        logger.debug(f"Extracted column config: {column_config}")
+        return column_config
 
     def format_excel_errors(self, error: Exception) -> str:
         """Excelエラー表示統合実装.
