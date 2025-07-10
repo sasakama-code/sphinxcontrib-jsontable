@@ -36,7 +36,7 @@
 
 **Problem**: `FileNotFoundError` or "File does not exist"
 
-```
+```text
 ERROR: File 'data/report.xlsx' not found
 ```
 
@@ -68,7 +68,7 @@ ERROR: File 'data/report.xlsx' not found
 **Problem**: Sphinx build taking too long or hanging
 
 **Symptoms**:
-```
+```text
 Building... (hanging at jsontable processing)
 ```
 

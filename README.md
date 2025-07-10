@@ -54,11 +54,11 @@ Against this backdrop, sphinxcontrib-jsontable was developed to directly embed s
 * Detailed logging for debugging
 
 ⚡ **Performance Optimized (New!)**
-* **40% faster processing** - Automatic optimization for all operations
-* **25% less memory usage** - Especially beneficial for large Excel files
-* **Enterprise-grade caching** - Intelligent file-level caching system
-* **83% code efficiency** - Streamlined, more reliable codebase
-* **Streaming Excel reader** - Handle massive files without memory issues
+* **40% faster processing** — Automatic optimization for all operations
+* **25% less memory usage** — Especially beneficial for large Excel files
+* **Enterprise-grade caching** — Intelligent file-level caching system
+* **83% code efficiency** — Streamlined, more reliable codebase
+* **Streaming Excel reader** — Handle massive files without memory issues
 * Automatic row limiting for large datasets (10,000 rows by default)
 * Configurable performance limits with smart defaults
 * User-friendly warnings and guidance for optimization

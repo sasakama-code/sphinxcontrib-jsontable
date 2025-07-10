@@ -656,7 +656,7 @@ class DistributedScalingCoordinator:
         )
 
         # キャッシュキー生成
-        cache_key = f"scaling_coordination_{hashlib.md5(json.dumps(coordination_config, sort_keys=True).encode()).hexdigest()}"
+        cache_key = f"scaling_coordination_{hashlib.sha256(json.dumps(coordination_config, sort_keys=True).encode()).hexdigest()[:16]}"
 
         # キャッシュ確認
         cached_result = self._get_cached_data(cache_key, "coordination")

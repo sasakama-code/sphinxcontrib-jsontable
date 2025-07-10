@@ -91,7 +91,7 @@ echo "All issues created successfully!"
 
 ## 🔗 Issue間の依存関係
 
-```
+```text
 ユーザー体験向上
 ├── 独立実行可能
 └── 他Issueの成果を説明に活用

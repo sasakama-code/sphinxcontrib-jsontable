@@ -258,7 +258,6 @@ class AdaptiveMemoryController:
         self._pressure_response_config = self._initialize_pressure_response_config()
         self._large_data_config = self._initialize_large_data_config()
         self._integration_config = self._initialize_integration_config()
-        self._control_lock = threading.Lock()
 
     def _initialize_monitoring_config(self) -> Dict[str, Any]:
         """監視設定初期化"""

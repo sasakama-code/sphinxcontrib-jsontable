@@ -260,7 +260,6 @@ class CPUUsageOptimizer:
         self._multicore_config = self._initialize_multicore_config()
         self._prediction_config = self._initialize_prediction_config()
         self._integration_config = self._initialize_integration_config()
-        self._optimization_lock = threading.Lock()
 
     def _initialize_optimization_config(self) -> Dict[str, Any]:
         """最適化設定初期化"""

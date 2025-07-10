@@ -296,11 +296,23 @@ class QueryOptimizer:
         # GREEN Phase: 基本的なクエリ最適化
         optimized_query = query
 
-        # 基本的なSQLインジェクション対策
-        if any(
-            dangerous in query.lower() for dangerous in ["drop", "delete", "truncate"]
-        ):
-            raise ValueError("Potentially dangerous query detected")
+        # より厳密なSQLインジェクション対策
+        # パラメータ化されたクエリのみを許可
+        allowed_operations = ["select", "insert", "update"]
+        query_lower = query.lower().strip()
+        
+        # クエリの最初の単語を確認
+        first_word = query_lower.split()[0] if query_lower else ""
+        if first_word not in allowed_operations:
+            raise ValueError(f"Operation '{first_word}' not allowed")
+        
+        # セミコロンによる複数クエリを禁止
+        if ";" in query:
+            raise ValueError("Multiple queries not allowed")
+        
+        # コメントを禁止
+        if "--" in query or "/*" in query:
+            raise ValueError("Comments in queries not allowed")
 
         return optimized_query
 
@@ -464,25 +476,41 @@ class MonitoringDataPersistence:
         else:
             db_path = ":memory:"
 
-        self._connection = sqlite3.connect(db_path, check_same_thread=False)
-        self._connection.execute("""
+        # スレッドローカルストレージを使用
+        self._db_path = db_path
+        self._local = threading.local()
+        
+        # 初期接続でテーブル作成
+        conn = self._get_connection()
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS monitoring_data (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp DATETIME,
                 source TEXT,
-                metrics TEXT,
-                tags TEXT,
-                metadata TEXT,
+                metrics BLOB,
+                tags BLOB,
+                metadata BLOB,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        self._connection.execute("""
+        # 追加のインデックス
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_timestamp_source 
+            ON monitoring_data(timestamp, source)
+        """)
+        conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_timestamp ON monitoring_data(timestamp)
         """)
-        self._connection.execute("""
+        conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_source ON monitoring_data(source)
         """)
-        self._connection.commit()
+        conn.commit()
+
+    def _get_connection(self):
+        """スレッドローカル接続取得"""
+        if not hasattr(self._local, 'connection'):
+            self._local.connection = sqlite3.connect(self._db_path)
+        return self._local.connection
 
     def _initialize_storage(self):
         """ストレージ初期化"""
@@ -859,7 +887,7 @@ class MonitoringDataPersistence:
                 query += " ORDER BY timestamp ASC"
 
                 # クエリ実行
-                cursor = self._connection.execute(query, params)
+                cursor = self._get_connection().execute(query, params)
                 rows = cursor.fetchall()
 
                 # 結果変換
@@ -1612,46 +1640,36 @@ class MonitoringDataPersistence:
 
         return QualityAssuranceReport()
 
-    def __del__(self):
-        """デストラクタ（REFACTOR企業グレード版）"""
-        # REFACTOR: 企業グレードクリーンアップ
-
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return False
+    
+    def close(self):
+        """リソースクリーンアップ"""
         try:
             # スレッドプール安全シャットダウン
             if hasattr(self, "_persistence_executor"):
                 self._persistence_executor.shutdown(wait=True, timeout=30)
 
-            # 最終統計ログ
-            if hasattr(self, "_audit_logger"):
-                self._audit_logger.info("MonitoringDataPersistence shutdown initiated")
-
             # キャッシュクリーンアップ
             if hasattr(self, "_persistence_cache"):
                 self._persistence_cache.clear()
 
-            if hasattr(self, "_query_cache"):
-                self._query_cache.clear()
-
-            # データベース接続安全クローズ
+            # データベース接続クローズ
             if hasattr(self, "_connection") and self._connection:
                 self._connection.close()
-
-            # 分散ステート更新
-            if hasattr(self, "_distributed_state"):
-                self._distributed_state["cluster_status"] = "shutdown"
-
-            # 企業グレード終了ログ
-            if hasattr(self, "_performance_logger"):
-                self._performance_logger.info(
-                    "Enterprise-grade persistence system shutdown completed successfully"
-                )
+                
+            # スレッドローカル接続のクリーンアップ
+            if hasattr(self, "_local") and hasattr(self._local, "connection"):
+                self._local.connection.close()
 
         except Exception as e:
-            # サイレントエラー処理（デストラクタでは例外を発生させない）
             if hasattr(self, "_logger"):
-                self._logger.warning(f"Cleanup warning during shutdown: {e}")
-            else:
-                # フォールバック - 標準ログ
-                import logging
+                self._logger.warning(f"Cleanup error: {e}")
 
-                logging.warning(f"MonitoringDataPersistence cleanup warning: {e}")
+    def __del__(self):
+        """デストラクタ"""
+        self.close()

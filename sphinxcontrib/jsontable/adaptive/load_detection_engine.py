@@ -20,7 +20,8 @@ CLAUDE.md Code Excellence Compliance:
 - Defensive Programming: 堅牢性・エラーハンドリング・安全性保証
 """
 
-import asyncio
+import collections
+import hashlib
 import logging
 import threading
 import time
@@ -306,7 +307,9 @@ class LoadDetectionEngine:
         self._distributed_config = self._initialize_distributed_config()
         self._detection_lock = threading.Lock()
         self._concurrent_lock = threading.RLock()  # 再帰可能ロック
-        self._metrics_cache = {}  # メトリクスキャッシュ
+        self._metrics_cache = collections.OrderedDict()  # 順序付きキャッシュ
+        self._max_cache_size = config.get('max_cache_size', 1000) if config else 1000
+        self._thread_pool_active = True
 
     def _initialize_enterprise_logging(self):
         """企業グレードログ初期化"""
@@ -338,7 +341,7 @@ class LoadDetectionEngine:
         self._thread_pool = ThreadPoolExecutor(
             max_workers=max_workers, thread_name_prefix="LoadDetection"
         )
-        self._async_semaphore = asyncio.Semaphore(max_workers)
+        self._thread_semaphore = threading.Semaphore(max_workers)
         self._concurrent_tasks = set()
 
     def _initialize_error_handling(self):
@@ -493,16 +496,15 @@ class LoadDetectionEngine:
 
         return validated_metrics
 
-    async def _execute_concurrent_detection(
+    def _execute_concurrent_detection(
         self, detection_func: Callable, options: Dict[str, Any]
     ):
         """並行検出実行"""
-        async with self._async_semaphore:
-            loop = asyncio.get_event_loop()
-            future = loop.run_in_executor(self._thread_pool, detection_func, options)
+        with self._thread_semaphore:
+            future = self._thread_pool.submit(detection_func, options)
             self._concurrent_tasks.add(future)
             try:
-                result = await future
+                result = future.result(timeout=30)
                 return result
             finally:
                 self._concurrent_tasks.discard(future)
@@ -591,7 +593,8 @@ class LoadDetectionEngine:
         }
 
         # キャッシュチェック
-        cache_key = f"multidimensional_{hash(str(sorted(detection_config.items())))}"
+        config_str = str(sorted(detection_config.items()))
+        cache_key = f"multidimensional_{hashlib.sha256(config_str.encode()).hexdigest()[:16]}"
         if cache_key in self._metrics_cache:
             cached_result = self._metrics_cache[cache_key]
             cache_age = time.time() - cached_result.get("timestamp", 0)
@@ -614,7 +617,11 @@ class LoadDetectionEngine:
 
         result = detection_effectiveness >= 0.94
 
-        # 結果をキャッシュ
+        # 結果をキャッシュ（サイズ制限あり）
+        if len(self._metrics_cache) >= self._max_cache_size:
+            # 最も古いエントリを削除
+            self._metrics_cache.popitem(last=False)
+        
         self._metrics_cache[cache_key] = {
             "result": result,
             "timestamp": time.time(),
@@ -1115,7 +1122,7 @@ class LoadDetectionEngine:
                 "concurrent_processing": {
                     "active_tasks": len(self._concurrent_tasks),
                     "thread_pool_active": hasattr(self, "_thread_pool")
-                    and not self._thread_pool._shutdown,
+                    and getattr(self, "_thread_pool_active", True),
                 },
             }
 

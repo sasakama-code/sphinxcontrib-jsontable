@@ -540,8 +540,15 @@ class AlertNotificationSystem:
         }
         self._cleanup_handlers = []
 
-    def __del__(self):
-        """デストラクタ: 適切なリソースクリーンアップ"""
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.cleanup()
+        return False
+    
+    def cleanup(self):
+        """リソースクリーンアップ"""
         try:
             # スレッドプール終了
             if hasattr(self, "_thread_pool"):
@@ -557,10 +564,13 @@ class AlertNotificationSystem:
                     try:
                         handler()
                     except Exception:
-                        pass  # デストラクタでは例外を隠蔽
-
+                        pass
         except Exception:
-            pass  # デストラクタでは例外を隠蔽
+            pass
+
+    def __del__(self):
+        """デストラクタ"""
+        self.cleanup()
 
     def _validate_performance_data(self, data: Any) -> bool:
         """パフォーマンスデータ検証"""

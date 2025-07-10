@@ -1,6 +1,4 @@
-"""適応的機能モジュール
-
-Phase 3: Adaptive & Intelligence Features
+"""適応的機能モジュール – Phase 3: Adaptive & Intelligence Features.
 
 適応的リソース管理・自動スケーリング・パフォーマンス監視機能を提供する。
 企業グレード適応システム・ML統合・リアルタイム最適化を実現する。

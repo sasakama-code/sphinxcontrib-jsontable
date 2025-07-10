@@ -258,7 +258,6 @@ class AdaptiveControlVerifier:
         self._performance_config = self._initialize_performance_config()
         self._security_config = self._initialize_security_config()
         self._operational_config = self._initialize_operational_config()
-        self._verification_lock = threading.Lock()
 
     def _initialize_verification_config(self) -> Dict[str, Any]:
         """検証設定初期化"""

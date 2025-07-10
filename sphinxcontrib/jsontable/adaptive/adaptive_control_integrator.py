@@ -260,7 +260,6 @@ class AdaptiveControlIntegrator:
         self._scalability_config = self._initialize_scalability_config()
         self._quality_config = self._initialize_quality_config()
         self._monitoring_config = self._initialize_monitoring_config()
-        self._integration_lock = threading.Lock()
 
     def _initialize_integration_config(self) -> Dict[str, Any]:
         """統合設定初期化"""
