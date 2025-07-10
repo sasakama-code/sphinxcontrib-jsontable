@@ -23,6 +23,7 @@ from .backward_compatibility import (
 from .base_directive import BaseDirective
 from .json_processor import JsonProcessor
 from .table_converter import TableConverter
+from .table_builder import TableBuilder
 from .validators import JsonTableError, ValidationUtils
 
 # Type definitions
@@ -78,6 +79,11 @@ class JsonTableDirective(BaseDirective):
         "merge-cells": directives.unchanged,
         "merge-headers": directives.unchanged,
         "json-cache": directives.flag,
+        # Data type-aware rendering options
+        "data-types": directives.flag,
+        "boolean-style": directives.unchanged,
+        "date-format": directives.unchanged,
+        "number-format": directives.unchanged,
     }
 
     def _initialize_processors(self) -> None:
@@ -130,6 +136,9 @@ class JsonTableDirective(BaseDirective):
 
         # Initialize table converter
         self.table_converter = TableConverter(default_max_rows)
+
+        # Initialize table builder
+        self.table_builder = TableBuilder(max_rows=default_max_rows, encoding=encoding)
 
         # Backward compatibility aliases
         self.converter = self.table_converter
@@ -243,24 +252,43 @@ class JsonTableDirective(BaseDirective):
             # Step 2: Process directive options
             include_header = "header" in self.options
             limit = self.options.get("limit")
+            data_types_enabled = "data-types" in self.options
 
             logger.debug(
-                f"Processing options: include_header={include_header}, limit={limit}"
+                f"Processing options: include_header={include_header}, limit={limit}, data_types_enabled={data_types_enabled}"
             )
 
             # Step 3: Convert to table format
-            table_data = self.table_converter.convert(json_data)
+            if data_types_enabled:
+                # Use type-aware conversion
+                table_data, type_info = self.table_converter.convert_with_types(json_data)
+            else:
+                # Use standard conversion
+                table_data = self.table_converter.convert(json_data)
+                type_info = None
 
             # Step 4: Apply directive options to table data
             if limit is not None:
                 # Apply row limit (keep header if present)
                 if include_header and len(table_data) > 1:
                     table_data = [table_data[0]] + table_data[1 : limit + 1]
+                    if type_info:
+                        type_info = type_info[:limit + 1]
                 else:
                     table_data = table_data[:limit]
+                    if type_info:
+                        type_info = type_info[:limit]
 
             # Step 5: Build docutils table
-            table_nodes = self.table_builder.build_table(table_data)
+            if data_types_enabled and type_info:
+                # Use type-aware table building
+                type_options = self._extract_type_options()
+                table_nodes = self.table_builder.build_table_with_types(
+                    table_data, type_info, type_options
+                )
+            else:
+                # Use standard table building
+                table_nodes = self.table_builder.build_table(table_data)
 
             logger.info("JsonTableDirective execution completed successfully")
             return table_nodes
@@ -364,6 +392,29 @@ class JsonTableDirective(BaseDirective):
 
         logger.debug(f"Generated processing config: {processing_config}")
         return processing_config
+
+    def _extract_type_options(self) -> dict[str, str]:
+        """Extract data type-aware rendering options from directive options."""
+        type_options = {}
+        
+        # Extract type rendering options
+        if "boolean-style" in self.options:
+            type_options["boolean_style"] = self.options["boolean-style"]
+        else:
+            type_options["boolean_style"] = "symbols"  # Default
+            
+        if "date-format" in self.options:
+            type_options["date_format"] = self.options["date-format"]
+        else:
+            type_options["date_format"] = "original"  # Default
+            
+        if "number-format" in self.options:
+            type_options["number_format"] = self.options["number-format"]
+        else:
+            type_options["number_format"] = "original"  # Default
+            
+        logger.debug(f"Extracted type options: {type_options}")
+        return type_options
 
     def format_excel_errors(self, error: Exception) -> str:
         """Excelエラー表示統合実装.

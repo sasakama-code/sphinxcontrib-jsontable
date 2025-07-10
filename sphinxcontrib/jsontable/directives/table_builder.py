@@ -173,6 +173,61 @@ class TableBuilder:
         logger.debug("Table build completed successfully")
         return [table_node]
 
+    def build_table_with_types(
+        self, 
+        table_data: TableData, 
+        type_info: list[list[str]], 
+        type_options: dict[str, str], 
+        has_header: bool = True
+    ) -> list[nodes.table]:
+        """
+        Build docutils.nodes.table with data type-aware rendering.
+        
+        Args:
+            table_data: 2D list representing table content
+            type_info: 2D list of data types corresponding to table_data
+            type_options: Dictionary of type rendering options
+            has_header: Whether the first row should be treated as a header
+            
+        Returns:
+            List containing a single nodes.table node with type-aware rendering
+        """
+        logger.debug(
+            f"Starting type-aware table build: {len(table_data) if table_data else 0} rows"
+        )
+        
+        # Comprehensive input validation
+        if table_data is None:
+            logger.error("Type-aware table build failed: table_data is None")
+            raise ValueError("table_data cannot be None")
+        
+        if not table_data:
+            logger.error("Type-aware table build failed: table_data is empty")
+            raise ValueError("table_data cannot be empty")
+        
+        if type_info is None or len(type_info) != len(table_data):
+            logger.error("Type-aware table build failed: type_info mismatch")
+            raise ValueError("type_info must match table_data dimensions")
+        
+        if len(table_data) > self.max_rows:
+            logger.error(
+                f"Type-aware table build failed: {len(table_data)} rows exceeds limit {self.max_rows}"
+            )
+            raise ValueError(
+                f"Table exceeds maximum rows limit: {len(table_data)} > {self.max_rows}"
+            )
+        
+        # Performance logging for large tables
+        row_count = len(table_data)
+        col_count = max(len(row) for row in table_data) if table_data else 0
+        logger.info(f"Building type-aware table: {row_count} rows x {col_count} columns")
+        
+        # Build table with type-aware rendering
+        table_node = self._build_table_with_types_internal(table_data, type_info, type_options, has_header)
+        
+        logger.debug("Type-aware table build completed successfully")
+        return [table_node]
+
     def build(self, table_data: TableData, has_header: bool = True) -> nodes.table:
         """
         Backward compatibility method for the legacy build() API.
@@ -348,3 +403,186 @@ class TableBuilder:
             row += entry
 
         return row
+
+    def _build_table_with_types_internal(
+        self,
+        table_data: TableData,
+        type_info: list[list[str]],
+        type_options: dict[str, str],
+        has_header: bool = True
+    ) -> nodes.table:
+        """
+        Internal method to build docutils table structure with type-aware rendering.
+        
+        Args:
+            table_data: 2D list representing table content
+            type_info: 2D list of data types
+            type_options: Type rendering options
+            has_header: Whether the first row is a header
+            
+        Returns:
+            nodes.table node with type-aware formatting
+        """
+        if not table_data:
+            return self._create_empty_table()
+        
+        max_cols = max(len(row) for row in table_data)
+        table = self._create_table_structure(max_cols)
+        
+        if has_header:
+            self._add_header_with_types(table, table_data[0], type_info[0], type_options)
+            body_data = table_data[1:]
+            body_types = type_info[1:]
+        else:
+            body_data = table_data
+            body_types = type_info
+        
+        self._add_body_with_types(table, body_data, body_types, type_options, max_cols)
+        return table
+
+    def _add_header_with_types(
+        self,
+        table: nodes.table,
+        header_data: list[str],
+        header_types: list[str],
+        type_options: dict[str, str]
+    ) -> None:
+        """
+        Add a header row to an existing table node with type-aware rendering.
+        
+        Args:
+            table: nodes.table to modify
+            header_data: List of header cell strings
+            header_types: List of header cell types
+            type_options: Type rendering options
+        """
+        thead = nodes.thead()
+        header_row = self._create_table_row_with_types(header_data, header_types, type_options)
+        thead += header_row
+        table[0] += thead
+
+    def _add_body_with_types(
+        self,
+        table: nodes.table,
+        body_data: TableData,
+        body_types: list[list[str]],
+        type_options: dict[str, str],
+        max_cols: int,
+    ) -> None:
+        """
+        Add body rows to an existing table node with type-aware rendering.
+        
+        Args:
+            table: nodes.table to modify
+            body_data: 2D list for body rows
+            body_types: 2D list for body row types
+            type_options: Type rendering options
+            max_cols: Maximum number of columns for padding
+        """
+        tbody = nodes.tbody()
+        
+        for i, row_data in enumerate(body_data):
+            if i < len(body_types):
+                row_types = body_types[i]
+            else:
+                row_types = ["string"] * len(row_data)
+            
+            # Pad row data and types to max_cols
+            padded_row = row_data + [""] * (max_cols - len(row_data))
+            padded_types = row_types + ["string"] * (max_cols - len(row_types))
+            
+            tbody += self._create_table_row_with_types(padded_row, padded_types, type_options)
+        
+        table[0] += tbody
+
+    def _create_table_row_with_types(
+        self,
+        row_data: list[str],
+        row_types: list[str],
+        type_options: dict[str, str]
+    ) -> nodes.row:
+        """
+        Create optimized docutils row node with type-aware rendering.
+        
+        Args:
+            row_data: List of strings for each cell
+            row_types: List of data types for each cell
+            type_options: Type rendering options
+            
+        Returns:
+            nodes.row containing type-aware entry nodes
+        """
+        row = nodes.row()
+        
+        for i, cell_data in enumerate(row_data):
+            cell_type = row_types[i] if i < len(row_types) else "string"
+            entry = self._create_typed_cell(cell_data, cell_type, type_options)
+            row += entry
+        
+        return row
+
+    def _create_typed_cell(
+        self,
+        cell_data: str,
+        cell_type: str,
+        type_options: dict[str, str]
+    ) -> nodes.entry:
+        """
+        Create a single table cell with type-aware rendering.
+        
+        Args:
+            cell_data: Cell content as string
+            cell_type: Detected data type
+            type_options: Type rendering options
+            
+        Returns:
+            nodes.entry with appropriate type-aware formatting
+        """
+        entry = nodes.entry()
+        
+        # Add CSS class for styling
+        entry["classes"] = [f"jsontable-{cell_type}"]
+        
+        if cell_type == "url":
+            # Create clickable link
+            ref = nodes.reference(refuri=cell_data, text=cell_data)
+            entry += nodes.paragraph("", "", ref)
+        
+        elif cell_type == "email":
+            # Create mailto link
+            ref = nodes.reference(refuri=f"mailto:{cell_data}", text=cell_data)
+            entry += nodes.paragraph("", "", ref)
+        
+        elif cell_type == "boolean":
+            # Render boolean based on style option
+            boolean_style = type_options.get("boolean_style", "symbols")
+            if boolean_style == "symbols":
+                display_text = "✓" if cell_data.lower() == "true" else "✗"
+            elif boolean_style == "yes-no":
+                display_text = "Yes" if cell_data.lower() == "true" else "No"
+            elif boolean_style == "true-false":
+                display_text = "True" if cell_data.lower() == "true" else "False"
+            else:
+                display_text = cell_data  # Fallback
+            entry += nodes.paragraph(text=display_text)
+        
+        elif cell_type in ["integer", "float", "currency", "percentage"]:
+            # Right-align numbers
+            entry["classes"].append("jsontable-number")
+            entry += nodes.paragraph(text=cell_data)
+        
+        elif cell_type == "date":
+            # Apply date formatting if needed
+            date_format = type_options.get("date_format", "original")
+            if date_format == "original":
+                display_text = cell_data
+            else:
+                # TODO: Implement localized/ISO date formatting
+                display_text = cell_data
+            entry += nodes.paragraph(text=display_text)
+        
+        else:
+            # Default rendering for other types
+            entry += nodes.paragraph(text=cell_data if cell_data is not None else "")
+        
+        return entry
