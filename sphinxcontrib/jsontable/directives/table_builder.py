@@ -103,7 +103,7 @@ class TableBuilder:
         )
 
     def build_table(
-        self, table_data: TableData, has_header: bool = True
+        self, table_data: TableData, has_header: bool = True, column_widths: list[int] | None = None
     ) -> list[nodes.table]:
         """
         Build enterprise-grade docutils.nodes.table from 2D list of strings.
@@ -168,7 +168,7 @@ class TableBuilder:
         logger.info(f"Building table: {row_count} rows x {col_count} columns")
 
         # Use the provided has_header parameter for backward compatibility
-        table_node = self._build_table_internal(table_data, has_header)
+        table_node = self._build_table_internal(table_data, has_header, column_widths)
 
         logger.debug("Table build completed successfully")
         return [table_node]
@@ -189,7 +189,7 @@ class TableBuilder:
         return table_nodes[0]
 
     def _build_table_internal(
-        self, table_data: TableData, has_header: bool = True
+        self, table_data: TableData, has_header: bool = True, column_widths: list[int] | None = None
     ) -> nodes.table:
         """
         Internal method to build docutils table structure.
@@ -205,7 +205,7 @@ class TableBuilder:
             return self._create_empty_table()
 
         max_cols = max(len(row) for row in table_data)
-        table = self._create_table_structure(max_cols)
+        table = self._create_table_structure(max_cols, column_widths)
 
         if has_header:
             self._add_header(table, table_data[0])
@@ -228,12 +228,13 @@ class TableBuilder:
         table += tgroup
         return table
 
-    def _create_table_structure(self, cols: int) -> nodes.table:
+    def _create_table_structure(self, cols: int, column_widths: list[int] | None = None) -> nodes.table:
         """
         Create a table structure with given number of columns.
 
         Args:
             cols: Number of columns for the table
+            column_widths: Optional list of column widths
 
         Returns:
             nodes.table with tgroup and colspec elements
@@ -242,18 +243,19 @@ class TableBuilder:
         tgroup = nodes.tgroup(cols=cols)
         table += tgroup
 
-        colspecs = self._create_colspec_nodes(cols)
+        colspecs = self._create_colspec_nodes(cols, column_widths)
         for colspec in colspecs:
             tgroup += colspec
 
         return table
 
-    def _create_colspec_nodes(self, col_count: int) -> list[nodes.colspec]:
+    def _create_colspec_nodes(self, col_count: int, column_widths: list[int] | None = None) -> list[nodes.colspec]:
         """
         Create column specification nodes.
 
         Args:
             col_count: Number of columns
+            column_widths: Optional list of column widths (integers)
 
         Returns:
             List of colspec nodes
@@ -264,7 +266,18 @@ class TableBuilder:
         if col_count <= 0:
             raise ValueError("col_count must be positive")
 
-        return [nodes.colspec(colwidth=1) for _ in range(col_count)]
+        colspecs = []
+        for i in range(col_count):
+            # Use custom width if provided, otherwise default to 1
+            if column_widths and i < len(column_widths):
+                width = column_widths[i]
+                logger.debug(f"Setting column {i} width to {width}")
+            else:
+                width = 1
+            
+            colspecs.append(nodes.colspec(colwidth=width))
+        
+        return colspecs
 
     def _add_header(self, table: nodes.table, header_data: list[str]) -> None:
         """
