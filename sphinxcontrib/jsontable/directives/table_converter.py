@@ -16,6 +16,9 @@ from .validators import JsonTableError, ValidationUtils
 # Type definitions
 JsonData = list[Any] | dict[str, Any]
 TableData = list[list[str]]
+# Enhanced type definition for type-aware rendering
+CellData = tuple[str, str]  # (value, data_type)
+TypeAwareTableData = list[list[CellData]]
 
 # Configuration constants
 DEFAULT_MAX_ROWS = 10000
@@ -57,7 +60,7 @@ class TableConverter:
     """
 
     def __init__(
-        self, max_rows: int | None = None, performance_mode: bool = False
+        self, max_rows: int | None = None, performance_mode: bool = False, enable_type_awareness: bool = False
     ) -> None:
         """
         Initialize TableConverter with enterprise-grade configuration.
@@ -66,18 +69,20 @@ class TableConverter:
             max_rows: Custom maximum row limit for performance protection
                      (None uses DEFAULT_MAX_ROWS constant)
             performance_mode: Enable performance optimizations
+            enable_type_awareness: Enable data type detection and preservation
 
         Example:
             >>> converter = TableConverter()  # Use default limits
-            >>> converter = TableConverter(max_rows=5000, performance_mode=True)
+            >>> converter = TableConverter(max_rows=5000, performance_mode=True, enable_type_awareness=True)
         """
         if max_rows is not None and max_rows <= 0:
             raise ValueError("max_rows must be positive")
 
         self.max_rows = max_rows or DEFAULT_MAX_ROWS
         self.performance_mode = performance_mode
+        self.enable_type_awareness = enable_type_awareness
         logger.debug(
-            f"TableConverter initialized with max_rows={self.max_rows}, performance_mode={performance_mode}"
+            f"TableConverter initialized with max_rows={self.max_rows}, performance_mode={performance_mode}, enable_type_awareness={enable_type_awareness}"
         )
 
     def convert(self, data: JsonData, include_header: bool | None = None) -> TableData:
@@ -285,3 +290,214 @@ class TableConverter:
             return str(value)
         else:
             return str(value)
+
+    def _detect_data_type(self, value) -> str:
+        """
+        Detect the data type of a value for type-aware rendering.
+        
+        Args:
+            value: The value to analyze
+            
+        Returns:
+            String representing the detected data type
+        """
+        import re
+        from datetime import datetime
+        
+        if value is None:
+            return "null"
+        elif isinstance(value, bool):
+            return "boolean"
+        elif isinstance(value, int):
+            return "integer"
+        elif isinstance(value, float):
+            return "float"
+        elif isinstance(value, str):
+            # Check for various string-based data types
+            if not value.strip():
+                return "string"
+            
+            # URL detection
+            if value.startswith(('http://', 'https://', 'ftp://', 'ftps://')):
+                return "url"
+            
+            # Email detection
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if re.match(email_pattern, value):
+                return "email"
+            
+            # Date detection (various formats)
+            date_patterns = [
+                r'^\d{4}-\d{2}-\d{2}$',  # YYYY-MM-DD
+                r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}',  # ISO 8601
+                r'^\d{2}/\d{2}/\d{4}$',  # MM/DD/YYYY
+                r'^\d{2}-\d{2}-\d{4}$',  # MM-DD-YYYY
+                r'^\d{1,2}/\d{1,2}/\d{4}$',  # M/D/YYYY
+            ]
+            
+            for pattern in date_patterns:
+                if re.match(pattern, value):
+                    try:
+                        # Try to parse as date to confirm it's valid
+                        if 'T' in value:
+                            datetime.fromisoformat(value.replace('Z', '+00:00'))
+                        return "date"
+                    except (ValueError, TypeError):
+                        pass
+            
+            # Phone number detection
+            phone_pattern = r'^\+?[\d\s\-\(\)]{10,}$'
+            if re.match(phone_pattern, value) and len(re.sub(r'[^\d]', '', value)) >= 10:
+                return "phone"
+            
+            # Currency detection
+            currency_pattern = r'^[\$€£¥₹₽]?[\d,]+\.?\d*$'
+            if re.match(currency_pattern, value):
+                return "currency"
+            
+            # Number in string format detection
+            if re.match(r'^-?\d+\.?\d*$', value):
+                return "number"
+            
+            return "string"
+        elif isinstance(value, (dict, list)):
+            return "object"
+        else:
+            return "unknown"
+
+    def _convert_with_type_info(self, value) -> CellData:
+        """
+        Convert value to string while preserving type information.
+        
+        Args:
+            value: The value to convert
+            
+        Returns:
+            Tuple of (string_value, data_type)
+        """
+        data_type = self._detect_data_type(value)
+        string_value = self._safe_str(value)
+        return (string_value, data_type)
+
+    def convert_with_types(self, data: JsonData, include_header: bool | None = None) -> TypeAwareTableData:
+        """
+        Convert JSON data to tabular format with type information preserved.
+        
+        This method creates a type-aware table structure where each cell contains
+        both the string representation and the detected data type.
+        
+        Args:
+            data: JSON data in supported format
+            include_header: Header handling (same as convert method)
+            
+        Returns:
+            TypeAwareTableData: 2D list where each cell is (value, type) tuple
+        """
+        logger.debug(f"Starting type-aware conversion: data_type={type(data).__name__}")
+        
+        # Input validation (same as convert method)
+        if data is None:
+            raise JsonTableError("Data cannot be None")
+
+        ValidationUtils.validate_not_empty(data, "No JSON data to process")
+
+        # Check row limit
+        if isinstance(data, list) and len(data) > self.max_rows:
+            raise JsonTableError(
+                f"Data size {len(data)} exceeds maximum {self.max_rows} rows"
+            )
+
+        # Route to appropriate conversion method
+        if isinstance(data, dict):
+            result = self._convert_single_object_with_types(data)
+        elif isinstance(data, list):
+            result = self._convert_array_with_types(data)
+        else:
+            raise JsonTableError(INVALID_JSON_DATA_ERROR)
+
+        # Handle backward compatibility for include_header parameter
+        if include_header is False and result and len(result) > 1:
+            if isinstance(data, list) and data and isinstance(data[0], dict):
+                result = result[1:]
+                logger.debug("Header row removed for backward compatibility (include_header=False)")
+            elif isinstance(data, dict):
+                result = result[1:]
+                logger.debug("Header row removed for backward compatibility (include_header=False)")
+            else:
+                logger.warning("include_header=False applied to data that may not have a header row")
+                result = result[1:]
+
+        logger.debug(f"Type-aware conversion completed: {len(result)} rows")
+        return result
+
+    def _convert_single_object_with_types(self, data: dict) -> TypeAwareTableData:
+        """Convert single object to type-aware table format."""
+        if not data:
+            return []
+
+        keys = sorted(data.keys())
+        header = [(key, "string") for key in keys]  # Headers are always strings
+        values = [self._convert_with_type_info(data.get(key, "")) for key in keys]
+
+        return [header, values]
+
+    def _convert_array_with_types(self, data: list) -> TypeAwareTableData:
+        """Convert array to type-aware table format."""
+        if not data:
+            return []
+
+        # Check if it's an array of objects
+        if data and isinstance(data[0], dict):
+            return self._convert_object_array_with_types(data)
+        else:
+            return self._convert_2d_array_with_types(data)
+
+    def _convert_object_array_with_types(self, data: list) -> TypeAwareTableData:
+        """Convert array of objects to type-aware table format."""
+        if not data:
+            return []
+
+        # Collect all unique keys
+        all_keys = set()
+        for item in data:
+            if isinstance(item, dict):
+                all_keys.update(item.keys())
+
+        # Sort keys for consistent output
+        sorted_keys = sorted(all_keys)
+
+        # Build header row (headers are always strings)
+        result = [[(key, "string") for key in sorted_keys]]
+
+        # Build data rows with type information
+        for item in data:
+            if isinstance(item, dict):
+                row = [self._convert_with_type_info(item.get(key, "")) for key in sorted_keys]
+            else:
+                row = [("", "string") for _ in sorted_keys]
+            result.append(row)
+
+        return result
+
+    def _convert_2d_array_with_types(self, data: list) -> TypeAwareTableData:
+        """Convert 2D array to type-aware table format."""
+        if not data:
+            return []
+
+        # Find maximum row length
+        max_length = max(len(row) if isinstance(row, list) else 1 for row in data)
+
+        result = []
+        for row in data:
+            if isinstance(row, list):
+                # Normalize row length with type information
+                normalized_row = [self._convert_with_type_info(item) for item in row]
+                while len(normalized_row) < max_length:
+                    normalized_row.append(("", "string"))
+            else:
+                # Single value becomes single-column row
+                normalized_row = [self._convert_with_type_info(row)] + [("", "string")] * (max_length - 1)
+
+            result.append(normalized_row)
+
+        return result

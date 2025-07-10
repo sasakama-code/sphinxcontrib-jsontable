@@ -31,6 +31,9 @@ from sphinx.util import logging as sphinx_logging
 
 # Type definitions for enhanced readability and type safety
 TableData = list[list[str]]
+# Enhanced type definition for type-aware rendering
+CellData = tuple[str, str]  # (value, data_type)
+TypeAwareTableData = list[list[CellData]]
 
 # Configuration constants
 DEFAULT_MAX_ROWS = 10000
@@ -348,3 +351,253 @@ class TableBuilder:
             row += entry
 
         return row
+
+    def build_table_with_types(
+        self, table_data: TypeAwareTableData, has_header: bool = True, 
+        type_render_options: dict[str, str] | None = None
+    ) -> list[nodes.table]:
+        """
+        Build enterprise-grade docutils.nodes.table with type-aware rendering.
+
+        This method creates tables with enhanced HTML rendering based on detected data types,
+        such as clickable links for URLs, visual indicators for booleans, and formatted dates.
+
+        Args:
+            table_data: Type-aware 2D list where each cell is (value, type) tuple
+            has_header: Whether the first row should be treated as a header row
+            type_render_options: Configuration for type-specific rendering
+
+        Returns:
+            List containing a single nodes.table node with type-aware formatting
+
+        Examples:
+            >>> builder = TableBuilder()
+            >>> type_data = [[("Name", "string"), ("URL", "string")], 
+            ...              [("Example", "string"), ("https://example.com", "url")]]
+            >>> table_nodes = builder.build_table_with_types(type_data)
+        """
+        logger.debug(
+            f"Starting type-aware table build: {len(table_data) if table_data else 0} rows"
+        )
+
+        # Set default type render options
+        if type_render_options is None:
+            type_render_options = {
+                "boolean_style": "symbols",  # symbols, yes-no, true-false
+                "date_format": "original",   # original, localized, iso
+                "number_format": "original", # original, formatted, units
+            }
+
+        # Comprehensive input validation
+        if table_data is None:
+            logger.error("Type-aware table build failed: table_data is None")
+            raise ValueError("table_data cannot be None")
+
+        if not table_data:
+            logger.error("Type-aware table build failed: table_data is empty")
+            raise ValueError("table_data cannot be empty")
+
+        if len(table_data) > self.max_rows:
+            logger.error(
+                f"Type-aware table build failed: {len(table_data)} rows exceeds limit {self.max_rows}"
+            )
+            raise ValueError(
+                f"Table exceeds maximum rows limit: {len(table_data)} > {self.max_rows}"
+            )
+
+        # Performance logging for large tables
+        row_count = len(table_data)
+        col_count = max(len(row) for row in table_data) if table_data else 0
+        logger.info(f"Building type-aware table: {row_count} rows x {col_count} columns")
+
+        # Build type-aware table
+        table_node = self._build_type_aware_table_internal(table_data, has_header, type_render_options)
+
+        logger.debug("Type-aware table build completed successfully")
+        return [table_node]
+
+    def _build_type_aware_table_internal(
+        self, table_data: TypeAwareTableData, has_header: bool = True, 
+        type_render_options: dict[str, str] | None = None
+    ) -> nodes.table:
+        """
+        Internal method to build type-aware docutils table structure.
+
+        Args:
+            table_data: Type-aware 2D list representing table content
+            has_header: Whether the first row is a header
+            type_render_options: Configuration for type-specific rendering
+
+        Returns:
+            nodes.table node with type-aware formatting
+        """
+        if not table_data:
+            return self._create_empty_table()
+
+        max_cols = max(len(row) for row in table_data)
+        table = self._create_table_structure(max_cols)
+
+        if has_header:
+            self._add_type_aware_header(table, table_data[0], type_render_options)
+            body_data = table_data[1:]
+        else:
+            body_data = table_data
+
+        self._add_type_aware_body(table, body_data, max_cols, type_render_options)
+        return table
+
+    def _add_type_aware_header(self, table: nodes.table, header_data: list[CellData], 
+                              type_render_options: dict[str, str] | None = None) -> None:
+        """
+        Add a type-aware header row to an existing table node.
+
+        Args:
+            table: nodes.table to modify
+            header_data: List of (value, type) tuples for header cells
+            type_render_options: Configuration for type-specific rendering
+        """
+        thead = nodes.thead()
+        header_row = self._create_type_aware_table_row(header_data, type_render_options)
+        thead += header_row
+        table[0] += thead
+
+    def _add_type_aware_body(
+        self,
+        table: nodes.table,
+        body_data: TypeAwareTableData,
+        max_cols: int,
+        type_render_options: dict[str, str] | None = None
+    ) -> None:
+        """
+        Add type-aware body rows to an existing table node.
+
+        Args:
+            table: nodes.table to modify
+            body_data: Type-aware 2D list for body rows
+            max_cols: Maximum number of columns for padding
+            type_render_options: Configuration for type-specific rendering
+        """
+        tbody = nodes.tbody()
+
+        for row_data in body_data:
+            # Pad row with empty cells if needed
+            padded_row = row_data + [("", "string")] * (max_cols - len(row_data))
+            tbody += self._create_type_aware_table_row(padded_row, type_render_options)
+
+        table[0] += tbody
+
+    def _create_type_aware_table_row(self, row_data: list[CellData], 
+                                   type_render_options: dict[str, str] | None = None) -> nodes.row:
+        """
+        Create type-aware docutils row node with enhanced formatting.
+
+        This method handles different data types and creates appropriate HTML nodes:
+        - URLs become clickable links
+        - Booleans become visual indicators
+        - Emails become mailto links
+        - Dates get formatted display
+        - Numbers get proper alignment
+
+        Args:
+            row_data: List of (value, type) tuples for each cell in the row
+            type_render_options: Configuration for type-specific rendering
+
+        Returns:
+            nodes.row containing properly formatted entry nodes based on data types
+        """
+        row = nodes.row()
+
+        for cell_value, cell_type in row_data:
+            entry = self._create_type_aware_cell(cell_value, cell_type, type_render_options)
+            row += entry
+
+        return row
+
+    def _create_type_aware_cell(self, cell_value: str, cell_type: str, 
+                              type_render_options: dict[str, str] | None = None) -> nodes.entry:
+        """
+        Create a single table cell with type-aware formatting.
+
+        Args:
+            cell_value: The string value of the cell
+            cell_type: The detected data type
+            type_render_options: Configuration for type-specific rendering
+
+        Returns:
+            nodes.entry with appropriate formatting based on data type
+        """
+        entry = nodes.entry()
+
+        # Handle None values
+        if cell_value is None:
+            entry += nodes.paragraph(text="")
+            return entry
+
+        # Set default options if not provided
+        if type_render_options is None:
+            type_render_options = {}
+
+        # Add CSS class for type-specific styling
+        entry['classes'] = [f'jsontable-{cell_type}']
+
+        # Type-specific rendering
+        if cell_type == "url":
+            # Create clickable link
+            try:
+                ref = nodes.reference(refuri=cell_value, text=cell_value)
+                ref['classes'] = ['jsontable-url-link']
+                entry += nodes.paragraph('', '', ref)
+            except Exception:
+                # Fallback to plain text if URL is malformed
+                entry += nodes.paragraph(text=cell_value)
+
+        elif cell_type == "email":
+            # Create mailto link
+            try:
+                ref = nodes.reference(refuri=f"mailto:{cell_value}", text=cell_value)
+                ref['classes'] = ['jsontable-email-link']
+                entry += nodes.paragraph('', '', ref)
+            except Exception:
+                # Fallback to plain text if email is malformed
+                entry += nodes.paragraph(text=cell_value)
+
+        elif cell_type == "boolean":
+            # Boolean rendering based on style preference
+            boolean_style = type_render_options.get("boolean_style", "symbols")
+            if boolean_style == "symbols":
+                symbol = "✓" if cell_value.lower() in ("true", "1", "yes") else "✗"
+                entry += nodes.paragraph(text=symbol)
+            elif boolean_style == "yes-no":
+                display = "Yes" if cell_value.lower() in ("true", "1", "yes") else "No"
+                entry += nodes.paragraph(text=display)
+            else:  # true-false or default
+                entry += nodes.paragraph(text=cell_value)
+
+        elif cell_type in ("integer", "float", "number", "currency"):
+            # Right-align numbers and add appropriate styling
+            entry['classes'].append('jsontable-number')
+            entry += nodes.paragraph(text=cell_value)
+
+        elif cell_type == "date":
+            # Date formatting based on preference
+            date_format = type_render_options.get("date_format", "original")
+            if date_format == "original":
+                formatted_date = cell_value
+            else:
+                # For now, keep original formatting
+                # Future enhancement: implement date parsing and formatting
+                formatted_date = cell_value
+            
+            entry['classes'].append('jsontable-date')
+            entry += nodes.paragraph(text=formatted_date)
+
+        elif cell_type == "phone":
+            # Phone number formatting
+            entry['classes'].append('jsontable-phone')
+            entry += nodes.paragraph(text=cell_value)
+
+        else:
+            # Default text rendering for string, null, object, unknown types
+            entry += nodes.paragraph(text=str(cell_value))
+
+        return entry

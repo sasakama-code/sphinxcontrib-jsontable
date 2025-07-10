@@ -63,7 +63,7 @@ class JsonTableDirective(BaseDirective):
     required_arguments = 0
     optional_arguments = 1
 
-    # Complete option specification - 100% compatible with original
+    # Complete option specification - 100% compatible with original + type-aware options
     option_spec: ClassVar[dict[str, Any]] = {
         "header": directives.flag,
         "encoding": directives.unchanged,
@@ -78,6 +78,11 @@ class JsonTableDirective(BaseDirective):
         "merge-cells": directives.unchanged,
         "merge-headers": directives.unchanged,
         "json-cache": directives.flag,
+        # Type-aware rendering options
+        "data-types": directives.flag,
+        "boolean-style": directives.unchanged,
+        "date-format": directives.unchanged,
+        "number-format": directives.unchanged,
     }
 
     def _initialize_processors(self) -> None:
@@ -128,8 +133,9 @@ class JsonTableDirective(BaseDirective):
         else:
             self.excel_processor = None
 
-        # Initialize table converter
-        self.table_converter = TableConverter(default_max_rows)
+        # Initialize table converter with type awareness if enabled
+        enable_type_awareness = "data-types" in self.options
+        self.table_converter = TableConverter(default_max_rows, enable_type_awareness=enable_type_awareness)
 
         # Backward compatibility aliases
         self.converter = self.table_converter
@@ -243,24 +249,41 @@ class JsonTableDirective(BaseDirective):
             # Step 2: Process directive options
             include_header = "header" in self.options
             limit = self.options.get("limit")
+            enable_type_awareness = "data-types" in self.options
 
             logger.debug(
-                f"Processing options: include_header={include_header}, limit={limit}"
+                f"Processing options: include_header={include_header}, limit={limit}, type_aware={enable_type_awareness}"
             )
 
-            # Step 3: Convert to table format
-            table_data = self.table_converter.convert(json_data)
+            # Step 3: Convert to table format (type-aware or standard)
+            if enable_type_awareness:
+                table_data = self.table_converter.convert_with_types(json_data)
+                
+                # Step 4: Apply directive options to type-aware table data
+                if limit is not None:
+                    # Apply row limit (keep header if present)
+                    if include_header and len(table_data) > 1:
+                        table_data = [table_data[0]] + table_data[1 : limit + 1]
+                    else:
+                        table_data = table_data[:limit]
 
-            # Step 4: Apply directive options to table data
-            if limit is not None:
-                # Apply row limit (keep header if present)
-                if include_header and len(table_data) > 1:
-                    table_data = [table_data[0]] + table_data[1 : limit + 1]
-                else:
-                    table_data = table_data[:limit]
+                # Step 5: Build type-aware docutils table
+                type_render_options = self._extract_type_render_options()
+                table_nodes = self.table_builder.build_table_with_types(table_data, include_header, type_render_options)
+            else:
+                # Standard processing (backward compatibility)
+                table_data = self.table_converter.convert(json_data)
+                
+                # Step 4: Apply directive options to standard table data
+                if limit is not None:
+                    # Apply row limit (keep header if present)
+                    if include_header and len(table_data) > 1:
+                        table_data = [table_data[0]] + table_data[1 : limit + 1]
+                    else:
+                        table_data = table_data[:limit]
 
-            # Step 5: Build docutils table
-            table_nodes = self.table_builder.build_table(table_data)
+                # Step 5: Build standard docutils table
+                table_nodes = self.table_builder.build_table(table_data)
 
             logger.info("JsonTableDirective execution completed successfully")
             return table_nodes
@@ -475,3 +498,43 @@ class JsonTableDirective(BaseDirective):
             sanitized = sanitized[:200] + "..."
 
         return sanitized
+
+    def _extract_type_render_options(self) -> dict[str, str]:
+        """Extract type-specific rendering options from directive options."""
+        type_options = {}
+        
+        # Boolean rendering style
+        if "boolean-style" in self.options:
+            boolean_style = self.options["boolean-style"]
+            if boolean_style in ("symbols", "yes-no", "true-false"):
+                type_options["boolean_style"] = boolean_style
+            else:
+                logger.warning(f"Invalid boolean-style '{boolean_style}', using default 'symbols'")
+                type_options["boolean_style"] = "symbols"
+        else:
+            type_options["boolean_style"] = "symbols"
+        
+        # Date formatting
+        if "date-format" in self.options:
+            date_format = self.options["date-format"]
+            if date_format in ("original", "localized", "iso"):
+                type_options["date_format"] = date_format
+            else:
+                logger.warning(f"Invalid date-format '{date_format}', using default 'original'")
+                type_options["date_format"] = "original"
+        else:
+            type_options["date_format"] = "original"
+        
+        # Number formatting
+        if "number-format" in self.options:
+            number_format = self.options["number-format"]
+            if number_format in ("original", "formatted", "units"):
+                type_options["number_format"] = number_format
+            else:
+                logger.warning(f"Invalid number-format '{number_format}', using default 'original'")
+                type_options["number_format"] = "original"
+        else:
+            type_options["number_format"] = "original"
+        
+        logger.debug(f"Extracted type render options: {type_options}")
+        return type_options
