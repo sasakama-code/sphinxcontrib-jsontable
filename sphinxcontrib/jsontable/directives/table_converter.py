@@ -369,48 +369,52 @@ class TableConverter:
         
         # Create column indices to keep
         column_indices = list(range(len(header_row)))
-        
+
         # Apply visible_columns filter (by header names)
         if "visible_columns" in column_config:
             visible_columns = column_config["visible_columns"]
-            column_indices = [i for i, header in enumerate(header_row) if header in visible_columns]
-        
+            column_indices = [
+                i for i, header in enumerate(header_row) if header in visible_columns
+            ]
+
         # Apply hidden_columns filter (by header names)
         if "hidden_columns" in column_config:
             hidden_columns = column_config["hidden_columns"]
-            column_indices = [i for i, header in enumerate(header_row) if header not in hidden_columns]
-        
+            column_indices = [
+                i for i, header in enumerate(header_row) if header not in hidden_columns
+            ]
+
         # Apply column_order (by header names)
         if "column_order" in column_config:
             column_order = column_config["column_order"]
             ordered_indices = []
-            
+
             # First, add columns in specified order
             for ordered_header in column_order:
                 for i, header in enumerate(header_row):
                     if header == ordered_header and i in column_indices:
                         ordered_indices.append(i)
                         break
-            
+
             # Then, add any remaining columns not in the order specification
             for i in column_indices:
                 if i not in ordered_indices:
                     ordered_indices.append(i)
-            
+
             column_indices = ordered_indices
-        
+
         # Apply column filtering to all rows
         result = []
         for row in data:
             filtered_row = [row[i] if i < len(row) else "" for i in column_indices]
             result.append(filtered_row)
-        
+
         logger.debug(
             f"Applied column config to 2D array: {len(data[0])} -> "
             f"{len(result[0])} columns"
         )
         return result
-    
+
     def _safe_str(self, value) -> str:
         """Safely convert value to string."""
         if value is None:

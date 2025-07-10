@@ -10,9 +10,7 @@ import os
 import sys
 
 # Add the package to the path
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "sphinxcontrib")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "sphinxcontrib"))
 
 def test_column_config_extraction():
     """Test column configuration extraction."""
@@ -21,7 +19,7 @@ def test_column_config_extraction():
     from sphinxcontrib.jsontable.directives.directive_core import (
         JsonTableDirective,
     )
-    
+
     # Create a minimal directive instance
     directive = JsonTableDirective.__new__(JsonTableDirective)
     directive.options = {
@@ -34,7 +32,7 @@ def test_column_config_extraction():
     try:
         config = directive._extract_column_config()
         print(f"✓ Column config extracted: {config}")
-        
+
         # Verify expected values
         assert config["visible_columns"] == ["name", "age", "city"]
         assert config["column_order"] == ["city", "name", "age"]
@@ -64,9 +62,9 @@ def test_table_converter_column_config():
         config = {
             "visible_columns": ["name", "city", "country"],
             "hidden_columns": ["age"],
-            "column_order": ["country", "name"]
+            "column_order": ["country", "name"],
         }
-        
+
         result = converter._apply_column_config(keys, config)
         expected = [
             "country",
@@ -74,15 +72,16 @@ def test_table_converter_column_config():
             "city",
         ]  # country first, then name, then remaining
         print(f"✓ Column config applied: {keys} -> {result}")
-        
+
         assert result == expected, f"Expected {expected}, got {result}"
         print("✓ Column ordering correct")
-        
+
     except Exception as e:
         print(f"✗ Table converter column config failed: {e}")
         return False
-    
+
     return True
+
 
 def test_table_builder_column_widths():
     """Test table builder column widths."""
@@ -91,16 +90,16 @@ def test_table_builder_column_widths():
     from sphinxcontrib.jsontable.directives.table_builder import (
         TableBuilder,
     )
-    
+
     try:
         builder = TableBuilder()
-        
+
         # Test default widths
         colspecs = builder._create_colspec_nodes(3)
         assert len(colspecs) == 3
         assert all(colspec.attributes["colwidth"] == 1 for colspec in colspecs)
         print("✓ Default column widths correct")
-        
+
         # Test custom widths
         colspecs = builder._create_colspec_nodes(3, [2, 1, 3])
         assert len(colspecs) == 3
@@ -108,12 +107,13 @@ def test_table_builder_column_widths():
         assert colspecs[1].attributes["colwidth"] == 1
         assert colspecs[2].attributes["colwidth"] == 3
         print("✓ Custom column widths correct")
-        
+
     except Exception as e:
         print(f"✗ Table builder column widths failed: {e}")
         return False
-    
+
     return True
+
 
 def test_object_array_conversion():
     """Test object array conversion with column config."""
