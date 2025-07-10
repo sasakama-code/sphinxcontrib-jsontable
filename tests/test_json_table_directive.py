@@ -260,7 +260,7 @@ class TestJsonTableDirective:
 
         # Assert
         directive_instance.table_builder.build_table.assert_called_once_with(
-            [["name"], ["test"]]
+            [["name"], ["test"]], has_header=True
         )
 
     @patch("sphinxcontrib.jsontable.directives.directive_core.logger")
